@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-data = pd.read_csv("../Data/Output/output.csv")
+# Files are relative to the project folder you are running in, not the file location
+data = pd.read_csv("Data/Output/output.csv")
 
-data.scat
+data.plot.line(x='time', y='y')
