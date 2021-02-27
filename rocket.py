@@ -1,11 +1,17 @@
+
 # TODO: add parachute logic
 # When the velocity flips
 # Change drag coefficient
 # Change area
+
 # TODO: account better for drift
 # Account for air resistance of rocket shape
-# TODO: three degree of freedom - in x, y, and z modelling
+# TODO: Add the affect of wind
+
+# TODO: six degree of freedom - in x, y, and z modelling
 # Model rotation in x, y, and z
+
+# TODO: Add unit tests
 
 from Helpers.dragForce import *
 from Helpers.gravity import *
@@ -21,7 +27,8 @@ p_acceleration = np.copy(acceleration)
 
 
 # Tanner's model currently reaces apogee at 3158 meters
-# My model reaches 3400
+# My model reaches 4081
+# The difference is probably due to drag_coefficient implementation and momentum calculations
 
 
 def simulate_step():
@@ -67,7 +74,8 @@ def simulate_step():
 
 
 # Calculate using http://www.rasaero.com/dl_software_ii.htm
-drag_coefficient = 0.75  # double check that it would be the same both up and sideways
+# TODO: figure out a way to simulate this so that it works in 3D
+drag_coefficient = 0.75
 # TODO: Find real data for areas
 vertical_area = 0.008  # m^2
 sideways_area = 0.1  # m^2
@@ -90,7 +98,8 @@ while position[1] >= 0:
     # Actually, it is a little better to just use te indexes
     to_log = {
         'time': t,
-        'position': position[1],
+        'position': position.copy(),
+        'velocity': velocity.copy(),
         'acceleration': acceleration
     }
 
@@ -107,5 +116,6 @@ print(
 
 # This stuff adds about two seconds to the run time
 df = pd.DataFrame(rows)
+df.set_index('time', inplace=True)
 
 df.to_csv("Data/Output/output.csv")
