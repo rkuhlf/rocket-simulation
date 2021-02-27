@@ -22,6 +22,10 @@ p_velocity = np.copy(velocity)
 p_acceleration = np.copy(acceleration)
 
 
+# Tanner's model currently reaces apogee at 3158 meters
+# My model reaches 3400
+
+
 def log_data(file, data):
     for val in data:
         file.write(str(val) + ",")
