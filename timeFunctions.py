@@ -10,7 +10,8 @@ from random import random
 
 # the simulation runs through 12,000 steps
 
-# One Trial: 9.65
+# One Trial: 5.7
+# With Pandas: 5.9
 
 
 def test_overall_speed():

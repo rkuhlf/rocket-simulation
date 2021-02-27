@@ -1,3 +1,5 @@
+# TODO: account for change in mass due to fuel
+# TODO: account for slow acceleration with fuel
 # TODO: add parachute logic
 # When the velocity flips
 # Change drag coefficient
@@ -22,6 +24,12 @@ p_acceleration = np.copy(acceleration)
 
 # Tanner's model currently reaces apogee at 3158 meters
 # My model reaches 3400
+
+
+def log_data(file, data):
+    for val in data:
+        file.write(str(val) + ",")
+    file.write("\n")
 
 
 def simulate_step():
@@ -69,16 +77,23 @@ def simulate_step():
 # Calculate using http://www.rasaero.com/dl_software_ii.htm
 drag_coefficient = 0.75  # double check that it would be the same both up and sideways
 # TODO: Find real data for areas
-vertical_area = 0.008  # m^2
+vertical_area = 0.01  # m^2
 sideways_area = 0.1  # m^2
 area = np.array([sideways_area, vertical_area])
 
 
-rows = []
-print("Launching rocket")
+output = open("Data/Output/output.csv", "w")
+output.write("x,y,x_acc,y_acc\n")
 
+
+print("Launching rocket")
 while position[1] >= 0:
     simulate_step()
+    log_data(
+        output, [position[0],
+                 position[1],
+                 acceleration[0],
+                 acceleration[1]])
 
     # y is the second index
     if not turned and position[1] < p_position[1]:
@@ -86,26 +101,10 @@ while position[1] >= 0:
             t, position[1]))
         turned = True
 
-    # Making copies of things is slow but I don't really have a choice
-    # Actually, it is a little better to just use te indexes
-    to_log = {
-        'time': t,
-        'position': position[1],
-        'acceleration': acceleration
-    }
-
-    rows.append(to_log)
-
     p_position = np.copy(position)
     p_velocity = np.copy(velocity)
     p_acceleration = np.copy(acceleration)
 
-print(
-    "Rocket landed with a speed of %.3s m/s after %.4s seconds of flight time." %
-    (np.linalg.norm(velocity),
-     t))
 
-# This stuff adds about two seconds to the run time
-df = pd.DataFrame(rows)
 
-df.to_csv("Data/Output/output.csv")
+output.close()
