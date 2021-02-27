@@ -3,6 +3,11 @@ import pandas as pd
 import numpy as np
 import re
 
+import sys
+sys.path.append('.')
+
+from Helpers.general import numpy_from_string
+
 # Most of these are super inefficient but I dont really care since its just conversions
 
 # For each one, check if there is already a 'conversions.csv' in outputs
@@ -33,12 +38,6 @@ def get_current_conversions():
         return make_conversions_file()
 
 
-def numpy_from_string(x):
-    return np.fromstring(
-        re.sub(r'[\[\] ]+', ' ', x),
-        dtype=float, sep=' ')
-
-
 def convert_g_force():
     df = get_current_conversions()
     df['acceleration'] = df['acceleration'].apply(numpy_from_string)
@@ -53,9 +52,8 @@ def convert_mock():
     df = get_current_conversions()
     df['velocity'] = df['velocity'].apply(numpy_from_string)
 
-    df['mock'] = df['velocity']
-    df['mock'] = df['mock'].apply(
-        lambda x: np.linalg.norm(df['velocity']) / 343)  # tis 343 sould vary
+    df['mock'] = df['velocity'].apply(
+        lambda x: np.linalg.norm(x) / 343)  # tis 343 sould vary
 
     df.to_csv(output_file)
 
