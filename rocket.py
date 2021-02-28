@@ -8,10 +8,12 @@
 # Account for air resistance of rocket shape
 # TODO: Add the affect of wind
 
-# TODO: six degree of freedom - in x, y, and z modelling
-# Model rotation in x, y, and z
+""" TODO: six degree of freedom - in x, y, and z modelling
+Model rotation in x, y, and z
+Figure out how to determine the change in motion and the change in rotation from a push not exactly at the center of mass
+"""
 
-# TODO: Add unit tests
+# TODO: Expand on and implement unit tests
 
 from Helpers.dragForce import *
 from Helpers.gravity import *
@@ -25,15 +27,31 @@ p_position = np.copy(position)  # p stands for previous
 p_velocity = np.copy(velocity)
 p_acceleration = np.copy(acceleration)
 
+p_rotation = np.copy(rotation)
+p_angular_velocity = np.copy(angular_velocity)
+p_angular_acceleration = np.copy(angular_acceleration)
+
 
 # Tanner's model currently reaces apogee at 3158 meters
 # My model reaches 4081
 # The difference is probably due to drag_coefficient implementation and momentum calculations
 
 
+
+
+# Calculate using http://www.rasaero.com/dl_software_ii.htm
+# TODO: figure out a way to simulate this so that it works in 3D
+# Probably the theoretical best thing to do is to calculate the drag coefficient of the object rotated so that the relative velocity is only in one dimension. Calculating separate drag coefficients for two components of velocity doesn't make sense, so it is necessary to rotate the shape so that it is at the same angle against a one component velocity, find the consequent drag force, then combine that to the unrotated force
+drag_coefficient = 0.75
+# TODO: Find real data for areas
+vertical_area = 0.008  # m^2
+sideways_area = 0.01  # m^2
+area = np.array([sideways_area, vertical_area])
+
+
 def simulate_step():
     # acceleration has to be global so that it can be logged
-    global t, mass, velocity, position, acceleration
+    global t, mass, velocity, position, acceleration, rotation, angular_velocity, angular_acceleration
 
     t += time_increment
 
@@ -44,9 +62,52 @@ def simulate_step():
     force[1] -= get_gravitational_attraction()
 
 
+    # This will have to change. Need to get the new area and the drag coefficient at run time
+    # This function only adjusts for the air density at altitude and the velocity of the rocket
+    drag_force = get_drag_force(area, drag_coefficient)
+
+    force -= drag_force
+
+
+
+    # The drag force fully applies to the translational motion of the rocket, but it also fully applies to the rotational momentum of the object
+    # torque = drag_force * distance between center of pressure and center of gravity
+    # returns 3d vector, so I have to convert it into that rotation
+    # calculate the angle between the vector application and the 'lever arm,' which is the rocket body in this case
+    # simple for 2d
+    torque = 0
+    if not np.all(drag_force == 0):
+        # It oscillates increasingly until it starts to spin in circles
+        # why does the angular acceleration take that long
+        # torque must be taking that long - either np.sin(angle) or np.linalg.norm(drag_force)
+        # print(drag_force)
+        # print(angle_from_vector_2d(drag_force))
+        angle = angle_from_vector_2d(drag_force) - rotation
+        # print(angle)
+        # Not 100% sure why this needs to be negative, but the rocket should be self correcting since the COP is behind the COG
+        # This changes whenever it turns over, when it should flip signs
+        # basically just gives the component that will have an affect on the rocket, the opposite of the opposite / hypotenuse (magnitude of vector)
+        perpendicular_component = np.linalg.norm(drag_force) * np.sin(angle)
+        # print(angle, drag_force, perpendicular_component)
+        torque = dist_gravity_pressure * perpendicular_component
+
+
+    # Do all angle stuff first, since some of it affects how forces are applied
+    angular_acceleration = torque / moment_of_inertia
+
+    combined_angular_acceleration = (
+        p_angular_acceleration + angular_acceleration) / 2
+    angular_velocity += combined_angular_acceleration * time_increment
+
+    combined_angular_velocity = (p_angular_velocity + angular_velocity) / 2
+    rotation += combined_angular_velocity * time_increment
+
+
+    # thrust is in direction of the rotation
     thrust = get_thrust(t - time_increment / 2)
+    unit_direction = euler_to_vector_2d(rotation)
     # adjust this for the angle
-    force[1] += thrust
+    force[1] += thrust  # * unit_direction
 
     new_mass = mass - thrust * mass_per_thrust * time_increment
     # adjust for momentum
@@ -55,13 +116,7 @@ def simulate_step():
 
     mass = new_mass
 
-
-    # This will have to change. Need to get the new area and the drag coefficient at run time
-    # This function only adjusts for the air density at altitude and the velocity of the rocket
-    force -= get_drag_force(area, drag_coefficient)
-
     acceleration = force / mass
-
 
     # Taking the average of the current acceleration and the previous acceleration is a better approximation of the change over the time_interval
     # It is basically a riemann midpoint integral over the acceleration so that it is more accurate finding the change in velocity
@@ -71,15 +126,6 @@ def simulate_step():
 
     combined_velocity = (p_velocity + velocity) / 2
     position += combined_velocity * time_increment
-
-
-# Calculate using http://www.rasaero.com/dl_software_ii.htm
-# TODO: figure out a way to simulate this so that it works in 3D
-drag_coefficient = 0.75
-# TODO: Find real data for areas
-vertical_area = 0.008  # m^2
-sideways_area = 0.1  # m^2
-area = np.array([sideways_area, vertical_area])
 
 
 rows = []
@@ -100,7 +146,10 @@ while position[1] >= 0:
         'time': t,
         'position': position.copy(),
         'velocity': velocity.copy(),
-        'acceleration': acceleration
+        'acceleration': acceleration,
+        'rotation': rotation.copy(),
+        'angular velocity': angular_velocity.copy(),
+        'angular acceleration': angular_acceleration
     }
 
     rows.append(to_log)
@@ -108,6 +157,10 @@ while position[1] >= 0:
     p_position = np.copy(position)
     p_velocity = np.copy(velocity)
     p_acceleration = np.copy(acceleration)
+
+    p_rotation = np.copy(rotation)
+    p_angular_velocity = np.copy(angular_velocity)
+    p_angular_acceleration = np.copy(angular_acceleration)
 
 print(
     "Rocket landed with a speed of %.3s m/s after %.4s seconds of flight time." %

@@ -1,6 +1,16 @@
 from Helpers.variables import *
 from Helpers.general import interpolate
 
+
+
+# Air speeds
+
+
+def get_air_speed():
+    # this tells us how the rocket is moving through space relative to the surrounding fluids
+    return np.zeros((2))
+
+
 # https://www.digitaldutch.com/
 density = 1  # kg/m^3 - this is density of the air, not the rocket
 density_data = pd.read_csv("Data/Input/airQuantities.csv")

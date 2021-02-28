@@ -11,12 +11,29 @@ velocity = np.array([0, 0], dtype="float64")
 # the acceleration isn't even necessary, but I do have to declare the previous value, so I'll just leave it here for clarity
 acceleration = np.array([0, 0], dtype="float64")
 
+# Using Euler X, Y, Z angles instead of quaternions because I am not a psychopath
+# Only need one dimension of rotation for two dimensions of position
+# When third dimension is added change it to three - this may cause some hard angle problems converting directional velocities to angular velocities in three dimensions
+# start with a ten degree tilt (90 degrees is straight up)
+rotation = np.array([100 * 3.14 / 180], dtype="float64")
+angular_velocity = np.array([0], dtype="float64")
+
+# the acceleration isn't even necessary, but I do have to declare the previous value, so I'll just leave it here for clarity
+angular_acceleration = np.array([0], dtype="float64")
+
 # indicates whether the rocket has begun to fall
 turned = False
 
 
 mass = 5.76  # kg
+# Actually this sucks and is complicated because moment of inertia isn't a scalar quantity for a complex 3d shape
+# use calculated value from Fusion 360/Other CAD, currently using random one
+moment_of_inertia = 1 / 12 * mass * 4 ** 2
 t = 0  # seconds
+
+center_of_gravity = 2  # meters from the bottom
+center_of_pressure = 0.8  # meters from the bottom
+dist_gravity_pressure = center_of_gravity - center_of_pressure
 
 
 # CONSTANTS
