@@ -93,6 +93,7 @@ def simulate_step():
 
 
     # Do all angle stuff first, since some of it affects how forces are applied
+    # FIXME: Moment of inertia needs to update every frame since mass changes
     angular_acceleration = torque / moment_of_inertia
 
     combined_angular_acceleration = (
