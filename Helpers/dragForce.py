@@ -81,3 +81,8 @@ def get_drag_force(area, drag_coefficient):
     air_resistance *= np.sign(velocity)
 
     return air_resistance
+
+def get_drag_torque():
+
+  # just totally ignore frictional angular drag
+  # and use the equation 
