@@ -43,9 +43,10 @@ p_angular_acceleration = np.copy(angular_acceleration)
 # TODO: figure out a way to simulate this so that it works in 3D
 # Probably the theoretical best thing to do is to calculate the drag coefficient of the object rotated so that the relative velocity is only in one dimension. Calculating separate drag coefficients for two components of velocity doesn't make sense, so it is necessary to rotate the shape so that it is at the same angle against a one component velocity, find the consequent drag force, then combine that to the unrotated force
 drag_coefficient = 0.75
+drag_coefficient_perpendicular = 1.08
 # TODO: Find real data for areas
-vertical_area = 0.008  # m^2
-sideways_area = 0.01  # m^2
+vertical_area = np.pi * radius ** 2 # 0.008  # m^2
+sideways_area = radius * 2 * height  # m^2
 area = np.array([sideways_area, vertical_area])
 
 
@@ -90,6 +91,11 @@ def simulate_step():
         perpendicular_component = np.linalg.norm(drag_force) * np.sin(angle)
         # print(angle, drag_force, perpendicular_component)
         torque = dist_gravity_pressure * perpendicular_component
+
+    if torque != 0:
+        rotation_drag = get_drag_torque(drag_coefficient_perpendicular)
+        print(rotation_drag)
+        torque -= rotation_drag
 
 
     # Do all angle stuff first, since some of it affects how forces are applied
