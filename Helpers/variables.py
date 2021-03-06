@@ -31,6 +31,8 @@ mass = 5.76  # kg
 moment_of_inertia = 1 / 12 * mass * 4 ** 2
 t = 0  # seconds
 
+radius = 0.05 # meters
+height = 4 # meters
 center_of_gravity = 2  # meters from the bottom
 center_of_pressure = 0.8  # meters from the bottom
 dist_gravity_pressure = center_of_gravity - center_of_pressure

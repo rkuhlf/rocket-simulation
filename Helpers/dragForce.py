@@ -82,7 +82,22 @@ def get_drag_force(area, drag_coefficient):
 
     return air_resistance
 
-def get_drag_torque():
+def get_drag_torque(drag_coefficient):
+    altitude = base_altitude + position[1]
 
-  # just totally ignore frictional angular drag
-  # and use the equation 
+    air_density = get_air_density(altitude)
+
+    # Might need this later for getting drag_coefficient better
+    # renold = air_density * area * drag_coefficient / 2
+    
+    # just totally ignore frictional angular drag
+    # and use the equation CD * pi * h * density * Angular velocity ^ 2 * radius ^ 4
+    # The coefficient of drag is the same as for a regular cylinder moving through the round side
+    
+
+    drag_force = drag_coefficient * np.pi * height * air_density * (angular_velocity ** 2) * radius ** 4
+
+    # In the same direction, so wen we subtract it the velocity will decrease
+    drag_torque = drag_force * np.sign(drag_force)
+
+    return drag_torque
