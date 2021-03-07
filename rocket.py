@@ -45,8 +45,8 @@ p_angular_acceleration = np.copy(angular_acceleration)
 drag_coefficient = 0.75
 drag_coefficient_perpendicular = 1.08
 # TODO: Find real data for areas
-vertical_area = np.pi * radius ** 2 # 0.008  # m^2
-sideways_area = radius * 2 * height  # m^2
+vertical_area = np.pi * radius ** 2  # 0.008  # m^2
+sideways_area = radius * 2 * height  # 0.4 m^2
 area = np.array([sideways_area, vertical_area])
 
 
@@ -65,7 +65,8 @@ def simulate_step():
 
     # This will have to change. Need to get the new area and the drag coefficient at run time
     # This function only adjusts for the air density at altitude and the velocity of the rocket
-    drag_force = get_drag_force(area, drag_coefficient)
+    # Just using vertical area right now. TODO: implement area calculations to get the cross sectional area of a rotated object
+    drag_force = get_drag_force(vertical_area, drag_coefficient)
 
     force -= drag_force
 
@@ -78,24 +79,25 @@ def simulate_step():
     # simple for 2d
     torque = 0
     if not np.all(drag_force == 0):
-        # It oscillates increasingly until it starts to spin in circles
-        # why does the angular acceleration take that long
-        # torque must be taking that long - either np.sin(angle) or np.linalg.norm(drag_force)
-        # print(drag_force)
-        # print(angle_from_vector_2d(drag_force))
+        # It oscillates on the descent - I feel like this should be fixable with a few negative signs
+        # Should be really close to 0 degrees, or pi / 2
         angle = angle_from_vector_2d(drag_force) - rotation
-        # print(angle)
-        # Not 100% sure why this needs to be negative, but the rocket should be self correcting since the COP is behind the COG
-        # This changes whenever it turns over, when it should flip signs
+
+        # print("Drag angle", drag_force, angle_from_vector_2d(drag_force))
+        # print("Drag angle to body", angle)
+
+
         # basically just gives the component that will have an affect on the rocket, the opposite of the opposite / hypotenuse (magnitude of vector)
         perpendicular_component = np.linalg.norm(drag_force) * np.sin(angle)
-        # print(angle, drag_force, perpendicular_component)
-        torque = dist_gravity_pressure * perpendicular_component
 
-    if torque != 0:
-        rotation_drag = get_drag_torque(drag_coefficient_perpendicular)
-        print(rotation_drag)
-        torque -= rotation_drag
+        torque += dist_gravity_pressure * perpendicular_component
+
+    # This rotation drag is always in the opposite direction of angular velocity. Be aware that that isn't always the same as the direction of torque due to translation
+    # It is in te 10 ^ -4 range. That seems like it is too low to cause the rotation to converge
+    rotation_drag = get_drag_torque(drag_coefficient_perpendicular)
+
+    # I think that the angular drag is probably also applied at the center of pressure
+    torque -= rotation_drag * dist_gravity_pressure
 
 
     # Do all angle stuff first, since some of it affects how forces are applied
@@ -114,7 +116,13 @@ def simulate_step():
     thrust = get_thrust(t - time_increment / 2)
     unit_direction = euler_to_vector_2d(rotation)
     # adjust this for the angle
-    force[1] += thrust  # * unit_direction
+
+
+    directed_thrust = np.reshape(thrust * unit_direction, (2,))
+    # directed_thrust = np.array([0, thrust]) # This is the old bad way
+
+    # Thrust is working in the correct direction
+    force += directed_thrust
 
     new_mass = mass - thrust * mass_per_thrust * time_increment
     # adjust for momentum
@@ -179,3 +187,5 @@ df = pd.DataFrame(rows)
 df.set_index('time', inplace=True)
 
 df.to_csv("Data/Output/output.csv")
+
+print("Saved the trial to csv")

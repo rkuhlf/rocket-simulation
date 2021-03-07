@@ -23,7 +23,17 @@ def angle_from_vector_2d(array):
         return np.pi / 2
 
     ratio = array[1] / array[0]
-    return np.tan(ratio)
+    ans = np.arctan(ratio)
+
+    # numpy inverse tangent ranges from -pi/2 to pi/2, so we have to add back in the negatives to get a full 360
+    # Already works perfectly for positive x values
+    if array[0] > 0:
+        return ans
+
+    # if array[1] < 0:  # both are negative
+    #     return np.pi + ans
+
+    return np.pi + ans
 
 
 

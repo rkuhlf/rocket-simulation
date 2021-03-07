@@ -34,3 +34,19 @@ class Testing(unittest.TestCase):
             np.isclose(
                 euler_to_vector_2d(-np.pi / 2),
                 np.array([0, -1]))))
+
+    def test_angle_from_vector(self):
+        self.assertTrue(np.alltrue(
+            np.isclose(
+                angle_from_vector_2d((1, 0)),
+                0)))
+
+        self.assertTrue(np.alltrue(
+            np.isclose(
+                angle_from_vector_2d((0, 1)),
+                np.pi / 2)))
+
+        self.assertTrue(np.alltrue(
+            np.isclose(
+                np.abs(angle_from_vector_2d((-10, 0)) / (np.pi)),
+                1)))

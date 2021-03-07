@@ -26,16 +26,18 @@ turned = False
 
 
 mass = 5.76  # kg
-# Actually this sucks and is complicated because moment of inertia isn't a scalar quantity for a complex 3d shape
-# use calculated value from Fusion 360/Other CAD, currently using random one
-moment_of_inertia = 1 / 12 * mass * 4 ** 2
 t = 0  # seconds
 
-radius = 0.05 # meters
-height = 4 # meters
+radius = 0.05  # meters
+height = 4  # meters
 center_of_gravity = 2  # meters from the bottom
 center_of_pressure = 0.8  # meters from the bottom
 dist_gravity_pressure = center_of_gravity - center_of_pressure
+
+# Actually this sucks and is complicated because moment of inertia isn't a scalar quantity for a complex 3d shape
+# use calculated value from Fusion 360/Other CAD, currently using random one
+moment_of_inertia = 1 / 12 * mass * height ** 2
+
 
 
 # CONSTANTS

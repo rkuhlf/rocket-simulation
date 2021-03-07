@@ -19,8 +19,8 @@ altitude_data = np.array(density_data["Altitude"])
 
 
 # for some reason this is slower but I don't really care because it is better
-# I think the function call might be doing it
-# Changing it to multiply by direction doesnt make it any faster
+# I think the function call required by recursion might be doing it
+# Changing it to multiply by direction in the inequality doesnt make it any faster
 def get_next(index, previous_index, direction, altitude):
     # if density_data.iloc[index]["Altitude"] * direction > direction * altitude:
     #     return index, previous_index
@@ -70,17 +70,35 @@ def get_air_density(altitude):
 
 # find air resistance
 def get_drag_force(area, drag_coefficient):
+    # Assumes the same area and drag coefficient for both sides
     altitude = base_altitude + position[1]
 
+    # one of these values is two dimensional, and I think that is causing a problem
+    # It's probably area
     air_density = get_air_density(altitude)
     renold = air_density * area * drag_coefficient / 2
 
-    air_resistance = renold * (velocity ** 2)
+    # FIXME: maybe should be the other way around
+    relative_velocity = velocity - get_air_speed()
 
-    # In the same direction, so wen we subtract it the velocity will decrease
-    air_resistance *= np.sign(velocity)
+    magnitude = np.linalg.norm(relative_velocity)
+    if np.isclose(magnitude, 0):
+        return np.array([0, 0])
 
+    unit_direction = relative_velocity / magnitude
+
+
+    # You can't square each component of velocity and have it be in the same direction
+    # So, multiply by the magnitude of the square, as the formula intends, then by the unit direction
+    air_resistance = renold * (magnitude ** 2)
+
+
+    # In the same direction, so wen we subtract it later the velocity will decrease
+    air_resistance *= unit_direction
+
+    # Somehow x is bigger than y when the rocket should be shooting straight up
     return air_resistance
+
 
 def get_drag_torque(drag_coefficient):
     altitude = base_altitude + position[1]
@@ -89,15 +107,16 @@ def get_drag_torque(drag_coefficient):
 
     # Might need this later for getting drag_coefficient better
     # renold = air_density * area * drag_coefficient / 2
-    
+
     # just totally ignore frictional angular drag
     # and use the equation CD * pi * h * density * Angular velocity ^ 2 * radius ^ 4
     # The coefficient of drag is the same as for a regular cylinder moving through the round side
-    
 
-    drag_force = drag_coefficient * np.pi * height * air_density * (angular_velocity ** 2) * radius ** 4
+
+    drag_force = drag_coefficient * np.pi * height * \
+        air_density * (angular_velocity ** 2) * radius ** 4
 
     # In the same direction, so wen we subtract it the velocity will decrease
-    drag_torque = drag_force * np.sign(drag_force)
+    drag_torque = drag_force * np.sign(angular_velocity)
 
     return drag_torque
