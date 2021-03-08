@@ -32,8 +32,17 @@ radius = 0.05  # meters
 height = 4  # meters
 center_of_gravity = 2  # meters from the bottom
 center_of_pressure = 0.8  # meters from the bottom
-dist_gravity_pressure = center_of_gravity - center_of_pressure
 
+
+
+# Calculate using http://www.rasaero.com/dl_software_ii.htm
+# TODO: figure out a way to simulate this so that it works in 3D
+# Probably the theoretical best thing to do is to calculate the drag coefficient of the object rotated so that the relative velocity is only in one dimension. Calculating separate drag coefficients for two components of velocity doesn't make sense, so it is necessary to rotate the shape so that it is at the same angle against a one component velocity, find the consequent drag force, then combine that to the unrotated force
+drag_coefficient = 0.75
+drag_coefficient_perpendicular = 1.08
+
+vertical_area = np.pi * radius ** 2  # 0.008  # m^2
+sideways_area = radius * 2 * height  # 0.4 m^2
 
 
 
@@ -50,12 +59,35 @@ base_altitude = 4  # meters
 
 
 
+
+
+
+
 save_preset = True
 
 if save_preset:
+    from presets import save_preset
+
+    # Swap this out for an input at some point
     save_as = 'TannerModel'
 
-    f = open('Data/Input/Presets/' + save_as + '.py', 'w')
-    print(globals())
-    # f.write()
-    f.close()
+    save_preset(save_as, globals())
+
+
+load_preset = False
+
+if load_preset:
+    from presets import load_preset
+
+    # Swap this for an input statemetn
+    to_load = 'TannerModel'
+
+    load_preset(to_load)
+
+
+
+
+# Calculated variables
+# Need to go after any importing prefabs shenanigans
+area = np.array([sideways_area, vertical_area])
+dist_gravity_pressure = center_of_gravity - center_of_pressure

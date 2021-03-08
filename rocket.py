@@ -44,16 +44,6 @@ p_angular_acceleration = np.copy(angular_acceleration)
 
 
 
-# Calculate using http://www.rasaero.com/dl_software_ii.htm
-# TODO: figure out a way to simulate this so that it works in 3D
-# Probably the theoretical best thing to do is to calculate the drag coefficient of the object rotated so that the relative velocity is only in one dimension. Calculating separate drag coefficients for two components of velocity doesn't make sense, so it is necessary to rotate the shape so that it is at the same angle against a one component velocity, find the consequent drag force, then combine that to the unrotated force
-drag_coefficient = 0.75
-drag_coefficient_perpendicular = 1.08
-
-vertical_area = np.pi * radius ** 2  # 0.008  # m^2
-sideways_area = radius * 2 * height  # 0.4 m^2
-area = np.array([sideways_area, vertical_area])
-
 
 to_log = {}
 
