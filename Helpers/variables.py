@@ -34,9 +34,6 @@ center_of_gravity = 2  # meters from the bottom
 center_of_pressure = 0.8  # meters from the bottom
 dist_gravity_pressure = center_of_gravity - center_of_pressure
 
-# Actually this sucks and is complicated because moment of inertia isn't a scalar quantity for a complex 3d shape
-# use calculated value from Fusion 360/Other CAD, currently using random one
-moment_of_inertia = 1 / 12 * mass * height ** 2
 
 
 
@@ -48,3 +45,17 @@ gravitational_constant = 6.67 * 10 ** -11
 
 # Lake Jackson altitude
 base_altitude = 4  # meters
+
+
+
+
+
+save_preset = True
+
+if save_preset:
+    save_as = 'TannerModel'
+
+    f = open('Data/Input/Presets/' + save_as + '.py', 'w')
+    print(globals())
+    # f.write()
+    f.close()
