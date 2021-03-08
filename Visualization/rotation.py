@@ -99,7 +99,7 @@ def graphCompleteWithArbitraryCoefficients():
         drag = drag_multiplier * angle_velocity ** 2
         drag *= np.sign(angle_velocity)
         drag_record.append(drag)
-        # print(drag)
+
         angle_velocity -= force + drag
         angle_velocity_record.append(angle_velocity)
 
@@ -116,6 +116,7 @@ def graphCompleteWithArbitraryCoefficients():
 # Based on this it seems that the rocket is experiencing too much torque due to air resistance
 def graphRocketOutput():
     df = pd.read_csv("Data/Output/output.csv")
+    # Convert it out of a 1,1 array
     df['rotation'] = df['rotation'].apply(lambda x: float(x[1:-1]))
 
     df.plot(x='time', y='rotation', kind='line')

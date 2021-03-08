@@ -1,4 +1,7 @@
 
+
+# TODO: Refactor te program to be more object oriented. There should be a rocket class, of which you can create an instance, then run the simulation. That class should accept an instance of a motor class, and it should accept an instance of a parachute class.
+
 # TODO: add parachute logic
 # When the velocity flips
 # Change drag coefficient
@@ -15,6 +18,8 @@ Figure out how to determine the change in motion and the change in rotation from
 
 # TODO: Expand on and implement unit tests
 
+# All of these import * are really bad practice. They clutter the interpreter (making it run slower), and they make it hard for linters to detect undefined names
+# However, I think it is fine atm for testing stuff
 from Helpers.dragForce import *
 from Helpers.gravity import *
 from Helpers.thrust import *
@@ -44,10 +49,13 @@ p_angular_acceleration = np.copy(angular_acceleration)
 # Probably the theoretical best thing to do is to calculate the drag coefficient of the object rotated so that the relative velocity is only in one dimension. Calculating separate drag coefficients for two components of velocity doesn't make sense, so it is necessary to rotate the shape so that it is at the same angle against a one component velocity, find the consequent drag force, then combine that to the unrotated force
 drag_coefficient = 0.75
 drag_coefficient_perpendicular = 1.08
-# TODO: Find real data for areas
+
 vertical_area = np.pi * radius ** 2  # 0.008  # m^2
 sideways_area = radius * 2 * height  # 0.4 m^2
 area = np.array([sideways_area, vertical_area])
+
+
+to_log = {}
 
 
 def simulate_step():
@@ -80,11 +88,15 @@ def simulate_step():
     torque = 0
     if not np.all(drag_force == 0):
         # It oscillates on the descent - I feel like this should be fixable with a few negative signs
-        # Should be really close to 0 degrees, or pi / 2
+        # Would a rocket without a parachute rotate like that?
+        # Should be really close to 0 degrees
         angle = angle_from_vector_2d(drag_force) - rotation
 
-        # print("Drag angle", drag_force, angle_from_vector_2d(drag_force))
-        # print("Drag angle to body", angle)
+        # if (velocity[1] < 0.5):
+        #     print("Drag angle", drag_force, angle_from_vector_2d(drag_force))
+        #     print("Drag angle to body", angle)
+
+        to_log['Drag to Body'] = angle
 
 
         # basically just gives the component that will have an affect on the rocket, the opposite of the opposite / hypotenuse (magnitude of vector)
@@ -101,6 +113,12 @@ def simulate_step():
 
 
     # Do all angle stuff first, since some of it affects how forces are applied
+
+    # Actually this sucks and is complicated because moment of inertia isn't a scalar quantity for a complex 3d shape
+    # use calculated value from Fusion 360/Other CAD, currently using random one
+    moment_of_inertia = 1 / 12 * mass * height ** 2
+
+
     # FIXME: Moment of inertia needs to update every frame since mass changes
     angular_acceleration = torque / moment_of_inertia
 
@@ -147,6 +165,8 @@ rows = []
 print("Launching rocket")
 
 while position[1] >= 0:
+    to_log = {}
+
     simulate_step()
 
     # y is the second index
@@ -157,7 +177,7 @@ while position[1] >= 0:
 
     # Making copies of things is slow but I don't really have a choice
     # Actually, it is a little better to just use te indexes
-    to_log = {
+    to_log.update({
         'time': t,
         'position': position.copy(),
         'velocity': velocity.copy(),
@@ -165,7 +185,7 @@ while position[1] >= 0:
         'rotation': rotation.copy(),
         'angular velocity': angular_velocity.copy(),
         'angular acceleration': angular_acceleration
-    }
+    })
 
     rows.append(to_log)
 
