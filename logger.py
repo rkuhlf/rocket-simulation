@@ -34,6 +34,9 @@ class Logger:
 
         df.to_csv("Data/Output/output.csv")
 
+    def reset(self):
+        self.__init__(self.rocket, self.to_record)
+
 
 class Feedback_Logger(Logger):
     "Logs the progress of the rocket simulation"

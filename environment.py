@@ -46,8 +46,6 @@ class Environment(PresetObject):
 
 
 
-
-
     def get_air_density(self, altitude):
         """Get the air density at a given number of meters in the air"""
         # Air density: This is a slow calculation

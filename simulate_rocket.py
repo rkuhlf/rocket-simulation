@@ -9,12 +9,24 @@ from logger import Feedback_Logger  # or just Logger
 from simulation import Simulation
 
 
+# Uses mostly class defaults
+env = Environment()
+motor = Motor()
+rocket = Rocket(environment=env, motor=motor)
+logger = Feedback_Logger(
+    rocket,
+    ['position', 'velocity', 'acceleration', 'rotation', 'angular_velocity',
+     'angular_acceleration'])
+
+sim = Simulation(env, rocket, logger)
+sim.run_simulation()
+
+
+# Example 1
+"""
 environment = Environment()
-
-
 motor = Motor()
 rocket = Rocket(environment=environment, motor=motor)
-rocket.save_preset()
 
 
 logger = Feedback_Logger(
@@ -23,7 +35,21 @@ logger = Feedback_Logger(
      'angular_velocity', 'angular_acceleration'])
 rocket.logger = logger
 
-
 sim = Simulation(environment, rocket, logger)
 
 sim.run_simulation()
+"""
+
+
+# Example 2
+"""
+rocket = Rocket()
+rocket.load_preset("TannerModel")
+
+
+logger = Logger(rocket, ['position', 'rotation'])
+
+sim = Simulation(rocket.environment, rocket, logger)
+
+sim.run_simulation()
+"""

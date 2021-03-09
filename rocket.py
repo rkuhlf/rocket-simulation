@@ -70,19 +70,19 @@ class Rocket(PresetObject):
         self.sideways_area = self.radius * 2 * self.height  # 0.4 m^2
 
 
-        super().overwrite_defaults(config)
-
         self.motor = motor
         self.environment = environment
         self.parachute = parachute
         self.logger = logger
 
+        # Everything before this is saved as a preset
+        super().overwrite_defaults(config)
 
 
         self.update_previous()
 
 
-        # TODO: Double check if I am supposed to be adding the propellant mass to the rocket mass to match tanner's model (what should the total weight of the rocket actually be)
+        # maybe should make an addmotor method
         self.mass += self.motor.mass
 
 
