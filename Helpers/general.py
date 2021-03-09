@@ -1,11 +1,30 @@
-from Helpers.variables import *
-import Helpers
 import re
+import numpy as np
 
 
-def interpolate(current_time, start_time, end_time, start_thrust, end_thrust):
-    # map the data linearly between the two
-    return (current_time - start_time) / (end_time - start_time) * (end_thrust - start_thrust) + start_thrust
+def interpolate(x, x1, x2, y1, y2):
+    '''Map one point from one range to another'''
+    if x2 == x1:
+        return (y1 + y2) / 2
+    return (x - x1) / (x2 - x1) * (y2 - y1) + y1
+
+
+def get_next(index, data, previous_index, direction, target):
+    """Get the next closest value in a collection of data starting from a cached index"""
+
+    # for some reason this is slower but I don't really care because it is better
+    # I think the function call required by recursion might be doing it
+
+    if direction < 0 and data[index] < target:
+        return index, previous_index
+    elif direction > 0 and data[index] > target:
+        return index, previous_index
+    else:
+        previous_index = index
+        index += direction
+
+        return get_next(index, data, previous_index, direction, target)
+
 
 
 def numpy_from_string(x):

@@ -1,5 +1,4 @@
-from Helpers.variables import *
-from Helpers.general import *
+"""from Helpers.general import *
 
 
 # Thrust
@@ -47,3 +46,4 @@ def get_thrust(current_time):
     except IndexError:
         finished_thrusting = True
         return 0
+"""
