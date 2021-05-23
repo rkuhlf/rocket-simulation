@@ -87,10 +87,3 @@ def angle_between(v1, v2):
     v1_u = unit_vector(v1)
     v2_u = unit_vector(v2)
     return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
-
-
-def combine(a, b):
-    """Returns the average of a and b"""
-    # Taking the average of the current acceleration and the previous acceleration is a better approximation of the change over the time_interval
-    # It is basically a riemann midpoint integral over the acceleration so that it is more accurate finding the change in velocity
-    return (a + b) / 2
