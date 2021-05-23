@@ -46,6 +46,8 @@ class Rocket(PresetObject):
         self.radius = 0.05  # meters
         self.height = 4  # meters
         # TODO: get approximate position of motor so that I can recalculate center of gravity every frame
+        # It should be do-able with only the initial center of gravity (and mass), and the position of the motor and the mass that is lost
+        # This is actually a relatively large difference, but hopefully increasing it will slow down rotation
         self.center_of_gravity = 2  # meters from the bottom
         self.center_of_pressure = 0.8  # meters from the bottom
 
@@ -92,35 +94,38 @@ class Rocket(PresetObject):
         self.p_angular_velocity = np.copy(self.angular_velocity)
         self.p_angular_acceleration = np.copy(self.angular_acceleration)
 
-    def get_drag_torque(self, drag_coefficient):
-        altitude = self.environment.base_altitude + self.position[1]
 
-        air_density = self.environment.get_air_density(altitude)
+    def get_drag_torque(self, drag_coefficient):
+        "Calculate the magnitude of the force opposed to the direction of rotation"
+        # Angular drag is a completely different calculation from translational drag
+
+        air_density = self.environment.get_air_density(self.get_altitude())
 
         # Might need this later for getting drag_coefficient better
         # renold = air_density * area * drag_coefficient / 2
 
-        # just totally ignore frictional angular drag
-        # and use the equation CD * pi * h * density * Angular velocity ^ 2 * radius ^ 4
-        # The coefficient of drag is the same as for linear drag
-        drag_force = drag_coefficient * np.pi * self.height * \
+        # just totally ignore shear angular drag and use the equation CD * pi * h * density * Angular velocity ^ 2 * radius ^ 4 from https://physics.stackexchange.com/questions/304742/angular-drag-on-body
+        # TODO: Check when shear stress is important (possibly for very thin rockets?)
+        # The coefficient of drag is the same as for linear drag atm, probably not realistic
+        drag_torque = drag_coefficient * np.pi * self.height * \
             air_density * (self.angular_velocity ** 2) * self.radius ** 4
 
-        # In the same direction, so wen we subtract it the velocity will decrease
-        drag_torque = drag_force * np.sign(self.angular_velocity)
+        # In the same direction, so when we subtract it the velocity will decrease
+        drag_torque *= np.sign(self.angular_velocity)
 
         return drag_torque
 
     def calculate_torque(self, force):
+        "Calculate the torque caused by an arbitrary force"
         # The drag force fully applies to the translational motion of the rocket, but it also fully applies to the rotational momentum of the object
         # calculate the angle between the vector application and the 'lever arm,' which is the rocket body in this case
         # In 3d, torque will be in 3 dimensions as well, complicating rotation
         torque = 0
         if not np.all(force == 0):
-            # It oscillates on the descent - I feel like this should be fixable with a few negative signs
-            # Would a rocket without a parachute rotate like that?
-            # Should be really close to 0 degrees
-            angle = angle_from_vector_2d(force) - self.rotation
+            # Should be really close to 0 or pi, especially right at the start
+            # TODO: Figure out why tf I need this
+            force[0] *= -1
+            angle = angle_from_vector_2d(-force) - self.rotation - np.pi / 2
 
             self.logger.add_items({"Angle to Body": angle})
 
@@ -129,32 +134,40 @@ class Rocket(PresetObject):
             perpendicular_component = np.linalg.norm(
                 force) * np.sin(angle)
 
+            # TODO: Check sign
             torque += self.dist_gravity_pressure * perpendicular_component
+            self.logger.add_items(
+                {"Translational component of angular drag": torque.copy()})
+
 
         # This rotation drag is always in the opposite direction of angular velocity. Be aware that that isn't always the same as the direction of torque due to translation
-        # It is in te 10 ^ -4 range. That seems like it is too low to cause the rotation to converge
+        # It is in the 10 ^ -4 range. That seems like it is too low to cause the rotation to converge
         rotation_drag = self.get_drag_torque(
-            self.drag_coefficient_perpendicular)
+            self.drag_coefficient_perpendicular) * 10000
 
-        # I think that the angular drag is probably also applied at the center of pressure
-        torque -= rotation_drag * self.dist_gravity_pressure
+
+
+        # No multiplication by dist_grav_press. If center of mass and center of pressure were identical, the object would still experience angular drag
+        # It is subtracted from the eventual torque because get_drag_torque is calculated in the direction of rotation
+        torque -= rotation_drag
+        self.logger.add_items(
+            {"Angular component of angular drag": -rotation_drag.copy()})
 
 
         return torque
 
 
     def get_drag_force(self, area, drag_coefficient):
-        # Assumes the same area and drag coefficient for flight upward and downward
-        altitude = self.get_altitude()
+        "Calculate the magnitude of the translational drag force"
 
-
-        air_density = self.environment.get_air_density(altitude)
+        air_density = self.environment.get_air_density(self.get_altitude())
         renold = air_density * area * drag_coefficient / 2
 
         # FIXME: maybe should be the other way around
         relative_velocity = self.velocity - self.environment.get_air_speed()
 
         magnitude = np.linalg.norm(relative_velocity)
+        # TODO: figure out why tf this is here
         if np.isclose(magnitude, 0):
             return np.array([0, 0])
 
@@ -172,38 +185,44 @@ class Rocket(PresetObject):
 
         return air_resistance
 
-    def calculate_force(self):
+    def calculate_forces(self):
         # Forces don't carry over from frame to frame, so we need to set them back to zero
-        # All of the force causes full translation
+        # The full force is applied in the fector direction that it has
         total_force = np.array([0., 0.])
-        # Only some of the force is applied off center, causing rotation
+        # Only the perpendicular component is applied to the rotation
         rotating_force = np.array([0., 0.])
 
+        # There is a constant gravitational force downwards
         total_force[1] -= self.environment.get_gravitational_attraction(
-            self.mass, self.position[1])
+            self.mass, self.get_altitude())
 
 
         # This will have to change. Need to get the new area and the drag coefficient at run time
         # This function only adjusts for the air density at altitude and the velocity of the rocket
-        # Just using vertical area right now. TODO: implement area calculations to get the cross sectional area of a rotated object
+        # Just using vertical area right now.
+        # TODO: implement area calculations to get the cross sectional area of a rotated object
         drag_force = self.get_drag_force(
             self.vertical_area, self.drag_coefficient)
 
         total_force -= drag_force
 
+        # I think this is the problem - I'm pretty sure not all of the energy of the air is applied to rotating the rocket. It is inelastic-ish, but I think that ish plays a big enough role that you can't just assume it's 100%. I'm not even sure if the word inelastic applies
         # changing this to a minus sign here, will have to change some other stuff when the sim starts
-        rotating_force -= drag_force
+        # It should be something like rotating_force -= drag_force * 0.5, but I can't figure out what
+        # TODO: See if a plus works here
+        rotating_force -= drag_force  # Force eventually added to the velocity
+        self.logger.add_items(
+            {"Direction of translational drag": rotating_force.copy()})
 
 
 
-        # Should really be doing angle adjustments before thrust, but sometimes life doesn't happen, and it causes negligable problems
         thrust = self.motor.get_thrust(self.environment.time)
-        # thrust is in direction of the rotation
 
-        unit_direction = euler_to_vector_2d(self.rotation)
+        # thrust is in direction of the rotation. The larger the angle is, the more to the right the rocket is
+        unit_direction = euler_to_vector_2d(np.pi / 2 - self.rotation)
         directed_thrust = np.reshape(thrust * unit_direction, (2,))
 
-        # nan
+
         total_force += directed_thrust
 
 
@@ -212,47 +231,41 @@ class Rocket(PresetObject):
 
         # adjust for conservation of momentum
         self.velocity *= self.mass / new_mass
-
-
         self.mass = new_mass
 
 
         return total_force, rotating_force
 
 
-    def combine(self, a, b):
-        """Returns the average of a and b"""
-        # Taking the average of the current acceleration and the previous acceleration is a better approximation of the change over the time_interval
-        # It is basically a riemann midpoint integral over the acceleration so that it is more accurate finding the change in velocity
-        return (a + b) / 2
-
     def apply_angular_acceleration(self):
-        combined_angular_acceleration = self.combine(
+        combined_angular_acceleration = combine(
             self.p_angular_acceleration, self.angular_acceleration)
         self.angular_velocity += combined_angular_acceleration * self.environment.time_increment
 
-        combined_angular_velocity = self.combine(
-            self.p_angular_velocity, self.angular_velocity)
-        self.rotation += combined_angular_velocity * self.environment.time_increment
+        if (self.apply_angular_forces):
+            combined_angular_velocity = combine(
+                self.p_angular_velocity, self.angular_velocity)
+
+            self.rotation += combined_angular_velocity * self.environment.time_increment
 
     def apply_acceleration(self):
-        combined_acceleration = self.combine(
+        combined_acceleration = combine(
             self.p_acceleration, self.acceleration)
         self.velocity += combined_acceleration * self.environment.time_increment
 
-        combined_velocity = self.combine(self.p_velocity, self.velocity)
+        combined_velocity = combine(self.p_velocity, self.velocity)
         self.position += combined_velocity * self.environment.time_increment
 
 
     def simulate_step(self):
         self.logger.add_items({'time': self.environment.time})
 
-        total_force, rotating_force = self.calculate_force()
+        total_force, rotating_force = self.calculate_forces()
         torque = self.calculate_torque(rotating_force)
 
 
         # FIXME: Actually this sucks and is complicated because moment of inertia isn't a scalar quantity for a complex 3d shape
-        # use calculated value from Fusion 360/Other CAD, currently using random one
+        # use calculated value from Fusion 360/Other CAD, currently using random one for a cylinder
         moment_of_inertia = 1 / 12 * self.mass * self.height ** 2
 
 

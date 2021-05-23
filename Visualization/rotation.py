@@ -7,11 +7,12 @@ import pandas as pd
 # Use to double check the derived equation is correct
 
 # TODO: derive equations for these graphs using calculus
+# Unfortunately, there is some extra difficulty
 
 
 # SIMPLIFIED REPRESENTATION OF ROCKET ANGLE:
 # Takeaways - regardless of the multiplier on the acceleration, the angle will never converge
-# That means that no matter how dense the air is, or drag heavy the rocket is, it will continue oscillating at the exact same rate
+# That means that no matter how dense the air is, or drag heavy the rocket is, it will continue oscillating at the exact same rate - unless there is an angular drag always opposed to the direction of rotation
 # Therefore, angular drag *does* have to be working correctly, and it is definitely not negligable
 def graphSimple():
     # Graph an angle
