@@ -9,27 +9,42 @@ class Logger:
         self.rows = []
         # Use the actual rocket object to determine the data
         self.rocket = rocket
+        self.splitting_arrays = False
         self.to_record = to_record
         self.current_row = {}
 
 
 
     def add_items(self, data):
+        if self.splitting_arrays:
+            k = list(data.keys())[0]
+            v = list(data.values())[0]
+
+
+            if isinstance(v, np.ndarray):
+                if len(v) != 0:
+                    data = {}
+                    index = 1
+                    for item in v:
+                        data[k + str(index)] = item
+
+                        index += 1
+
         self.current_row.update(data)
 
     def save_row(self):
         self.rows.append(self.current_row)
         self.current_row = {}
 
-
     def handle_frame(self):
         for key in self.to_record:
-            self.add_items({key: self.rocket.__dict__[key]})
+            self.add_items({key: self.rocket.__dict__[key].copy()})
 
         self.save_row()
 
     def save_to_csv(self):
         df = pd.DataFrame(self.rows)
+        print(df)
         df.set_index('time', inplace=True)
 
         df.to_csv("Data/Output/output.csv")
@@ -39,7 +54,7 @@ class Logger:
 
 
 class Feedback_Logger(Logger):
-    "Logs the progress of the rocket simulation"
+    "Logs the progress of the rocket simulation along with some print statements"
 
     def __init__(self, rocket, to_record):
         print("Launching rocket")
@@ -61,6 +76,7 @@ class Feedback_Logger(Logger):
                   self.rocket.environment.time)
             self.p_thrusted = True
 
+        # If the y is less than or equal to zero, we hit the ground
         if self.rocket.position[1] <= 0:
             print(
                 "Rocket landed with a speed of %.3s m/s after %.4s seconds of flight time" %

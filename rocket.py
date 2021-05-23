@@ -36,7 +36,9 @@ class Rocket(PresetObject):
         # Using Euler X, Y, Z angles instead of quaternions because I am not a psychopath
         # Only need one dimension of rotation for two dimensions of position
         # When third dimension is added change it to three - this may cause some hard angle problems converting directional velocities to angular velocities in three dimensions
-        self.rotation = np.array([np.pi / 2], dtype="float64")
+        # The simulation works unless you start with  diff rotation
+        # When rotation is zero (measured in radians), the rocket is headed straight up
+        self.rotation = np.array([0], dtype="float64")
         self.angular_velocity = np.array([0], dtype="float64")
         self.angular_acceleration = np.array([0], dtype="float64")
 
@@ -62,6 +64,8 @@ class Rocket(PresetObject):
         self.vertical_area = np.pi * self.radius ** 2  # 0.008  # m^2
         self.sideways_area = self.radius * 2 * self.height  # 0.4 m^2
 
+        # This is overriden in the simulation initialization
+        self.apply_angular_forces = False
 
         self.motor = motor
         self.environment = environment
@@ -77,6 +81,7 @@ class Rocket(PresetObject):
 
         # maybe should make an addmotor method
         self.mass += self.motor.mass
+        self.mass += self.parachute.mass
 
 
         # Indicates whether the rocket has begun to descend

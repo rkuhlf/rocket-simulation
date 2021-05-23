@@ -2,11 +2,11 @@ import numpy as np
 import pandas as pd
 from Helpers.general import interpolate, get_next
 from preset_object import PresetObject
+from Data.Input.models import get_density
 
 
 class Environment(PresetObject):
     def __init__(self, config={}):
-        # probably would have been easier to just go self. for all of these, then override it with a dictionary
         self.time = 0
         self.time_increment = 0.01  # seconds
 
@@ -18,7 +18,6 @@ class Environment(PresetObject):
         self.density_location = "airQuantities"
 
         super().overwrite_defaults(config)
-
 
         # https://www.digitaldutch.com/
         self.density_data = pd.read_csv(
@@ -48,6 +47,9 @@ class Environment(PresetObject):
 
     def get_air_density(self, altitude):
         """Get the air density at a given number of meters in the air"""
+
+        return get_density(altitude)
+
         # Air density: This is a slow calculation
         # might be faster to optimize a function to the line
         # It turns out lookups from pandas are much slower than from numpy
