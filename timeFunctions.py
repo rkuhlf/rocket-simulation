@@ -1,20 +1,23 @@
+# Functions to determine how fast each of the parts of the simulation are
+
 from timeit import timeit
 import importlib
-import Helpers.variables
 from Helpers.timing import Timer
-from Helpers.thrust import get_thrust
-from Helpers.dragForce import *
-from Helpers.gravity import *
 import pandas as pd
 from random import random
+from environment import Environment
+from rocket import Rocket
+from motor import Motor
 
-# the simulation runs through 12,000 steps
 
 # One Trial: 5.7
 # With Pandas: 5.9
 
 
+
 def test_overall_speed():
+    # TODO: Make this work with the new implementations
+
     with Timer():
         # this one isn't going to work for multiple trials
         # I think if you just reset the variables.py it might work
@@ -32,27 +35,29 @@ def test_thrust():  # this one is fast
             get_thrust(i * end / steps_to_take)
 
 
-# 10,000 iterations takes 3 seconds
-# looking up the drag is still the most inefficient part
-def test_drag():  # this really slows it down
+# 10,000 iterations takes 3 seconds with lookup and 0.7399 when density is fitted to a curve. That's fast enough
+def test_drag():
     iters = 10000
+    e = Environment()
+    m = Motor()
+    r = Rocket(environment=e, motor=m)
+
+
     with Timer():
         for i in range(iters):
-            Helpers.variables.position[1] = random() * 3000
-            get_drag_force(random() * 3, random() * 1.2 + 0.2)
+            r.position[1] = random() * 3000
+            r.get_drag_force(random() * 3, random() * 1.2 + 0.2)
 
 
-# The fetching density makes up the vast majority of the time spent calculating drag
-# Probably just cache the most recent index, then start checking from there to see where the next altitude is
-
-
-def test_density():  # this really slows it down
+# With a funciton, it's 0.0112
+# With a lookup # TODO: Calculate
+def test_density():
     iters = 10000
     end = 13
+    e = Environment()
     with Timer():
         for i in range(iters):
-            get_air_density(i * end / iters)
-
+            e.get_air_density(i * end / iters)
 
 
 # This is definitely fast enough
@@ -65,6 +70,7 @@ def test_gravity():
 
 
 if __name__ == "__main__":
-    test_overall_speed()
+    # test_overall_speed()
     # test_density()
+    test_drag()
     # test_gravity()

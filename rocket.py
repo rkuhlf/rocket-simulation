@@ -1,13 +1,7 @@
 import numpy as np
+from Helpers.general import euler_to_vector_2d, angle_from_vector_2d, combine
 
-from Helpers.general import euler_to_vector_2d, angle_from_vector_2d
 
-# TODO: Refactor te program to be more object oriented. There should be a rocket class, of which you can create an instance, then run the simulation. That class should accept an instance of a motor class, and it should accept an instance of a parachute class.
-
-# TODO: add parachute logic
-# When the velocity flips
-# Change drag coefficient
-# Change area
 
 # TODO: account better for drift
 # Account for air resistance of rocket shape
@@ -18,16 +12,13 @@ Model rotation in x, y, and z
 Figure out how to determine the change in motion and the change in rotation from a push not exactly at the center of mass
 """
 
+# TODO: Check that I'm using horizontal area where appropriate
 
-from Helpers.thrust import *
+
 from Helpers.general import interpolate
 
 # also includes any libraries that are imported in this file
 from preset_object import PresetObject
-
-# Have a separate motor class
-
-# Have a separate parachute class
 
 # Have a separate fin class?
 
@@ -272,17 +263,16 @@ class Rocket(PresetObject):
         self.apply_acceleration()
 
 
-        if self.position[1] <= 0:
+        if self.position[1] <= self.environment.base_altitude:
             self.landed = True
 
         if self.position[1] < self.p_position[1]:
             self.turned = True
 
-            # Deploy parachute here
+            # TODO: Figure out how parachute deployment mechanisms tend to work. Is it always as soon as it turns? How long does it take? Calculate the forces on the parachute chord
+            # self.parachute.deploy(self)
 
         self.update_previous()
-
-
 
 
     def get_altitude(self):
