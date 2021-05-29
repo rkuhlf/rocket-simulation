@@ -10,7 +10,6 @@ from Data.Input.models import get_coefficient_of_drag
 
 """ TODO: six degree of freedom - in x, y, and z modelling
 Model rotation in x, y, and z
-Figure out how to determine the change in motion and the change in rotation from a push not exactly at the center of mass
 """
 
 # TODO: Check that I'm using horizontal area where appropriate
@@ -39,7 +38,8 @@ class Rocket(PresetObject):
         # When third dimension is added change it to three - this may cause some hard angle problems converting directional velocities to angular velocities in three dimensions
         # The simulation works unless you start with  diff rotation
         # When rotation is zero (measured in radians), the rocket is headed straight up
-        self.rotation = np.array([0], dtype="float64")
+        # It's against safety procedures to launch at an angle more than 30 degrees from vertical
+        self.rotation = np.array([np.pi / 10], dtype="float64")
         self.angular_velocity = np.array([0], dtype="float64")
         self.angular_acceleration = np.array([0], dtype="float64")
 
@@ -165,8 +165,15 @@ class Rocket(PresetObject):
 
         # This rotation drag is always in the opposite direction of angular velocity. Be aware that that isn't always the same as the direction of torque due to translation
         # It is in the 10 ^ -4 range. That seems like it is too low to cause the rotation to converge
+        # The impulse that this supplies should never be bigger than the impulse that the rocket is rotating with. TODO: Figure out how to calculate the momentum of rotation an object has (mv -> moment of inertia * rotational velocity)
+        current_rotational_momentum = self.moment_of_inertia * self.angular_velocity
+
         rotation_drag = self.get_drag_torque(
-            self.drag_coefficient_perpendicular) * 10000
+            self.drag_coefficient_perpendicular)
+
+        if rotation_drag * self.environment.time_increment > current_rotational_momentum:
+            # This actually has an effect a significant portion of the time
+            rotation_drag = current_rotational_momentum
 
 
 
@@ -223,7 +230,7 @@ class Rocket(PresetObject):
         # This will have to change. Need to get the new area and the drag coefficient at run time
         # This function only adjusts for the air density at altitude and the velocity of the rocket
         # Just using vertical area right now.
-        # TODO: implement area calculations to get the cross sectional area of a rotated object
+        # TODO: implement area calculations to get the cross sectional area of a rotated object (someting something barrowman equation maybe)
         drag_force = self.get_drag_force(
             self.vertical_area, self.drag_coefficient)
 
