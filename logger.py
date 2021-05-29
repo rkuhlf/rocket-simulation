@@ -60,6 +60,7 @@ class Feedback_Logger(Logger):
         print("Launching rocket")
         self.p_turned = False
         self.p_thrusted = False
+        self.should_print_top_speed = True
 
         super().__init__(rocket, to_record)
 
@@ -70,14 +71,28 @@ class Feedback_Logger(Logger):
             print('Reached the turning point at %.3s seconds with a height of %.5s meters' % (
                 self.rocket.environment.time, self.rocket.position[1]))
             self.p_turned = True
+            self.should_print_top_speed
+
+        # FIXME: Doesn't work because p_velocity = velocity in the rocket. Probably should check if y acceleration is in opposite direction to y velocit
+        if self.should_print_top_speed:
+            # print(np.linalg.norm(self.rocket.p_velocity))
+            # print(np.linalg.norm(self.rocket.velocity))
+            if np.sign(
+                    self.rocket.velocity[1]) != np.sign(
+                    self.rocket.acceleration[1]):
+                print("Top speed was", np.linalg.norm(
+                    self.rocket.velocity), " at Mach", self.rocket.get_mach())
+
+                self.should_print_top_speed = False
+
 
         if not self.p_thrusted and self.rocket.motor.finished_thrusting:
             print('Finished thrusting after %.3s seconds' %
                   self.rocket.environment.time)
             self.p_thrusted = True
 
-        # If the y is less than or equal to zero, we hit the ground
-        if self.rocket.position[1] <= 0:
+        # If the position off of the base altitude is less than or equal to zero, we hit the ground
+        if self.rocket.position[1] < 0:
             print(
                 "Rocket landed with a speed of %.3s m/s after %.4s seconds of flight time" %
                 (np.linalg.norm(self.rocket.velocity),
