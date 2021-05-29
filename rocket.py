@@ -1,5 +1,6 @@
 import numpy as np
 from Helpers.general import euler_to_vector_2d, angle_from_vector_2d, combine
+from Data.Input.models import get_coefficient_of_drag
 
 
 
@@ -58,8 +59,11 @@ class Rocket(PresetObject):
         # Calculate using http://www.rasaero.com/dl_software_ii.htm
         # TODO: figure out a way to simulate this so that it works in 3D
         # Probably the theoretical best thing to do is to calculate the drag coefficient of the object rotated so that the relative velocity is only in one dimension. Calculating separate drag coefficients for two components of velocity doesn't make sense, so it is necessary to rotate the shape so that it is at the same angle against a one component velocity, find the consequent drag force, then combine that to the unrotated force
-        self.drag_coefficient = 0.75
+        # This is basically a cached value
+        self.drag_coefficient = 0
         self.drag_coefficient_perpendicular = 1.08
+        self.moment_of_inertia = 0
+
 
         self.vertical_area = np.pi * self.radius ** 2  # 0.008  # m^2
         self.sideways_area = self.radius * 2 * self.height  # 0.4 m^2
@@ -98,6 +102,20 @@ class Rocket(PresetObject):
         self.p_rotation = np.copy(self.rotation)
         self.p_angular_velocity = np.copy(self.angular_velocity)
         self.p_angular_acceleration = np.copy(self.angular_acceleration)
+
+    def calculate_moment_of_inertia(self):
+        # FIXME: Actually this sucks and is complicated because moment of inertia isn't a scalar quantity for a complex 3d shape
+        # use calculated value from Fusion 360/Other CAD, currently using random one for a cylinder
+        self.moment_of_inertia = 1 / 12 * self.mass * self.height ** 2
+
+    def get_mach(self):
+        # How many speed of sounds am I going
+        v = self.environment.get_speed_of_sound(self.get_altitude())
+
+        return np.linalg.norm(self.velocity) / v
+
+    def calculate_drag_coefficient(self):
+        self.drag_coefficient = get_coefficient_of_drag(self.get_mach())
 
 
     def get_drag_torque(self, drag_coefficient):
@@ -265,23 +283,23 @@ class Rocket(PresetObject):
     def simulate_step(self):
         self.logger.add_items({'time': self.environment.time})
 
+        # Recalculate cached values
+        self.calculate_drag_coefficient()
+        self.calculate_moment_of_inertia()
+
         total_force, rotating_force = self.calculate_forces()
+        # Adds in the rotational drag
         torque = self.calculate_torque(rotating_force)
 
 
-        # FIXME: Actually this sucks and is complicated because moment of inertia isn't a scalar quantity for a complex 3d shape
-        # use calculated value from Fusion 360/Other CAD, currently using random one for a cylinder
-        moment_of_inertia = 1 / 12 * self.mass * self.height ** 2
-
-
-        self.angular_acceleration = torque / moment_of_inertia
+        self.angular_acceleration = torque / self.moment_of_inertia
         self.apply_angular_acceleration()
 
         self.acceleration = total_force / self.mass
         self.apply_acceleration()
 
 
-        if self.position[1] <= self.environment.base_altitude:
+        if self.position[1] <= 0:
             self.landed = True
 
         if self.position[1] < self.p_position[1]:

@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from Helpers.general import interpolate, get_next
 from preset_object import PresetObject
-from Data.Input.models import get_density
+from Data.Input.models import get_density, get_speed_of_sound
 
 
 class Environment(PresetObject):
@@ -44,18 +44,17 @@ class Environment(PresetObject):
         return np.zeros((2))
 
 
+    def get_speed_of_sound(self, altitude):
+        return get_speed_of_sound(altitude)
 
-    def get_air_density(self, altitude):
-        """Get the air density at a given number of meters in the air"""
 
+    def get_air_density_from_model(self, altitude):
+        # From the polynomial models file
         return get_density(altitude)
 
-        # Air density: This is a slow calculation
-        # might be faster to optimize a function to the line
-        # It turns out lookups from pandas are much slower than from numpy
 
-        altitude /= 1000  # convert to kilometers
-
+    def get_air_density_from_lookup(self, altitude):
+        # This is mostly just here to double check that the model is wokring
         index = self.previous_air_density_index
         if self.altitude_data[index] > altitude:
             index, self.previous_air_density_index = get_next(
@@ -78,3 +77,11 @@ class Environment(PresetObject):
             next_density["Altitude"],
             previous_density["Density"],
             next_density["Density"])
+
+
+    def get_air_density(self, altitude):
+        """Get the air density at a given number of meters in the air"""
+
+        altitude /= 1000  # convert to kilometers
+
+        return self.get_air_density_from_model(altitude)
