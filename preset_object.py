@@ -9,12 +9,10 @@ class PresetObject:
         overwrite_defaults({}, config)
 
 
-
     def overwrite_defaults(self, config):
         # extract config to self
         self.__dict__.update(config)
 
-        # see if this works without the deepcopy, I think self is basically a local variable, not a reference
         self.saved_state = copy.deepcopy(self.__dict__)
 
 
@@ -42,4 +40,4 @@ class PresetObject:
         self.__init__(config)
 
     def reset(self):
-        self.__init__(self.saved_state)
+        self.overwrite_defaults(self.saved_state)

@@ -37,6 +37,14 @@ class Testing(unittest.TestCase):
                 euler_to_vector_2d(-np.pi / 2),
                 np.array([0, -1]))))
 
+        print(vector_from_angle([0, 0]))
+        print(vector_from_angle([np.pi * 3 / 4, np.pi / 4]))
+        print(vector_from_angle([0, np.pi / 2]))
+        print(vector_from_angle([np.pi / 2, np.pi / 2]))
+        print(vector_from_angle([0, np.pi]))
+
+
+
     def test_angle_from_vector(self):
         self.assertTrue(np.alltrue(
             np.isclose(
@@ -52,3 +60,20 @@ class Testing(unittest.TestCase):
             np.isclose(
                 np.abs(angle_from_vector_2d((-10, 0)) / (np.pi)),
                 1)))
+
+        print(180 / np.pi * angles_from_vector_3d((10, 0, 20)))
+        print(180 / np.pi * angles_from_vector_3d((10, 1, 20)))
+        print(180 / np.pi * angles_from_vector_3d((0, 10, -5)))
+        print(180 / np.pi * angles_from_vector_3d((-1, 10, -5)))
+        print(180 / np.pi * angles_from_vector_3d((-10, 10, 0)))
+        print(180 / np.pi * angles_from_vector_3d((-10, 0, -5)))  # broken
+        print(180 / np.pi * angles_from_vector_3d((-10, -10, 0)))
+        print(180 / np.pi * angles_from_vector_3d((0, -10, 0)))  # broken
+        print(180 / np.pi * angles_from_vector_3d((3, -4, 0)))
+        print(180 / np.pi * angles_from_vector_3d((100, -4, 0)))
+
+
+        # self.assertTrue(np.alltrue(
+        #     np.isclose(
+        #         np.abs(angles_from_vector_3d((-10, -10, 0))),
+        #         (np))))

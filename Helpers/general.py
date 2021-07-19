@@ -33,6 +33,79 @@ def numpy_from_string(x):
         dtype=float, sep=' ')
 
 
+def magnitude(np_array):
+    return np.linalg.norm(np_array)
+
+
+def angled_cylinder_cross_section(angle, radius, height):
+    "When the angle is zero, the rocket is traveling the same way it is pointed, so it is the angle of attack"
+    # https://math.stackexchange.com/questions/2336305/cross-section-of-a-cylinder
+
+    area = abs(np.pi * radius * radius * 1 / np.cos(angle))
+
+    # The first calculation assumes the cylinder is infinitely tall
+    area = min(area, height * 2 * radius)
+
+    return area
+
+
+def unit_vector(vector):
+    """ Returns the unit vector of the vector.  """
+    return vector / magnitude(vector)
+
+
+def angle_between(v1, v2):
+    """ Returns the angle in radians between vectors 'v1' and 'v2'::
+
+            >>> angle_between((1, 0, 0), (0, 1, 0))
+            1.5707963267948966
+            >>> angle_between((1, 0, 0), (1, 0, 0))
+            0.0
+            >>> angle_between((1, 0, 0), (-1, 0, 0))
+            3.141592653589793
+    """
+
+    v1_u = unit_vector(v1)
+    v2_u = unit_vector(v2)
+    return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+
+
+def angles_from_vector_3d(np_array):
+    normalized = np_array / magnitude(np_array)
+    x, y, z = normalized
+
+    # For some reason the axes lines are poorly defined, so I just encode them manually
+    if x == 0:
+        if y < 0:
+            theta_around = np.pi * 3 / 2
+        else:
+            theta_around = np.pi / 2
+    elif y == 0:
+        if x < 0:
+            theta_around = np.pi
+        else:
+            theta_around = 0
+    else:
+        theta_around = np.arcsin(
+            abs(y) / (x ** 2 + y ** 2) ** (1 / 2))
+
+        if x < 0 and y > 0 or x > 0 and y < 0:
+            theta_around = (np.pi / 2) - theta_around
+
+        # This sould be oing around in a C pattern
+        if x < 0 and y < 0:
+            theta_around += np.pi
+        elif x < 0:
+            theta_around += np.pi / 2
+        elif y < 0:
+            theta_around += np.pi * 3 / 2
+
+    theta_down = np.arccos(z)
+
+
+    return np.array([theta_around, theta_down])
+
+
 def angle_from_vector_2d(array):
     if array[0] == 0:
         if array[1] < 0:
@@ -55,6 +128,19 @@ def angle_from_vector_2d(array):
     return np.pi + ans
 
 
+def vector_from_angle(np_array):
+    # TODO: Fix it
+
+    # This has great potential to be incorrect
+    # I copied it from https://stackoverflow.com/questions/1568568/how-to-convert-euler-angles-to-directional-vector
+    around, down = np_array
+    x = np.cos(around) * np.sin(down)
+    y = np.sin(around) * np.sin(down)
+    # Tis is different - right now 0 degrees (straight up, will return 0 in the z axis).
+    z = np.cos(down)
+
+    return np.array([x, y, z])
+
 
 def euler_to_vector_2d(angle):
     """Converts Euler angles (up, right, away) into a unit vector"""
@@ -63,30 +149,10 @@ def euler_to_vector_2d(angle):
          np.sin(angle)])  # opposite / hypotenuse (1)
 
 
-def euler_to_vector():
-    """Converts Euler angles (up, right, away) into a unit vector"""
-    pass
-
 
 def unit_vector(vector):
     """ Returns the unit vector of the vector.  """
     return vector / np.linalg.norm(vector)
-
-
-def angle_between(v1, v2):
-    # https://stackoverflow.com/questions/2827393/angles-between-two-n-dimensional-vectors-in-python
-    """ Returns the angle in radians between vectors 'v1' and 'v2'::
-
-            >>> angle_between((1, 0, 0), (0, 1, 0))
-            1.5707963267948966
-            >>> angle_between((1, 0, 0), (1, 0, 0))
-            0.0
-            >>> angle_between((1, 0, 0), (-1, 0, 0))
-            3.141592653589793
-    """
-    v1_u = unit_vector(v1)
-    v2_u = unit_vector(v2)
-    return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
 
 
 def combine(a, b):

@@ -17,6 +17,8 @@ class Environment(PresetObject):
 
         self.density_location = "airQuantities"
 
+        self.previous_air_density_index = 0
+
         super().overwrite_defaults(config)
 
         # https://www.digitaldutch.com/
@@ -26,7 +28,6 @@ class Environment(PresetObject):
             columns=["Viscosity", "Temperature", "Pressure"])
         self.altitude_data = np.array(self.density_data["Altitude"])
 
-        self.previous_air_density_index = 0
 
     def simulate_step(self):
         self.time += self.time_increment
@@ -41,7 +42,20 @@ class Environment(PresetObject):
 
     def get_air_speed(self):
         # this tells us how the rocket is moving through space relative to the surrounding fluids
-        return np.zeros((2))
+
+        # Random things that might I come back to
+        # https://www.quora.com/What-is-the-average-wind-speed-at-different-altitudes
+        # https://retscreen.software.informer.com/4.0/
+        # https://ieeexplore.ieee.org/document/6808712
+        # https://www.osti.gov/servlets/purl/6632347
+        # https://github.com/srlightfoote/AWEA_WRA_Working_Group/blob/master/Example_Wind_Resource_Assessment_Using_R.md#packages
+        # https://rmets.onlinelibrary.wiley.com/doi/pdf/10.1017/S1350482702004048
+        # https://www.researchgate.net/publication/328173177_SMARTS_Modeling_of_Solar_Spectra_at_Stratospheric_Altitude_and_Influence_on_Performance_of_Selected_III-V_Solar_Cells/figures?lo=1
+        # https://qph.fs.quoracdn.net/main-qimg-30e7697ac625734562eaca496e813467.webp
+
+        # Probably useful
+        # https://weatherspark.com/y/9257/Average-Weather-in-Lake-Jackson-Texas-United-States-Year-Round
+        return np.array([100, 0, 0])
 
 
     def get_speed_of_sound(self, altitude):

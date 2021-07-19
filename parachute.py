@@ -10,6 +10,8 @@ class Parachute(PresetObject):
         self.drag_coefficient = 1.75
         self.mass = 0.01  # kg
 
+        # Should recalculate center of pressure, don't bother too much until Barrowman equations are implemented. Also will be difficult because the parachute rotates separately from the rocket
+
         self.deployed = False
 
         super().overwrite_defaults(config)

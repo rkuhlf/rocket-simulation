@@ -9,8 +9,12 @@ from rocket import Rocket
 from parachute import Parachute
 from logger import Feedback_Logger  # , Logger
 from simulation import Simulation
+from numpy import array
+
+from Helpers.general import angles_from_vector_3d
 
 
+# Base
 # Uses mostly class defaults
 env = Environment({"time_increment": 0.01})
 motor = Motor()
@@ -24,39 +28,7 @@ logger = Feedback_Logger(
 logger.splitting_arrays = True
 
 sim = Simulation(
-    {"apply_angular_forces": True, "max_frames": -1},
+    {"apply_angular_forces": True, "max_frames": -1,
+     "stopping_errors": False},
     env, rocket, logger)
 sim.run_simulation()
-
-
-# Example 1
-"""
-environment = Environment()
-motor = Motor()
-rocket = Rocket(environment=environment, motor=motor)
-
-
-logger = Feedback_Logger(
-    rocket,
-    ['position', 'velocity', 'acceleration', 'rotation',
-     'angular_velocity', 'angular_acceleration'])
-rocket.logger = logger
-
-sim = Simulation(environment, rocket, logger)
-
-sim.run_simulation()
-"""
-
-
-# Example 2
-"""
-rocket = Rocket()
-rocket.load_preset("TannerModel")
-
-
-logger = Logger(rocket, ['position', 'rotation'])
-
-sim = Simulation(rocket.environment, rocket, logger)
-
-sim.run_simulation()
-"""

@@ -1,3 +1,14 @@
+Potential Issues:
+- Translational drag isn't opposed to rotation correctly
+- The calculation for angular drag is wrong
+- Something, somewhere is seeking the vertical axis instead of the direction of motion
+    - The gravity-pressure thing is flipped somewhere
+    - If it only has a z-axis drag effect, it will seek the center
+
+
+
+# Design Notes
+
 Since the project is sort of sprawling and might be a little confusing, particularly coming from an excel based math model, I thought I would provide some reasoning behind some of the design decisions.
 
 The rocket model system makes fairly consistent use of object oriented design throughout. By separating each main component of the simulation into its own class, files can be made smaller and it is easier to figure out where things belong. The rocket is in a section all by itself, where it basically performs all of the necessary aerodynamics calculations. Because there are way more factors affecting aerodynamics than anything else, it takes up way more space than anything else. The parachute and motor classes are separate, but it simplifies where data is stored a little bit. Object-oriented structure also lends itself to a component based rocket simulation. You can change which motor you want to use, but keep the same rocket frame. In case I ever want to rewrite the aerodynamics stuff, I kept the simulation and logging apart from the rocket itself.

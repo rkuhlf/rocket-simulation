@@ -5,13 +5,14 @@ import pandas as pd
 class Logger:
     "Logs only the data"
 
-    def __init__(self, rocket, to_record):
+    def __init__(self, rocket, to_record, target="output.csv"):
         self.rows = []
         # Use the actual rocket object to determine the data
         self.rocket = rocket
         self.splitting_arrays = False
         self.to_record = to_record
         self.current_row = {}
+        self.target = target
 
 
 
@@ -47,7 +48,7 @@ class Logger:
         print(df)
         df.set_index('time', inplace=True)
 
-        df.to_csv("Data/Output/output.csv")
+        df.to_csv("Data/Output/" + self.target)
 
     def reset(self):
         self.__init__(self.rocket, self.to_record)
@@ -56,30 +57,28 @@ class Logger:
 class Feedback_Logger(Logger):
     "Logs the progress of the rocket simulation along with some print statements"
 
-    def __init__(self, rocket, to_record):
+    def __init__(self, rocket, to_record, target="output.csv"):
         print("Launching rocket")
         self.p_turned = False
         self.p_thrusted = False
         self.should_print_top_speed = True
 
-        super().__init__(rocket, to_record)
+        super().__init__(rocket, to_record, target)
 
     def handle_frame(self):
         super().handle_frame()
 
         if not self.p_turned and self.rocket.turned:
             print('Reached the turning point at %.3s seconds with a height of %.5s meters' % (
-                self.rocket.environment.time, self.rocket.position[1]))
+                self.rocket.environment.time, self.rocket.position[2]))
             self.p_turned = True
             self.should_print_top_speed
 
         # FIXME: Doesn't work because p_velocity = velocity in the rocket. Probably should check if y acceleration is in opposite direction to y velocit
         if self.should_print_top_speed:
-            # print(np.linalg.norm(self.rocket.p_velocity))
-            # print(np.linalg.norm(self.rocket.velocity))
             if np.sign(
-                    self.rocket.velocity[1]) != np.sign(
-                    self.rocket.acceleration[1]):
+                    self.rocket.velocity[2]) != np.sign(
+                    self.rocket.acceleration[2]):
                 print("Top speed was", np.linalg.norm(
                     self.rocket.velocity), " at Mach", self.rocket.get_mach())
 
@@ -92,7 +91,7 @@ class Feedback_Logger(Logger):
             self.p_thrusted = True
 
         # If the position off of the base altitude is less than or equal to zero, we hit the ground
-        if self.rocket.position[1] < 0:
+        if self.rocket.position[2] < 0:
             print(
                 "Rocket landed with a speed of %.3s m/s after %.4s seconds of flight time" %
                 (np.linalg.norm(self.rocket.velocity),
