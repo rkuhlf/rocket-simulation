@@ -40,7 +40,6 @@ def magnitude(np_array):
 def angled_cylinder_cross_section(angle, radius, height):
     "When the angle is zero, the rocket is traveling the same way it is pointed, so it is the angle of attack"
     # https://math.stackexchange.com/questions/2336305/cross-section-of-a-cylinder
-
     area = abs(np.pi * radius * radius * 1 / np.cos(angle))
 
     # The first calculation assumes the cylinder is infinitely tall
@@ -64,6 +63,8 @@ def angle_between(v1, v2):
             >>> angle_between((1, 0, 0), (-1, 0, 0))
             3.141592653589793
     """
+    if (np.isclose(magnitude(v1), 0) or np.isclose(magnitude(v2), 0)):
+        return np.pi / 2
 
     v1_u = unit_vector(v1)
     v2_u = unit_vector(v2)
@@ -129,8 +130,6 @@ def angle_from_vector_2d(array):
 
 
 def vector_from_angle(np_array):
-    # TODO: Fix it
-
     # This has great potential to be incorrect
     # I copied it from https://stackoverflow.com/questions/1568568/how-to-convert-euler-angles-to-directional-vector
     around, down = np_array

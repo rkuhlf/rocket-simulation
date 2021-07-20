@@ -8,6 +8,8 @@ from Data.Input.models import get_coefficient_of_drag
 # TODO: Add the affect of wind
 
 # TODO: Factor in changing center of gravity
+# TODO: get approximate position of motor so that I can recalculate center of gravity every frame
+# It should be do-able with only the initial center of gravity (and mass), and the position of the motor and the mass that is lost
 
 
 
@@ -48,7 +50,7 @@ class Rocket(PresetObject):
         # It's against safety procedures to launch at an angle more than 30 degrees from vertical
         # Unless there is wind, rotation around (index zero) should not change at all; That part is working correctly
         self.rotation = np.array(
-            [np.pi / 2, -0.452],
+            [np.pi / 2, -0.05],
             dtype="float64")
         self.angular_velocity = np.array([0, 0], dtype="float64")
         self.angular_acceleration = np.array([0, 0], dtype="float64")
@@ -58,8 +60,7 @@ class Rocket(PresetObject):
 
         self.radius = 0.05  # meters
         self.height = 4  # meters
-        # TODO: get approximate position of motor so that I can recalculate center of gravity every frame
-        # It should be do-able with only the initial center of gravity (and mass), and the position of the motor and the mass that is lost
+
         # This is actually a relatively large difference, but hopefully increasing it will slow down rotation
         self.center_of_gravity = 2.0  # meters from the bottom
         self.center_of_pressure = 0.8  # meters from the bottom
@@ -273,8 +274,8 @@ class Rocket(PresetObject):
         # I don't think this is the right name
         reynold = air_density * area * drag_coefficient / 2
 
-        # FIXME: maybe should be the other way around
-        relative_velocity = self.velocity - self.environment.get_air_speed()
+        relative_velocity = self.velocity - \
+            self.environment.get_air_speed(self.get_altitude())
 
         base_magnitude = magnitude(relative_velocity)
         # No div by 0 error
@@ -309,20 +310,20 @@ class Rocket(PresetObject):
             self.mass, self.get_altitude())
 
 
-        # This will have to change. Need to get the new area and the drag coefficient at run time
-        # This function only adjusts for the air density at altitude and the velocity of the rocket
-        # Just using vertical area right now.
-        # TODO: implement area calculations to get the cross sectional area of a rotated object (someting something barrowman equation maybe)
+        # This will have to change. Need to get the new drag coefficient at run time
+
         angle_of_attack = angle_between(
             self.velocity, vector_from_angle(self.rotation))
+
         area = angled_cylinder_cross_section(
             angle_of_attack, self.radius, self.height)
+
         drag_force = self.get_drag_force(
-            self.vertical_area, self.drag_coefficient)
+            area, self.drag_coefficient)
 
         total_force += drag_force
 
-        # I think this is the problem - I'm pretty sure not all of the energy of the air is applied to rotating the rocket. It is inelastic-ish, but I think that ish plays a big enough role that you can't just assume it's 100%. I'm not even sure if the word inelastic applies
+        # I'm still slightly concerned about this - I'm pretty sure not all of the energy of the air is applied to rotating the rocket. It is inelastic-ish, but I think that ish plays a big enough role that you can't just assume it's 100%. I'm not even sure if the word inelastic applies
         # changing this to a minus sign here, will have to change some other stuff when the sim starts
         # It should be something like rotating_force -= drag_force * 0.5, but I can't figure out what
         rotating_force += drag_force  # Force eventually added to the velocity

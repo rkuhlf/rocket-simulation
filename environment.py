@@ -3,6 +3,8 @@ import pandas as pd
 from Helpers.general import interpolate, get_next
 from preset_object import PresetObject
 from Data.Input.models import get_density, get_speed_of_sound
+import noise
+from Helpers.wind import Wind
 
 
 class Environment(PresetObject):
@@ -28,6 +30,9 @@ class Environment(PresetObject):
             columns=["Viscosity", "Temperature", "Pressure"])
         self.altitude_data = np.array(self.density_data["Altitude"])
 
+        self.wind = Wind(self.time_increment)
+        self.wind.randomize_direction()
+
 
     def simulate_step(self):
         self.time += self.time_increment
@@ -40,11 +45,10 @@ class Environment(PresetObject):
             self.earth_radius + altitude + self.base_altitude) ** 2
 
 
-    def get_air_speed(self):
+    def get_air_speed(self, altitude):
         # this tells us how the rocket is moving through space relative to the surrounding fluids
 
         # Random things that might I come back to
-        # https://www.quora.com/What-is-the-average-wind-speed-at-different-altitudes
         # https://retscreen.software.informer.com/4.0/
         # https://ieeexplore.ieee.org/document/6808712
         # https://www.osti.gov/servlets/purl/6632347
@@ -55,7 +59,11 @@ class Environment(PresetObject):
 
         # Probably useful
         # https://weatherspark.com/y/9257/Average-Weather-in-Lake-Jackson-Texas-United-States-Year-Round
-        return np.array([100, 0, 0])
+        # https://numpy.org/doc/stable/reference/random/generated/numpy.random.weibull.html
+        # https://www.quora.com/What-is-the-average-wind-speed-at-different-altitudes
+
+        # TODO: Get actual values for roughness and lake jackson average wind speed
+        return self.wind.get_air_speed(2, 10, 5, altitude, self.time)
 
 
     def get_speed_of_sound(self, altitude):
