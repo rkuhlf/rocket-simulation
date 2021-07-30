@@ -1,6 +1,6 @@
 import pandas as pd
 
-from Helpers.general import interpolate
+from Helpers.general import interpolate, binary_solve
 from preset_object import PresetObject
 
 
@@ -64,6 +64,12 @@ class Motor(PresetObject):
         return thrust * self.mass_per_thrust * time
 
 
+# https://www.grc.nasa.gov/www/k-12/rocket/rktthsum.html
+# There are three equations of state (plus one for exit temperature that we don't care about)
+# From the equation for exit mach, we solve for exit velocity by multiplying by the speed of sound at altitude
+
+# The goal is to solve for thrust given easily determined characteristics of the motor
+# The things that are changing is the mass flow rate and the exit velocity, as well as the exit pressure (probably)
 class CustomMotor(Motor):
     # Test with https://www.grc.nasa.gov/www/k-12/rocket/ienzl.html
     # At the moment, everything is being calculated as a constant
@@ -73,14 +79,21 @@ class CustomMotor(Motor):
 
     def __init__(self, config={}):
         # Somehow these things are just constant
+        # TODO: Figure out how on earth that is possible
+        # TODO: Figure out how rocket motors work with gas (particularly hybrid) because I think it might affect these variables
+        # pt is the total pressure in the combustion chamber, same for tt
+        # I'm not sure these are the only things changing. I mean, there should be someway to simulate the fuel grain
         self.total_pressure = 10
         self.total_temperature = 100
 
+        # Supposedly ratio should be from 1 to 60
         self.chamber_area = 0.1  # m
         self.throat_area = 0.01  # m
         self.exit_area = 0.1  # m
 
-        self.specific_heat_ratio = 0.3  # often abbreviated gamma in equations
+        # I believe that 1.33 is the best value for Nitrous, a common fuel
+        # Between 1.3 and 1.6 ish
+        self.specific_heat_ratio = 1.4  # often abbreviated gamma in equations
         self.gas_constant = 8.31446261815324  # per mole, probably not correct
         self.specific_heat_exponent = (
             self.specific_heat_ratio + 1) / (2 * (self.specific_heat_ratio - 1))
@@ -88,7 +101,11 @@ class CustomMotor(Motor):
         super().overwrite_defaults(config)
 
 
-    def mass_flow_rate(self, mach):
+    def mass_flow_rate(self, mach=1):
+        # TODO: add mach adjustment into here
+        # I believe this is for the conditions given that mass flow rate is choked at sonic conditions
+        # I suspect this is where a CFD would be much more accurate
+        # tis is were the problems are
 
         ans = self.throat_area * self.total_pressure / \
             (self.total_temperature) ** (1 / 2)
@@ -100,8 +117,37 @@ class CustomMotor(Motor):
         return ans
 
 
+
+
     def exit_mach(self):
-        pass
+        # The algebra is much more complicated
+        # The exit mach is zero makes it undefined
+        # It usually simplifies down to a polynomial
+        # Unfortunately it often has multiple solutions
+        # I believe that there should only ever be one solution at less than Mach one, which would be the correct result
+
+        # Based on https://math.stackexchange.com/questions/2165814/how-to-solve-an-equation-with-a-decimal-exponent, I think there is no way to solve the polynomial rearrangement. I suspect that the best path forwards is the brute-force method. I think I'll just go ahead and use some kind of math library, but I am interested in coming up with a way to do this myself. Actually, I think binary search wouldn't be half bad, but it won't converge as quickly as a gradient descent algorithm
+        # Have to rearrange equation so that x values are on one side
+        # I'm not sure if polynomial form or original form is more efficient
+
+        gamma_fraction = (self.specific_heat_ratio + 1) / 2
+
+        gamma_fraction_extended = gamma_fraction / \
+            (self.specific_heat_ratio - 1)
+
+
+        target = self.exit_area / (self.throat_area * gamma_fraction ** -
+                                   gamma_fraction_extended)
+
+        # Just need to make sure it converges on the larger one
+        ans = binary_solve(
+            lambda
+            exit_mach:
+            (1 + ((self.specific_heat_ratio - 1) / 2) * exit_mach ** 2) **
+            gamma_fraction_extended / exit_mach, target, 1, 10)
+
+
+        return ans
 
 
     def exit_temperature(self):
@@ -110,13 +156,13 @@ class CustomMotor(Motor):
         return self.total_temperature * ans
 
     def exit_pressure(self):
-        ans = (1 + (self.specific_heat_ratio - 1) / 2 * self.exit_mach **
+        ans = (1 + (self.specific_heat_ratio - 1) / 2 * self.exit_mach() **
                2) ** (self.specific_heat_ratio / (self.specific_heat_ratio - 1))
 
         return self.total_pressure * ans
 
 
-    def exit_velocity(self, initial_velocity, mach):
+    def exit_velocity(self):
         """Assuming flow is choked at the """
 
         return self.exit_mach() * \
@@ -126,9 +172,27 @@ class CustomMotor(Motor):
     def get_free_stream_pressure(self):
         # A function of pressure, altitude, and mach number
         # just returning a constant atm bc idk
+        # I believe this is a quantity that will vary slightly with atmospheric conditions
+
+        # This will get funky because the pressure at the back end of the rocket is sometimes pretty close to negative. However, I already account for a lot of that. I don't know what to do. Is that pressure additional to the aerodynamic forces?
+
         return 20
 
     def get_thrust(self):
         # https://www.grc.nasa.gov/WWW/K-12/rocket/rktthsum.html
+        # I think that it would be best just to simulate these things in a CFD
+        # They should also be relatively easy to figure out from experimental data
+        self.update_total_pressure()
+        self.update_total_temperature()
 
-        return self.get_mass_flow_rate() * self.exit_velocity() + self.exit_area * (self.get_exit_pressure - self.get_free_stream_pressure())
+        # The amount of momentum being pushed out + the pressure difference
+        return self.mass_flow_rate() * self.exit_velocity() + self.exit_area * (
+            self.exit_pressure() - self.get_free_stream_pressure())
+
+
+# TODO: Figure out the min mass flow rate, if any, for the nozzle to reach mach one at the choke. I don't see how it could instantaneously reach mach speeds
+if __name__ == "__main__":
+    # some motor tests that should be moved to the actual tests TODO
+    m = CustomMotor()
+    m.exit_mach()
+    print(m.get_thrust())

@@ -48,6 +48,29 @@ def angled_cylinder_cross_section(angle, radius, height):
     return area
 
 
+def binary_solve(func, target, min, max, iters=100):
+    "Solve for an input on a known domain using binary search"
+
+    # This is my very own idea and I have no idea how efficient or reasonable it is
+    while func(max) < target:
+        print('doubling')
+        max = max + (max - min)
+
+    while func(min) > target:
+        min = min - (max - min)
+
+    for i in range(iters):
+        guess = func(combine(min, max))
+
+        if guess > target:  # we are overestimating
+            max = min + (max - min) / 2
+        else:  # we are underestimating
+            min = max - (max - min) / 2
+
+    return combine(min, max)
+
+
+
 def unit_vector(vector):
     """ Returns the unit vector of the vector.  """
     return vector / magnitude(vector)
