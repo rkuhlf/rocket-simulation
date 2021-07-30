@@ -35,6 +35,7 @@ class Wind():
     def __init__(
             self, time_increment, count=30, octaves=4, wind_direction=[0, 0],
             interpolation_speed=0.1, k=2):
+        # FIXME: I never really bothered to test any of this
         # TODO: Add some more visualization stuff to make sure that this is following a weibull distribution and that interpolation speed = 0.1 makes sense
         self.interpolation_speed = interpolation_speed
         self.count = count

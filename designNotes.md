@@ -21,6 +21,13 @@ There are some folders that I mostly just kept so that all of the stuff would be
 
 ## Inputs
 
+### Coefficient of Drag
+A DIY simulation of CD is very unpractical. It would require an entire meshing algorithm, full implementation of the Navier-Stokes equations and turbulence modelling, not to mention the mathematical know-how involved in simultaneously solving the PDEs. Therefore, the main goal is to be able to get the data from some kind of CFD.
+
+I know that Autodesk (they make Fusion 360) is supposed to have some kind of CFD software, but I don't know how to use it and it seems like it would be difficult to add onto a Python project. The ultimate goal is to provide an stl file and have an OpenFoam setup automatically generated which simulates all angles and speeds. Unfortunately, it turns out CFD is very finicky, and it would be very difficult to create a sim like that. As it is, I thought it was best to keep CD determination completely separate. 
+
+P.S. OpenFoam was really hard for me to learn and you might want to go for some kind of GUI-based CFD.
+
 ### Wind
 It turns out that simulating wind accurately is very difficult and not that important to how a rocket flies. I hope to get a working method to generate wind that is consistent with Lake Jackson's terrain, the altitude the rocket is at, and the time. It should be relatively continuous, but the amount of wind data is really lacking
 

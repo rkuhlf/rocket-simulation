@@ -56,6 +56,7 @@ class Environment(PresetObject):
         # https://rmets.onlinelibrary.wiley.com/doi/pdf/10.1017/S1350482702004048
         # https://www.researchgate.net/publication/328173177_SMARTS_Modeling_of_Solar_Spectra_at_Stratospheric_Altitude_and_Influence_on_Performance_of_Selected_III-V_Solar_Cells/figures?lo=1
         # https://qph.fs.quoracdn.net/main-qimg-30e7697ac625734562eaca496e813467.webp
+        # https://www.sciencedirect.com/science/article/abs/pii/0038092X81902048 Looks promising but ccan't access
 
         # Probably useful
         # https://weatherspark.com/y/9257/Average-Weather-in-Lake-Jackson-Texas-United-States-Year-Round
