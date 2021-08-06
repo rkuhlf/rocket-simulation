@@ -87,6 +87,10 @@ class Wind():
 
     def get_average_speed_altitude(
             self, roughness, base_altitude, average_wind_speed, altitude):
+
+        # Roughness is z_0, or roughness length
+        # For lake jackson, z_0 = 1
+        # Relatively good explanation: https://wind-data.ch/tools/profile.php?lng=en
         return average_wind_speed * np.log(altitude / roughness) / np.log(
             base_altitude / roughness)
 

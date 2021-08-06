@@ -57,3 +57,11 @@ Most matematical models will be quicker to calculate tan a lookup, so it is some
 TL;DR: lmfit is better. Though most of the other code is written using numpy for calculations, the polynomial class is very poorly supported. There are basically two versions, and looking through the documentation for either one is a nightmare. It is also hard to save the model.
 
 lmfit is built entirely for this kind of thing - fitting a user-inputted function to input-output data. Eventually, everything should be generated using lmfit.
+
+
+## Inaccuracies in Inputs
+Most rocket simulation software only allows you to input one possible value for each input. However, aerodynamics is a particularly inaccurate science, with difficulties determining coefficients of force to even one significant figure. Therefore, I thought it would be useful to allow inputs that covered a range of data. To do so, I think it makes the most since to extend the simulation class. <!-- TODO: do this. It might take quite a bit of finagling, and multiple rocket objects might have to be created -->
+
+Simply allow the user to input an array of two items, worst-case first followed by best-case. The program would then run two simulations and output the range of possible outcomes. 
+
+An even more advanced version of this software could accept an array of objects - value-probability pairs - and create a sampling distribution from that. It would take a weighted random value from each object, then run the simulation, appending the result to a collection of results. A a relatively continuous graph of the results could then be created

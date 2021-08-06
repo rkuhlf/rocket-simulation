@@ -1,11 +1,8 @@
 import numpy as np
 from Helpers.general import vector_from_angle, angle_between, combine, magnitude, angled_cylinder_cross_section
+from Helpers.fluidSimulation import cutout_method, barrowman_equation, extended_barrowman_equation
 from Data.Input.models import get_coefficient_of_drag
 
-
-
-# Account for air resistance of rocket shape
-# TODO: Add the affect of wind
 
 # TODO: Factor in changing center of gravity
 # TODO: get approximate position of motor so that I can recalculate center of gravity every frame
@@ -42,6 +39,9 @@ class Rocket(PresetObject):
         self.velocity = np.array([0, 0, 0], dtype="float64")
         self.acceleration = np.array([0, 0, 0], dtype="float64")
 
+        # TODO: Implement a sort of framework class
+        # It holds all of the information about the rocket's shape. Then I can put some of the barrowman stuff in there
+        # It also throws you a message if the engine wouldn't fit
 
         # Using rotation around, rotation down. Later I will add roll, but I think the effects are too complicated atm
         # Using global rotation, not relative rotation based on the rocket
@@ -59,13 +59,13 @@ class Rocket(PresetObject):
         self.mass = 1.86  # kg
 
         self.radius = 0.05  # meters
-        self.height = 4  # meters
+        self.height = 2  # meters
 
         # This is actually a relatively large difference, but hopefully increasing it will slow down rotation
-        self.center_of_gravity = 2.0  # meters from the bottom
-        self.center_of_pressure = 0.8  # meters from the bottom
+        self.center_of_gravity = 1.0  # meters from the nose tip
+        self.center_of_pressure = 1.8  # meters from the nose tip
 
-        self.dist_gravity_pressure = self.center_of_gravity - self.center_of_pressure
+        self.dist_gravity_pressure = self.center_of_pressure - self.center_of_gravity
 
 
         # Calculate using http://www.rasaero.com/dl_software_ii.htm
@@ -116,11 +116,6 @@ class Rocket(PresetObject):
     def theta_down(self):
         return self.rotation[1]
 
-    def calculate_moment_of_inertia(self):
-        # FIXME: Actually this sucks and is complicated because moment of inertia isn't a scalar quantity for a complex 3d shape
-        # use calculated value from Fusion 360/Other CAD, currently using random one for a cylinder
-        self.moment_of_inertia = 1 / 12 * self.mass * self.height ** 2
-
     def get_mach(self):
         # How many speed of sounds am I going
         v = self.environment.get_speed_of_sound(self.get_altitude())
@@ -131,9 +126,32 @@ class Rocket(PresetObject):
         # Using Z as up vector
         return self.environment.base_altitude + self.position[2]
 
+    def calculate_moment_of_inertia(self):
+        # FIXME: Actually this sucks and is complicated because moment of inertia isn't a scalar quantity for a complex 3d shape
+        # use calculated value from Fusion 360/Other CAD, currently using random one for a cylinder
+        self.moment_of_inertia = 1 / 12 * self.mass * self.height ** 2
+
     def calculate_drag_coefficient(self):
         self.drag_coefficient = get_coefficient_of_drag(self.get_mach())
 
+    def calculate_center_of_pressure(self):
+        cutout = cutout_method()
+        barrowman = barrowman_equation()
+
+        self.center_of_pressure = extended_barrowman_equation(
+            self.get_angle_of_attack(), barrowman, cutout)
+
+
+
+    def calculate_center_of_gravity(self):
+        pass
+
+    def calculate_cp_cg_dist(self):
+        self.dist_press_grav = self.center_of_pressure - self.center_of_gravity
+
+    def get_angle_of_attack(self):
+        return angle_between(
+            self.velocity, vector_from_angle(self.rotation))
 
     def get_drag_torque(self, drag_coefficient):
         "Calculate the magnitude of the force opposed to the direction of rotation"
@@ -178,8 +196,6 @@ class Rocket(PresetObject):
 
             # a torque in the vertical direction (positive z component), should cause an increase in theta down
             torque[1] += self.dist_gravity_pressure * z_component_perpendicular
-            # self.logger.add_items(
-            #    {"Pitch torque due to z translational drag": torque[1].copy()})
 
 
 
@@ -193,18 +209,12 @@ class Rocket(PresetObject):
             torque[1] -= x_component * pitch_multiplier * \
                 angle_of_incidence_multiplier * self.dist_gravity_pressure
 
-            # self.logger.add_items(
-            #    {"Pitch torque after x translational drag": torque[1].copy()})
-
 
             # Only apply the leftover x to the yaw
             yaw_multiplier = np.sin(self.theta_around())
             # When the rocket is horizontal, however, the yaw will still be fully applied. I don't think I need any other multiplier
 
             torque[0] += x_component * yaw_multiplier * self.dist_gravity_pressure
-            # self.logger.add_items(
-            #    {"Yaw torque after x translational drag": torque[0].copy()})
-
 
             y_component = force[1]
             pitch_multiplier = np.sin(self.theta_around())
@@ -213,8 +223,6 @@ class Rocket(PresetObject):
             torque[1] -= y_component * pitch_multiplier * \
                 angle_of_incidence_multiplier * self.dist_gravity_pressure
 
-            # self.logger.add_items(
-            #    {"Pitch torque after y translational drag": torque[1].copy()})
 
             yaw_multiplier = np.cos(self.theta_around())
             # x and y can't cause yaw in the same direction (I think, so we'll just have them be opposite)
@@ -271,13 +279,18 @@ class Rocket(PresetObject):
         "Calculate the magnitude of the translational drag force"
 
         air_density = self.environment.get_air_density(self.get_altitude())
-        # I don't think this is the right name
-        reynold = air_density * area * drag_coefficient / 2
+
+        self.logger.add_items(
+            {"area": area})
+
+        coeff = air_density * area * drag_coefficient / 2
 
         relative_velocity = self.velocity - \
             self.environment.get_air_speed(self.get_altitude())
 
         base_magnitude = magnitude(relative_velocity)
+        self.logger.add_items(
+            {"mag": base_magnitude})
         # No div by 0 error
         if np.isclose(base_magnitude, 0):
             return np.array([0., 0., 0.])
@@ -286,17 +299,26 @@ class Rocket(PresetObject):
 
         squared_magnitude = base_magnitude ** 2
 
+
         relative_velocity *= squared_magnitude / base_magnitude
 
-        air_resistance = reynold * -relative_velocity
+        self.logger.add_items(
+            {"squared_magnitude": magnitude(relative_velocity)})
 
-
-
+        self.logger.add_items(
+            {"coeff": coeff})
         # self.logger.add_items(
-        #    {"Direction of translational drag": air_resistance.copy()})
+        #     {"squared_magnitude": magnitude(relative_velocity)})
+        air_resistance = coeff * -relative_velocity
+
+
+
+        self.logger.add_items(
+            {"Direction of translational drag": air_resistance.copy()})
 
         return air_resistance
 
+    # Maybe have an add force function which takes a distance from the nose tip
     def calculate_forces(self):
         # Forces don't carry over from frame to frame, so we need to set them back to zero
         # The full force is applied in the fector direction that it has
@@ -312,9 +334,10 @@ class Rocket(PresetObject):
 
         # This will have to change. Need to get the new drag coefficient at run time
 
-        angle_of_attack = angle_between(
-            self.velocity, vector_from_angle(self.rotation))
+        angle_of_attack = self.get_angle_of_attack()
 
+        # This is correct, but it is going to give some pretty fucked up results without a variable (with angle) center of pressure. Extended barrowman should solve that issue
+        # This is actually only sort of correct. Basically, the drag force calculation is expecting a reference area. That just means that however we determined our coefficients of drag, that is how we should determine the area. Since it is probably easiest just to use fattest cross section each time, it is unnecessary. Again, it depends on how the calculation for CD is done.
         area = angled_cylinder_cross_section(
             angle_of_attack, self.radius, self.height)
 
@@ -323,6 +346,7 @@ class Rocket(PresetObject):
 
         total_force += drag_force
 
+        # TODO: Research the 'Normal Force Coefficient'
         # I'm still slightly concerned about this - I'm pretty sure not all of the energy of the air is applied to rotating the rocket. It is inelastic-ish, but I think that ish plays a big enough role that you can't just assume it's 100%. I'm not even sure if the word inelastic applies
         # changing this to a minus sign here, will have to change some other stuff when the sim starts
         # It should be something like rotating_force -= drag_force * 0.5, but I can't figure out what
@@ -374,8 +398,8 @@ class Rocket(PresetObject):
 
                 self.angular_acceleration[1] *= -1
                 self.angular_velocity[1] *= -1
-
-            if (self.rotation[1] < 0):
+                self.logger.add_items({"flipped": 1})
+            elif (self.rotation[1] < 0):
                 # Should just turn this into a function, want to make sure it's identical
                 self.rotation[0] += np.pi
                 self.rotation[0] %= np.pi * 2
@@ -384,6 +408,11 @@ class Rocket(PresetObject):
 
                 self.angular_acceleration[1] *= -1
                 self.angular_velocity[1] *= -1
+                self.logger.add_items({"flipped": 1})
+            else:
+                self.logger.add_items({"flipped": 0})
+
+
 
     def apply_acceleration(self):
         combined_acceleration = combine(
@@ -401,6 +430,9 @@ class Rocket(PresetObject):
         # Recalculate cached values
         self.calculate_drag_coefficient()
         self.calculate_moment_of_inertia()
+        # self.calculate_center_of_pressure()
+        # self.calculate_center_of_gravity()
+        # self.calculate_cp_cg_dist()
 
         total_force, rotating_force = self.calculate_forces()
         # Adds in the rotational drag

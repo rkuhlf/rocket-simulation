@@ -1,3 +1,8 @@
 *.pyc
 __pycache__
 .replit
+
+.gitignore
+
+Helpers/__pycache__/general.cpython-36.pyc
+
