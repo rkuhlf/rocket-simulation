@@ -111,5 +111,5 @@ class Wind():
 
         # TODO: Add some variability to the wind direction, particularly as altitude changes
         # In meters per second
-        return [0, 100, 0]
+        # return [0, 0, 0]
         return wind_unit_vector * speed
