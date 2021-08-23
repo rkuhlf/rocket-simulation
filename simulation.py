@@ -46,18 +46,19 @@ class Simulation(PresetObject):
             self.logger.save_to_csv()
 
     def run_simulation(self):
-        if self.stopping_errors:
-            try:
+        try:
+            if self.stopping_errors:
+                try:
+                    while not self.rocket.landed and (
+                            self.max_frames == -1 or self.max_frames > self.frames):
+                        self.simulate_step()
+                except (Exception) as e:
+                    print(e)
+                    # print(e.with_traceback())
+
+            else:
                 while not self.rocket.landed and (
                         self.max_frames == -1 or self.max_frames > self.frames):
                     self.simulate_step()
-            except (Exception) as e:
-                print(e)
-                # print(e.with_traceback())
-
-        else:
-            while not self.rocket.landed and (
-                    self.max_frames == -1 or self.max_frames > self.frames):
-                self.simulate_step()
-
-        self.end()
+        finally:
+            self.end()

@@ -4,7 +4,7 @@ from Helpers.general import *
 import numpy as np
 
 
-# TODO: Expand on and implement unit tests
+# TODO: Expand on and implement more unit tests
 
 
 class Testing(unittest.TestCase):
@@ -43,7 +43,8 @@ class Testing(unittest.TestCase):
         print(vector_from_angle([np.pi / 2, np.pi / 2]))
         print(vector_from_angle([0, np.pi]))
 
-
+    def test_projection(self):
+        print(project(np.array([10., 2., 0]), np.array([1., 0., 0])))
 
     def test_angle_from_vector(self):
         self.assertTrue(np.alltrue(

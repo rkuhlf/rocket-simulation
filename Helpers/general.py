@@ -70,6 +70,11 @@ def binary_solve(func, target, min, max, iters=100):
     return combine(min, max)
 
 
+def project(initial, target):
+    'Project vector initial onto target vector'
+
+    return (np.dot(initial, target) / np.dot(target, target)) * target
+
 
 def unit_vector(vector):
     """ Returns the unit vector of the vector.  """
