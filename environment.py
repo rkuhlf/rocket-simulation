@@ -57,13 +57,19 @@ class Environment(PresetObject):
         # https://qph.fs.quoracdn.net/main-qimg-30e7697ac625734562eaca496e813467.webp
         # https://www.sciencedirect.com/science/article/abs/pii/0038092X81902048 Looks promising but ccan't access
 
+        # Potentially Have the Table data
+        # https://www.meteoblue.com/en/weather/archive/export/white-sands-national-monument_united-states-of-america_5497921?daterange=2021-07-20%20-%202021-08-03&domain=NEMSGLOBAL&params%5B%5D=temp2m&min=2021-07-20&max=2021-08-03&utc_offset=-6&timeResolution=daily&temperatureunit=FAHRENHEIT&velocityunit=KILOMETER_PER_HOUR&energyunit=watts&lengthunit=metric&degree_day_type=10%3B30&gddBase=10&gddLimit=30
+        # https://gmao.gsfc.nasa.gov/reanalysis/MERRA-2/ <- seems most likely
+
         # Probably useful
         # https://weatherspark.com/y/9257/Average-Weather-in-Lake-Jackson-Texas-United-States-Year-Round
         # https://numpy.org/doc/stable/reference/random/generated/numpy.random.weibull.html
         # https://www.quora.com/What-is-the-average-wind-speed-at-different-altitudes
+        # https://globalwindatlas.info/ - I think this will tell me the z value
 
-        # TODO: Get actual values for roughness and lake jackson average wind speed
-        return self.wind.get_air_speed(2, 10, 5, altitude, self.time)
+        # I believe that Lake Jackson averae windspeed is about 2.1 m/s
+        # https://globalwindatlas.info/ also has some direction data
+        return self.wind.get_air_speed(1, 10, 2.71, altitude, self.time)
 
 
     def get_speed_of_sound(self, altitude):

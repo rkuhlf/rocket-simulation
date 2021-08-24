@@ -57,3 +57,30 @@ Most matematical models will be quicker to calculate tan a lookup, so it is some
 TL;DR: lmfit is better. Though most of the other code is written using numpy for calculations, the polynomial class is very poorly supported. There are basically two versions, and looking through the documentation for either one is a nightmare. It is also hard to save the model.
 
 lmfit is built entirely for this kind of thing - fitting a user-inputted function to input-output data. Eventually, everything should be generated using lmfit.
+
+
+## Inaccuracies in Inputs
+Most rocket simulation software only allows you to input one possible value for each input. However, aerodynamics is a particularly inaccurate science, with difficulties determining coefficients of force to even one significant figure. Therefore, I thought it would be useful to allow inputs that covered a range of data. To do so, I think it makes the most since to extend the simulation class. <!-- TODO: do this. It might take quite a bit of finagling, and multiple rocket objects might have to be created -->
+
+Simply allow the user to input an array of two items, worst-case first followed by best-case. The program would then run two simulations and output the range of possible outcomes. 
+
+An even more advanced version of this software could accept an array of objects - value-probability pairs - and create a sampling distribution from that. It would take a weighted random value from each object, then run the simulation, appending the result to a collection of results. A a relatively continuous graph of the results could then be created
+
+## Nomenclature
+
+I call the rotational moment torque, but it isn't really torque. Torque as units Newton-meters, but I am using a force with radians per second^2 kilograms - The main difference is that I don't have the extra meters in it.
+
+
+## Rotation
+TODO: Implement a sort of framework class
+It holds all of the information about the rocket's shape. Then I can put some of the barrowman stuff in there
+It also throws you a message if the engine wouldn't fit
+
+Using rotation around, rotation down. Later I will add roll, but I think the effects are too complicated atm
+Using global rotation, not relative rotation based on the rocket
+When rotation is zero (measured in radians), the rocket is headed straight up
+It's against safety procedures to launch at an angle more than 30 degrees from vertical
+Unless there is wind, rotation around (index zero) should not change at all; That part is working correctly
+
+## Parachute Deployment
+The 2020-2021 Goddard team used a linear increase in the radius

@@ -4,9 +4,9 @@
 # The difference is probably due to drag_coefficient implementation and momentum calculations
 
 from environment import Environment
-from motor import Motor
+from RocketParts.motor import Motor
 from rocket import Rocket
-from parachute import Parachute
+from RocketParts.parachute import Parachute
 from logger import Feedback_Logger  # , Logger
 from simulation import Simulation
 from numpy import array

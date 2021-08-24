@@ -78,8 +78,6 @@ class CustomMotor(Motor):
     # However, there doesn't appear to be any wiggle room for that in the equation
 
     def __init__(self, config={}):
-        # Somehow these things are just constant
-        # TODO: Figure out how on earth that is possible
         # TODO: Figure out how rocket motors work with gas (particularly hybrid) because I think it might affect these variables
         # pt is the total pressure in the combustion chamber, same for tt
         # I'm not sure these are the only things changing. I mean, there should be someway to simulate the fuel grain
