@@ -3,7 +3,6 @@ import pandas as pd
 from Helpers.general import interpolate, get_next
 from preset_object import PresetObject
 from Data.Input.models import get_density, get_speed_of_sound
-import noise
 from Helpers.wind import Wind
 
 

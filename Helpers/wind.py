@@ -1,4 +1,6 @@
 # Ranges from -1 to 1 I think
+# Installing this requires C++ compilation. If you don't want to install that capability on your computer, you can install it by downloading the wheel from https://www.lfd.uci.edu/~gohlke/pythonlibs/#noise
+# Then running pip install <wheel-location>
 from noise import pnoise1
 import matplotlib.pyplot as plt
 import numpy as np
