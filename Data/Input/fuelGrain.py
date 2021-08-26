@@ -4,7 +4,7 @@ import numpy as np
 from PIL import Image
 from matplotlib import pyplot as plt
 
-
+# I think it should be pretty flat on all of the sides, so push all of the pixels up one i and down one i, then chop off that top pointy bit
 
 
 # The interior will be white, or 1, and the exterior will be black, or 0
