@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 # I think it should be pretty flat on all of the sides, so push all of the pixels up one i and down one i, then chop off that top pointy bit
 
 
-# The interior will be white, or 1, and the exterior will be black, or 0
+# The interior (oxidizer) will be white, or 1, and the exterior will be black, or 0
 # The walls of a combustion chamber will be represented by a -1. The color to match is that N/A magenta
 def load_image(path):
     """
@@ -88,6 +88,35 @@ def is_edge(i, j, image):
 
     return False
 
+def is_adjacent(a, b):
+    """
+    Accepts two tuples of indices, returns whether they are off by one
+    """
+
+    if a[0] == b[0]:
+        if a[1] == b[1] + 1 or a[1] == b[1] - 1:
+            return True
+    elif a[1] == b[1]:
+        if a[0] == b[0] + 1 or a[0] == b[0] - 1:
+            return True
+
+    return False
+
+def is_diagonal(a, b):
+    x_off = a[0] - b[0]
+    y_off = a[1] - b[1]
+
+    return abs(x_off) == 1 and abs(y_off) == 1
+
+def is_diagonal_without_fuel(a, b, image):
+    if not is_diagonal(a, b):
+        return False
+
+    # check if the cells in between are oxidizer (they should be for it to be diagonal)
+    if image[a[0], b[1]] == 1 or image[b[0], a[1]] == 1:
+        return True
+
+    return False
 
 def is_ox_edge(i, j, image):
     return image[i, j] == 1 and is_edge(i, j, image)
@@ -156,7 +185,7 @@ def regress_fuel_grain(distance, image, edges):
     return possible_edges
 
 
-def get_edge_distance(edges):
+def get_edge_distance(edges, pixels):
     "From an unordered list of edges in 2D, calculate the path between them"
     # I think maybe te easiest to do is to steal the algorithm from a machine learning
     # https://docs.opencv.org/3.3.1/d4/d73/tutorial_py_contours_begin.html
@@ -171,31 +200,52 @@ def get_edge_distance(edges):
 
     # Start at edge index 0 (this is basically random)
     current_edge = edges[0]
+    current_index = 0
 
     # While there are still edges
-    while (len(edges) != 0):
+    while (len(edges) > 0):
+        print(len(edges))
         connected = None
         to_add = 0
-        for edge in edges:
+        for edge, index in zip(edges, range(len(edges))):
+            
             # Check if any of the edges are adjacently connected to the active edge
             if is_adjacent(edge, current_edge):
                 # to_add the distance depending on whether it is adjacent or diagonal
                 to_add = adjacent_distance
-                current_edge = edge
+                connected = edge
+                connected_index = index
                 break
             # Check if any of the edges are diagonally connected to the active (there cannot be any fuel grain in between them)
-            elif is_diagonal_without_fuel(edge, current_edge):
+            elif is_diagonal_without_fuel(edge, current_edge, pixels):
                 to_add = diagonal_distance
-                current_edge = edge
+                connected = edge
+                connected_index = index
                 break
         
 
         # Set the current edge to the newly found edge. Delete the old edge
-        if connected:
+        if connected is not None:
             distance += to_add
+            try:
+                del edges[current_index]
+                current_edge = connected
+            except:
+                break
 
-        # If there are no connected edges, delete the edge, add no distance, and set the new current_edge to the index zero
-    pass
+            # If we just deleted an index beneath it, you need to decrement the index we will use next by one
+            if current_index < connected_index:
+                connected_index -= 1
+            
+            current_index = connected_index
+        else:
+            # If there are no connected edges, delete the edge, add no distance, and set the new current_edge to the index zero
+            del edges[current_index]
+            try:
+                current_edge = edges[0]
+                current_index = 0
+            except:
+                break
 
 
 if __name__ == "__main__":
@@ -211,14 +261,20 @@ if __name__ == "__main__":
                 edges.append((i, j))
 
 
+    iters = 100
+    regressions = []
+    areas = []
+    
+    # Generate data
+    for i in range(iters):
+        pass
     possible_edges = regress_fuel_grain(10, pixels, edges)
 
     # Loop through all of the possible edge pixels, checking if that pixel is an edge
     edges = get_edges(possible_edges, pixels)
 
-
     # Loop through the edge pixels and determine their distance
-    linear_surface_area = get_edge_distance(edges)
+    linear_surface_area = get_edge_distance(edges, pixels)
 
 
     display_image(pixels)
