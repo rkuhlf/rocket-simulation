@@ -110,20 +110,24 @@ def regress_fuel_grain(distance, image, edges):
     Returns the new image and the new possible edges
     """
 
+    distance += 0.5
+
     possible_edges = []
 
     for edge_index in edges:
         base_i, base_j = edge_index
         # Determine which pixels are within a circle of the pixel by looping through all of the pixels less than ... away
-        i_offset = int(round(distance))
+        i_offset = int(np.floor(distance))
         min_i = base_i - i_offset
         max_i = base_i + i_offset
 
         for i in range(min_i, max_i + 1):
             j_offset = int(
-                round((distance ** 2 - (i - base_i) ** 2) ** (1 / 2)))
+                np.floor(((distance ** 2 - (i - base_i) ** 2) ** (1 / 2))))
             min_j = base_j - j_offset
             max_j = base_j + j_offset
+
+            # Not working right now because there is an edge pixel I'm not including
 
             # Need a special case for min and max because that is where the edge of the circle is
             # This is where meta programming would be better because I could insert it into the loop and it would be equally fast
@@ -142,18 +146,22 @@ def regress_fuel_grain(distance, image, edges):
                 if image[i, j] == 0:
                     image[i, j] = 1
 
+                    # I tink tis simple ceck makes it faster
                     if i == min_i or i == max_i:
-                        print("appendin")
-                    possible_edges.append((i, j))
+                        possible_edges.append((i, j))
+                    elif np.sqrt((i - base_i) ** 2 + (j - base_j) ** 2) > (distance - 1):
+                        possible_edges.append((i, j))
 
-
-                # Loop through all of the possible edge pixels, checking if that pixel is an edge
-                # Loop through the edge pixels and determine their distance
 
     return possible_edges
 
 
-
+def get_edge_distance(edges):
+    "From an unordered list of edges in 2D, calculate the path between them"
+    # I think maybe te easiest to do is to steal the algorithm from a machine learning
+    # https://docs.opencv.org/3.3.1/d4/d73/tutorial_py_contours_begin.html
+    # Matlab bwboundaries
+    pass
 
 
 if __name__ == "__main__":
@@ -169,12 +177,14 @@ if __name__ == "__main__":
                 edges.append((i, j))
 
 
-    possible_edges = regress_fuel_grain(10, pixels, [(100, 400)])
+    possible_edges = regress_fuel_grain(10, pixels, edges)
 
-    for index in possible_edges:
-        pixels[index[0], index[1]] = 2
+    # Loop through all of the possible edge pixels, checking if that pixel is an edge
+    edges = get_edges(possible_edges, pixels)
 
-    # print(possible_edges)
+
+    # Loop through the edge pixels and determine their distance
+    linear_surface_area = get_edge_distance(edges)
 
 
     display_image(pixels)
