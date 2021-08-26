@@ -161,13 +161,47 @@ def get_edge_distance(edges):
     # I think maybe te easiest to do is to steal the algorithm from a machine learning
     # https://docs.opencv.org/3.3.1/d4/d73/tutorial_py_contours_begin.html
     # Matlab bwboundaries
+
+    # Actually, I should probably make my own algorithm because those will not use the known edges
+
+    distance = 0 # in pixels
+
+    adjacent_distance = 1
+    diagonal_distance = np.sqrt(2)
+
+    # Start at edge index 0 (this is basically random)
+    current_edge = edges[0]
+
+    # While there are still edges
+    while (len(edges) != 0):
+        connected = None
+        to_add = 0
+        for edge in edges:
+            # Check if any of the edges are adjacently connected to the active edge
+            if is_adjacent(edge, current_edge):
+                # to_add the distance depending on whether it is adjacent or diagonal
+                to_add = adjacent_distance
+                current_edge = edge
+                break
+            # Check if any of the edges are diagonally connected to the active (there cannot be any fuel grain in between them)
+            elif is_diagonal_without_fuel(edge, current_edge):
+                to_add = diagonal_distance
+                current_edge = edge
+                break
+        
+
+        # Set the current edge to the newly found edge. Delete the old edge
+        if connected:
+            distance += to_add
+
+        # If there are no connected edges, delete the edge, add no distance, and set the new current_edge to the index zero
     pass
 
 
 if __name__ == "__main__":
     pixels = load_image("Data/Input/grainCrossSectionColored.png")
 
-    # Take the pixelated image. Determine all of the edge pixels (diagonals only)
+    # Take the pixelated image. Determine all of the edge pixels (directly adjacent to fuel only, should generate a diagonal line)
     edges = []
 
     # It's okay to do this over all of the pixels just the one time, but the repeated algorithm needs to be faster

@@ -56,13 +56,12 @@ class Wind():
         # Have to manually calculate normalized perlin noise deviation
         # The time increment has to be the exact same each time too, otherwise the standard deviation of the theoretical won't match the actual
 
-
-
         self.std = self.determine_std()
 
 
     def randomize_direction(self):
         # At this point I am basically just assuming that there is no vertical wind
+        # This function is called by the environment class. It is basically a public method
         self.wind_direction[0] = np.random.rand() * np.pi * 2
 
     def get_normal_perlin(self, x):
@@ -76,6 +75,7 @@ class Wind():
         return (val - mean) / std
 
     def get_percentile_from_z(self, z):
+        # Get the cumulative distribution function for a normal distribution based on a z-value
         return st.norm.cdf(z)
 
 
