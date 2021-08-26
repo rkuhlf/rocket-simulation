@@ -1,5 +1,8 @@
 # Generate input-output data for the 2D cross-section surface area of the fuel grain given a base shape and the regression rate
 
+# SOURCES OF ERROR:
+# It is not totally accurate to represent curved shapes with pixels. I thought this error would go away as pixels -> infinity, but it did not. The error appears to flatten out at about 5% overestimation for a circle, but that number will obviously vary with different shapes
+
 import numpy as np
 from PIL import Image
 from matplotlib import pyplot as plt
@@ -23,17 +26,17 @@ def load_image(path):
 
     pixels = np.asarray(im).copy()
 
-    pixel_mask = np.ndarray((pixels.shape[:2]))
+    pixel_mask = np.ndarray((pixels.shape[:2]), dtype=int)
 
     ox_mask = np.where((pixels[:, :, 0] == 255) & (pixels[:, :, 1] == 255))
-    # fuel_mask = np.where((pixels[:, :, 0] == 0) & (pixels[:, :, 1] == 0))
+    fuel_mask = np.where((pixels[:, :, 0] == 0) & (pixels[:, :, 1] == 0))
     wall_mask = np.where((pixels[:, :, 0] == 255) & (pixels[:, :, 1] == 0))
 
 
     pixel_mask[ox_mask[0], ox_mask[1]] = 1
     pixel_mask[wall_mask[0], wall_mask[1]] = -1
     # They are automatically initialized to zero
-    # pixel_mask[fuel_mask[0], fuel_mask[1]] = 0
+    pixel_mask[fuel_mask[0], fuel_mask[1]] = 0
 
     return pixel_mask
 
@@ -88,6 +91,7 @@ def is_edge(i, j, image):
 
     return False
 
+
 def is_adjacent(a, b):
     """
     Accepts two tuples of indices, returns whether they are off by one
@@ -102,11 +106,13 @@ def is_adjacent(a, b):
 
     return False
 
+
 def is_diagonal(a, b):
     x_off = a[0] - b[0]
     y_off = a[1] - b[1]
 
     return abs(x_off) == 1 and abs(y_off) == 1
+
 
 def is_diagonal_without_fuel(a, b, image):
     if not is_diagonal(a, b):
@@ -117,6 +123,7 @@ def is_diagonal_without_fuel(a, b, image):
         return True
 
     return False
+
 
 def is_ox_edge(i, j, image):
     return image[i, j] == 1 and is_edge(i, j, image)
@@ -185,6 +192,10 @@ def regress_fuel_grain(distance, image, edges):
     return possible_edges
 
 
+# FIXME: For some reason this somewhat (5%) overestimates the total edge distance of a large circle
+# It doesn't overestimate the small circle by as much
+# I would think it would get more accurate as the circle gets bigger
+# I think that makes sense, as the number of pixels increases though it should improve
 def get_edge_distance(edges, pixels):
     "From an unordered list of edges in 2D, calculate the path between them"
     # I think maybe te easiest to do is to steal the algorithm from a machine learning
@@ -192,8 +203,9 @@ def get_edge_distance(edges, pixels):
     # Matlab bwboundaries
 
     # Actually, I should probably make my own algorithm because those will not use the known edges
+    edges = edges.copy()
 
-    distance = 0 # in pixels
+    distance = 0  # in pixels
 
     adjacent_distance = 1
     diagonal_distance = np.sqrt(2)
@@ -204,17 +216,17 @@ def get_edge_distance(edges, pixels):
 
     # While there are still edges
     while (len(edges) > 0):
-        print(len(edges))
         connected = None
         to_add = 0
         for edge, index in zip(edges, range(len(edges))):
-            
+
             # Check if any of the edges are adjacently connected to the active edge
             if is_adjacent(edge, current_edge):
                 # to_add the distance depending on whether it is adjacent or diagonal
                 to_add = adjacent_distance
                 connected = edge
                 connected_index = index
+                pixels[edge[0], edge[1]] = 2
                 break
             # Check if any of the edges are diagonally connected to the active (there cannot be any fuel grain in between them)
             elif is_diagonal_without_fuel(edge, current_edge, pixels):
@@ -222,7 +234,7 @@ def get_edge_distance(edges, pixels):
                 connected = edge
                 connected_index = index
                 break
-        
+
 
         # Set the current edge to the newly found edge. Delete the old edge
         if connected is not None:
@@ -236,7 +248,7 @@ def get_edge_distance(edges, pixels):
             # If we just deleted an index beneath it, you need to decrement the index we will use next by one
             if current_index < connected_index:
                 connected_index -= 1
-            
+
             current_index = connected_index
         else:
             # If there are no connected edges, delete the edge, add no distance, and set the new current_edge to the index zero
@@ -247,9 +259,12 @@ def get_edge_distance(edges, pixels):
             except:
                 break
 
+    return distance
 
+
+# TODO: further testing required for internal circle
 if __name__ == "__main__":
-    pixels = load_image("Data/Input/grainCrossSectionColored.png")
+    pixels = load_image("Data/Input/internalGrain.png")
 
     # Take the pixelated image. Determine all of the edge pixels (directly adjacent to fuel only, should generate a diagonal line)
     edges = []
@@ -261,24 +276,40 @@ if __name__ == "__main__":
                 edges.append((i, j))
 
 
-    iters = 100
+    r = 0
+    total_regression = 50
+    iters = 5
+    interp_increment = total_regression / iters
     regressions = []
     areas = []
-    
+
     # Generate data
-    for i in range(iters):
-        pass
-    possible_edges = regress_fuel_grain(10, pixels, edges)
+    # TODO: add first point to data
+    for _ in range(iters):
+        r += interp_increment
 
-    # Loop through all of the possible edge pixels, checking if that pixel is an edge
-    edges = get_edges(possible_edges, pixels)
+        possible_edges = regress_fuel_grain(interp_increment, pixels, edges)
 
-    # Loop through the edge pixels and determine their distance
-    linear_surface_area = get_edge_distance(edges, pixels)
+        # Loop through all of the possible edge pixels, checking if that pixel is an edge
+        edges = get_edges(possible_edges, pixels)
 
+        # Loop through the edge pixels and determine their distance
+        linear_surface_area = get_edge_distance(edges, pixels)
+
+
+        regressions.append(r)
+        areas.append(linear_surface_area)
+
+
+
+    print(regressions, areas)
+    plt.plot(regressions, areas)
+    plt.show()
+
+    # linear_surface_area = get_edge_distance(edges, pixels)
+    # print(linear_surface_area)
 
     display_image(pixels)
-
 
 
 
