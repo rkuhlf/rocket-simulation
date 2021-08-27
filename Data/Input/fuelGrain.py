@@ -41,17 +41,28 @@ def load_image(path):
     return pixel_mask
 
 
-def display_image(array):
+def create_image(array):
     pixels = np.ndarray((array.shape[0], array.shape[1], 3))
     debug_mask = np.where((array == 2))
     ox_mask = np.where((array == 1))
     fuel_mask = np.where((array == 0))
     wall_mask = np.where((array == -1))
 
-    pixels[debug_mask[0], debug_mask[1]] = [255, 0, 0]
-    pixels[ox_mask[0], ox_mask[1]] = [255, 255, 255]
-    pixels[wall_mask[0], wall_mask[1]] = [255, 0, 255]
-    pixels[fuel_mask[0], fuel_mask[1]] = [0, 0, 0]
+    pixels[debug_mask[0], debug_mask[1]] = np.asarray([1, 0, 0])
+    pixels[ox_mask[0], ox_mask[1]] = np.asarray([1, 1, 1])
+    pixels[wall_mask[0], wall_mask[1]] = np.asarray([1, 0, 1])
+    pixels[fuel_mask[0], fuel_mask[1]] = np.asarray([0, 0, 0])
+
+    return pixels
+
+
+def save_image(name, array):
+    img = create_image(array)
+    plt.imsave(name, img, format="PNG")
+
+
+def display_image(array):
+    pixels = create_image(array)
 
     # For some reason PIL freaks out if you try and get it to show the pixels
     plt.imshow(pixels, interpolation='nearest')
@@ -263,8 +274,11 @@ def get_edge_distance(edges, pixels):
 
 
 # TODO: further testing required for internal circle
+# Gear demonstrates issues best
 if __name__ == "__main__":
-    pixels = load_image("Data/Input/internalGrain.png")
+    base_path = "Data/Input/"
+    file_name = "gear.png"
+    pixels = load_image(base_path + file_name)
 
     # Take the pixelated image. Determine all of the edge pixels (directly adjacent to fuel only, should generate a diagonal line)
     edges = []
@@ -278,17 +292,18 @@ if __name__ == "__main__":
 
     r = 0
     total_regression = 50
-    iters = 5
+    iters = 15
     interp_increment = total_regression / iters
     regressions = []
     areas = []
 
+
+
     # Generate data
-    # TODO: add first point to data
     for _ in range(iters):
-        r += interp_increment
 
         possible_edges = regress_fuel_grain(interp_increment, pixels, edges)
+        save_image(base_path + file_name + "Regressed" + str(r) + ".png", pixels)
 
         # Loop through all of the possible edge pixels, checking if that pixel is an edge
         edges = get_edges(possible_edges, pixels)
@@ -300,6 +315,10 @@ if __name__ == "__main__":
         regressions.append(r)
         areas.append(linear_surface_area)
 
+        r += interp_increment
+
+
+
 
 
     print(regressions, areas)
@@ -309,7 +328,7 @@ if __name__ == "__main__":
     # linear_surface_area = get_edge_distance(edges, pixels)
     # print(linear_surface_area)
 
-    display_image(pixels)
+    # display_image(pixels)
 
 
 
