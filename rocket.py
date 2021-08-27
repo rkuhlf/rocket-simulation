@@ -106,7 +106,7 @@ class Rocket(PresetObject):
             self.turned = True
 
             # TODO: Figure out how parachute deployment mechanisms tend to work. Is it always as soon as it turns? How long does it take? Calculate the forces on the parachute chord
-            # self.parachute.deploy(self)
+            self.parachute.deploy(self)
 
 
         # Set yourself up for the next frame
@@ -370,8 +370,9 @@ class Rocket(PresetObject):
         self.moment_of_inertia = 1 / 12 * self.mass * self.height ** 2
 
     def calculate_coefficient_of_drag(self):
-        self.CD = get_coefficient_of_drag(
-            self.get_mach(), self.angle_of_attack)
+        if not self.parachute.deployed:
+            self.CD = get_coefficient_of_drag(
+                self.get_mach(), self.angle_of_attack)
 
     def calculate_coefficient_of_lift(self):
         self.CL = get_coefficient_of_lift(

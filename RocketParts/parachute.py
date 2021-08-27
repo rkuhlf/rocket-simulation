@@ -2,6 +2,7 @@ from numpy import pi
 from preset_object import PresetObject
 
 
+# Linear interpolation of radius does not make sense. Any time you change the radius (reference area, you have to recalculate the CD)
 class Parachute(PresetObject):
 
     def __init__(self, config={}):
@@ -16,14 +17,18 @@ class Parachute(PresetObject):
 
         super().overwrite_defaults(config)
 
-
+    # For some reason, the drag is not being applied in the direction of free-stream velocity
     def deploy(self, rocket):
         # TODO: Rewrite this to use a gradual deployment function
         if not self.deployed:
             self.deployed = True
 
-            rocket.vertical_area = self.area
+            rocket.reference_area = self.area
             rocket.drag_coefficient = self.drag_coefficient
+
+    # def update(self):
+    #     if self.deployed:
+    #         rocket.ref
 
     def calculate_tension(self, weight, drag):
         "Return the tension present in the ropes holding the parachute up."
