@@ -26,6 +26,8 @@ from environment import Environment
 # Notice that it is a 17 second sim to apogee
 # just curious to see the behavior over the higher values
 
+# At the current state of the model, it looks like you can't get any better data by decreasing delta T past 0.0024
+
 def frange(x, y, jump):
     while x < y:
         yield x
