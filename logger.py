@@ -73,6 +73,7 @@ class Feedback_Logger(Logger):
                 self.rocket.environment.time, self.rocket.position[2]))
             self.p_turned = True
             self.should_print_top_speed
+            self.apogee = self.rocket.position[2]
 
         # FIXME: Doesn't work because p_velocity = velocity in the rocket. Probably should check if y acceleration is in opposite direction to y velocit
         if self.should_print_top_speed:

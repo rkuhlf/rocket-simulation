@@ -6,10 +6,11 @@ from preset_object import PresetObject
 class Parachute(PresetObject):
 
     def __init__(self, config={}):
-        self.radius = 2  # meters, I'm just making it up
+        self.radius = 1  # meters, I'm just making it up
         self.area = pi * self.radius ** 2
-        self.drag_coefficient = 1.75
+        self.drag_coefficient = 1.0
         self.mass = 0.01  # kg
+        self.target_altitude = 1000  # m AGL (idk how actual sensors work)
 
         # Should recalculate center of pressure, don't bother too much until Barrowman equations are implemented. Also will be difficult because the parachute rotates separately from the rocket
 
@@ -17,7 +18,13 @@ class Parachute(PresetObject):
 
         super().overwrite_defaults(config)
 
-    # For some reason, the drag is not being applied in the direction of free-stream velocity
+    def should_deploy(self, rocket):
+        if rocket.turned and rocket.position[2] < self.target_altitude:
+            return True
+
+        return False
+
+
     def deploy(self, rocket):
         # TODO: Rewrite this to use a gradual deployment function
         if not self.deployed:
@@ -37,3 +44,8 @@ class Parachute(PresetObject):
 
     # Need some kind of function to recalculate the center of pressure, the area, and the coefficient of drag.
     # For now, the rocket's values will just be overriden by the parachute
+
+
+class ApogeeParachute(Parachute):
+    def should_deploy(self, rocket):
+        return rocket.velocity[2] < 0

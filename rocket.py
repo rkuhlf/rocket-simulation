@@ -4,7 +4,7 @@
 # The CL & CD don't work past four degrees. This is just further impetus to get verifiable CFD data. Until that point I can't really move forwards here.
 
 import numpy as np
-from Helpers.general import vector_from_angle, angle_between, combine, magnitude, angled_cylinder_cross_section
+from Helpers.general import vector_from_angle, angle_between, combine, magnitude
 # from Helpers.fluidSimulation import cutout_method, barrowman_equation, extended_barrowman_equation
 from Data.Input.models import get_coefficient_of_drag, get_coefficient_of_lift
 
@@ -28,7 +28,7 @@ class Rocket(PresetObject):
 
     def __init__(
             self, config={},
-            environment=None, motor=None, parachute=None, logger=None):
+            environment=None, motor=None, parachutes=[], logger=None):
         # X, Y, Z values, where Z is upwards
         self.position = np.array([0, 0, 0], dtype="float64")
         self.velocity = np.array([0, 0, 0], dtype="float64")
@@ -51,7 +51,7 @@ class Rocket(PresetObject):
         # region Set References
         self.motor = motor
         self.environment = environment
-        self.parachute = parachute
+        self.parachutes = parachutes
         self.logger = logger
         # endregion
 
@@ -69,7 +69,8 @@ class Rocket(PresetObject):
 
         # maybe should make an addmotor method
         self.mass += self.motor.mass
-        self.mass += self.parachute.mass
+        for parachute in parachutes:
+            self.mass += parachute.mass
 
         # Indicates whether the rocket has begun to descend
         self.turned = False
@@ -80,8 +81,7 @@ class Rocket(PresetObject):
 
     def simulate_step(self):
         self.calculate_cached()
-        if self.logger is not None:
-            self.logger.add_items({'time': self.environment.time})
+        self.log_data('time', self.environment.time)
 
 
         # First, apply all of the forces to the rocket
@@ -102,11 +102,16 @@ class Rocket(PresetObject):
         if self.position[2] < 0:
             self.landed = True
 
-        if self.position[2] < self.p_position[2]:
+        if self.position[2] < self.p_position[2] and not self.turned:
             self.turned = True
 
+            self.apogee = self.p_position.copy()[2]
+
             # TODO: Figure out how parachute deployment mechanisms tend to work. Is it always as soon as it turns? How long does it take? Calculate the forces on the parachute chord
-            self.parachute.deploy(self)
+
+        for parachute in self.parachutes:
+            if parachute.should_deploy(self):
+                parachute.deploy(self)
 
 
         # Set yourself up for the next frame
@@ -156,7 +161,7 @@ class Rocket(PresetObject):
 
             self.angular_acceleration[1] *= -1
             self.angular_velocity[1] *= -1
-            self.logger.add_items({"flipped": 1})
+            self.log_data("flipped", 1)
         elif (self.rotation[1] < 0):
             # Should just turn this into a function, want to make sure it's identical
             self.rotation[0] += np.pi
@@ -166,9 +171,9 @@ class Rocket(PresetObject):
 
             self.angular_acceleration[1] *= -1
             self.angular_velocity[1] *= -1
-            self.logger.add_items({"flipped": 1})
+            self.log_data("flipped", 1)
         else:
-            self.logger.add_items({"flipped": 0})
+            self.log_data("flipped", 0)
 
     def get_angular_acceleration(self):
         self.angular_acceleration = self.torque / self.moment_of_inertia
@@ -199,8 +204,7 @@ class Rocket(PresetObject):
             distance_from_nose = self.CG
 
         if debug:
-            self.logger.add_items(
-                {name: value * direction})
+            self.log_data(name, value * direction)
 
         self.force += value * direction
 
@@ -254,9 +258,6 @@ class Rocket(PresetObject):
         # x and y can't cause yaw in the same direction (I think, so we'll just have them be opposite)
         self.torque[0] -= y_component * yaw_multiplier * distance_from_CG
 
-        # self.logger.add_items(
-        #   {"Yaw torque after y translational drag": torque[0].copy()})
-
 
 
     def apply_air_resistance(self):
@@ -281,6 +282,12 @@ class Rocket(PresetObject):
 
         relative_velocity = self.velocity - \
             self.environment.get_air_speed(self.get_altitude())
+
+        # FIXME: This relative velocity is actually wrong
+        # Good lord it's because the wind is only in the z direction
+        self.log_data('air speed', self.environment.get_air_speed(
+            self.get_altitude()))
+        self.log_data('relative velocity', relative_velocity)
 
         # Drag force is applied in the same direction as freestream velocity
         drag_direction = - relative_velocity / magnitude(relative_velocity)
@@ -330,6 +337,9 @@ class Rocket(PresetObject):
     # endregion
 
     # region GENERAL FUNCTIONS
+    def log_data(self, name, data):
+        if self.logger is not None:
+            self.logger.add_items({name: data})
 
     def theta_around(self):
         return self.rotation[0]
@@ -370,9 +380,11 @@ class Rocket(PresetObject):
         self.moment_of_inertia = 1 / 12 * self.mass * self.height ** 2
 
     def calculate_coefficient_of_drag(self):
-        if not self.parachute.deployed:
-            self.CD = get_coefficient_of_drag(
-                self.get_mach(), self.angle_of_attack)
+        for parachute in self.parachutes:
+            if parachute.deployed:
+                return
+        self.CD = get_coefficient_of_drag(
+            self.get_mach(), self.angle_of_attack)
 
     def calculate_coefficient_of_lift(self):
         self.CL = get_coefficient_of_lift(
