@@ -6,7 +6,7 @@
 from environment import Environment
 from RocketParts.motor import Motor
 from rocket import Rocket
-from RocketParts.parachute import Parachute
+from RocketParts.parachute import ApogeeParachute
 from logger import Feedback_Logger  # , Logger
 from simulation import Simulation
 from numpy import array
@@ -16,10 +16,20 @@ from Helpers.general import angles_from_vector_3d
 
 # Base
 # Uses mostly class defaults
-env = Environment({"time_increment": 0.01})
+# Notice that it is a 17 second sim to apogee
+# 1 gives me 1064 meters, very big max speed
+# 0.5 returns 1642, much lower max speed
+# 0.1 gives me 1277
+# 0.05 gives me 937
+# 0.01 gives me 1720
+# 0.005 -> 2009
+# 0.001 -> 2074
+# 0.0005 -> 2074
+# 0.0001 -> 2074
+env = Environment({"time_increment": 0.1, "apply_wind": False})
 motor = Motor()
-parachute = Parachute()
-rocket = Rocket(environment=env, motor=motor, parachute=parachute)
+parachute = ApogeeParachute()
+rocket = Rocket(environment=env, motor=motor, parachutes=[parachute])
 logger = Feedback_Logger(
     rocket,
     ['position', 'velocity', 'acceleration', 'rotation', 'angular_velocity',
@@ -32,3 +42,4 @@ sim = Simulation(
      "stopping_errors": False},
     env, rocket, logger)
 sim.run_simulation()
+print(sim.apogee())
