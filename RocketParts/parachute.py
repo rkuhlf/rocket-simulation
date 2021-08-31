@@ -4,10 +4,14 @@ from preset_object import PresetObject
 
 # Linear interpolation of radius does not make sense. Any time you change the radius (reference area, you have to recalculate the CD)
 class Parachute(PresetObject):
+    def calculate_area(self, radius=None):
+        if radius is not None:
+            self.radius = radius
+
+        self.area = pi * self.radius ** 2
 
     def __init__(self, config={}):
         self.radius = 1  # meters, I'm just making it up
-        self.area = pi * self.radius ** 2
         self.drag_coefficient = 1.0
         self.mass = 0.01  # kg
         self.target_altitude = 1000  # m AGL (idk how actual sensors work)
@@ -17,6 +21,9 @@ class Parachute(PresetObject):
         self.deployed = False
 
         super().overwrite_defaults(config)
+
+        self.calculate_area()
+
 
     def should_deploy(self, rocket):
         if rocket.turned and rocket.position[2] < self.target_altitude:

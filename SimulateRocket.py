@@ -26,7 +26,7 @@ from Helpers.general import angles_from_vector_3d
 # 0.001 -> 2074
 # 0.0005 -> 2074
 # 0.0001 -> 2074
-env = Environment({"time_increment": 0.1, "apply_wind": False})
+env = Environment({"time_increment": 0.1, "apply_wind": True})
 motor = Motor()
 parachute = ApogeeParachute()
 rocket = Rocket(environment=env, motor=motor, parachutes=[parachute])
@@ -42,4 +42,3 @@ sim = Simulation(
      "stopping_errors": False},
     env, rocket, logger)
 sim.run_simulation()
-print(sim.apogee())
