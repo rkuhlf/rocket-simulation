@@ -35,7 +35,9 @@ class Wind():
         return np.std(average_ys)
 
     def __init__(
-            self, time_increment, count=30, octaves=4, wind_direction=[0, 0],
+            self, time_increment, count=30, octaves=4,
+            # Wind direction starts off at a right angle to up
+            wind_direction=[0, np.pi / 2],
             interpolation_speed=0.1, k=2):
         # FIXME: I never really bothered to test any of this
         # TODO: Add some more visualization stuff to make sure that this is following a weibull distribution and that interpolation speed = 0.1 makes sense

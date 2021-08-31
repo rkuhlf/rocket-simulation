@@ -20,6 +20,8 @@ class Environment(PresetObject):
 
         self.previous_air_density_index = 0
 
+        self.apply_wind = True
+
         super().overwrite_defaults(config)
 
         # https://www.digitaldutch.com/
@@ -45,6 +47,8 @@ class Environment(PresetObject):
 
 
     def get_air_speed(self, altitude):
+        if not self.apply_wind:
+            return [0, 0, 0]
         # this tells us how the rocket is moving through space relative to the surrounding fluids
 
         # Random things that might I come back to

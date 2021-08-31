@@ -62,3 +62,24 @@ class Simulation(PresetObject):
                     self.simulate_step()
         finally:
             self.end()
+
+
+    # region Helpers to evaluate the flight
+
+
+    def max_velocity(self):
+        pass
+
+    def max_mach(self):
+        pass
+
+    def dist_from_start(self):
+        return (self.rocket.position[0] ** 2 + self.rocket.position[1] ** 2) ** (1 / 2)
+
+    def landing_speed(self):
+        return self.rocket.velocity[2]
+
+    def apogee(self):
+        return self.rocket.apogee
+
+    # endregion

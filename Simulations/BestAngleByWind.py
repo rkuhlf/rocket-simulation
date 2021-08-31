@@ -1,16 +1,18 @@
 import sys
-
 sys.path.append(".")
 
-from environment import Environment
-from motor import Motor
-from rocket import Rocket
-from parachute import Parachute
-from logger import Feedback_Logger  # , Logger
-from simulation import Simulation
-from numpy import array
 
 from Helpers.general import angles_from_vector_3d
+from numpy import array
+from simulation import Simulation
+from logger import Feedback_Logger  # , Logger
+from RocketParts.parachute import Parachute
+from rocket import Rocket
+from RocketParts.motor import Motor
+from environment import Environment
+
+
+
 
 # Find best launch angle based on a constant wind speed
 
@@ -19,7 +21,7 @@ from Helpers.general import angles_from_vector_3d
 env = Environment({"time_increment": 0.01})
 motor = Motor()
 parachute = Parachute()
-rocket = Rocket(environment=env, motor=motor, parachute=parachute)
+rocket = Rocket(environment=env, motor=motor, parachutes=[parachute])
 
 sim = Simulation({}, env, rocket)
 

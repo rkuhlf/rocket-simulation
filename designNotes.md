@@ -67,8 +67,9 @@ Simply allow the user to input an array of two items, worst-case first followed 
 An even more advanced version of this software could accept an array of objects - value-probability pairs - and create a sampling distribution from that. It would take a weighted random value from each object, then run the simulation, appending the result to a collection of results. A a relatively continuous graph of the results could then be created
 
 ## Nomenclature
+I call the rotational moment torque, but it isn't really torque. Torque as units Newton-meters, but I am using a force with radians per second^2 kilograms - The main difference is that I don't have the extra meters in it. Actually I'm not sure there's a difference.
 
-I call the rotational moment torque, but it isn't really torque. Torque as units Newton-meters, but I am using a force with radians per second^2 kilograms - The main difference is that I don't have the extra meters in it.
+I tried to capitalize python files that are intended to be run. For the most part, files that begin with a lowercase are just helpers.
 
 
 ## Rotation

@@ -13,6 +13,7 @@ from motor import Motor
 # One Trial: 5.7
 # With Pandas: 5.9
 
+# TODO: Now that I am working on extremely small time increments, it is probably worthwhile to do another efficiency study
 
 
 def test_overall_speed():
@@ -35,7 +36,7 @@ def test_thrust():  # this one is fast
             get_thrust(i * end / steps_to_take)
 
 
-# 10,000 iterations takes 3 seconds with lookup and 0.7399 when density is fitted to a curve. That's fast enough
+# 10,000 iterations takes 3 seconds with lookup and 0.7399 when density is fitted to a curve. That's fast enough # TODO: It kinda needs to be faster now
 def test_drag():
     iters = 10000
     e = Environment()
