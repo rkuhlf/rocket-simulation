@@ -6,12 +6,10 @@
 from environment import Environment
 from RocketParts.motor import Motor
 from rocket import Rocket
-from RocketParts.parachute import ApogeeParachute
+from RocketParts.parachute import ApogeeParachute, Parachute
 from logger import Feedback_Logger  # , Logger
 from simulation import Simulation
 from numpy import array
-
-from Helpers.general import angles_from_vector_3d
 
 
 # Base
@@ -26,10 +24,11 @@ from Helpers.general import angles_from_vector_3d
 # 0.001 -> 2074
 # 0.0005 -> 2074
 # 0.0001 -> 2074
-env = Environment({"time_increment": 0.1, "apply_wind": True})
+env = Environment({"time_increment": 0.01, "apply_wind": True})
 motor = Motor()
-parachute = ApogeeParachute()
-rocket = Rocket(environment=env, motor=motor, parachutes=[parachute])
+drogue_parachute = ApogeeParachute({"radius": 0.2})
+main_parachute = Parachute()
+rocket = Rocket(environment=env, motor=motor, parachutes=[drogue_parachute, main_parachute])
 logger = Feedback_Logger(
     rocket,
     ['position', 'velocity', 'acceleration', 'rotation', 'angular_velocity',
@@ -38,7 +37,7 @@ logger = Feedback_Logger(
 logger.splitting_arrays = True
 
 sim = Simulation(
-    {"apply_angular_forces": True, "max_frames": -1,
+    {"apply_angular_forces": False, "max_frames": -1,
      "stopping_errors": False},
     env, rocket, logger)
 sim.run_simulation()
