@@ -1,7 +1,9 @@
 import pandas as pd
 
 from Helpers.general import interpolate, binary_solve
-from preset_object import PresetObject
+# You know what, I'm just going to go for a data-oriented design with the whole engine
+# Functions for everything. Later, I can have functions for sensitivity analysis
+# from preset_object import PresetObject
 
 
 class Motor(PresetObject):
