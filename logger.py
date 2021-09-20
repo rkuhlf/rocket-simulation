@@ -4,6 +4,7 @@ import pandas as pd
 
 class Logger:
     "Logs only the data"
+    count = 0
 
     def __init__(self, rocket, to_record, target="output.csv"):
         self.rows = []
@@ -48,7 +49,9 @@ class Logger:
         print(df)
         df.set_index('time', inplace=True)
 
-        df.to_csv("Data/Output/" + self.target)
+        # FIXME: erase this crap
+        df.to_csv("Data/Output/" + str(Logger.count) + ".csv")
+        Logger.count += 1
 
     def reset(self):
         self.__init__(self.rocket, self.to_record)
@@ -58,7 +61,7 @@ class Feedback_Logger(Logger):
     "Logs the progress of the rocket simulation along with some print statements"
 
     def __init__(self, rocket, to_record, target="output.csv"):
-        print("Launching rocket")
+        print("Logger is prepared to launch rocket")
         self.p_turned = False
         self.p_thrusted = False
         self.should_print_top_speed = True
@@ -92,7 +95,7 @@ class Feedback_Logger(Logger):
             self.p_thrusted = True
 
         # If the position off of the base altitude is less than or equal to zero, we hit the ground
-        if self.rocket.position[2] < 0:
+        if self.rocket.landed:
             print(
                 "Rocket landed with a speed of %.3s m/s after %.4s seconds of flight time" %
                 (np.linalg.norm(self.rocket.velocity),

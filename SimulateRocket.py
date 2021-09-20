@@ -24,7 +24,7 @@ from numpy import array
 # 0.001 -> 2074
 # 0.0005 -> 2074
 # 0.0001 -> 2074
-env = Environment({"time_increment": 0.01, "apply_wind": True})
+env = Environment({"time_increment": 0.1, "apply_wind": False})
 motor = Motor()
 drogue_parachute = ApogeeParachute({"radius": 0.2})
 main_parachute = Parachute()
@@ -37,7 +37,7 @@ logger = Feedback_Logger(
 logger.splitting_arrays = True
 
 sim = Simulation(
-    {"apply_angular_forces": False, "max_frames": -1,
+    {"apply_angular_forces": True, "max_frames": -1,
      "stopping_errors": False},
     env, rocket, logger)
 sim.run_simulation()

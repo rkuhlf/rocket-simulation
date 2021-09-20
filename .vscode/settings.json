@@ -9,5 +9,7 @@
     "python.testing.pytestEnabled": false,
     "python.testing.nosetestsEnabled": false,
     "python.testing.unittestEnabled": true,
-    "csv-preview.formatValues": "never"
+    "csv-preview.formatValues": "never",
+    "editor.formatOnSave": false,
+    "python.linting.lintOnSave": false
 }

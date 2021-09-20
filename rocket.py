@@ -7,7 +7,7 @@ import numpy as np
 from Helpers.general import vector_from_angle, angle_between, combine, magnitude
 # from Helpers.fluidSimulation import cutout_method, barrowman_equation, extended_barrowman_equation
 from Data.Input.models import get_coefficient_of_drag, get_coefficient_of_lift
-
+from math import isnan
 
 # TODO: Factor in changing center of gravity
 # TODO: get approximate position of motor so that I can recalculate center of gravity every frame
@@ -99,10 +99,15 @@ class Rocket(PresetObject):
 
 
         # Has anything changed since the last frame
-        if self.position[2] < 0:
+        # TODO: add some kind of has lifted of thing
+        if self.position[2] < 0 and (self.p_position[2] > 0 or self.position[2] < -100):
+            if self.position[2] < -100:
+                print(self.position[2])
+                raise Exception("Your rocket fell straight into the ground")
+
             self.landed = True
 
-        if self.position[2] < self.p_position[2] and not self.turned:
+        if self.position[2] < self.p_position[2] and not self.turned and (self.position[2] > 0 or self.position[2] < -100):
             self.turned = True
 
             self.apogee = self.p_position.copy()[2]
@@ -115,6 +120,9 @@ class Rocket(PresetObject):
 
 
         # Set yourself up for the next frame
+        if isnan(self.position[2]):
+            raise Exception("Everything fell apart. NaN value in altitude")
+
         self.update_previous()
         self.force = np.array([0., 0., 0.])
         self.torque = np.array([0., 0.])
