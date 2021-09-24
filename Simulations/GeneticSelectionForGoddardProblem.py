@@ -62,11 +62,11 @@ def fitness(apogee):
     return apogee
 
 
-def mutate(rocket):
-    # atm we only have to adjust parachutes
-    data = rocket.motor.thrust_data
-    current_burn_time = rocket.motor.get_burn_time()
-    target_total_impulse = rocket.motor.get_total_impulse()
+def mutate(motor):
+    # There is a side effect here that I need to get rid of
+    data = deepcopy(motor.thrust_data)
+    current_burn_time = motor.get_burn_time()
+    target_total_impulse = motor.get_total_impulse()
 
     for index, row in data.iterrows():
         row["thrust"] *= normalvariate(1, 0.5)
@@ -99,14 +99,15 @@ def mutate(rocket):
     current_total = m.get_total_impulse()
     m.scale_thrust(target_total_impulse / current_total)
 
-    rocket.motor = m
+    return m
 
     # No return statement is required because no copies are made; all modification is in place
 
-
+# TODO: the easiest thing is probably just to write a function of the preset object that creates a copy
 def mutated_simulation(sim):
     new_sim = deepcopy(sim)
-    mutate(new_sim.rocket)
+    new_motor = deepcopy(sim.rocket.motor)
+    new_sim.rocket.motor = mutate(new_motor)
 
     return new_sim
 
@@ -125,7 +126,8 @@ if __name__ == "__main__":
 
     base_env = Environment({"time_increment": 0.1, "apply_wind": False})
 
-    num_rockets = 10
+    num_rockets = 2
+
     num_iterations = 5
     sims = []
     fits = []
@@ -139,7 +141,7 @@ if __name__ == "__main__":
             ['position', 'velocity', 'acceleration'], target="GoddardSim" + str(i) + ".csv")
 
         logger.splitting_arrays = True
-        sims.append(Simulation({}, deepcopy(base_env), new_rocket, logger=logger))
+        sims.append(Simulation({}, deepcopy(base_env), new_rocket))#, logger=logger))
 
     # print("Initialized Rockets: ", sims)
 
@@ -159,7 +161,7 @@ if __name__ == "__main__":
             # I dont understand why it doesn't work without this
             sim.reset()
 
-            # print("Calculated fitness is", str(fit))
+            print(f"Sim index {i} has fitness", str(fit))
 
             fits.append(fit)
 
@@ -176,12 +178,14 @@ if __name__ == "__main__":
         fits /= np.std(fits)
 
         # should take about the top 25%
-        cutoff = 1.5
+        cutoff = 0
 
         fits = list(fits)
         # loop in lists backwards, deleting bad ones
-        for i in range(len(fits) - 1, 0, -1):
+        # Sometimes this deletes the wrong one. It deletes the best
+        for i in range(len(fits) - 1, -1, -1):
             if fits[i] < cutoff:
+                print(f"Deleting fits index {i} because its fitness is too low")
                 del fits[i]
                 del sims[i]
 
@@ -197,12 +201,19 @@ if __name__ == "__main__":
         # FIXME: For some reason, the highest one does not fly the same height every time
         # Probably because the rocket is being mutated, changing this one as well as the other one
         # Actually my best guess now is that it is an issue with the environment. I can't figure out why the 'same' rocket is flying different heights. Maybe I should make a simpler test case of this
-        for sim, fit in sim_fit_pairs[round(-num_rockets * 1):]:
+        print(f"there are only {len(sim_fit_pairs)} rockets left")
 
+        target_reserved_rockets = num_rockets * 0.5
+        current_index = len(sim_fit_pairs) - 1
+        while (len(new_sims) < target_reserved_rockets):
+            sim_to_add, fit = sim_fit_pairs[current_index]
             sim.reset()
-            new_sims.append(deepcopy(sim))
+            new_sims.append(deepcopy(sim_to_add))
 
-        print(new_sims[-1].rocket.motor.thrust_data)
+            current_index -= 1
+            if current_index == -1:
+                current_index = len(sim_fit_pairs) - 1
+            
         
         fit_selector = []
         total_fit = 0
@@ -211,7 +222,7 @@ if __name__ == "__main__":
             total_fit += fit
             fit_selector.append((sim, total_fit))
 
-        for _ in range(round(num_rockets * 0.7)):
+        for _ in range(round(num_rockets * 0.5)):
             selection = random() * total_fit * 1.5 # scaling factor to select higher
             appended = False
             for sim, cumulative_fit in fit_selector:
@@ -224,6 +235,7 @@ if __name__ == "__main__":
                 new_sims.append(mutated_simulation(sims[-1]))
 
         for _ in range(num_rockets - len(new_sims)):
+            print("Randomly generating")
             new_rocket = create_random_rocket()
 
             new_sims.append(
