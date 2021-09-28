@@ -50,7 +50,6 @@ class Environment(PresetObject):
         if not self.apply_wind:
             return [0, 0, 0]
         # this tells us how the rocket is moving through space relative to the surrounding fluids
-        print("Applying wind")
         # Random things that might I come back to
         # https://retscreen.software.informer.com/4.0/
         # https://ieeexplore.ieee.org/document/6808712

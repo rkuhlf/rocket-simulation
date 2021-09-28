@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d, interp2d, fitpack, bisplrep, bisplev
+from math import isnan
 
 
 def get_density(altitude):
@@ -48,6 +49,9 @@ drag_spline = bisplrep(mach, alpha, CD, kx=1, ky=1, s=0.3)
 
 
 def get_coefficient_of_drag(mach, alpha):
+    if isnan(alpha):
+        raise Exception("Your angle of attack is NaN")
+
     alpha = alpha / np.pi * 180
     return bisplev(mach, alpha, drag_spline)
 

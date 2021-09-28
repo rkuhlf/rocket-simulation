@@ -31,6 +31,20 @@ class Simulation(PresetObject):
         # This is very necessary and it kind of makes resetting the other stuff pointless
         self.override_subobjects()
 
+    def copy(self):
+        # Often when doing genetic sims, it is important to make a copy of the object
+
+        new_environment = self.environment.copy()
+        new_rocket = self.rocket.copy()
+
+        if self.logger is not None:
+            new_logger = self.logger.copy()
+            new_logger.rocket = new_rocket
+        else:
+            new_logger=None
+
+        return Simulation({}, environment=new_environment, rocket=new_rocket, logger=new_logger)
+
     def simulate_step(self):
         self.rocket.simulate_step()
         self.environment.simulate_step()

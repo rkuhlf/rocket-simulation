@@ -4,7 +4,6 @@ import pandas as pd
 
 class Logger:
     "Logs only the data"
-    count = 0
 
     def __init__(self, rocket, to_record, target="output.csv"):
         self.rows = []
@@ -14,6 +13,10 @@ class Logger:
         self.to_record = to_record
         self.current_row = {}
         self.target = target
+
+    def copy():
+        # Hopefully this is being called from the simulation and the rocket I am about to make gets overridden
+        return deepcopy(self)
 
 
 
@@ -49,9 +52,7 @@ class Logger:
         print(df)
         df.set_index('time', inplace=True)
 
-        # FIXME: erase this crap
-        df.to_csv("Data/Output/" + str(Logger.count) + ".csv")
-        Logger.count += 1
+        df.to_csv("Data/Output/" + self.target)
 
     def reset(self):
         self.__init__(self.rocket, self.to_record)
@@ -105,4 +106,4 @@ class Feedback_Logger(Logger):
     def save_to_csv(self):
         super().save_to_csv()
 
-        print("Saved the trial to csv")
+        print(f"Saved the trial to csv at {self.target}")

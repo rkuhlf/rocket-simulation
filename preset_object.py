@@ -13,6 +13,9 @@ class PresetObject:
         # extract config to self
         self.__dict__.update(config)
 
+        self.update_saved_state()
+
+    def update_saved_state(self):
         self.saved_state = copy.deepcopy(self.__dict__)
 
 
@@ -41,3 +44,6 @@ class PresetObject:
 
     def reset(self):
         self.overwrite_defaults(self.saved_state)
+
+    def copy(self):
+        return copy.deepcopy(self)

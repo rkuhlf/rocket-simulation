@@ -102,7 +102,8 @@ class Rocket(PresetObject):
         # TODO: add some kind of has lifted of thing
         if self.position[2] < 0 and (self.p_position[2] > 0 or self.position[2] < -100):
             if self.position[2] < -100:
-                print(self.position[2])
+                if self.logger is not None:
+                    self.logger.save_to_csv()
                 raise Exception("Your rocket fell straight into the ground")
 
             self.landed = True
@@ -114,9 +115,10 @@ class Rocket(PresetObject):
 
             # TODO: Figure out how parachute deployment mechanisms tend to work. Is it always as soon as it turns? How long does it take? Calculate the forces on the parachute chord
 
-        for parachute in self.parachutes:
-            if parachute.should_deploy(self):
-                parachute.deploy(self)
+        if False: #self.environment.time > self.motor.get_burn_time():
+            for parachute in self.parachutes:
+                if parachute.should_deploy(self):
+                    parachute.deploy(self)
 
 
         # Set yourself up for the next frame
@@ -191,6 +193,12 @@ class Rocket(PresetObject):
 
     def update_previous(self):
         """Update the variables that hold last frame's rocket features"""
+        # I am just going to start applying a normal force here because this is super annoying. Hopefully nobody is trying to do one second rocket flights.
+        if self.environment.time < 1 and self.position[2] < 0:
+            self.position[2] = 0
+            self.velocity[2] = 0
+            self.acceleration[2] = 0
+
         self.p_position = np.copy(self.position)  # p stands for previous
         self.p_velocity = np.copy(self.velocity)
         self.p_acceleration = np.copy(self.acceleration)
@@ -382,6 +390,8 @@ class Rocket(PresetObject):
         self.angle_of_attack = angle_between(
             relative_velocity, vector_from_angle(self.rotation))
 
+        self.log_data("AOA1", self.angle_of_attack)
+
     def calculate_moment_of_inertia(self):
         # FIXME: Actually this sucks and is complicated because moment of inertia isn't a scalar quantity for a complex 3d shape
         # use calculated value from Fusion 360/Other CAD, currently using random one for a cylinder
@@ -391,8 +401,10 @@ class Rocket(PresetObject):
         for parachute in self.parachutes:
             if parachute.deployed:
                 return
+        self.log_data("AOA", self.angle_of_attack)
         self.CD = get_coefficient_of_drag(
             self.get_mach(), self.angle_of_attack)
+        self.log_data("CD", self.CD)
 
     def calculate_coefficient_of_lift(self):
         self.CL = get_coefficient_of_lift(

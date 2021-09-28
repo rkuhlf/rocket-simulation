@@ -26,7 +26,8 @@ class Parachute(PresetObject):
 
 
     def should_deploy(self, rocket):
-        if rocket.turned and rocket.position[2] < self.target_altitude:
+        if rocket.turned and rocket.position[2] < self.target_altitude and not self.deployed:
+            print("Should deploy thinks true")
             return True
 
         return False
@@ -34,11 +35,10 @@ class Parachute(PresetObject):
 
     def deploy(self, rocket):
         # TODO: Rewrite this to use a gradual deployment function
-        if not self.deployed:
-            self.deployed = True
+        self.deployed = True
 
-            rocket.reference_area = self.area
-            rocket.drag_coefficient = self.drag_coefficient
+        rocket.reference_area = self.area
+        rocket.drag_coefficient = self.drag_coefficient
 
     # def update(self):
     #     if self.deployed:
@@ -55,4 +55,4 @@ class Parachute(PresetObject):
 
 class ApogeeParachute(Parachute):
     def should_deploy(self, rocket):
-        return rocket.velocity[2] < 0
+        return rocket.velocity[2] < 0 and not self.deployed

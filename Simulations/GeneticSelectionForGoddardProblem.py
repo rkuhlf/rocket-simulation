@@ -16,7 +16,7 @@ from copy import deepcopy
 import time
 
 
-def create_random_motor(target_total_impulse, point_count):
+def create_random_motor(target_total_impulse, point_count=10):
     # Varying the CD and the area is pointless, since they are multiplied together the one time they are used
     # just going to use a constant number of points to approximate a curve. The thrust and time of each of the points will be completely random, then I will scale the motor to match a total impulse
     # The only funny business comes from deciding which axis to scale. If
@@ -44,7 +44,7 @@ def create_random_motor(target_total_impulse, point_count):
 
 
 def create_random_rocket():
-    motor = create_random_motor(3092.55, 4)
+    motor = create_random_motor(3092.55)
 
     return Rocket(environment=deepcopy(base_env), motor=motor)
 
@@ -62,7 +62,8 @@ def fitness(apogee):
     return apogee
 
 
-def mutate(motor):
+def mutate(rocket):
+    motor = rocket.motor
     # There is a side effect here that I need to get rid of
     data = deepcopy(motor.thrust_data)
     current_burn_time = motor.get_burn_time()
@@ -105,9 +106,13 @@ def mutate(motor):
 
 # TODO: the easiest thing is probably just to write a function of the preset object that creates a copy
 def mutated_simulation(sim):
-    new_sim = deepcopy(sim)
-    new_motor = deepcopy(sim.rocket.motor)
-    new_sim.rocket.motor = mutate(new_motor)
+    print("Original rocket motor for mutation", sim.rocket.motor.thrust_data)
+    new_sim = sim.copy()
+    new_sim.rocket.motor = mutate(new_sim.rocket)
+    new_sim.update_saved_state()
+
+    print("Original rocket motor; should be the same", sim.rocket.motor.thrust_data)
+    print("New rocket motor for mutation", new_sim.rocket.motor.thrust_data)
 
     return new_sim
 
@@ -126,9 +131,9 @@ if __name__ == "__main__":
 
     base_env = Environment({"time_increment": 0.1, "apply_wind": False})
 
-    num_rockets = 2
+    num_rockets = 100
 
-    num_iterations = 5
+    num_iterations = 10
     sims = []
     fits = []
     average_fits = []
@@ -158,9 +163,10 @@ if __name__ == "__main__":
             except Exception as e:
                 fit = 0
 
-            # I dont understand why it doesn't work without this
-            sim.reset()
+            # I dont understand why it doesn't work without this            
 
+            print("Simming ", sim.rocket.motor.thrust_data)
+            print("It has ", sim.rocket.motor.get_total_impulse())
             print(f"Sim index {i} has fitness", str(fit))
 
             fits.append(fit)
@@ -188,6 +194,9 @@ if __name__ == "__main__":
                 print(f"Deleting fits index {i} because its fitness is too low")
                 del fits[i]
                 del sims[i]
+            else:
+                # all of the sims have to be reset at some point anyways
+                sims[i].reset()
 
         # adjust the weighting mechanism to favor better motors more
         for i in range(len(fits)):
@@ -203,7 +212,7 @@ if __name__ == "__main__":
         # Actually my best guess now is that it is an issue with the environment. I can't figure out why the 'same' rocket is flying different heights. Maybe I should make a simpler test case of this
         print(f"there are only {len(sim_fit_pairs)} rockets left")
 
-        target_reserved_rockets = num_rockets * 0.5
+        target_reserved_rockets = num_rockets * 0.2
         current_index = len(sim_fit_pairs) - 1
         while (len(new_sims) < target_reserved_rockets):
             sim_to_add, fit = sim_fit_pairs[current_index]
@@ -222,7 +231,7 @@ if __name__ == "__main__":
             total_fit += fit
             fit_selector.append((sim, total_fit))
 
-        for _ in range(round(num_rockets * 0.5)):
+        for _ in range(round(num_rockets * 0.7)):
             selection = random() * total_fit * 1.5 # scaling factor to select higher
             appended = False
             for sim, cumulative_fit in fit_selector:
@@ -233,6 +242,7 @@ if __name__ == "__main__":
                     break
             if not appended:
                 new_sims.append(mutated_simulation(sims[-1]))
+            print("mutated appendae", new_sims[-1].rocket.motor.thrust_data)
 
         for _ in range(num_rockets - len(new_sims)):
             print("Randomly generating")
@@ -281,7 +291,12 @@ if __name__ == "__main__":
 
         plt.plot(np.asarray(data["time"]) * time_scale, np.asarray(data["thrust"] * thrust_scale), alpha=0.1)
 
+
     plt.show()
+
+    top_fits = []
+    for trial in collective_fits:
+        top_fits.append(np.average(trial[-round(num_rockets * 0.2):]))
 
     collective_fits = np.transpose(np.asarray(collective_fits))
 
@@ -289,7 +304,55 @@ if __name__ == "__main__":
         plt.plot(range(len(percentile)), percentile)
     plt.show()
 
-    print(average_fits)
-    plt.plot(range(num_iterations), average_fits)
-    plt.show()
     
+
+    plt.plot(range(num_iterations), average_fits)
+    plt.plot(range(num_iterations), top_fits)
+    plt.show()
+
+    print("Apparently, the best rocket thrust profile is as follows:")
+    best = sim_fit_pairs[-1][0].rocket.motor
+    data = best.thrust_data
+    data['time'] *= best.time_multiplier
+    data['thrust'] *= best.thrust_multiplier
+    print(data)
+    print("It had a fitness of", sim_fit_pairs[-1][1])
+    
+
+# Generated:
+'''
+0  0.000000     0.000000
+1  1.256881  1107.605155
+2  1.912713  2879.295138
+3  2.669230     0.000000
+It had a fitness of 1683.801762261541
+'''
+
+'''
+0  0.000000     0.000000
+1  0.160235    32.031430
+2  0.460823  6420.931929
+3  1.121207     0.000000
+It had a fitness of 1644.529439212358 (confirmed by regular sim)
+'''
+
+'''
+0  0.000000     0.000000
+1  0.386891   856.287747
+2  1.694458  2961.528633
+3  1.985442     0.000000
+It had a fitness of 1738.779290500912
+'''
+'''
+0  0.000000      0.000000
+1  0.204627     49.527358
+2  0.256816   6003.019970
+3  0.395159   2205.838998
+4  0.741824   2256.975580
+5  0.839057      0.000000
+6  0.901387  37289.365676
+7  0.917359      0.000000
+8  1.206704    108.740455
+9  1.258324      0.000000
+It had a fitness of 2199.805851873474
+'''
