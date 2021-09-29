@@ -1,5 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
+
+sys.path.append(".")
+
+from RocketParts.Motor.nitrousProperties import *
 
 # atm it is mostly DOD, I'm not sure I want it like that, especially when I add it into the frame-by-frame sim
 
@@ -103,6 +108,7 @@ def get_length(volume, radius, hemispherical_ends=False):
 
 
 if __name__ == '__main__':
+    print(find_minimum_wall_thickness(5.688*10**6, 0.1016, 1.5, 2.7579e+8))
     '''
     # print(find_specific_enthalpy_of_gaseous_nitrous(273 - 0))
     ox_mass = 68.5  # kg
