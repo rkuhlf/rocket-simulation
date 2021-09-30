@@ -28,6 +28,7 @@ def find_ullage(
     liquid_density = find_liquid_nitrous_density(temperature)
     gas_density = find_gaseous_nitrous_density(temperature)
 
+    #region Algebraic Proof for phase mass
     # volume = gas_volume + liquid_volume
     # mass = gas_mass + liquid_mass
     # gas_mass = mass - liquid_mass
@@ -39,6 +40,8 @@ def find_ullage(
     # volume = mass / gas_density + liquid_mass * (1 / liquid_density - 1 / gas_density)
 
     # liquid_mass = (volume - mass / gas_density) / (1 / liquid_density - 1 / gas_density)
+    #endregion
+
     liquid_mass = (
         volume - ox_mass / gas_density) / (1 / liquid_density - 1 / gas_density)
     gas_mass = ox_mass - liquid_mass
@@ -47,10 +50,9 @@ def find_ullage(
 
     if not constant_temperature and iters_so_far < iterations:
         newly_evaporated_gas = gas_mass - already_gas_mass
-        print("vap", find_heat_of_vaporization(temperature))
         heat_absorbed = newly_evaporated_gas * \
             find_heat_of_vaporization(temperature)
-        print("absorbed", heat_absorbed)
+        print("absorbed", heat_absorbed) # currently imaginary
         total_heat_capacity = find_combined_total_heat_capacity(
             gas_mass, liquid_mass,
             find_gaseous_heat_capacity(temperature),
@@ -105,6 +107,22 @@ def get_length(volume, radius, hemispherical_ends=False):
         return straight_length + radius * 2
     else:  # cylindrical ends
         return volume / (np.pi * radius ** 2)
+
+def find_center_of_mass(ullage, volume, length, temperature):
+    # All centers of mass are with reference to the top of the ox tank
+    # The current calculations do not account for hemispherical end caps
+    gas_center_of_mass = length * ullage / 2
+    gas_end_distance = length * ullage
+    liquid_center_of_mass = gas_end_distance + length * (1 - ullage) / 2
+
+    gas_volume = ullage * volume
+    liquid_volume = volume - gas_volume
+
+    gas_mass = gas_volume * find_gaseous_nitrous_density(temperature)
+    liquid_mass = liquid_volume * find_liquid_nitrous_density(temperature)
+
+    return (liquid_center_of_mass * liquid_mass + gas_center_of_mass * gas_mass) / (liquid_mass + gas_mass)
+
 
 
 if __name__ == '__main__':
