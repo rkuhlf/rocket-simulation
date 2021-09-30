@@ -1,6 +1,22 @@
 import numpy as np
+import sys
+sys.path.append('.')
+
 from RocketParts.Motor.nitrousProperties import find_nitrous_vapor_pressure, find_liquid_nitrous_density, find_specific_enthalpy_of_gaseous_nitrous, find_specific_enthalpy_of_liquid_nitrous
 
+
+def find_required_thickness(pressure_drop, radius, poisson_ratio, failure_stress):
+    numerator = 0.375 * pressure_drop * radius**3 * (1 + poisson_ratio)
+    return (numerator / failure_stress) ** (1/2)
+
+def find_injector_volume(thickness, radius):
+    return np.pi * radius ** 2 * thickness
+
+def find_injector_mass(thickness, radius, density):
+    return find_injector_volume(thickness, radius) * density
+
+
+#region MASS FLOW CHARACTERISTICS
 
 def find_total_cross_sectional_area(count, diameter):
     # for use with multiple orifices
@@ -82,7 +98,12 @@ def find_mass_flow_dyer_interpolation(
             )
         )
 
+#endregion
 
 
 if __name__ == "__main__":
-    pass
+    # These are the numbers from memory for aluminum, they do not include the effects of heat (probably important, considering aluminum melts at 1,221 F and our combustion will probably be around 3300 F)
+    thickness = (find_required_thickness(450, 4, 0.31, 40000)) # everything in psi
+    mass = find_injector_mass(thickness, 4, )
+
+ 

@@ -276,7 +276,7 @@ def get_edge_distance(edges, pixels):
 # TODO: further testing required for internal circle
 # Gear demonstrates issues best
 if __name__ == "__main__":
-    base_path = "Data/Input/"
+    base_path = "Data/Input/RegressionImages/"
     file_name = "gear.png"
     pixels = load_image(base_path + file_name)
 
