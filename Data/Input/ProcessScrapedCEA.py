@@ -11,26 +11,27 @@
 # It should be pretty simple to do with a rearrangement of the thrust equation
 # And I would like to output the *CF*; I believe CEA assumes atmospheric conditions
 
+import pandas as pd
+import numpy as np
 
 
 import sys
 sys.path.append(".")
 
 # Adds one because it is exclusive
-max_file_num = 1
+max_file_num = 15
 
 
+output = []
 
 
 def read_cea_lines(lines):
     chamber_pressure = float(lines[0].split()[2])
-    print(chamber_pressure)
 
     while "O/F= " not in lines[0]:
         del lines[0]
 
     OF_ratio = float(lines[0].split()[1])
-    print(OF_ratio)
 
     # If we don't get to exit conditions, we can't do anything
     while len(lines) > 0 and "EXIT" not in lines[0]:
@@ -60,15 +61,16 @@ def read_cea_lines(lines):
         del lines[0]
 
     mach_number = float(lines[0].split()[4])
-    print("Mach number", mach_number)
 
     exit_velocity = speed_of_sound * mach_number
 
-    print(exit_velocity)
 
+    while "CF" not in lines[0]:
+        del lines[0]
 
+    CF = float(lines[0].split()[2])
 
-
+    return [chamber_pressure, OF_ratio, exit_pressure, gamma, exit_velocity, CF]
 
     
 
@@ -93,9 +95,23 @@ for num in range(max_file_num):
             cea_run.append(lines[0])
             del lines[0]
 
-        read_cea_lines(cea_run)
+        data = read_cea_lines(cea_run)
+        if data is not None:
+            output.append(data)
 
 
 
 
     f.close()
+
+
+output = np.asarray(output)
+
+print(output)
+
+dataframe = pd.DataFrame(output, columns=["Chamber Pressure [psia]", "O/F Ratio", "Exit Pressure [psia]", "gamma", "Exit Velocity [m/s]", "Thrust Coefficient"])
+print(dataframe)
+
+dataframe.to_csv("./Data/Input/CombustionLookup.csv")
+
+
