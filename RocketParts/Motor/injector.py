@@ -104,6 +104,8 @@ def find_mass_flow_dyer_interpolation(
 if __name__ == "__main__":
     # These are the numbers from memory for aluminum, they do not include the effects of heat (probably important, considering aluminum melts at 1,221 F and our combustion will probably be around 3300 F)
     thickness = (find_required_thickness(450, 4, 0.31, 40000)) # everything in psi
-    mass = find_injector_mass(thickness, 4, )
+    mass = find_injector_mass(thickness, 4, 0.0442451) # density in kg/m^3
+
+    print(mass, "kg")
 
  
