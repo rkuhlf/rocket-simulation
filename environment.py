@@ -45,6 +45,8 @@ class Environment(PresetObject):
         return self.gravitational_constant * self.earth_mass * rocket_mass / (
             self.earth_radius + altitude + self.base_altitude) ** 2
 
+    def get_air_pressure(self, altitude):
+        pass
 
     def get_air_speed(self, altitude):
         if not self.apply_wind:

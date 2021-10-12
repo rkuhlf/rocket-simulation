@@ -30,8 +30,9 @@ timeout = 3
 #endregion
 
 #region DESIRED INPUTS
+# https://ntrs.nasa.gov/api/citations/19960044559/downloads/19960044559.pdf
 
-# bothh of these will overshoot unless you line up the increment perfectly
+# both of these will overshoot unless you line up the increment perfectly
 # min should realistically be one, it starts at one
 min_pressure = 1
 max_pressure = 50
@@ -45,6 +46,10 @@ OF_increment = 0.2
 
 nozzleDivergingRatio = 4
 
+paraffin_temperature = 293 # Kelvin, idk
+paraffin_enthalpy = "" # J/mol
+
+nitrous_temperature = 270 # Kelvin, it is coming out and evaporating, I think it might be pretty low
 #endregion
 
 
@@ -79,7 +84,7 @@ def on_load(wait_selector, func):
         # print("Page loaded", wait_selector)
         func()
 
-
+#region FUNCTIONS FOR SCRAPING
 submit_button = "input[name='.submit']"
 
 def click_css(selector):
@@ -149,6 +154,8 @@ def finalSubmission():
     click_css("input[name='Equilibrium']")
 
     clickSubmit()
+
+#endregion
 
 iters = 0
 def saveOutput():
