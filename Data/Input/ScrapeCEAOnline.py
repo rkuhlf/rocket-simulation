@@ -17,10 +17,11 @@ from pynput.keyboard import Key, Controller
 
 #region SCRAPING SETTINGS
 options = webdriver.ChromeOptions()
+options.add_experimental_option('excludeSwitches', ['enable-logging'])
 # options.add_argument("--headless")
 
-chrome_driver = ChromeDriverManager().install()
-driver = webdriver.Chrome(chrome_driver, options=options)
+# chrome_driver = ChromeDriverManager().install()
+driver = webdriver.Chrome("C:/Users/rkuhlman813/Documents/chromedriver.exe", options=options)
 
 keyboard = Controller()
 
@@ -31,14 +32,15 @@ timeout = 3
 #region DESIRED INPUTS
 
 # bothh of these will overshoot unless you line up the increment perfectly
+# min should realistically be one, it starts at one
 min_pressure = 1
 max_pressure = 50
-pressure_increment = 2
+pressure_increment = 1
 
 
-min_OF = 0
+min_OF = 0.3
 max_OF = 25
-OF_increment = 5
+OF_increment = 0.2
 
 
 nozzleDivergingRatio = 4
@@ -47,7 +49,7 @@ nozzleDivergingRatio = 4
 
 
 runs_for_pressure = []
-pressure_iterated_so_far = 0
+pressure_iterated_so_far = min_pressure
 
 while pressure_iterated_so_far < max_pressure:
     # The max it can take is 24, and it is inclusive-inclusive
@@ -56,7 +58,7 @@ while pressure_iterated_so_far < max_pressure:
 
 
 runs_for_OF = []
-OF_iterated_so_far = 0
+OF_iterated_so_far = min_OF
 
 while OF_iterated_so_far < max_OF:
     # The max it can take is 30, and it is inclusive-inclusive
@@ -64,7 +66,7 @@ while OF_iterated_so_far < max_OF:
     OF_iterated_so_far += OF_increment * 30
 
 
-
+#region SCRAPING FUNCTIONS
 
 def on_load(wait_selector, func):
     try:
@@ -74,7 +76,7 @@ def on_load(wait_selector, func):
     except TimeoutException:
         print("Timed out waiting for page to load", wait_selector)
     finally:
-        print("Page loaded", wait_selector)
+        # print("Page loaded", wait_selector)
         func()
 
 
@@ -152,16 +154,22 @@ iters = 0
 def saveOutput():
     global iters
     output = driver.find_element_by_tag_name("body").text
-    print(output)
 
     f = open("./Data/Input/CEAOutput/" + str(iters), "w")
     f.write(output)
     f.close()
+    print("Saved output")
+
 
     iters += 1
 
-for pressure_range in [(1, 10)]:# runs_for_pressure:
-    for OF_range in [(0.1, 10)]:# runs_for_OF:
+#endregion
+
+print(runs_for_OF, "\n", runs_for_pressure)
+for pressure_range in runs_for_pressure:
+    for OF_range in runs_for_OF:
+        print(pressure_range, OF_range)
+
         driver.get("https://cearun.grc.nasa.gov/")
         on_load('.submitBtn', submitRocketType)
 
@@ -182,6 +190,7 @@ for pressure_range in [(1, 10)]:# runs_for_pressure:
         on_load("body", lambda : click_css("a[href='showFileOnBrowser.cgi?results=o']"))
 
         on_load("body", saveOutput)
+        # driver.close()
 
 
 

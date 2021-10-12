@@ -1,3 +1,8 @@
+import sys
+sys.path.append(".")
+
+from preset_object import PresetObject
+
 # Finds the dynamic O/F stuff
 # Keeps track of the change in chamber pressure
 # The combustion chamber keeps track of the fuel grain and combustion
