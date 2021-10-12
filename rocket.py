@@ -246,7 +246,7 @@ class Rocket(PresetObject):
 
 
         x_component = direction[0] * value
-        # The around rotation determines what fraction of the force goes to the yaw and what fraction to the torque. When the rocket hasn't spun at all, all of the x_component goes to the pitch
+        # The around rotation determines what fraction of the force goes to the yaw and what fraction to the pitch. When the rocket hasn't spun at all, all of the x_component goes to the pitch
         # I might just need the value of this
         pitch_multiplier = np.cos(self.theta_around())
         # If the rocket was travelling horizontally, there wouldn't be any force. 90 -> 0
