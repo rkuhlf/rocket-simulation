@@ -126,11 +126,22 @@ class CustomMotor(Motor):
         self.nozzle = nozzle
         self.environment = environment
 
+        self.data_path = "./Data/Inputs/CombustionLookup.csv"
+
+
         super().overwrite_defaults(config)
 
         # Look, here is where I really want to have all of the mass calculations done separately
         # TODO: I could have a mass object class that all of the objects in the rocket with mass inherit from, then I have it define a get mass and a get_position function, then it uses its own state to calculate each
         self.mass = ox_tank.mass + injector.mass + combustion_chamber.mass + nozzle.mass
+
+    def update_values_from_CEA(self, chamber_pressure, OF):
+        self.nozzle.throat_temperature
+        self.nozzle.exit_pressure
+        self.nozzle.isentropic_exponent
+        self.combustion_chamber.temperature
+        self.combustion_chamber.cstar
+        
 
     def simulate_step(self):
         upstream_pressure = self.ox_tank.pressure
@@ -138,11 +149,13 @@ class CustomMotor(Motor):
         ox_flow = self.injector.get_mass_flow(downstream_pressure, upstream_pressure)
 
         self.ox_tank.update_drain(ox_flow * self.environment.time_increment)
-        self.combustion_chamber.update_combustion(ox_flow)
+        self.combustion_chamber.update_combustion(ox_flow, self.nozzle, self.environment.time_increment)
 
         fuel_flow = self.combustion_chamber.grain.mass_flow
 
-        nozzle_coefficient = self.nozzle.get_nozzle_coefficient(self.ox_tank.pressure, ox_flow / fuel_flow, self.environment.get_air_pressure(0))
+        OF = ox_flow / fuel_flow
+
+        nozzle_coefficient = self.nozzle.get_nozzle_coefficient(self.combustion_chamber.pressure, OF, self.environment.get_air_pressure(0))
 
         # TODO: Account for nozzle loss from the port diameter ratio to the nozzle throat. I still need to read about this some more
         self.thrust = nozzle_coefficient * self.nozzle.throat_area * self.combustion_chamber.pressure

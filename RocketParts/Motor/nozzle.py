@@ -140,9 +140,19 @@ def determine_expansion_ratio(combustion_chamber_pressure, atmospheric_pressure,
 
 
 class Nozzle(PresetObject):
+    """
+    This one is not really meant to be used, it is just a parent class for the CEA nozzle.
+    Maybe in the future it will also be the parent class for a simpler nozzle as well.
+    """
 
     def __init__(self, config={}, fuel_grain=None):
         self.area_ratio = 4
+        self.throat_temperature = 800 # Kelvin
+
+        self.isentropic_exponent = 1.3
+        self.exit_pressure = 100000 # Pascals. Assumes the nozzle is optimized for sea level
+
+        self.overexpanded = False
 
         super().overwrite_defaults(config)
 
@@ -154,21 +164,20 @@ class Nozzle(PresetObject):
         """
         # Look up the isentropic exponent and the exit pressure from the CEA inputs we are using
 
-        isentropic_less = isentropic_exponent - 1
-        isentropic_more = isentropic_exponent + 1
+        isentropic_less = self.isentropic_exponent - 1
+        isentropic_more = self.isentropic_exponent + 1
 
         # C_F = sqrt([(2*gamma^2)/(gamma-1)] * [2/(gamma+1)]^[(gamma+1)/(gamma-1)] * [1 - (P_e / P_c) ^ [(gamma-1)/gamma]])  +  (P_e - P_a)/P_c * A_e/A_t
 
-        first_coefficient = 2 * isentropic_exponent ** 2 / isentropic_less
+        first_coefficient = 2 * self.isentropic_exponent ** 2 / isentropic_less
         second_coefficient = (2 / isentropic_more) ** (isentropic_more / isentropic_less)
-        third_coefficient = 1 - (exit_pressure / chamber_pressure) ** (isentropic_less / isentropic_exponent)
+        third_coefficient = 1 - (self.exit_pressure / chamber_pressure) ** (isentropic_less / self.isentropic_exponent)
 
         momentum_component = (first_coefficient * second_coefficient * third_coefficient) ** (1 / 2)
 
-        pressure_difference_component = (exit_pressure - atmospheric_pressure) / chamber_pressure * self.area_ratio
+        pressure_difference_component = (self.exit_pressure - atmospheric_pressure) / chamber_pressure * self.area_ratio
 
         return momentum_component + pressure_difference_component
-
 
 
 

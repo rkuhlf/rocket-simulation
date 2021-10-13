@@ -27,6 +27,13 @@ class CombustionChamber(PresetObject):
         self.pressure = 101300 # Pa
         # Instantly goes to the adiabatic (?) flame temperature
         self.temperature = 273.15 + 23 # Kelvin
+        # P / RT = rho
+        # Actually it turns out there is a wacko condition in the way MW is calculated and it is easiest just to use the density output by CEA; I think it does it with M but it might be with MW
+        # Please do not use the value from CEA here, that will ruin the whole point of the calculations. We have to find our own pressure, because we have to find our own mass
+        # TODO: I don't know the difference between M and MW. There is a 50% chance this is wrong. Most useful source is on 78 of https://ntrs.nasa.gov/api/citations/19960044559/downloads/19960044559.pdf
+        # You know what, I came back around. Our system is only defined by the pressure and the volume. We have given the CEA pressure and temperature, from P=pRT it can find the density
+        self.density = 4  # kg/m^3
+        self.cstar = 1500 # m/s
 
         super().overwrite_defaults(config)
 
@@ -45,11 +52,7 @@ class CombustionChamber(PresetObject):
         '''
         # d(P_c)/d(t) = [m-dot_ox + (rho_f - rho_c)*A_b*a*G_ox^n - P_c*A_t/c*_exp] * R*T_C / V_C
 
-    def update_chamber_conditions(self, OF):
-        # This is basically just a look up for the CEA table
-        pass
-
-    def update_combustion(self, ox_mass_flow, time_increment):
+    def update_combustion(self, ox_mass_flow, nozzle, time_increment):
         # From the grain and the ox mass flow, calculate the mass flow of fuel
         self.fuel_grain.update_regression(ox_mass_flow, time_increment)
         fuel_flow = self.fuel_grain.mass_flow
@@ -58,8 +61,11 @@ class CombustionChamber(PresetObject):
         OF = ox_mass_flow / fuel_flow
 
         # Calculate the mass flow out (requires nozzle throat)
+        mass_flow_out = self.pressure * self.nozzle.throat_area / self.cstar
 
+    
 
         # Update the pressure in the system. Uses the previously calculated mass flux out
-
-        pass
+        # mass flow into the chamber
+        mass_flow_total = ox_mass_flow +  - mass_flow_out
+        

@@ -11,6 +11,8 @@
 # It should be pretty simple to do with a rearrangement of the thrust equation
 # And I would like to output the *CF*; I believe CEA assumes atmospheric conditions
 
+# Turns out I also need the molecular weight (MW) for the ideal gas law in CC, and the c-star value, since that is in fact the main point of the calculation
+
 import pandas as pd
 import numpy as np
 
@@ -24,6 +26,9 @@ max_file_num = 15
 
 output = []
 
+def process_CEA_float(string):
+    # account for the minus sign making it scientific notation
+    pass
 
 def read_cea_lines(lines):
     chamber_pressure = float(lines[0].split()[2])
@@ -41,34 +46,50 @@ def read_cea_lines(lines):
         return
 
     # We go through all of the things we need and return them
+    # Bruh they literally did this for me and I ignored it
     while "Pinf/P" not in lines[0]:
         del lines[0]
     
-    chamber_over_exit = float(lines[0].split()[3])
+    chamber_over_exit = process_CEA_float(lines[0].split()[3])
     exit_pressure = chamber_pressure / chamber_over_exit
+
+    while "RHO" not in lines[0]:
+        del lines[0]
+
+    density = process_CEA_float(lines[0].split()[3])
+    print(density)
 
     while "GAMMAs" not in lines[0]:
         del lines[0]
 
-    gamma = float(lines[0].split()[2])
+    gamma = process_CEA_float(lines[0].split()[2])
 
     while "SON VEL,M/SEC" not in lines[0]:
         del lines[0]
 
-    speed_of_sound = float(lines[0].split()[4])
+    speed_of_sound = process_CEA_float(lines[0].split()[4])
 
     while "MACH NUMBER" not in lines[0]:
         del lines[0]
 
-    mach_number = float(lines[0].split()[4])
+    mach_number = process_CEA_float(lines[0].split()[4])
 
     exit_velocity = speed_of_sound * mach_number
 
+    while "CSTAR" not in lines[0]:
+        del lines[0]
+
+    cstar = process_CEA_float(lines[0].split()[2])
 
     while "CF" not in lines[0]:
         del lines[0]
 
-    CF = float(lines[0].split()[2])
+    CF = process_CEA_float(lines[0].split()[2])
+
+    while "Isp" not in lines[0]:
+        del lines[0]
+
+    specific_impulse = process_CEA_float(lines[0].split()[3])
 
     return [chamber_pressure, OF_ratio, exit_pressure, gamma, exit_velocity, CF]
 
@@ -76,6 +97,7 @@ def read_cea_lines(lines):
 
 
 for num in range(max_file_num):
+    print("EXTRACTING FROM FILE", num)
     f = open("Data/Input/CEAOutput/" + str(num))
     lines = f.readlines()
 
