@@ -66,8 +66,8 @@ def find_dyer_interpolation_factor(
 # TODO: I need to implement the critical velocity point for when the pressure downstream is very low and things are basically choked
 
 # TODO: I have a major problem; probably the best solution will be found in one of the 2 100 page papers on ox tanks
-# The upstream pressure is calculated identically to the calculations for the vapor pressure in the injector
-# I think that there needs to be some new calculations to get a different temperature in the injector, but I don't know what
+# The upstream pressure is calculated identically to the calculations for the vapor pressure in the injector. That means that k will always be sqrt(1)
+# I believe that the way I am supposed to fix this is to implement a more advanced equation of state for the ox tank. I think I will try to do the Helmholtz one. It looks like it will make the 
 
 
 def find_mass_flow_dyer_interpolation(

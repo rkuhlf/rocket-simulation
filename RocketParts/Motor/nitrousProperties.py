@@ -90,3 +90,24 @@ def find_gaseous_heat_capacity(temperature):
         total += coefficients[i] * (1 - temperature / 309.57) ** ((i - 2) / 3)
 
     return 132.632 * total
+
+
+
+
+
+if __name__ == "__main__":
+    print("Calculating Compressibility Ratios")
+
+
+    temperatures = np.linspace(273.15 - 90, 273.15 + 36, num=50)
+    compressibilities = []
+
+    for t in temperatures:
+        P = find_nitrous_vapor_pressure(t)* 10**5
+        rho = find_gaseous_nitrous_density(t)
+        R = 188.91 # J/ kgK
+
+        compressibilities.append(P / (rho * t * R))
+
+    for i in range(len(temperatures)):
+        print(temperatures[i], compressibilities[i])
