@@ -11,7 +11,8 @@
 # It should be pretty simple to do with a rearrangement of the thrust equation
 # And I would like to output the *CF*; I believe CEA assumes atmospheric conditions
 
-# Turns out I also need the molecular weight (MW) for the ideal gas law in CC, and the c-star value, since that is in fact the main point of the calculation
+# Turns out I also need the molecular weight (MW) for the ideal gas law in CC. Actually, I just need the density of the chamber. and the *c-star* value, since that is in fact the main point of the calculation
+# Also I need the velocity at the throat
 
 import pandas as pd
 import numpy as np
@@ -28,7 +29,13 @@ output = []
 
 def process_CEA_float(string):
     # account for the minus sign making it scientific notation
-    pass
+    if "-" in string:
+        split = string.split("-")
+        base = float(split[0])
+        exponent = float(split[1])
+        return base * 10 ** exponent
+    
+    return float(string)
 
 def read_cea_lines(lines):
     chamber_pressure = float(lines[0].split()[2])
@@ -53,11 +60,15 @@ def read_cea_lines(lines):
     chamber_over_exit = process_CEA_float(lines[0].split()[3])
     exit_pressure = chamber_pressure / chamber_over_exit
 
+    # while "T, K" not in lines[0]:
+    #     del lines[0]
+
+    # throat_temperature = process_CEA_float(lines[0].split()[3])
+
     while "RHO" not in lines[0]:
         del lines[0]
 
     density = process_CEA_float(lines[0].split()[3])
-    print(density)
 
     while "GAMMAs" not in lines[0]:
         del lines[0]
@@ -67,6 +78,7 @@ def read_cea_lines(lines):
     while "SON VEL,M/SEC" not in lines[0]:
         del lines[0]
 
+    throat_velocity = process_CEA_float(lines[0].split()[3])
     speed_of_sound = process_CEA_float(lines[0].split()[4])
 
     while "MACH NUMBER" not in lines[0]:
@@ -89,9 +101,9 @@ def read_cea_lines(lines):
     while "Isp" not in lines[0]:
         del lines[0]
 
-    specific_impulse = process_CEA_float(lines[0].split()[3])
+    specific_impulse = process_CEA_float(lines[0].split()[3]) / 9.81
 
-    return [chamber_pressure, OF_ratio, exit_pressure, gamma, exit_velocity, CF]
+    return [chamber_pressure, OF_ratio, cstar, specific_impulse, density, throat_velocity, exit_pressure, gamma, exit_velocity, CF]
 
     
 
@@ -131,8 +143,12 @@ output = np.asarray(output)
 
 print(output)
 
-dataframe = pd.DataFrame(output, columns=["Chamber Pressure [psia]", "O/F Ratio", "Exit Pressure [psia]", "gamma", "Exit Velocity [m/s]", "Thrust Coefficient"])
+dataframe = pd.DataFrame(output, columns=["Chamber Pressure [psia]", "O/F Ratio", "C-star", "Specific Impulse [s]", "Chamber Density [kg/m^3]", "Throat Velocity [m/s]", "Exit Pressure [psia]", "gamma", "Exit Velocity [m/s]", "Thrust Coefficient"])
+
+dataframe = dataframe.sort_values(["O/F Ratio", "Chamber Pressure [psia]"])
+
 print(dataframe)
+
 
 dataframe.to_csv("./Data/Input/CombustionLookup.csv")
 

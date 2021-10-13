@@ -156,7 +156,7 @@ class Nozzle(PresetObject):
 
         super().overwrite_defaults(config)
 
-    def get_nozzle_coefficient(self, chamber_pressure, OF, atmospheric_pressure):
+    def get_nozzle_coefficient(self, chamber_pressure, atmospheric_pressure):
         """
             Calculate the multiplicative effect that the nozzle has on thrust
 

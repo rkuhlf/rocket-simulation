@@ -26,6 +26,7 @@ class CombustionChamber(PresetObject):
         # Starts at this and we change it manually
         self.pressure = 101300 # Pa
         # Instantly goes to the adiabatic (?) flame temperature
+        # FIXME: For some reason I am not using this temperature value anywhere. I am 40% sure that I should be. The other 60% thinks that we have the system defined in terms of pressure, and the only thing we need the temperature for is to find the density, which CEA already knows
         self.temperature = 273.15 + 23 # Kelvin
         # P / RT = rho
         # Actually it turns out there is a wacko condition in the way MW is calculated and it is easiest just to use the density output by CEA; I think it does it with M but it might be with MW
@@ -43,13 +44,13 @@ class CombustionChamber(PresetObject):
         #endregion
 
 
-    def get_change_in_pressure(self, ox_mass_flow):
+    def get_change_in_pressure(self, apparent_mass_flow):
         '''
         Returns the rate of pressure change with respect to time. 
         Based off of mass continuity in the combustion chamber.
-        This ox_mass_flow is the flow rate, it should be in mass-per-time
-        I believe this equation is absolutely correct
+        You have to input the net effective mass flowing into the chamber
         '''
+        # Based off of this monster of an equation
         # d(P_c)/d(t) = [m-dot_ox + (rho_f - rho_c)*A_b*a*G_ox^n - P_c*A_t/c*_exp] * R*T_C / V_C
 
     def update_combustion(self, ox_mass_flow, nozzle, time_increment):
@@ -63,9 +64,9 @@ class CombustionChamber(PresetObject):
         # Calculate the mass flow out (requires nozzle throat)
         mass_flow_out = self.pressure * self.nozzle.throat_area / self.cstar
 
-    
+        volume_regressed = self.fuel_grain.get_volume_flow() * time_increment
 
         # Update the pressure in the system. Uses the previously calculated mass flux out
         # mass flow into the chamber
-        mass_flow_total = ox_mass_flow +  - mass_flow_out
+        effective_mass_flow_total = ox_mass_flow + (self.fuel_grain.density - self.density) * volume_regressed - mass_flow_out
         

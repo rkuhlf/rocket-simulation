@@ -1,4 +1,9 @@
 import numpy as np
+import sys
+sys.path.append(".")
+
+from preset_object import PresetObject
+
 
 class Grain(PresetObject):
     def __init__(self, config={}):
@@ -16,6 +21,9 @@ class Grain(PresetObject):
         leading_ballistic_coefficient = 1.550 * 10^-4
         exponential_ballistic_coefficient = 0.5
         return leading_ballistic_coefficient * mass_flux ** exponential_ballistic_coefficient
+
+    def get_volume_flow(self):
+        return self.mass_flow / self.density
 
     def update_regression(self, ox_flow, time_increment):
         port_area = np.pi * self.inner_radius ** 2

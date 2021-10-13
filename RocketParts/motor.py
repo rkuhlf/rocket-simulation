@@ -127,6 +127,7 @@ class CustomMotor(Motor):
         self.environment = environment
 
         self.data_path = "./Data/Inputs/CombustionLookup.csv"
+        self.data = pd.read_csv(self.data_path)
 
 
         super().overwrite_defaults(config)
@@ -136,11 +137,30 @@ class CustomMotor(Motor):
         self.mass = ox_tank.mass + injector.mass + combustion_chamber.mass + nozzle.mass
 
     def update_values_from_CEA(self, chamber_pressure, OF):
-        self.nozzle.throat_temperature
-        self.nozzle.exit_pressure
-        self.nozzle.isentropic_exponent
-        self.combustion_chamber.temperature
-        self.combustion_chamber.cstar
+        """
+        This is doing a look up for the chamber pressure in Pascals.
+        It will always round up
+        """
+        # I don't really know what to do if we are getting condensed values in the nose cone. I guess we can just use the next one up
+        looking_for_pressure = False
+
+        for row in self.data.iterrows():
+            if looking_for_pressure and chamber_pressure < row["Chamber Pressure [psia]"] * 6894.76: # convert to Pa
+                # We have found the row we want
+                # Eventually, I should probably add an output for the nozzle throat temperature over time. We want to be certain that our graphite won't be damaged by the extreme heat
+                # Actually we don't even need the velocity at the throat because we can calculate it from the c-star and the internal pressure
+                self.nozzle.throat_velocity = row["Throat Velocity [m/s]"]
+                self.nozzle.exit_pressure = row["Exit Pressure [psia]"] * 6894.76
+                self.nozzle.isentropic_exponent = row["gamma"]
+                self.combustion_chamber.density = row["Chamber Density [kg/m^3]"]
+                self.combustion_chamber.cstar = row["C-star"]
+
+            if OF < row["O/F Ratio"]:
+                # To make sure that we always get a number, I am going to always pick the row that has an O/F ratio immediately above the current value
+                looking_for_pressure = True
+
+
+        
         
 
     def simulate_step(self):
@@ -158,6 +178,7 @@ class CustomMotor(Motor):
         nozzle_coefficient = self.nozzle.get_nozzle_coefficient(self.combustion_chamber.pressure, OF, self.environment.get_air_pressure(0))
 
         # TODO: Account for nozzle loss from the port diameter ratio to the nozzle throat. I still need to read about this some more
+        # TODO: I want to reimplement this so that the nozzle is giving mass flow and exit velocity values. I think both ways should work, but that way will be easier to compare, and I am not sure that my nozzle coefficient calculation is correct
         self.thrust = nozzle_coefficient * self.nozzle.throat_area * self.combustion_chamber.pressure
 
 
