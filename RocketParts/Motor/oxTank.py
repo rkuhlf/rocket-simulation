@@ -223,6 +223,9 @@ class OxTank(PresetObject):
         #     raise ValueError(
         #         "Your ox tank is overfull with liquid. I don't know what happens when you put more volume of liquid than can fit into a container, but there are likely going to be some extra stresses here.")
 
+    def get_pressure(self):
+        return get_nitrous_vapor_pressure(self.temperature)
+
 
     def update_drain(self, mass_change):
         self.ox_mass -= mass_change

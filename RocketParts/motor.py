@@ -126,7 +126,7 @@ class CustomMotor(Motor):
         self.nozzle = nozzle
         self.environment = environment
 
-        self.data_path = "./Data/Inputs/CombustionLookup.csv"
+        self.data_path = "./Data/Input/CombustionLookup.csv"
         self.data = pd.read_csv(self.data_path)
 
 
@@ -134,7 +134,7 @@ class CustomMotor(Motor):
 
         # Look, here is where I really want to have all of the mass calculations done separately
         # TODO: I could have a mass object class that all of the objects in the rocket with mass inherit from, then I have it define a get mass and a get_position function, then it uses its own state to calculate each
-        self.mass = ox_tank.mass + injector.mass + combustion_chamber.mass + nozzle.mass
+        # self.mass = ox_tank.mass + injector.mass + combustion_chamber.mass + nozzle.mass
 
     def update_values_from_CEA(self, chamber_pressure, OF):
         """
@@ -160,13 +160,11 @@ class CustomMotor(Motor):
                 looking_for_pressure = True
 
 
-        
-        
 
     def simulate_step(self):
-        upstream_pressure = self.ox_tank.pressure
+        upstream_pressure = self.ox_tank.get_pressure()
         downstream_pressure = self.combustion_chamber.pressure
-        ox_flow = self.injector.get_mass_flow(downstream_pressure, upstream_pressure)
+        ox_flow = self.injector.get_mass_flow()
 
         self.ox_tank.update_drain(ox_flow * self.environment.time_increment)
         self.combustion_chamber.update_combustion(ox_flow, self.nozzle, self.environment.time_increment)
@@ -194,5 +192,26 @@ if __name__ == "__main__":
     # m.exit_mach()
     # print(m.get_thrust())
 
-    m = Motor()
+    # Bare minimum simulation
+    from RocketParts.Motor.oxTank import OxTank
+    from RocketParts.Motor.injector import Injector
+    from RocketParts.Motor.combustionChamber import CombustionChamber
+    from RocketParts.Motor.grain import Grain
+    from RocketParts.Motor.nozzle import Nozzle
+    from environment import Environment
+
+    ox = OxTank()
+    grain = Grain()
+    chamber = CombustionChamber(fuel_grain=grain)
+    injector = Injector(ox_tank=ox, combustion_chamber=chamber)
+    nozzle = Nozzle(fuel_grain=grain)
+    env = Environment()
+
+    motor = CustomMotor(ox_tank=ox, injector=injector, combustion_chamber=chamber, nozzle=nozzle, environment=env)
+
+    for i in range(30):
+        motor.simulate_step()
+        print(motor.combustion_chamber.pressure)
+
+    
     # print(m.get_burn_time())

@@ -11,7 +11,7 @@ from preset_object import PresetObject
 
 # The goal is to solve for thrust given easily determined characteristics of the motor
 # The things that are changing is the mass flow rate and the exit velocity, as well as the exit pressure (probably)
-class CustomMotor(Motor):
+'''class CustomMotor(Motor):
     # TODO: check that the NASA method gives the same output as CEA
     # Test with https://www.grc.nasa.gov/www/k-12/rocket/ienzl.html
     # At the moment, everything is being calculated as a constant
@@ -110,7 +110,7 @@ class CustomMotor(Motor):
         # The amount of momentum being pushed out + the pressure difference
         return self.mass_flow_rate() * self.exit_velocity() + self.exit_area * (
             self.exit_pressure() - self.get_free_stream_pressure())
-
+'''
 
 
 def determine_expansion_ratio(combustion_chamber_pressure, atmospheric_pressure, isentropic_exponent):

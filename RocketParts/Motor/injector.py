@@ -38,7 +38,7 @@ def find_mass_flow_single_phase_incompressible(
 
 
 def find_mass_flow_homogenous_equilibrium(
-        pressure, upstream_enthalpy, downstream_enthalpy):
+        density, upstream_enthalpy, downstream_enthalpy):
     # Some implementations of this model are going to include a C_d here, but I think it is better to only have the one C_d with dyer
 
     # Underpredicts flow rate, assumes equilibrium of flow
@@ -46,7 +46,7 @@ def find_mass_flow_homogenous_equilibrium(
     # Notice it is upstream - downstream. When you are going to a really small energy state, you will get more mass flow
     # TODO: I don't think this is very correct. I'm pretty sure this downstream enthalpy is different than just using the temperature of nitrous in the combustion chamber
     # Even if I just say that it is all gas, the gradient is still going to be mostly backwards
-    return pressure * (2 * (upstream_enthalpy - downstream_enthalpy)) ** (1 / 2)
+    return density * (2 * (upstream_enthalpy - downstream_enthalpy)) ** (1 / 2)
 
 
 def find_dyer_interpolation_factor(
@@ -88,14 +88,14 @@ def find_mass_flow_dyer_interpolation(
     downstream_enthalpy = find_specific_enthalpy_of_gaseous_nitrous(
         downstream_temperature)
 
-
+    # TODO: make sure that I am multiplying by area and density in the correct places
     return discharge_coefficient * area * \
         (
             k / (k + 1) * find_mass_flow_single_phase_incompressible(
                 liquid_density,
                 upstream_pressure - downstream_pressure)
             + 1 / (k + 1) * find_mass_flow_homogenous_equilibrium(
-                pressure, upstream_enthalpy, downstream_enthalpy
+                liquid_density, upstream_enthalpy, downstream_enthalpy
             )
         )
 
@@ -130,12 +130,20 @@ class Injector(PresetObject):
 
         area_ratio = self.get_total_orifice_area() / self.combustion_chamber.grain.get_outer_cross_sectional_area()
 
-        upstream_pressure = self.ox_tank.
-
         return ((2 * liquid_density * pressure_drop) / (1 - area_ratio ** 2)) ** (1 / 2)
 
     def get_mass_flow(self):
-        
+        upstream_pressure = self.ox_tank.get_pressure()
+        downstream_pressure = self.combustion_chamber.pressure
+        pressure_drop = upstream_pressure - downstream_pressure
+
+        density = get_liquid_nitrous_density(self.ox_tank.temperature)
+
+        return self.discharge_coefficient * \
+            self.find_mass_flow_single_phase_incompressible(
+                density, 
+                pressure_drop, 
+                self.get_total_cross_sectional_area)
 
 
 

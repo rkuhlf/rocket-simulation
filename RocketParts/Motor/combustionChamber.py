@@ -43,6 +43,8 @@ class CombustionChamber(PresetObject):
 
         #endregion
 
+    def get_volume(self):
+        pass
 
     def get_change_in_pressure(self, apparent_mass_flow):
         '''
@@ -52,6 +54,8 @@ class CombustionChamber(PresetObject):
         '''
         # Based off of this monster of an equation
         # d(P_c)/d(t) = [m-dot_ox + (rho_f - rho_c)*A_b*a*G_ox^n - P_c*A_t/c*_exp] * R*T_C / V_C
+        # TODO: R is broken right now. I don't know how to calculate; probably just use the M value from CEA
+        return apparent_mass_flow * R * self.temperature / self.get_volume()
 
     def update_combustion(self, ox_mass_flow, nozzle, time_increment):
         # From the grain and the ox mass flow, calculate the mass flow of fuel
@@ -69,4 +73,6 @@ class CombustionChamber(PresetObject):
         # Update the pressure in the system. Uses the previously calculated mass flux out
         # mass flow into the chamber
         effective_mass_flow_total = ox_mass_flow + (self.fuel_grain.density - self.density) * volume_regressed - mass_flow_out
+
+        self.get_change_in_pressure(effective_mass_flow_total)
         
