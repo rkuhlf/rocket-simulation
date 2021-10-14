@@ -8,9 +8,6 @@ from preset_object import PresetObject
 
 from RocketParts.Motor.nitrousProperties import *
 
-# atm it is mostly DOD, I'm not sure I want it like that, especially when I add it into the frame-by-frame sim
-
-
 #region DATA-ORIENTED EQUATIONS
 
 def find_combined_total_heat_capacity(gaseous_mass, liquid_mass,
@@ -132,23 +129,28 @@ def find_center_of_mass(ullage, volume, length, temperature):
 #endregion
 
 
-
+# FIXME: The gas mass is bigger than the ox mass. This is wrong
 class OxTank(PresetObject):
     def __init__(self, config={}):
 
         # TODO: figure out the optimal value for this
         self.temperature = 293 # Kelvin
-        self.length = 3 # m
+        self.length = 3.7 # m
         self.radius = 0.1016 # m
-        self.ox_mass = 70 # kg
+        self.ox_mass = 70.0 # kg
 
 
         super().overwrite_defaults(config)
 
         self.volume = self.get_volume()
+        self.inaccuracies = []
 
         # Do some initialization things
         self.ullage = 0
+        self.calculate_ullage()
+
+    def set_temperature(self, temperature):
+        self.temperature = temperature
         self.calculate_ullage()
 
     def get_volume(self):
@@ -158,6 +160,7 @@ class OxTank(PresetObject):
         return self.get_volume() * self.ullage
 
     def get_gas_mass(self):
+        print("In the get gas function", get_gaseous_nitrous_density(self.temperature), self.temperature)
         return self.get_gas_volume() * get_gaseous_nitrous_density(self.temperature)
 
 
@@ -186,6 +189,7 @@ class OxTank(PresetObject):
 
         return self.get_gas_mass() * gaseous_specific_heat + self.get_liquid_mass() * liquid_specific_heat
 
+    # I think temperature change is wrong at the moment. I don't understand why the temperature should continue to decrease when it is completely in the gaseous state - there is no more evaporation, and I don't think I'm simulating ideal gas stuff
     def calculate_ullage(self, constant_temperature=False, iterations=3, iters_so_far=0):
         """
         Calculate indicates that it will not return a value, but there are side effects to the object - it changes the object.
@@ -194,17 +198,28 @@ class OxTank(PresetObject):
 
         liquid_density = get_liquid_nitrous_density(self.temperature)
         gas_density = get_gaseous_nitrous_density(self.temperature)
+        print("First gas density", gas_density)
 
         already_gas_mass = self.get_gas_mass()
 
         liquid_mass = (self.volume - self.ox_mass / gas_density) / (1 / liquid_density - 1 / gas_density)
+        
         gas_mass = self.ox_mass - liquid_mass
+
+        print("Ox mass", self.ox_mass)
+        print("gas mass", gas_mass)
+        print("Already gas", already_gas_mass)
+        print("Volume of Chamber", self.volume)
+        print("Volume of gas", gas_mass / get_gaseous_nitrous_density(self.temperature))
+        print("Volume of liquid", self.get_liquid_mass())
+        self.inaccuracies.append((self.get_gas_volume() + self.get_liquid_volume()) / self.volume)
 
         self.ullage = (gas_mass / gas_density) / self.volume
         self.ullage = max(min(self.ullage, 1), 0)
 
         if not constant_temperature and iters_so_far < iterations:
             newly_evaporated_gas = gas_mass - already_gas_mass
+            print(newly_evaporated_gas)
             heat_absorbed = newly_evaporated_gas * \
                 find_heat_of_vaporization(self.temperature)
 
