@@ -39,7 +39,8 @@ class CombustionChamber(PresetObject):
         super().overwrite_defaults(config)
 
         #region CALCULATED
-        
+        # TODO: actually calculate it based on P = pRT
+        self.ideal_gas_constant = 0
 
         #endregion
 
@@ -53,6 +54,7 @@ class CombustionChamber(PresetObject):
         You have to input the net effective mass flowing into the chamber
         '''
         # Based off of this monster of an equation
+        # I think there is some way to do this without knowing R. Again, I'm not too sure about what is going on with how density is calculated for the combustion chamber; however, I am going to move forward with using molar mass and adiabatic flame temperature as well as density to find the change in pressure
         # d(P_c)/d(t) = [m-dot_ox + (rho_f - rho_c)*A_b*a*G_ox^n - P_c*A_t/c*_exp] * R*T_C / V_C
         # TODO: R is broken right now. I don't know how to calculate; probably just use the M value from CEA
         return apparent_mass_flow * R * self.temperature / self.get_volume()

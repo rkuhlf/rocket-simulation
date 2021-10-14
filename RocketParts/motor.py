@@ -3,7 +3,7 @@ import sys
 sys.path.append(".")
 
 from preset_object import PresetObject
-from Helpers.general import interpolate, binary_solve
+from Helpers.general import interpolate
 import pandas as pd
 
 
@@ -70,11 +70,9 @@ class Motor(PresetObject):
         current_time /= self.time_multiplier
         # this isn't very efficient, but there are barely 100 data points so it should be instant
         try:
-            previous_thrust = self.thrust_data[self.thrust_data["time"] <=
-                                               current_time]
+            previous_thrust = self.thrust_data[self.thrust_data["time"] <= current_time]
 
-            next_thrust = self.thrust_data[self.thrust_data["time"] >=
-                                           current_time]
+            next_thrust = self.thrust_data[self.thrust_data["time"] >= current_time]
 
             previous_thrust = previous_thrust.iloc[-1]
             next_thrust = next_thrust.iloc[0]
@@ -154,6 +152,8 @@ class CustomMotor(Motor):
                 self.nozzle.isentropic_exponent = row["gamma"]
                 self.combustion_chamber.density = row["Chamber Density [kg/m^3]"]
                 self.combustion_chamber.cstar = row["C-star"]
+                # TODO: Divide by the M that I will get from parsing CEA
+                self.combustion_chamber.ideal_gas_constant = 8.314 # 8.314 J/ mol·K / (kg/mol) = J / kgK, which I believe is what we want. Nevertheless, I need to make sure the values are reasonable
 
             if OF < row["O/F Ratio"]:
                 # To make sure that we always get a number, I am going to always pick the row that has an O/F ratio immediately above the current value
