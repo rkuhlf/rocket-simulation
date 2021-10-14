@@ -16,6 +16,10 @@ class Grain(PresetObject):
 
         super().overwrite_defaults(config)
 
+    def get_outer_cross_sectional_area(self):
+        return np.pi * self.outer_radius ** 2
+
+
     def get_regression_rate(self, mass_flux):
         # This is the famous regression rate equation that is so hard to get right
         leading_ballistic_coefficient = 1.550 * 10^-4

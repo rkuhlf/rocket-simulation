@@ -11,7 +11,7 @@ def confirm_range(temperature):
 
 
 # Also important for getting the tank pressure
-def find_nitrous_vapor_pressure(temperature):
+def get_nitrous_vapor_pressure(temperature):
     # bar
     confirm_range(temperature)
     return 72.51 * np.e ** (309.57 / temperature *
@@ -21,7 +21,7 @@ def find_nitrous_vapor_pressure(temperature):
                              (1 - temperature / 309.57) ** (5)))
 
 
-def find_liquid_nitrous_density(temperature):
+def get_liquid_nitrous_density(temperature):
     # kg/m**3
     confirm_range(temperature)
     return 452 * np.e ** (1.72328 * (1 - (temperature / 309.57)) ** (1 / 3) -
@@ -30,7 +30,7 @@ def find_liquid_nitrous_density(temperature):
                           (1 - (temperature / 309.57)) ** (4 / 3))
 
 
-def find_gaseous_nitrous_density(temperature):
+def get_gaseous_nitrous_density(temperature):
     # kg / m**3
     # could definitely have done this with a loop and like one array
     confirm_range(temperature)
@@ -103,8 +103,8 @@ if __name__ == "__main__":
     compressibilities = []
 
     for t in temperatures:
-        P = find_nitrous_vapor_pressure(t)* 10**5
-        rho = find_gaseous_nitrous_density(t)
+        P = get_nitrous_vapor_pressure(t)* 10**5
+        rho = get_gaseous_nitrous_density(t)
         R = 188.91 # J/ kgK
 
         compressibilities.append(P / (rho * t * R))

@@ -4,10 +4,14 @@ import sys
 
 sys.path.append(".")
 
+from preset_object import PresetObject
+
 from RocketParts.Motor.nitrousProperties import *
 
 # atm it is mostly DOD, I'm not sure I want it like that, especially when I add it into the frame-by-frame sim
 
+
+#region DATA-ORIENTED EQUATIONS
 
 def find_combined_total_heat_capacity(gaseous_mass, liquid_mass,
                                       gaseous_specific_heat,
@@ -25,8 +29,8 @@ def find_ullage(
     # if the temperature is changing, we need to know how much is already in gas phase
     # Because the change in phase is associated with a temperature change, we need to recalculate to adjust the densities. Since this is cyclical, we'll just loop through a couple of times and hope it converges (it should, unless the temperature is so large it causes more phase change than the initial)
     # If the temperature is constant, we will not account for the enthalpy absorbed by nitrous shifting to the gas phase
-    liquid_density = find_liquid_nitrous_density(temperature)
-    gas_density = find_gaseous_nitrous_density(temperature)
+    liquid_density = get_liquid_nitrous_density(temperature)
+    gas_density = get_gaseous_nitrous_density(temperature)
 
     #region Algebraic Proof for phase mass
     # volume = gas_volume + liquid_volume
@@ -79,6 +83,13 @@ def find_ullage(
     return [ullage, temperature_change_so_far]
 
 
+#endregion
+
+
+#region DESIGN EQUATIONS
+
+# TODO: create equation to maximize the volume and limit the stress given a cylindrical shape, eventually do it for a hemi-spherical shape
+
 def find_safety_factor(pressure, radius, thickness, failure_strength):
     stress = pressure * radius / thickness
     return failure_strength / stress
@@ -88,11 +99,9 @@ def find_minimum_wall_thickness(
         pressure, radius, safety_factor, failure_strength):
     return pressure * radius * safety_factor / failure_strength
 
-
-
 def find_nitrous_volume(mass, temperature, ullage=0):
     # This ullage adjustment is an approximation, and not a very good one
-    return (mass / find_liquid_nitrous_density(temperature)) / (1 - ullage)
+    return (mass / get_liquid_nitrous_density(temperature)) / (1 - ullage)
 
 
 def get_length(volume, radius, hemispherical_ends=False):
@@ -116,16 +125,150 @@ def find_center_of_mass(ullage, volume, length, temperature):
     gas_volume = ullage * volume
     liquid_volume = volume - gas_volume
 
-    gas_mass = gas_volume * find_gaseous_nitrous_density(temperature)
-    liquid_mass = liquid_volume * find_liquid_nitrous_density(temperature)
+    gas_mass = gas_volume * get_gaseous_nitrous_density(temperature)
+    liquid_mass = liquid_volume * get_liquid_nitrous_density(temperature)
 
     return (liquid_center_of_mass * liquid_mass + gas_center_of_mass * gas_mass) / (liquid_mass + gas_mass)
+#endregion
 
+
+
+class OxTank(PresetObject):
+    def __init__(self, config={}):
+
+        # TODO: figure out the optimal value for this
+        self.temperature = 293 # Kelvin
+        self.length = 3 # m
+        self.radius = 0.1016 # m
+        self.ox_mass = 70 # kg
+
+
+        super().overwrite_defaults(config)
+
+        self.volume = self.get_volume()
+
+        # Do some initialization things
+        self.ullage = 0
+        self.calculate_ullage()
+
+    def get_volume(self):
+        return self.length * np.pi * self.radius ** 2
+
+    def get_gas_volume(self):
+        return self.get_volume() * self.ullage
+
+    def get_gas_mass(self):
+        return self.get_gas_volume() * get_gaseous_nitrous_density(self.temperature)
+
+
+    def get_liquid_volume(self):
+        return self.get_volume() * (1 - self.ullage)
+
+    def get_liquid_mass(self):
+        return self.get_liquid_volume() * get_liquid_nitrous_density(self.temperature)
+
+
+    def get_center_of_mass(self):
+        # All centers of mass are with reference to the top of the ox tank
+        # The current calculations do not account for hemispherical end caps
+        gas_center_of_mass = self.length * self.ullage / 2
+        gas_end_distance = self.length * self.ullage
+        liquid_center_of_mass = gas_end_distance + self.length * (1 - self.ullage) / 2
+
+
+        return (liquid_center_of_mass * self.get_liquid_mass() + gas_center_of_mass * self.get_gas_mass()) / (self.get_liquid_mass() + self.get_gas_mass())
+
+    def get_combined_total_heat_capacity(self):
+        # kJ / K
+        # Notice that we use mass. This is a scientific thing. You do not heat up a volume of something, you heat up a mass of particles.
+        gaseous_specific_heat = find_gaseous_heat_capacity(self.temperature)
+        liquid_specific_heat = find_liquid_heat_capacity(self.temperature)
+
+        return self.get_gas_mass() * gaseous_specific_heat + self.get_liquid_mass() * liquid_specific_heat
+
+    def calculate_ullage(self, constant_temperature=False, iterations=3, iters_so_far=0):
+        """
+        Calculate indicates that it will not return a value, but there are side effects to the object - it changes the object.
+        In this case it returns the ullage fraction and changes the temperature
+        """
+
+        liquid_density = get_liquid_nitrous_density(self.temperature)
+        gas_density = get_gaseous_nitrous_density(self.temperature)
+
+        already_gas_mass = self.get_gas_mass()
+
+        liquid_mass = (self.volume - self.ox_mass / gas_density) / (1 / liquid_density - 1 / gas_density)
+        gas_mass = self.ox_mass - liquid_mass
+
+        self.ullage = (gas_mass / gas_density) / self.volume
+        self.ullage = max(min(self.ullage, 1), 0)
+
+        if not constant_temperature and iters_so_far < iterations:
+            newly_evaporated_gas = gas_mass - already_gas_mass
+            heat_absorbed = newly_evaporated_gas * \
+                find_heat_of_vaporization(self.temperature)
+
+            total_heat_capacity = self.get_combined_total_heat_capacity()
+            temperature_change = -heat_absorbed / total_heat_capacity
+            self.temperature += temperature_change
+
+            self.calculate_ullage(iterations=iterations, iters_so_far=iters_so_far + 1)
+
+
+        # if self.ullage > 1:
+        #     raise Warning(
+        #         "Your ox tank is filled completely with gas. Be sure to use your own calculations for density rather than the saturated model.")
+        #     return 1
+        # elif self.ullage < 0:
+        #     raise ValueError(
+        #         "Your ox tank is overfull with liquid. I don't know what happens when you put more volume of liquid than can fit into a container, but there are likely going to be some extra stresses here.")
+
+
+    def update_drain(self, mass_change):
+        self.ox_mass -= mass_change
+
+        self.calculate_ullage()
+
+        print(self.ullage)
 
 
 if __name__ == '__main__':
-    print(find_minimum_wall_thickness(5.688*10**6, 0.09525, 1.5, 2.551e+8)) # 6061 T6
-    print(get_length(70.61538462 / find_liquid_nitrous_density(280), 0.1905 / 2))
+    ox = OxTank()
+    # With a linear drain
+
+    masses = []
+    ullages = []
+    centers = []
+
+    for _ in range(70):
+        masses.append(ox.ox_mass)
+        ullages.append(ox.ullage)
+        centers.append(ox.get_center_of_mass() / ox.length)
+        ox.update_drain(1)
+
+    fig, ax = plt.subplots()
+
+    ax.plot(masses, ullages, label="Ullage")
+    ax.plot(masses, centers, label="Center of Mass")
+
+    ax.set_title("Ullage over Masses")
+
+    ax.set_xlim(0, 70)
+    ax.set_xlabel("Ox Mass [kg]")
+    ax.invert_xaxis()
+
+    ax.set_ylim(0, 1)
+    ax.set_ylabel("Fraction")
+    ax.invert_yaxis()
+
+
+    plt.legend(loc="upper right")
+
+
+    plt.show()
+
+    # print(find_minimum_wall_thickness(5.688*10**6, 0.09525, 1.5, 2.551e+8)) # 6061 T6
+    # print(get_length(70.61538462 / get_liquid_nitrous_density(280), 0.1905 / 2))
     '''
     # print(find_specific_enthalpy_of_gaseous_nitrous(273 - 0))
     ox_mass = 68.5  # kg
@@ -136,7 +279,7 @@ if __name__ == '__main__':
     '''
 
     '''
-    # print(find_gaseous_nitrous_density(273.15 + 40))
+    # print(get_gaseous_nitrous_density(273.15 + 40))
     ox_mass = 68.5  # kg
     # 3ish cubic feet converted to meters cubed
     volume = 3 / 35.3147

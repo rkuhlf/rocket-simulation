@@ -2,25 +2,26 @@ import numpy as np
 import sys
 sys.path.append('.')
 
-from RocketParts.Motor.nitrousProperties import find_nitrous_vapor_pressure, find_liquid_nitrous_density, find_specific_enthalpy_of_gaseous_nitrous, find_specific_enthalpy_of_liquid_nitrous
+from preset_object import PresetObject
+
+from RocketParts.Motor.nitrousProperties import get_nitrous_vapor_pressure, get_liquid_nitrous_density, find_specific_enthalpy_of_gaseous_nitrous, find_specific_enthalpy_of_liquid_nitrous
 
 
-def find_required_thickness(pressure_drop, radius, poisson_ratio, failure_stress):
+#region DESIGN/WEIGHT FUNCTIONS
+
+def determine_required_thickness(pressure_drop, radius, poisson_ratio, failure_stress):
     numerator = 0.375 * pressure_drop * radius**3 * (1 + poisson_ratio)
     return (numerator / failure_stress) ** (1/2)
 
-def find_injector_volume(thickness, radius):
+def determine_injector_volume(thickness, radius):
     return np.pi * radius ** 2 * thickness
 
-def find_injector_mass(thickness, radius, density):
-    return find_injector_volume(thickness, radius) * density
+def determine_injector_mass(thickness, radius, density):
+    return determine_injector_volume(thickness, radius) * density
 
+#endregion
 
 #region MASS FLOW CHARACTERISTICS
-
-def find_total_cross_sectional_area(count, diameter):
-    # for use with multiple orifices
-    return count * np.pi * (diameter / 2) ** 2
 
 
 def find_mass_flow_single_phase_incompressible(
@@ -77,10 +78,10 @@ def find_mass_flow_dyer_interpolation(
 
     k = find_dyer_interpolation_factor(
         upstream_pressure,
-        find_nitrous_vapor_pressure(injector_fluid_temperature),
+        get_nitrous_vapor_pressure(injector_fluid_temperature),
         downstream_pressure)
 
-    liquid_density = find_liquid_nitrous_density(injector_fluid_temperature)
+    liquid_density = get_liquid_nitrous_density(injector_fluid_temperature)
     # FIXME: This is wrong in so many ways I don't know how to start
     upstream_enthalpy = find_specific_enthalpy_of_liquid_nitrous(
         upstream_temperature)
@@ -100,12 +101,50 @@ def find_mass_flow_dyer_interpolation(
 
 #endregion
 
+class Injector(PresetObject):
+    def __init__(self, config={}, ox_tank=None, combustion_chamber=None):
+        # Since I don't know which properties I am going to be needing from the ox tank and the combustion chamber, I will just pass them in right here
+
+        self.ox_tank = ox_tank
+        self.combustion_chamber = combustion_chamber
+        
+        self.orifice_count = 5
+        # Recall that we do not have total control over this. We have to order some swagelock fittings
+        self.orifice_diameter = 0.005 # m
+
+        self.discharge_coefficient = 0.7
+
+
+        super().overwrite_defaults(config)
+
+    def get_total_cross_sectional_area(self):
+        # for use with multiple orifices
+        return self.count * np.pi * (self.diameter / 2) ** 2
+
+
+    def find_mass_flow_single_phase_incompressible(self, 
+        liquid_density, pressure_drop, orifice_area):
+        # Relatively simple model that assumes your flow is entirely liquid. This will work well for most liquid rockets, but very poorly for nitrous (it overestimates it; since it is actually lower density)
+
+        # most models actually discount the denominator for this model, since it is almost exactly equal to unity. I put it in because that is how the model is derived
+
+        area_ratio = self.get_total_orifice_area() / self.combustion_chamber.grain.get_outer_cross_sectional_area()
+
+        upstream_pressure = self.ox_tank.
+
+        return ((2 * liquid_density * pressure_drop) / (1 - area_ratio ** 2)) ** (1 / 2)
+
+    def get_mass_flow(self):
+        
+
+
 
 if __name__ == "__main__":
     # These are the numbers from memory for aluminum, they do not include the effects of heat (probably important, considering aluminum melts at 1,221 F and our combustion will probably be around 3300 F)
-    thickness = (find_required_thickness(450, 4, 0.31, 40000)) # everything in psi
-    mass = find_injector_mass(thickness, 4, 0.0442451) # density in kg/m^3
+    thickness = (determine_required_thickness(450, 4, 0.31, 40000)) # everything in psi
+    mass = determine_injector_mass(thickness, 4, 0.0442451) # density in kg/m^3
 
     print(mass, "kg")
 
+    
  

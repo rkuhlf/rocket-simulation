@@ -6,7 +6,7 @@ sys.path.append(".")
 
 
 from RocketParts.Motor.oxTank import find_center_of_mass, find_ullage
-from RocketParts.Motor.nitrousProperties import find_gaseous_nitrous_density, find_nitrous_vapor_pressure, find_liquid_nitrous_density
+from RocketParts.Motor.nitrousProperties import get_gaseous_nitrous_density, get_nitrous_vapor_pressure, get_liquid_nitrous_density
 
 # TODO: Finish implementing the injector stuff then start using another one
 from RocketParts.Motor.injector import find_mass_flow_single_phase_incompressible, find_total_cross_sectional_area
@@ -24,7 +24,7 @@ temperature = 273.15 + 22
 
 # assumes constant temperature
 ullage = find_ullage(ox_mass, volume, 273)[0]
-tank_pressure = find_nitrous_vapor_pressure(temperature) * 10**5
+tank_pressure = get_nitrous_vapor_pressure(temperature) * 10**5
 print("TNK PRES", tank_pressure)
 chamber_pressure = 3.3e+6
 injector_area = find_total_cross_sectional_area(5, 0.005)
@@ -34,7 +34,7 @@ injector_face_area = np.pi * 0.5 **2
 print(injector_area)
 print(injector_face_area)
 
-print("SPI", find_mass_flow_single_phase_incompressible(find_liquid_nitrous_density(temperature), 
+print("SPI", find_mass_flow_single_phase_incompressible(get_liquid_nitrous_density(temperature), 
                                                                             tank_pressure - chamber_pressure,
                                                                             injector_area, injector_face_area))
 
@@ -46,9 +46,9 @@ masses = []
 center_of_masses = []
 
 while ox_mass > 0:
-    old_gas_mass = volume * ullage * find_gaseous_nitrous_density(temperature)
+    old_gas_mass = volume * ullage * get_gaseous_nitrous_density(temperature)
     # m-dot_SPI is currently imaginary
-    ox_mass -= time_increment * find_mass_flow_single_phase_incompressible(find_liquid_nitrous_density(temperature), 
+    ox_mass -= time_increment * find_mass_flow_single_phase_incompressible(get_liquid_nitrous_density(temperature), 
                                                                             tank_pressure - chamber_pressure,
                                                                             injector_area, injector_face_area)
 
