@@ -53,13 +53,13 @@ def find_ullage(
         newly_evaporated_gas = gas_mass - already_gas_mass
         heat_absorbed = newly_evaporated_gas * \
             find_heat_of_vaporization(temperature)
-        print("absorbed", heat_absorbed) # currently imaginary
+
         total_heat_capacity = find_combined_total_heat_capacity(
             gas_mass, liquid_mass,
             find_gaseous_heat_capacity(temperature),
             find_liquid_heat_capacity(temperature))
         temperature_change = -heat_absorbed / total_heat_capacity
-        print(temperature_change)
+
 
         return find_ullage(
             ox_mass, volume, temperature + temperature_change,
@@ -160,7 +160,6 @@ class OxTank(PresetObject):
         return self.get_volume() * self.ullage
 
     def get_gas_mass(self):
-        print("In the get gas function", get_gaseous_nitrous_density(self.temperature), self.temperature)
         return self.get_gas_volume() * get_gaseous_nitrous_density(self.temperature)
 
 
@@ -255,8 +254,6 @@ class OxTank(PresetObject):
 
         # TODO: If it is all gas (I'll just add a boolean, we need to do a different drain method. The vapor pressure is no longer important)
         self.calculate_ullage()
-
-        print(self.ullage)
 
 
 if __name__ == '__main__':

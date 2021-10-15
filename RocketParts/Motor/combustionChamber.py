@@ -78,5 +78,6 @@ class CombustionChamber(PresetObject):
         # mass flow into the chamber
         effective_mass_flow_total = ox_mass_flow + (self.fuel_grain.density - self.density) * volume_regressed - mass_flow_out
 
-        self.get_change_in_pressure(effective_mass_flow_total)
+        pressure_increase_rate = self.get_change_in_pressure(effective_mass_flow_total)
+        self.pressure += pressure_increase_rate * time_increment
         

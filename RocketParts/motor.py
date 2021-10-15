@@ -141,7 +141,7 @@ class CustomMotor(Motor):
         # I don't really know what to do if we are getting condensed values in the nose cone. I guess we can just use the next one up
         looking_for_pressure = False
 
-        for row in self.data.iterrows():
+        for index, row in self.data.iterrows():
             if looking_for_pressure and chamber_pressure < row["Chamber Pressure [psia]"] * 6894.76: # convert to Pa
                 # We have found the row we want
                 # Eventually, I should probably add an output for the nozzle throat temperature over time. We want to be certain that our graphite won't be damaged by the extreme heat
@@ -176,8 +176,7 @@ class CustomMotor(Motor):
         OF = ox_flow / fuel_flow
         self.update_values_from_CEA(self.combustion_chamber.pressure, OF)
 
-
-        nozzle_coefficient = self.nozzle.get_nozzle_coefficient(self.combustion_chamber.pressure, OF, self.environment.get_air_pressure(0))
+        nozzle_coefficient = self.nozzle.get_nozzle_coefficient(self.combustion_chamber.pressure, self.environment.get_air_pressure(0))
 
         # TODO: Account for nozzle loss from the port diameter ratio to the nozzle throat. I still need to read about this some more
         # TODO: I want to reimplement this so that the nozzle is giving mass flow and exit velocity values. I think both ways should work, but that way will be easier to compare, and I am not sure that my nozzle coefficient calculation is correct
@@ -213,7 +212,7 @@ if __name__ == "__main__":
 
     motor = CustomMotor(ox_tank=ox, injector=injector, combustion_chamber=chamber, nozzle=nozzle, environment=env)
 
-    for i in range(30):
+    while ox.get_pressure() > chamber.pressure:
         motor.simulate_step()
         print(motor.combustion_chamber.pressure)
 

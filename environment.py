@@ -46,7 +46,8 @@ class Environment(PresetObject):
             self.earth_radius + altitude + self.base_altitude) ** 2
 
     def get_air_pressure(self, altitude):
-        pass
+        # FIXME: TODO: This has to be fixed; assumes atmospheric atm
+        return 101300
 
     def get_air_speed(self, altitude):
         if not self.apply_wind:
