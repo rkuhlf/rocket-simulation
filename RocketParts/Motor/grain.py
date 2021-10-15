@@ -7,7 +7,7 @@ from preset_object import PresetObject
 
 class Grain(PresetObject):
     def __init__(self, config={}):
-        self.inner_radius = 0.5 # random
+        self.inner_radius = 0.05 # random
         self.outer_radius = 0.1016 # random
         # of the fuel
         self.mass_flow = 0
@@ -21,8 +21,8 @@ class Grain(PresetObject):
 
 
     def get_regression_rate(self, mass_flux):
-        # This is the famous regression rate equation that is so hard to get right
-        leading_ballistic_coefficient = 1.550 * 10^-4
+        # This is the famous regression rate equation that is so hard to get right. I think this is an equation for Paraffin-Nitrous
+        leading_ballistic_coefficient = 1.550 * 10 ** -4
         exponential_ballistic_coefficient = 0.5
         return leading_ballistic_coefficient * mass_flux ** exponential_ballistic_coefficient
 
@@ -33,8 +33,8 @@ class Grain(PresetObject):
         port_area = np.pi * self.inner_radius ** 2
         ox_flux = ox_flow / port_area
         # Give a warning if ox flux is too big: might blow fire out, might cause combustion instability
-        if ox_flux > 500: # assumes kg/m^2
-            raise Warning("McLeod told us not to go this high. He warned of blowing the flame out, but I have also seen some combustion instability stuff.")
+        if ox_flux > 700: # assumes kg/m^2
+            raise Warning("McLeod told us not to go past 500 kg/m^2-s. He warned of blowing the flame out, but I have also seen some combustion instability stuff.")
 
         if self.inner_radius > self.outer_radius:
             raise Warning("You have burned through the entire fuel grain")

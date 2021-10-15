@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import sys
-# This adds the project to te path so that I can import helpers
+
 sys.path.append(".")
 # Depending on how aggressive any autoformatting is it may be necessary to save this without formatting so that the path is affected at the start. (In VSCode ctrl-K ctrl-shift-S saves without formatting)
 from Helpers.general import numpy_from_string
@@ -26,7 +26,7 @@ def graph_conversions():
 
 
 
-# rap everytin
+# graph everything
 def graph_all():
     data = pd.read_csv("Data/Output/output.csv")
 
@@ -56,9 +56,18 @@ def graph_vertical_acceleration():
 
     plt.show()
 
+def graph_angle_of_attack():
+    data = pd.read_csv("Data/Output/output.csv")
+
+    data.plot.line(x="time", y="AOA1")
+    data.plot.line(x="time", y="rotation2")
+
+    plt.show()
+
 
 if __name__ == "__main__":
     # graph_conversions()
     # graph_all()
     # graph_flight_path()
-    graph_vertical_acceleration()
+    # graph_vertical_acceleration()
+    graph_angle_of_attack()

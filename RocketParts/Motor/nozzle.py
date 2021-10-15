@@ -1,3 +1,5 @@
+import numpy as np
+
 import sys
 sys.path.append(".")
 
@@ -146,6 +148,8 @@ class Nozzle(PresetObject):
     """
 
     def __init__(self, config={}, fuel_grain=None):
+        self.throat_diameter = 0.03048 # meters
+        self.throat_area = self.get_throat_area()
         self.area_ratio = 4
         self.throat_temperature = 800 # Kelvin
 
@@ -155,6 +159,9 @@ class Nozzle(PresetObject):
         self.overexpanded = False
 
         super().overwrite_defaults(config)
+
+    def get_throat_area(self):
+        return np.pi * self.throat_diameter ** 2
 
     def get_nozzle_coefficient(self, chamber_pressure, atmospheric_pressure):
         """

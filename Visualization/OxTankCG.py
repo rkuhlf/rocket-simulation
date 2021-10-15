@@ -8,19 +8,21 @@ from RocketParts.Motor.oxTank import OxTank
 
 # Higher than 36 Celsius is super critical. Please don't do that
 ox = OxTank()
-ox.set_temperature(25 + 273.15) # 36.6667
+# ox.set_temperature(30 + 273.15)
 # With a linear drain
 
 masses = []
 ullages = []
 centers = []
 temperatures = []
+pressures = []
 
 for _ in range(70):
     masses.append(ox.ox_mass)
     ullages.append(ox.ullage)
     centers.append(ox.get_center_of_mass() / ox.length)
     temperatures.append(ox.temperature)
+    pressures.append(ox.get_pressure())
     ox.update_drain(1)
 
 fig, ax = plt.subplots()
@@ -49,6 +51,10 @@ plt.show()
 
 
 plt.plot(range(len(ox.inaccuracies)), ox.inaccuracies)
+plt.show()
+
+
+plt.plot(masses, pressures)
 plt.show()
 
 print(ox.inaccuracies)

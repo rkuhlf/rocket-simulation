@@ -1,4 +1,3 @@
-
 import sys
 sys.path.append(".")
 
@@ -152,9 +151,11 @@ class CustomMotor(Motor):
                 self.nozzle.isentropic_exponent = row["gamma"]
                 self.combustion_chamber.density = row["Chamber Density [kg/m^3]"]
                 self.combustion_chamber.cstar = row["C-star"]
+                average_molar_mass = row["Molar Mass [kg/mol]"]
                 # TODO: Divide by the M that I will get from parsing CEA
-                self.combustion_chamber.ideal_gas_constant = 8.314 # 8.314 J/ mol·K / (kg/mol) = J / kgK, which I believe is what we want. Nevertheless, I need to make sure the values are reasonable
+                self.combustion_chamber.ideal_gas_constant = 8.314 / average_molar_mass # 8.314 J/ mol·K / (kg/mol) = J / kgK, which I believe is what we want. Nevertheless, I need to make sure the values are reasonable
 
+            # FIXME: tuple indices must be integers or slices, not str
             if OF < row["O/F Ratio"]:
                 # To make sure that we always get a number, I am going to always pick the row that has an O/F ratio immediately above the current value
                 looking_for_pressure = True
@@ -162,16 +163,19 @@ class CustomMotor(Motor):
 
 
     def simulate_step(self):
-        upstream_pressure = self.ox_tank.get_pressure()
-        downstream_pressure = self.combustion_chamber.pressure
+        # upstream_pressure = self.ox_tank.get_pressure()
+        # downstream_pressure = self.combustion_chamber.pressure
         ox_flow = self.injector.get_mass_flow()
-
         self.ox_tank.update_drain(ox_flow * self.environment.time_increment)
         self.combustion_chamber.update_combustion(ox_flow, self.nozzle, self.environment.time_increment)
 
-        fuel_flow = self.combustion_chamber.grain.mass_flow
+        fuel_flow = self.combustion_chamber.fuel_grain.mass_flow
 
+        # I have no idea how I have made it this far without considering the O/F. The ox-fuel ratio should determine the C-star.
+        # Actually, I guess all that I need is the chamber temperature and the average molar mass
         OF = ox_flow / fuel_flow
+        self.update_values_from_CEA(self.combustion_chamber.pressure, OF)
+
 
         nozzle_coefficient = self.nozzle.get_nozzle_coefficient(self.combustion_chamber.pressure, OF, self.environment.get_air_pressure(0))
 

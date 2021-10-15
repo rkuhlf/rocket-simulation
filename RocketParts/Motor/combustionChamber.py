@@ -1,3 +1,5 @@
+import numpy as np
+
 import sys
 sys.path.append(".")
 
@@ -45,7 +47,7 @@ class CombustionChamber(PresetObject):
         #endregion
 
     def get_volume(self):
-        pass
+        return np.pi * self.fuel_grain.inner_radius ** 2
 
     def get_change_in_pressure(self, apparent_mass_flow):
         '''
@@ -57,7 +59,7 @@ class CombustionChamber(PresetObject):
         # I think there is some way to do this without knowing R. Again, I'm not too sure about what is going on with how density is calculated for the combustion chamber; however, I am going to move forward with using molar mass and adiabatic flame temperature as well as density to find the change in pressure
         # d(P_c)/d(t) = [m-dot_ox + (rho_f - rho_c)*A_b*a*G_ox^n - P_c*A_t/c*_exp] * R*T_C / V_C
         # TODO: R is broken right now. I don't know how to calculate; probably just use the M value from CEA
-        return apparent_mass_flow * R * self.temperature / self.get_volume()
+        return apparent_mass_flow * self.ideal_gas_constant * self.temperature / self.get_volume()
 
     def update_combustion(self, ox_mass_flow, nozzle, time_increment):
         # From the grain and the ox mass flow, calculate the mass flow of fuel
@@ -68,7 +70,7 @@ class CombustionChamber(PresetObject):
         OF = ox_mass_flow / fuel_flow
 
         # Calculate the mass flow out (requires nozzle throat)
-        mass_flow_out = self.pressure * self.nozzle.throat_area / self.cstar
+        mass_flow_out = self.pressure * nozzle.throat_area / self.cstar
 
         volume_regressed = self.fuel_grain.get_volume_flow() * time_increment
 

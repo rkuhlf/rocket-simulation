@@ -108,7 +108,7 @@ class Injector(PresetObject):
         self.ox_tank = ox_tank
         self.combustion_chamber = combustion_chamber
         
-        self.orifice_count = 5
+        self.orifice_count = 3
         # Recall that we do not have total control over this. We have to order some swagelock fittings
         self.orifice_diameter = 0.005 # m
 
@@ -119,7 +119,7 @@ class Injector(PresetObject):
 
     def get_total_cross_sectional_area(self):
         # for use with multiple orifices
-        return self.count * np.pi * (self.diameter / 2) ** 2
+        return self.orifice_count * np.pi * (self.orifice_diameter / 2) ** 2
 
 
     def find_mass_flow_single_phase_incompressible(self, 
@@ -128,13 +128,15 @@ class Injector(PresetObject):
 
         # most models actually discount the denominator for this model, since it is almost exactly equal to unity. I put it in because that is how the model is derived
 
-        area_ratio = self.get_total_orifice_area() / self.combustion_chamber.grain.get_outer_cross_sectional_area()
-
-        return ((2 * liquid_density * pressure_drop) / (1 - area_ratio ** 2)) ** (1 / 2)
+        area_ratio = self.get_total_cross_sectional_area() / self.combustion_chamber.fuel_grain.get_outer_cross_sectional_area()
+        print(pressure_drop)
+        return orifice_area * ((2 * liquid_density * pressure_drop) / (1 - area_ratio ** 2)) ** (1 / 2)
 
     def get_mass_flow(self):
         upstream_pressure = self.ox_tank.get_pressure()
+        print("Upstream", upstream_pressure)
         downstream_pressure = self.combustion_chamber.pressure
+        print("Downstream", downstream_pressure)
         pressure_drop = upstream_pressure - downstream_pressure
 
         density = get_liquid_nitrous_density(self.ox_tank.temperature)
@@ -143,7 +145,7 @@ class Injector(PresetObject):
             self.find_mass_flow_single_phase_incompressible(
                 density, 
                 pressure_drop, 
-                self.get_total_cross_sectional_area)
+                self.get_total_cross_sectional_area())
 
 
 

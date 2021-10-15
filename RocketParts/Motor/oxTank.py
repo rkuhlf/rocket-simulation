@@ -134,7 +134,7 @@ class OxTank(PresetObject):
     def __init__(self, config={}):
 
         # TODO: figure out the optimal value for this
-        self.temperature = 293 # Kelvin
+        self.temperature = 30 + 273.15 # Kelvin
         self.length = 3.7 # m
         self.radius = 0.1016 # m
         self.ox_mass = 70.0 # kg
@@ -202,6 +202,7 @@ class OxTank(PresetObject):
 
         already_gas_mass = self.get_gas_mass()
         # This is slightly inaccurate, but it only really triggers during the gas only phase
+        # Sometimes the ox mass goes complex for some reason
         already_gas_mass = min(self.ox_mass, already_gas_mass)
 
         liquid_mass = (self.volume - self.ox_mass / gas_density) / (1 / liquid_density - 1 / gas_density)
@@ -246,7 +247,7 @@ class OxTank(PresetObject):
         #         "Your ox tank is overfull with liquid. I don't know what happens when you put more volume of liquid than can fit into a container, but there are likely going to be some extra stresses here.")
 
     def get_pressure(self):
-        return get_nitrous_vapor_pressure(self.temperature)
+        return get_nitrous_vapor_pressure(self.temperature) * 100000
 
 
     def update_drain(self, mass_change):
