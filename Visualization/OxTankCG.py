@@ -8,7 +8,7 @@ from RocketParts.Motor.oxTank import OxTank
 
 # Higher than 36 Celsius is super critical. Please don't do that
 ox = OxTank()
-ox.set_temperature(34 + 273.15) # 36.6667
+ox.set_temperature(25 + 273.15) # 36.6667
 # With a linear drain
 
 masses = []

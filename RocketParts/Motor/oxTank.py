@@ -191,6 +191,7 @@ class OxTank(PresetObject):
 
     # I think temperature change is wrong at the moment. I don't understand why the temperature should continue to decrease when it is completely in the gaseous state - there is no more evaporation, and I don't think I'm simulating ideal gas stuff
     def calculate_ullage(self, constant_temperature=False, iterations=3, iters_so_far=0):
+        # FIXME: Right now, there are a lot of issues in the gas only phase. It spikes up to make the thing match
         """
         Calculate indicates that it will not return a value, but there are side effects to the object - it changes the object.
         In this case it returns the ullage fraction and changes the temperature
@@ -198,20 +199,16 @@ class OxTank(PresetObject):
 
         liquid_density = get_liquid_nitrous_density(self.temperature)
         gas_density = get_gaseous_nitrous_density(self.temperature)
-        print("First gas density", gas_density)
 
         already_gas_mass = self.get_gas_mass()
+        # This is slightly inaccurate, but it only really triggers during the gas only phase
+        already_gas_mass = min(self.ox_mass, already_gas_mass)
 
         liquid_mass = (self.volume - self.ox_mass / gas_density) / (1 / liquid_density - 1 / gas_density)
-        
+        liquid_mass = max(0, liquid_mass)
+
         gas_mass = self.ox_mass - liquid_mass
 
-        print("Ox mass", self.ox_mass)
-        print("gas mass", gas_mass)
-        print("Already gas", already_gas_mass)
-        print("Volume of Chamber", self.volume)
-        print("Volume of gas", gas_mass / get_gaseous_nitrous_density(self.temperature))
-        print("Volume of liquid", self.get_liquid_mass())
         self.inaccuracies.append((self.get_gas_volume() + self.get_liquid_volume()) / self.volume)
 
         self.ullage = (gas_mass / gas_density) / self.volume
@@ -219,7 +216,6 @@ class OxTank(PresetObject):
 
         if not constant_temperature and iters_so_far < iterations:
             newly_evaporated_gas = gas_mass - already_gas_mass
-            print(newly_evaporated_gas)
             heat_absorbed = newly_evaporated_gas * \
                 find_heat_of_vaporization(self.temperature)
 
@@ -228,6 +224,17 @@ class OxTank(PresetObject):
             self.temperature += temperature_change
 
             self.calculate_ullage(iterations=iterations, iters_so_far=iters_so_far + 1)
+        else:
+            # I think it is bad to end on a temperature change, it is giving me some serious inaccuracies because it changes the density significantly
+            liquid_density = get_liquid_nitrous_density(self.temperature)
+            gas_density = get_gaseous_nitrous_density(self.temperature)
+
+            # This should be a negative over a negative
+            liquid_mass = (self.volume - self.ox_mass / gas_density) / (1 / liquid_density - 1 / gas_density)
+            gas_mass = self.ox_mass - liquid_mass
+
+            self.ullage = (gas_mass / gas_density) / self.volume
+            self.ullage = max(min(self.ullage, 1), 0)
 
 
         # if self.ullage > 1:
@@ -245,6 +252,7 @@ class OxTank(PresetObject):
     def update_drain(self, mass_change):
         self.ox_mass -= mass_change
 
+        # TODO: If it is all gas (I'll just add a boolean, we need to do a different drain method. The vapor pressure is no longer important)
         self.calculate_ullage()
 
         print(self.ullage)
