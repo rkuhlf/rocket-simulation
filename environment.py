@@ -47,7 +47,7 @@ class Environment(PresetObject):
 
     def get_air_pressure(self, altitude):
         # FIXME: TODO: This has to be fixed; assumes atmospheric atm
-        return 101300
+        return 101300 # Pa
 
     def get_air_speed(self, altitude):
         if not self.apply_wind:

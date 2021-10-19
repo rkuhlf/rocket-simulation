@@ -11,7 +11,7 @@ class Simulation(PresetObject):
         if self.rocket.environment is not self.environment:
             self.rocket.environment = self.environment
 
-    def __init__(self, config, environment, rocket, logger=None):
+    def __init__(self, config={}, environment=None, rocket=None, logger=None):
         self.environment = environment
         self.rocket = rocket
         self.logger = logger

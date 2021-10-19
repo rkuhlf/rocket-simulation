@@ -30,6 +30,7 @@ class CombustionChamber(PresetObject):
         # Instantly goes to the adiabatic (?) flame temperature
         # FIXME: For some reason I am not using this temperature value anywhere. I am 40% sure that I should be. The other 60% thinks that we have the system defined in terms of pressure, and the only thing we need the temperature for is to find the density, which CEA already knows
         self.temperature = 273.15 + 23 # Kelvin
+        self.p_temperature = self.temperature
         # P / RT = rho
         # Actually it turns out there is a wacko condition in the way MW is calculated and it is easiest just to use the density output by CEA; I think it does it with M but it might be with MW
         # Please do not use the value from CEA here, that will ruin the whole point of the calculations. We have to find our own pressure, because we have to find our own mass
@@ -59,6 +60,8 @@ class CombustionChamber(PresetObject):
         # I think there is some way to do this without knowing R. Again, I'm not too sure about what is going on with how density is calculated for the combustion chamber; however, I am going to move forward with using molar mass and adiabatic flame temperature as well as density to find the change in pressure
         # d(P_c)/d(t) = [m-dot_ox + (rho_f - rho_c)*A_b*a*G_ox^n - P_c*A_t/c*_exp] * R*T_C / V_C
         # TODO: R is broken right now. I don't know how to calculate; probably just use the M value from CEA
+        # So this gives the change in pressure due to mass flow, but it doesn't account for any change in pressure due to temperature change
+        # Look: PV = nRT. We are assuming this to be true; it's pretty safe. We are accounting for the change in n right now. V is not changing and P is the output. However, T is also changing, and we need to deal with that. Probably, the easiest thing is to store the previous frame's temperature and multiply by the ratio. 
         return apparent_mass_flow * self.ideal_gas_constant * self.temperature / self.get_volume()
 
     def update_combustion(self, ox_mass_flow, nozzle, time_increment):
@@ -77,6 +80,13 @@ class CombustionChamber(PresetObject):
         # Update the pressure in the system. Uses the previously calculated mass flux out
         # mass flow into the chamber
         effective_mass_flow_total = ox_mass_flow + (self.fuel_grain.density - self.density) * volume_regressed - mass_flow_out
+
+        # It's hard to say whether it is more accurate to multiply by temperature first or do the addition first.
+        # The difference between approaches should tend to zero as the time increment approaches zero
+        self.pressure *= self.temperature / self.p_temperature
+        # print("Ratio", self.temperature / self.p_temperature)
+        # print("Temp", self.temperature)
+        self.p_temperature = self.temperature
 
         pressure_increase_rate = self.get_change_in_pressure(effective_mass_flow_total)
         self.pressure += pressure_increase_rate * time_increment

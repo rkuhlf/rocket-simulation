@@ -7,6 +7,7 @@ import pandas as pd
 
 
 
+
 # You know what, I'm just going to go for a data-oriented design with the whole engine
 # Functions for everything. Later, I can have functions for sensitivity analysis
 # from preset_object import PresetObject
@@ -129,6 +130,8 @@ class CustomMotor(Motor):
 
         super().overwrite_defaults(config)
 
+        self.thrust = 0
+
         # Look, here is where I really want to have all of the mass calculations done separately
         # TODO: I could have a mass object class that all of the objects in the rocket with mass inherit from, then I have it define a get mass and a get_position function, then it uses its own state to calculate each
         # self.mass = ox_tank.mass + injector.mass + combustion_chamber.mass + nozzle.mass
@@ -143,6 +146,7 @@ class CustomMotor(Motor):
 
         for index, row in self.data.iterrows():
             if looking_for_pressure and chamber_pressure < row["Chamber Pressure [psia]"] * 6894.76: # convert to Pa
+                # print("Looking through row", index)
                 # We have found the row we want
                 # Eventually, I should probably add an output for the nozzle throat temperature over time. We want to be certain that our graphite won't be damaged by the extreme heat
                 # Actually we don't even need the velocity at the throat because we can calculate it from the c-star and the internal pressure
@@ -150,12 +154,15 @@ class CustomMotor(Motor):
                 self.nozzle.exit_pressure = row["Exit Pressure [psia]"] * 6894.76
                 self.nozzle.isentropic_exponent = row["gamma"]
                 self.combustion_chamber.density = row["Chamber Density [kg/m^3]"]
-                self.combustion_chamber.cstar = row["C-star"]
+                self.combustion_chamber.temperature = row["Chamber Temperature [K]"]
+                self.combustion_chamber.cstar = row["C-star"] # m/s
                 average_molar_mass = row["Molar Mass [kg/mol]"]
                 # TODO: Divide by the M that I will get from parsing CEA
-                self.combustion_chamber.ideal_gas_constant = 8.314 / average_molar_mass # 8.314 J/ mol·K / (kg/mol) = J / kgK, which I believe is what we want. Nevertheless, I need to make sure the values are reasonable
+                self.combustion_chamber.ideal_gas_constant = 8.314 / average_molar_mass # 8.314 J/ mol·K / (kg/mol) = J / kgK, which I believe is what we want. Nevertheless, TODO:  I need to make sure the values are reasonable
+                break
+            elif looking_for_pressure:
+                continue
 
-            # FIXME: tuple indices must be integers or slices, not str
             if OF < row["O/F Ratio"]:
                 # To make sure that we always get a number, I am going to always pick the row that has an O/F ratio immediately above the current value
                 looking_for_pressure = True
@@ -163,8 +170,6 @@ class CustomMotor(Motor):
 
 
     def simulate_step(self):
-        # upstream_pressure = self.ox_tank.get_pressure()
-        # downstream_pressure = self.combustion_chamber.pressure
         ox_flow = self.injector.get_mass_flow()
         self.ox_tank.update_drain(ox_flow * self.environment.time_increment)
         self.combustion_chamber.update_combustion(ox_flow, self.nozzle, self.environment.time_increment)
@@ -196,6 +201,7 @@ if __name__ == "__main__":
     # print(m.get_thrust())
 
     # Bare minimum simulation
+    import matplotlib.pyplot as plt
     from RocketParts.Motor.oxTank import OxTank
     from RocketParts.Motor.injector import Injector
     from RocketParts.Motor.combustionChamber import CombustionChamber
@@ -208,13 +214,37 @@ if __name__ == "__main__":
     chamber = CombustionChamber(fuel_grain=grain)
     injector = Injector(ox_tank=ox, combustion_chamber=chamber)
     nozzle = Nozzle(fuel_grain=grain)
-    env = Environment()
+    env = Environment({
+        "time_increment": 0.25
+    })
 
     motor = CustomMotor(ox_tank=ox, injector=injector, combustion_chamber=chamber, nozzle=nozzle, environment=env)
 
-    while ox.get_pressure() > chamber.pressure:
+    time = 0
+    times = []
+    pressures = []
+    thrusts = []
+    temperatures = []
+
+    while ox.get_pressure() > chamber.pressure and ox.ox_mass > 0:
         motor.simulate_step()
-        print(motor.combustion_chamber.pressure)
+        times.append(time)
+        time += env.time_increment
+
+        pressures.append(motor.combustion_chamber.pressure)
+        thrusts.append(motor.thrust)
+        temperatures.append(motor.combustion_chamber.temperature)
+    
+    plt.subplot(2, 2, 1)
+    plt.plot(times, pressures)
+
+    plt.subplot(2, 2, 2)
+    plt.plot(times, thrusts)
+
+    plt.subplot(2, 2, 3)
+    plt.plot(times, temperatures)
+
+    plt.show()
+    
 
     
-    # print(m.get_burn_time())

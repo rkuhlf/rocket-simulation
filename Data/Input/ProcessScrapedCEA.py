@@ -60,10 +60,10 @@ def read_cea_lines(lines):
     chamber_over_exit = process_CEA_float(lines[0].split()[3])
     exit_pressure = chamber_pressure / chamber_over_exit
 
-    # while "T, K" not in lines[0]:
-    #     del lines[0]
+    while "T, K" not in lines[0]:
+        del lines[0]
 
-    # throat_temperature = process_CEA_float(lines[0].split()[3])
+    chamber_temperature = process_CEA_float(lines[0].split()[2])
 
     while "RHO" not in lines[0]:
         del lines[0]
@@ -108,7 +108,7 @@ def read_cea_lines(lines):
 
     specific_impulse = process_CEA_float(lines[0].split()[3]) / 9.81
 
-    return [chamber_pressure, OF_ratio, cstar, specific_impulse, density, molar_mass, throat_velocity, exit_pressure, gamma, exit_velocity, CF]
+    return [chamber_pressure, OF_ratio, cstar, specific_impulse, chamber_temperature, density, molar_mass, throat_velocity, exit_pressure, gamma, exit_velocity, CF]
 
     
 
@@ -148,7 +148,7 @@ output = np.asarray(output)
 
 print(output)
 
-dataframe = pd.DataFrame(output, columns=["Chamber Pressure [psia]", "O/F Ratio", "C-star", "Specific Impulse [s]", "Chamber Density [kg/m^3]", "Molar Mass [kg/mol]", "Throat Velocity [m/s]", "Exit Pressure [psia]", "gamma", "Exit Velocity [m/s]", "Thrust Coefficient"])
+dataframe = pd.DataFrame(output, columns=["Chamber Pressure [psia]", "O/F Ratio", "C-star", "Specific Impulse [s]", "Chamber Temperature [K]", "Chamber Density [kg/m^3]", "Molar Mass [kg/mol]", "Throat Velocity [m/s]", "Exit Pressure [psia]", "gamma", "Exit Velocity [m/s]", "Thrust Coefficient"])
 
 dataframe = dataframe.sort_values(["O/F Ratio", "Chamber Pressure [psia]"])
 

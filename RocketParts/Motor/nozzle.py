@@ -6,6 +6,53 @@ sys.path.append(".")
 from preset_object import PresetObject
 
 
+#region NOZZLE EQUATION
+from scipy.optimize import fsolve
+
+def equations(p):
+    x0, x1, x2, y0, y1, y2, ti, tf = p
+    # Each of these equations should be rearranged to equal zero
+
+    x_start = 0
+    x_end = 1
+
+    y_start = 0.4
+    y_end = 0.8
+
+    theta_opening = np.radians(20)
+    theta_exit = np.radians(8)
+
+    slope_opening = np.tan(theta_opening)
+    slope_exit = np.tan(theta_exit)
+
+    return (
+        x0 * (1-ti)**2 + x1 * 2*ti * (1-ti) + x2*ti**2 - x_start,
+        x0 * (1-tf)**2 + x1 * 2*tf * (1-tf) + x2*tf**2 - x_end,
+        2 * (-x0 * (1-ti) + x1 * (1-2*ti) + x2 * ti) - 1,
+        2 * (-x0 * (1-tf) + x1 * (1-2*tf) + x2 * tf) - 1,
+
+        y0 * (1-ti)**2 + y1 * 2*ti * (1-ti) + y2*ti**2 - y_start,
+        y0 * (1-tf)**2 + y1 * 2*tf * (1-tf) + y2*tf**2 - y_end,
+        2 * (-y0 * (1-ti) + y1 * (1-2*ti) + y2 * ti) - slope_opening,
+        2 * (-y0 * (1-tf) + y1 * (1-2*tf) + y2 * tf) - slope_exit,
+    )
+
+x0, x1, x2, y0, y1, y2, ti, tf = fsolve(equations, (0, 0.1833585488061928, 0.6522647013212155, 0.15782637660825902, 0.4338491713221504, 0.6199270045991325, 0.18210153851863387, 1.4775947674149508))
+
+print(x0, x1, x2, y0, y1, y2, ti, tf)
+
+'''
+## -- End pasted text --
+(0.0, 0.0)
+
+In [2]: x
+Out[2]: 3.5000000414181831
+
+In [3]: y
+Out[3]: 1.7500000828363667
+'''
+#endrregion
+
 
 # https://www.grc.nasa.gov/www/k-12/rocket/rktthsum.html
 # There are three equations of state (plus one for exit temperature that we don't care about)
@@ -169,7 +216,8 @@ class Nozzle(PresetObject):
 
             Notice that pressure can be in any units so long as they are all the same
         """
-        # Look up the isentropic exponent and the exit pressure from the CEA inputs we are using
+        
+        # The isentropic exponent and the exit pressure is determined by CEA software and updated by our motor class
 
         isentropic_less = self.isentropic_exponent - 1
         isentropic_more = self.isentropic_exponent + 1
