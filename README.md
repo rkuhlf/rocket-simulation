@@ -125,6 +125,8 @@ There are a few artifacts in my code due to my programming environment.
 
 I frequently use  `import sys \ sys.path.append(".")`. This is because when Visual Studio Code runs a file in a folder, it doesn't include the project folder for imports (at least it doesn't on my computer). That code adds it.
 
+I use `#region` and VS Code (maybe some extension) to create foldable sections of code. Sorry if it gets in the way a little or it doesn't work with your editor
+
 There is a .replit file for when I occasionally need the configuration to edit my code online.
 
 Also, the tests for the code are completely disorganized, but there are a few basic ones that I would like to expand on located in the *Tests* folder. I have never been good at keeping track of tests, and I found it extremely difficult to update them regularly.
