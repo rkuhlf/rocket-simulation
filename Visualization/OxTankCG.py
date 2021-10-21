@@ -25,36 +25,39 @@ for _ in range(70):
     pressures.append(ox.get_pressure())
     ox.update_drain(1)
 
-fig, ax = plt.subplots()
+fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
 
-ax.plot(masses, ullages, label="Ullage")
-ax.plot(masses, centers, label="Center of Mass")
+ax1.plot(masses, ullages, label="Ullage")
+ax1.plot(masses, centers, label="Center of Mass")
 
-ax.set_title("Ullage over Masses")
+ax1.set_title("Ullage over Mass Drain")
 
-ax.set_xlim(1, 70)
-ax.set_xlabel("Ox Mass [kg]")
-ax.invert_xaxis()
+ax1.set_xlim(1, 70)
+ax1.set_xlabel("Ox Mass [kg]")
+ax1.invert_xaxis()
 
-ax.set_ylim(0, 1)
-ax.set_ylabel("Fraction")
-ax.invert_yaxis()
-
-
-plt.legend(loc="upper right")
+ax1.set_ylim(0, 1)
+ax1.set_ylabel("Fraction")
+ax1.invert_yaxis()
 
 
-plt.show()
-
-plt.plot(masses, temperatures)
-plt.show()
+ax1.legend(loc="upper right")
 
 
-plt.plot(range(len(ox.inaccuracies)), ox.inaccuracies)
-plt.show()
+ax2.plot(masses, temperatures)
+ax2.set_title("Temperature over Mass Drain")
+ax2.set_xlabel("Ox Mass [kg]")
+ax2.set_ylabel("Temperature [K]")
+ax2.invert_xaxis()
 
+ax3.plot(masses, pressures)
+ax3.set_title("Pressure over Mass Drain")
+ax3.set_xlabel("Ox Mass [kg]")
+ax3.set_ylabel("Pressure [Pa]")
+ax3.invert_xaxis()
 
-plt.plot(masses, pressures)
+fig.tight_layout()
+
 plt.show()
 
 print(ox.inaccuracies)

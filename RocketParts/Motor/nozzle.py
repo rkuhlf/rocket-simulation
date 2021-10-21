@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 import sys
 sys.path.append(".")
@@ -9,15 +10,50 @@ from preset_object import PresetObject
 #region NOZZLE EQUATION
 from scipy.optimize import fsolve
 
+
+
+def get_point(t, parameters):
+    x0, x1, x2, y0, y1, y2 = parameters
+
+    return (
+        (1 - t)**2 * x0 + 2 * t * (1 - t) * x1 + t ** 2 * x2,
+        (1 - t)**2 * y0 + 2 * t * (1 - t) * y1 + t ** 2 * y2
+    )
+
+def generate_points(parameters):
+    ti = parameters[-2]
+    tf = parameters[-1]
+    parameters = parameters[:-2]
+    
+    points = []
+
+    for t in np.linspace(ti, tf, num=100):
+        points.append(np.asarray(get_point(t, parameters)))
+
+    return np.asarray(points)
+
+def display_nozzle(parameters):
+    print(parameters)
+
+    points = generate_points(parameters)
+
+    points = points.transpose()
+
+    plt.plot(points[0], points[1])
+    # plt.xlim(0, 1)
+    # plt.ylim(0, 1)
+    plt.title("Nozzle Contour")
+    plt.show()
+
 def equations(p):
     x0, x1, x2, y0, y1, y2, ti, tf = p
     # Each of these equations should be rearranged to equal zero
 
     x_start = 0
-    x_end = 1
+    x_end = 10
 
-    y_start = 0.4
-    y_end = 0.8
+    y_start = 0
+    y_end = 0
 
     theta_opening = np.radians(20)
     theta_exit = np.radians(8)
@@ -37,9 +73,44 @@ def equations(p):
         2 * (-y0 * (1-tf) + y1 * (1-2*tf) + y2 * tf) - slope_exit,
     )
 
-x0, x1, x2, y0, y1, y2, ti, tf = fsolve(equations, (0, 0.1833585488061928, 0.6522647013212155, 0.15782637660825902, 0.4338491713221504, 0.6199270045991325, 0.18210153851863387, 1.4775947674149508))
+iters = 1
+least_error = 1e10
+best_parameters = []
 
-print(x0, x1, x2, y0, y1, y2, ti, tf)
+# TODO: Just write an algorithm to solve it totally randomly, recording the inputs that minimize the 8 equations
+for i in range(iters):
+    if i % 1000 == 0:
+        print(i)
+    inputs = tuple(np.random.randn((8)))
+    # print("INPUTS", inputs)
+    # (0, 0.5, 1, 0, 1, 0.9, 0, 1)
+    parameters = fsolve(equations, inputs)
+    # print(parameters)
+
+    outputs = equations(parameters)
+    total_error = 0
+    for output in outputs:
+        total_error += abs(output)
+    if total_error < least_error:
+        print("Found better parameters")
+        print(outputs)
+        least_error = total_error
+        best_parameters = parameters
+    
+    # print("OUTPUTS", outputs)
+    # print(error)
+    # print("FAILED")
+    # plt.cla()
+
+print(least_error)
+print(best_parameters)
+display_nozzle(best_parameters)
+
+
+parameters = fsolve(equations, (0.15470709552420203, -0.03718261636217335, 0.401636215953701, 0.29084105509625857, -0.11101274275171547, 0.013110433950737174, -0.3689025055437478, -0.10153484052973501))
+
+display_nozzle(parameters)
+
 
 '''
 ## -- End pasted text --

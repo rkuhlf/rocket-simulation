@@ -1,3 +1,9 @@
+# ROCKET COMBUSTION CHAMBER
+# Simulates the evolution of the pressure within the combustion chamber
+# Keeps track of pre-combustion and post-combustion volumes (not yet implemented)
+# Is the main reference to the fuel grain, which is located within it.
+
+
 import numpy as np
 
 import sys
@@ -5,18 +11,7 @@ sys.path.append(".")
 
 from preset_object import PresetObject
 
-# Finds the dynamic O/F stuff
-# Keeps track of the change in chamber pressure
-# The combustion chamber keeps track of the fuel grain and combustion
-# The motor class connects ox tank to the injector to the combustion chamber to the nozzle
 
-def find_characteristic_velocity_from_OF(ratio):
-    # This part of the model should be completely empirical
-    pass
-
-
-def find_combustion_chamber_pressure():
-    pass
 
 
 class CombustionChamber(PresetObject):

@@ -1,5 +1,6 @@
-
-
+# SCRAPE CHEMICAL EQUILIBRIUM ANALYSIS from NASA
+# Using https://cearun.grc.nasa.gov/, which is an online implementation of a thingy that gives properties of combustion depending on the chamber pressure and the mixture ratio of reactants
+# This is slightly illegal (all website scraping is), and I would really like to re-implement this kind of thing with either RocketCEA or the CEA app
 
 
 from selenium import webdriver
