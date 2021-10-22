@@ -1,51 +1,52 @@
-# This file is intended to be run inside of the scripts section of a blender project.
+# CONVERT FLIGHT SIMULATION TO BLENDER ANIMATION
+# This file is intended to be run inside of the scripts section of a Blender project.
 # It converts a csv of output into a flight path for an object
+# Note that installing pandas for Blender is not a simple task. I believe you can either configure the python version used to do some really janky stuff to get it installed on the original.
 
 
 import bpy
 import csv
 import os
 from math import pi
+import pandas as pd
 
 scene = bpy.context.scene
+
+if (len(bpy.context.selected_objects) == 0):
+    print("You haven't selected an object")
+    raise Exception('You must select the rocket object')
 
 rocket = bpy.context.selected_objects[0]
 
 
-filename = 'output.csv'
-# <-- if you have linux or osx
-directory = r'C:\Users\riley\Documents\PythonPrograms\MathModels\Rocket'
+filename = 'noWind.csv'
+directory = r'C:\Users\riley\Documents\PythonPrograms\MathModels\Rocket\rocket-simulation\Data\Output'  # <-- if you have linux or osx
 # directory = r'c:\some\directory'  # <-- if windows, the r is important
 # directory = 'c:/some/directory'  # <-- if windows (alternative)
 
 fullpath = os.path.join(directory, filename)
 
-with open(fullpath, 'r', newline='') as csvfile:
-    ofile = csv.reader(csvfile, delimiter=',')
-    next(ofile)  # <-- skip the x,y,z header
+data = pd.read_csv(fullpath)
 
-    # this makes a generator of the remaining non-empty lines
-    rows = (r for r in ofile if r)
+for index, row in data.iterrows():
+    # adjusting the multiplier should give some control over frame rate
+    scene.frame_set(index * 1)
 
-#    for row in rows:
-#        for i in row:
-#            print(i)
+    x = float(row.loc['position1'])
+    y = float(row.loc['position2'])
+    z = float(row.loc['position3'])
 
-    frame = 1
-    for row in rows:
-        scene.frame_set(frame)
+    rocket.location = (x, y, z)
+    rocket.keyframe_insert(data_path="location", index=-1)
+    
+    
+    # rotation around
+    z = float(row['rotation1'])
+    # rotation down
+    y = float(row['rotation2'])
+    
+    # There is no extra roll rotation, because blender and I do things differently. It will probably take some advanced math to figure out this last bit
+#    z = float(row['rotation3'])
 
-        x = float(row[4])
-        z = float(row[5])
-        rotation = float(row[10])
-        print(rotation)
-
-        rocket.location = (x, 0, z)
-        rocket.keyframe_insert(data_path="location", index=-1)
-
-        rocket.rotation_euler = (0, rotation, 0)
-        rocket.keyframe_insert(data_path="rotation_euler", index=-1)
-
-        # Using this increment and the frame rate, you can manipulate it to be real time
-        # Curently, every frame is 0.1 seconds
-        frame += 1
+    rocket.rotation_euler  = (0, y, z)
+    rocket.keyframe_insert(data_path="rotation_euler", index=-1)
