@@ -1,14 +1,15 @@
+# CALCULATE CONVERSIONS FOR THE CURRENT OUTPUT
+# Most of these are super inefficient but I dont really care since its just conversions
+
 import os
 import pandas as pd
 import numpy as np
-import re
+import re # FIXME: leave a comment that says what this is
 
 import sys
 sys.path.append('.')
 
 from Helpers.general import numpy_from_string
-
-# Most of these are super inefficient but I dont really care since its just conversions
 
 # For each one, check if there is already a 'conversions.csv' in outputs
 # Then add the conversions based on that data
@@ -21,6 +22,7 @@ output_file = 'Data/Output/conversions.csv'
 
 
 def make_conversions_file():
+    """Save all of the values in the input_file to their converted values in the output file"""
     # just copy output.csv to conversions.csv
     # Overwrites any already existing conversions
     df = pd.read_csv(input_file, index_col='time')
@@ -47,13 +49,13 @@ def convert_g_force():
     df.to_csv(output_file)
 
 
-def convert_mock():
+def convert_mach():
     # FIXME: fix this so that it adjusts for altitude using the airQualities.csv file
     df = get_current_conversions()
     df['velocity'] = df['velocity'].apply(numpy_from_string)
 
-    df['mock'] = df['velocity'].apply(
-        lambda x: np.linalg.norm(x) / 343)  # tis 343 sould vary
+    df['mach'] = df['velocity'].apply(
+        lambda x: np.linalg.norm(x) / 343)  # this 343 should vary
 
     df.to_csv(output_file)
 
@@ -82,7 +84,7 @@ def convert_imperial():
 
 def add_all_conversions():
     convert_g_force()
-    convert_mock()
+    convert_mach()
     convert_imperial()
 
 
