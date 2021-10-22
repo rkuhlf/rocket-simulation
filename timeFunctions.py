@@ -1,4 +1,8 @@
-# Functions to determine how fast each of the parts of the simulation are
+# ANALYSIS OF TIME-EFFICIENCY OF FUNCTIONS
+# Uses the timeit library to figure out which functions are slowing the simulation down.
+# Note that this file has not been looked at in a while, and some things have been redisigned.
+# The main original takeaway was that Pandas adds a constant amount of time that isn't really important, the drag is a little bit slow (I think it is mostly the CD lookup), and decreasing the time_increment has a major impact
+# I also suspect that it is all of the trigonometry calculations that are taking so much time; there are a lot of them in a 5 DOF and they are NP (I'm pretty sure)
 
 from timeit import timeit
 import importlib
@@ -17,11 +21,13 @@ from motor import Motor
 
 
 def test_overall_speed():
+    "Calculate the amount of time it takes to run one basic rocket simulation."
     # TODO: Make this work with the new implementations
 
     with Timer():
         # this one isn't going to work for multiple trials
         # I think if you just reset the variables.py it might work
+        # FIXME: this isn't working anymore
         importlib.import_module('rocket')
 
 
