@@ -1,5 +1,14 @@
+# ENVIRONMENT CLASS
+# Define an object to store the atmospheric conditions at any position in the world based on th 1976 Standard Atmosphere
+# It models the wind (hopefully it will eventually include gusts, but right now it's a DIY thing that's wrong)
+# Also models air density, pressure, and temperature.
+
 import numpy as np
 import pandas as pd
+
+import sys
+sys.path.append(".")
+
 from Helpers.general import interpolate, get_next
 from preset_object import PresetObject
 from Data.Input.models import get_density, get_speed_of_sound
@@ -7,12 +16,20 @@ from Helpers.wind import Wind
 
 
 class Environment(PresetObject):
+    """
+        Define how the environment works for a simulation (both the motor and the rocket).
+        The most important factor is the time_increment - check out some of the timeStudies to see the effect.
+        The base_altitude is also relatively important, as it can seriously cut down on the air density, decreasing drag
+        
+        The current model implements the 1976 Standard Atmosphere based on Digital Dutch's data as well as a variable gravity model of a perfectly spherical Earth.
+    """
+    
     def __init__(self, config={}):
         self.time = 0
         self.time_increment = 0.01  # seconds
 
         self.earth_mass = 5.972 * 10 ** 24  # kg
-        self.gravitational_constant = 6.67 * 10 ** -11
+        self.gravitational_constant = 6.67 * 10 ** -11  # Newtons kg^-2 m^2
         self.earth_radius = 6371071.03  # m
         self.base_altitude = 4  # m
 
@@ -79,10 +96,12 @@ class Environment(PresetObject):
 
 
     def get_speed_of_sound(self, altitude):
+        """Look up the speed of sound by the altitude (in kilometers)"""
         return get_speed_of_sound(altitude)
 
 
     def get_air_density_from_model(self, altitude):
+        """Look up a the air density in kg/m^3 by the altitude in km using a fitted polynomial model"""
         # From the polynomial models file
         return get_density(altitude)
 
