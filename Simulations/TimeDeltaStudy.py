@@ -58,3 +58,18 @@ print(apogees)
 
 plt.plot(time_deltas, apogees)
 plt.show()
+
+
+
+# Base (pasted from the SimulateRocket.py file)
+# Uses mostly class defaults
+# Notice that it is a 17 second sim to apogee
+# 1 gives me 1064 meters, very big max speed
+# 0.5 returns 1642, much lower max speed
+# 0.1 gives me 1277
+# 0.05 gives me 937
+# 0.01 gives me 1720
+# 0.005 -> 2009
+# 0.001 -> 2074
+# 0.0005 -> 2074
+# 0.0001 -> 2074

@@ -1,3 +1,12 @@
+# ROCKET OBJECT
+
+
+# here is my plan: 
+# Debug the current simulation - why is it spinning out
+# Add variable mass and center of gravity from custom things.
+# Scale it up to the current rocket we are using in class
+
+
 # There are a few main areas that need improvement
 # There is no variable center of gravity. This is relatively easy to fix and will play a large role in stability
 # There is no variable center of pressure. This is much harder to fix. I can get a crappy solution from Rasaero, but I would really like to use CFD data
@@ -5,13 +14,8 @@
 
 import numpy as np
 from Helpers.general import vector_from_angle, angle_between, combine, magnitude
-# from Helpers.fluidSimulation import cutout_method, barrowman_equation, extended_barrowman_equation
 from Data.Input.models import get_coefficient_of_drag, get_coefficient_of_lift
 from math import isnan
-
-# TODO: Factor in changing center of gravity
-# TODO: get approximate position of motor so that I can recalculate center of gravity every frame
-# It should be do-able with only the initial center of gravity (and mass), and the position of the motor and the mass that is lost
 
 
 
@@ -35,7 +39,7 @@ class Rocket(PresetObject):
         self.acceleration = np.array([0, 0, 0], dtype="float64")
 
         self.rotation = np.array(
-            [np.pi / 2, -0.05],
+            [np.pi / 2, 0.01],
             dtype="float64")
         self.angular_velocity = np.array([0, 0], dtype="float64")
         self.angular_acceleration = np.array([0, 0], dtype="float64")
@@ -48,7 +52,7 @@ class Rocket(PresetObject):
 
         self.reference_area = np.pi * self.radius ** 2  # 0.008  # m^2
 
-        # region Set References
+        # region SET REFERENCES
         self.motor = motor
         self.environment = environment
         self.parachutes = parachutes
@@ -65,7 +69,6 @@ class Rocket(PresetObject):
 
         self.update_previous()
 
-        # TODO: Test the refactor and see if bestangle by wind still works (mit need a reset() metod)
 
         # maybe should make an addmotor method
         self.mass += self.motor.mass
@@ -124,6 +127,8 @@ class Rocket(PresetObject):
         # Set yourself up for the next frame
         if isnan(self.position[2]):
             raise Exception("Everything fell apart. NaN value in altitude")
+
+        self.log_data("Net Force", self.force)
 
         self.update_previous()
         self.force = np.array([0., 0., 0.])
@@ -285,7 +290,7 @@ class Rocket(PresetObject):
             self.apply_force(lift_magnitude, lift_direction,
                              self.CP, debug=True, name="Lift")
 
-        # Angular drag
+        # Angular drag: not currently implemented
         if not np.all(np.isclose(self.angular_velocity, 0)):
             pass
 
@@ -299,8 +304,7 @@ class Rocket(PresetObject):
         relative_velocity = self.velocity - \
             self.environment.get_air_speed(self.get_altitude())
 
-        # FIXME: This relative velocity is actually wrong
-        # Good lord it's because the wind is only in the z direction
+
         self.log_data('air speed', self.environment.get_air_speed(
             self.get_altitude()))
         self.log_data('relative velocity', relative_velocity)
@@ -310,14 +314,16 @@ class Rocket(PresetObject):
 
         # Lift force is applied perpendicular to the freestream velocity
         # This is the part that is stupid because I should just use normal and axial forces
-        # Assumin lift forces are in te same plane as dra forces and te rocket (if it was defined as a line)
-        # Tis isnt perfectly accurate, but it is impossible to do better witout more detailed information from Rasaero
-
+        # Assuming lift forces are in te same plane as drag forces and the rocket (if it was defined as a line)
         heading = vector_from_angle(self.rotation)
         component_in_drag_direction = project(heading, drag_direction)
 
         lift_direction = heading - component_in_drag_direction
-        lift_direction /= magnitude(lift_direction)
+        if np.all(np.isclose(lift_direction, 0)):
+            lift = 0
+            lift_direction = np.array([0, 0, -1])
+        else:
+            lift_direction /= magnitude(lift_direction)
 
 
         return drag, drag_direction, lift, lift_direction
@@ -336,6 +342,8 @@ class Rocket(PresetObject):
             thrust, self.environment.time_increment)
 
         self.mass = new_mass
+
+        self.log_data("Thrust", thrust)
 
         # thrust is in direction of the rotation. The larger the angle is, the more to the right the rocket is
         self.apply_force(thrust, vector_from_angle(self.rotation))
@@ -409,6 +417,8 @@ class Rocket(PresetObject):
     def calculate_coefficient_of_lift(self):
         self.CL = get_coefficient_of_lift(
             self.get_mach(), self.angle_of_attack)
+        self.log_data("CL", self.CL)
+
 
     def calculate_center_of_pressure(self):
         self.CP = 1.8

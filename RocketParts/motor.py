@@ -60,8 +60,6 @@ class Motor(PresetObject):
         # print(self.mass_per_thrust)
 
 
-
-
     def get_thrust(self, current_time):
         if self.finished_thrusting:
             return 0

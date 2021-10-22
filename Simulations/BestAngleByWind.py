@@ -1,3 +1,6 @@
+# OPTIMIZE ANGLE GIVEN WIND
+
+
 import sys
 sys.path.append(".")
 
@@ -12,6 +15,7 @@ from RocketParts.motor import Motor
 from environment import Environment
 
 
+# TODO: Test the refactor and see if bestangle by wind still works (mit need a reset() metod)
 
 
 # Find best launch angle based on a constant wind speed
