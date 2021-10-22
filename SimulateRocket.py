@@ -44,4 +44,4 @@ if __name__ == "__main__":
     simulate_rocket()
 
     from Visualization.OpticalAnalysis import display_optical_analysis
-    # display_optical_analysis()
+    display_optical_analysis()

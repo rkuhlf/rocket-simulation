@@ -158,12 +158,6 @@ class Rocket(PresetObject):
             self.p_angular_velocity, self.angular_velocity)
         self.rotation += combined_angular_velocity * self.environment.time_increment
 
-    def apply_angular_acceleration(self):
-        combined_angular_acceleration = combine(
-            self.p_angular_acceleration, self.get_angular_acceleration())
-        self.angular_velocity += combined_angular_acceleration * self.environment.time_increment
-
-        # TODO: debug the logger class so that it stops giving me these negative accelerations. I think something is just off by one frame
         # Flip all of the rotation
         # Change the theta_down so that it is never negative (should always be between 0 and pi)
         # Swap the velocity so that it is still going the same way
@@ -190,6 +184,12 @@ class Rocket(PresetObject):
             self.log_data("flipped", 1)
         else:
             self.log_data("flipped", 0)
+
+    def apply_angular_acceleration(self):
+        combined_angular_acceleration = combine(
+            self.p_angular_acceleration, self.get_angular_acceleration())
+        self.angular_velocity += combined_angular_acceleration * self.environment.time_increment
+
 
     def get_angular_acceleration(self):
         self.angular_acceleration = self.torque / self.moment_of_inertia

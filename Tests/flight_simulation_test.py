@@ -88,3 +88,15 @@ class TestAscent(TestSimulateRocket):
             previous_altitude = current_altitude
 
 # TODO: implement test to make sure that the rocket flight is nearly identical (with the same/no wind) regardless of which way around the rotation you start (0.05 and -0.05)
+
+class TestWholeFlight(TestSimulateRocket):
+    def test_flipping(self):
+        data = self.get_current_output()
+
+        for i, row in data.iterrows():
+            self.assertGreater(abs(row["rotation2"]), 0,  
+                "The flipping code is not working correctly. Somehow we got a negative rotation down.")
+            
+            self.assertLess(abs(row["rotation2"]), np.pi,  
+                "The flipping code is not working correctly. Somehow we got an overrotated rotation down.")
+
