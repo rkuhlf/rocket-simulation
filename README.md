@@ -42,6 +42,8 @@ I have tried to use the *if __name__ == "__main__" idiom wherever a file has cod
 
 There are many ways to program multiple objects so that they take data differently but perform the same calculations on it. At the moment, I am trying to have the main parent object for a class always accept a few different kinds of `set_` function, like `set_constant_mass` or `set_CG_function` or `set_thrust_table`. However, implementing these must always result in a change to the properties of the object, otherwise preset object will not be able to save it properly.
 
+This readme file is really long, so I have more information about the design practices listed under a designNotes.md file.
+
 ## A Note on Preset Object
 The idea is that eventually everything will be saveable. Also it allows the settings to be passed in as a config argument. I know there are other idioms like *kwargs that may be better suited for this, I might swap everything out later.
 
