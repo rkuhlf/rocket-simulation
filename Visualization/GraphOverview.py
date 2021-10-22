@@ -1,10 +1,13 @@
+# GRAPH AN OVERVIEW OF A FLIGHT SIMULATION
+# One graph with all of the outputs, one graph with some conversions, one graph with flight path, one graph for rotations, etc.
+
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
-import sys
 
+import sys
 sys.path.append(".")
-# Depending on how aggressive any autoformatting is it may be necessary to save this without formatting so that the path is affected at the start. (In VSCode ctrl-K ctrl-shift-S saves without formatting)
+
 from Helpers.general import numpy_from_string
 
 
@@ -12,6 +15,7 @@ from Helpers.general import numpy_from_string
 
 
 def graph_conversions():
+    """Recommended that you run CalculateConversions.py to generate this file."""
     # Files are relative to the project folder you are running in, not the file location
     data = pd.read_csv("Data/Output/conversions.csv")
 
