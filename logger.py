@@ -1,9 +1,20 @@
+# LOGGER CLASS
+# The data storage is separated from the rocket class and integrated via the Simulation class
+# There is a basic version that only stores a csv file, under Logger, and there a few additional print statements under FeedbackLogger
+
 import numpy as np
 import pandas as pd
 
+# TODO: import the magnitude method from helpers instead of np.linalg.norm
+
 
 class Logger:
-    "Logs only the data"
+    """
+        Logs only the data.
+        Should be hooked into the Simulation object, but a reference also has to be set in the Rocket object.
+        
+        Stores an array of objects, since I think that is slightly better than appending to a dataframe.
+    """
 
     def __init__(self, rocket, to_record, target="output.csv"):
         self.rows = []
@@ -14,13 +25,17 @@ class Logger:
         self.current_row = {}
         self.target = target
 
-    def copy():
-        # Hopefully this is being called from the simulation and the rocket I am about to make gets overridden
+    def copy(self):
+        # Hopefully this is being called from the simulation and the rocket I am about to make gets overridden (This comment exists from a time when I was working on the Goddard Problem Optimization)
         return deepcopy(self)
 
 
 
     def add_items(self, data):
+        """
+            Update the current row of data, which should eventually be saved by save_row
+        """
+        
         if self.splitting_arrays:
             k = list(data.keys())[0]
             v = list(data.values())[0]
@@ -42,6 +57,9 @@ class Logger:
         self.current_row = {}
 
     def handle_frame(self):
+        """
+            This is the only thing that needs to be run for the logger to work in the Simulation class (also the save_to_csv)
+        """
         for key in self.to_record:
             self.add_items({key: self.rocket.__dict__[key].copy()})
 
@@ -49,17 +67,22 @@ class Logger:
 
     def save_to_csv(self):
         df = pd.DataFrame(self.rows)
-        print(df)
+        # Rather than using the index (0, 1, 2, 3, 4...), I will index the rows by the time the row is recorded at
         df.set_index('time', inplace=True)
 
         df.to_csv("Data/Output/" + self.target)
 
     def reset(self):
+        """
+            Reinitialize the Logger object
+        """
         self.__init__(self.rocket, self.to_record)
 
 
 class Feedback_Logger(Logger):
-    "Logs the progress of the rocket simulation along with some print statements"
+    """
+        Logs the progress of the rocket simulation along with some print statements.
+    """
 
     def __init__(self, rocket, to_record, target="output.csv"):
         print("Logger is prepared to launch rocket")
@@ -79,11 +102,10 @@ class Feedback_Logger(Logger):
             self.should_print_top_speed
             self.apogee = self.rocket.position[2]
 
-        # FIXME: Doesn't work because p_velocity = velocity in the rocket. Probably should check if y acceleration is in opposite direction to y velocit
+        # TODO: I should probably print the maximum Mach and Max Q as well
         if self.should_print_top_speed:
-            if np.sign(
-                    self.rocket.velocity[2]) != np.sign(
-                    self.rocket.acceleration[2]):
+            # If the acceleration is going against the velocity, it is decelerating
+            if np.sign(self.rocket.velocity[2]) != np.sign(self.rocket.acceleration[2]):
                 print("Top speed was", np.linalg.norm(
                     self.rocket.velocity), " at Mach", self.rocket.get_mach())
 
