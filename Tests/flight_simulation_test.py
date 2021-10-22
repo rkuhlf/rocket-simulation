@@ -87,4 +87,4 @@ class TestAscent(TestSimulateRocket):
             
             previous_altitude = current_altitude
 
-
+# TODO: implement test to make sure that the rocket flight is nearly identical (with the same/no wind) regardless of which way around the rotation you start (0.05 and -0.05)

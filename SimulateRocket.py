@@ -27,7 +27,7 @@ def simulate_rocket():
     logger = Feedback_Logger(
         rocket,
         ['position', 'velocity', 'acceleration', 'rotation', 'angular_velocity',
-        'angular_acceleration'], target="noWind.csv")
+        'angular_acceleration'], target="outputIncorrectRestoration.csv")
 
     logger.splitting_arrays = True
 

@@ -10,6 +10,7 @@
 # I don't really have very much faith that this is going to make the model work, but they are broken
 
 # There is clearly a restoring force, since the rocket oscillates about its main heading
+# The main heading might have a mistake in it (for some reason it moves towards 0 over time), but it is close enough to zero that the rocket should be moving straight up
 
 import pandas as pd
 import numpy as np
@@ -43,7 +44,7 @@ def display_optical_analysis():
         This is designed so that you look at the graphs while you read the output of the console to determine if it is working properly.
     """
 
-    data = pd.read_csv("Data/Output/noWind.csv")
+    data = pd.read_csv("Data/Output/outputIncorrectRestoration.csv")
 
     # display_forces(data)
 
@@ -51,10 +52,10 @@ def display_optical_analysis():
     # TODO: Graph the stability over time
 
 
-    # fig, ax = plt.subplots()
-    # ax.plot(data["time"], data["rotation2"])
+    fig, ax = plt.subplots()
+    ax.plot(data["time"], data["rotation2"])
 
-    # plt.show()
+    plt.show()
 
     # AOA looks to be calculated correctly
     # fig, ax = plt.subplots()

@@ -39,7 +39,7 @@ class Rocket(PresetObject):
         self.acceleration = np.array([0, 0, 0], dtype="float64")
 
         self.rotation = np.array(
-            [np.pi / 2, 0.01],
+            [np.pi / 2, 0.05],
             dtype="float64")
         self.angular_velocity = np.array([0, 0], dtype="float64")
         self.angular_acceleration = np.array([0, 0], dtype="float64")
@@ -165,8 +165,8 @@ class Rocket(PresetObject):
 
 
         # Flip all of the rotation
-        # Change the theta_down
-        # Swap te velocity so tat it is still oin te same way
+        # Change the theta_down so that it is never negative (should always be between 0 and pi)
+        # Swap the velocity so that it is still going the same way
         if (self.rotation[1] > np.pi):
             self.rotation[0] += np.pi
             self.rotation[0] %= np.pi * 2
@@ -182,6 +182,7 @@ class Rocket(PresetObject):
             self.rotation[0] += np.pi
             self.rotation[0] %= np.pi * 2
 
+            # Make the rotation positive
             self.rotation[1] = -self.rotation[1]
 
             self.angular_acceleration[1] *= -1
@@ -215,8 +216,6 @@ class Rocket(PresetObject):
     # endregion
 
     # region FORCE BASED CALCULATIONS
-
-
     def apply_force(
             self, value, direction, distance_from_nose=None, debug=False,
             name="Force"):
