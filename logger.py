@@ -29,7 +29,9 @@ class Logger:
         # Hopefully this is being called from the simulation and the rocket I am about to make gets overridden (This comment exists from a time when I was working on the Goddard Problem Optimization)
         return deepcopy(self)
 
-
+    @property
+    def full_path(self):
+        return "Data/Output/" + self.target
 
     def add_items(self, data):
         """
@@ -70,7 +72,7 @@ class Logger:
         # Rather than using the index (0, 1, 2, 3, 4...), I will index the rows by the time the row is recorded at
         df.set_index('time', inplace=True)
 
-        df.to_csv("Data/Output/" + self.target)
+        df.to_csv(self.full_path)
 
     def reset(self):
         """
@@ -128,4 +130,4 @@ class Feedback_Logger(Logger):
     def save_to_csv(self):
         super().save_to_csv()
 
-        print(f"Saved the trial to csv at {self.target}")
+        print(f"Saved the trial to csv at {self.full_path}")

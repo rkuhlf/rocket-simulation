@@ -80,19 +80,23 @@ class Simulation(PresetObject):
 
     # region Helpers to evaluate the flight
 
-
+    @property
     def max_velocity(self):
         pass
-
+    
+    @property
     def max_mach(self):
         pass
 
+    @property
     def dist_from_start(self):
         return (self.rocket.position[0] ** 2 + self.rocket.position[1] ** 2) ** (1 / 2)
 
+    @property
     def landing_speed(self):
         return self.rocket.velocity[2]
 
+    @property
     def apogee(self):
         return self.rocket.apogee
 

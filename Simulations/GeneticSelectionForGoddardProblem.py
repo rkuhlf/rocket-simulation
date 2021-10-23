@@ -1,3 +1,17 @@
+# ITERATIVELY SOLVE THE GODDARD PROBLEM
+# Repeating simulations multiple times, determine which thrust profile optimizes apogee with a given total impulse and no limits on thrust shape.
+# The file uses an evolution-based implementation of a Monte Carlo algorithm, in which many rockets are generated, simulated, and then either saved, mutated, or randomized
+# By the end, the best shape for thrust should be clear.
+# Side note: the solution to this problem is not very important for hybrid rockets (a short explanation that I wrote is available at TODO: write this). Nevertheless, I think it is an interesting application of a python sim.
+# There is a slightly more relevant simulation under GeneticSimulationForBurnTime.py, which just scales the thrust profile linearly
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from random import random, normalvariate
+from copy import deepcopy
+import time
+
 import sys
 sys.path.append(".")
 
@@ -7,13 +21,6 @@ from rocket import Rocket
 from RocketParts.motor import Motor
 from RocketParts.parachute import ApogeeParachute, Parachute
 from logger import Feedback_Logger
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from random import random, normalvariate
-from copy import deepcopy
-
-import time
 
 
 def create_random_motor(target_total_impulse, point_count=10):

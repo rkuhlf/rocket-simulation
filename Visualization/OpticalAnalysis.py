@@ -39,14 +39,14 @@ def display_forces(data):
     print("All of these lines should be relatively smooth. You should be able to identify all spikes: thrust curve burning out and the deployment of parachutes. In addition, the peak of the resistive forces should come immediately after the net force begins to turn negative, maybe even sooner because of the decreasing air density. Note that small osciallations may occur as the rocket wobbles in the air.")
     plt.show()
 
-def display_optical_analysis():
+def display_optical_analysis(target):
     """
         Shows several graphs (using matplotlib and pandas) of the angles of the rocket flight
 
         This is designed so that you look at the graphs while you read the output of the console to determine if it is working properly.
     """
 
-    data = pd.read_csv("Data/Output/outputIncorrectRestoration.csv")
+    data = pd.read_csv(target)
 
     # display_forces(data)
 
@@ -102,4 +102,4 @@ def display_optical_analysis():
 
 
 if __name__ == "__main__":
-    display_optical_analysis()
+    display_optical_analysis("Data/Output/output.csv")

@@ -17,8 +17,8 @@ from Simulations.verifiedSimulation import VerifiedSimulation
 from numpy import array
 
 
-
-def simulate_rocket():
+def get_simulation():
+    # additional function because it turns out I need access to this in other files
     env = Environment({"time_increment": 0.01, "apply_wind": False})
     motor = Motor()
     drogue_parachute = ApogeeParachute({"radius": 0.2})
@@ -35,13 +35,19 @@ def simulate_rocket():
         {"apply_angular_forces": True, "max_frames": -1,
         "stopping_errors": False},
         env, rocket, logger)
+    
+    return sim
+
+
+def simulate_rocket():
+    sim = get_simulation()
     sim.run_simulation()
 
     return sim
 
 
 if __name__ == "__main__":
-    simulate_rocket()
+    sim = simulate_rocket()
 
     from Visualization.OpticalAnalysis import display_optical_analysis
-    display_optical_analysis()
+    display_optical_analysis(sim.logger.full_path)

@@ -5,6 +5,7 @@
 import unittest
 import pandas as pd
 import numpy as np
+from random import random
 
 import sys
 sys.path.append(".")
@@ -24,8 +25,7 @@ class TestSimulateRocket(unittest.TestCase):
         if not hasattr(self, "data"):
             sim = self.get_current_simulation()
 
-            data_path = "Data/Output/" + sim.logger.target
-            self.data = pd.read_csv(data_path)
+            self.data = pd.read_csv(sim.logger.full_path)
         
         return self.data
 
@@ -89,6 +89,7 @@ class TestAscent(TestSimulateRocket):
             previous_altitude = current_altitude
 
     def lift_direction(self):
+        pass
         # These things should be true for the vast majority of the ascent
         # There could be small differences depending on off-by-one frame issues
         # Also atm I am not accounting for different headings so, that part is wrong
@@ -155,3 +156,24 @@ class TestWholeFlight(TestSimulateRocket):
             between = angle_between(lift, drag)
 
             self.assertAlmostEqual(between, np.pi/2)
+
+    def test_arbitrary_rotations(self):
+        # When there is no wind, only the angle of inclination matters - the apogee should be the same regardless of theta_around
+        self.sim = SimulateRocket.get_simulation()
+        self.sim.environment.apply_wind = False
+        original_rotation = self.sim.rocket.rotation.copy()
+
+
+        self.sim.run_simulation()
+        base_apogee = self.sim.apogee
+
+
+        self.sim.reset()
+        self.sim.rocket.rotation = np.array([random() * np.pi * 2, original_rotation[1]])
+
+        self.sim.run_simulation()
+        new_apogee = self.sim.apogee
+
+        self.assertLess(abs(base_apogee - new_apogee) / base_apogee, 0.005, "There is an error in the rotation code - running two simulations at identical inclinations should result in very similar heights (with no randomized features). These simulations had different results.")
+
+
