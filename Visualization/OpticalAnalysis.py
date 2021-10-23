@@ -12,7 +12,7 @@
 # There is clearly a restoring force, since the rocket oscillates about its main heading
 # The main heading might have a mistake in it (for some reason it moves towards 0 over time), but it is close enough to zero that the rocket should be moving straight up
 
-# Drag and lift forces are perfectly correct. However, the angular acceleration is incorrect - it provides an acceleration downwards once the rocket points far enough downwards, but it should still be pushing the fins back down
+# I think that the descent is broken now. My hope is that everything can be magically fixed with one negative sign, but I doubt it.
 
 import pandas as pd
 import numpy as np

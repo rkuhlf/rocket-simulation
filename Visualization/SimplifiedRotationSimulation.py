@@ -80,7 +80,8 @@ def graphCompleteWithArbitraryCoefficients():
 
     # This multiplier represents the effects of the translational speed of the rocket, the density, and the drag coefficient
     # If it is too high (like 5), the rocket does start to spin out of control
-    multiplier = 0.2  # starts expanding around pi / 2 (I think)
+    # FIXME: make it clearer what this does (is it broken?)
+    multiplier = 0.4  # starts expanding around pi / 2 (I think)
 
 
     # The higher this multiplier, the quicker it compresses, regardless of the multiplier for torque caused by translation
@@ -132,5 +133,5 @@ def graphRocketOutput():
 
 
 if __name__ == "__main__":
-    # graphCompleteWithArbitraryCoefficients()
-    graphRocketOutput()
+    graphCompleteWithArbitraryCoefficients()
+    # graphRocketOutput()

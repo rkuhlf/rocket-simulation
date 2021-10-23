@@ -168,6 +168,7 @@ class Rocket(PresetObject):
             # basically just 360 - rotation down
             self.rotation[1] = np.pi - overshoot
 
+            # Notice that flipping the rotational acceleration is important, even if it has already been applied this frame. Next frame, when we average it, it will basically be zero, showing the flip
             self.angular_acceleration[1] *= -1
             self.angular_velocity[1] *= -1
             self.log_data("flipped", 1)
@@ -341,8 +342,13 @@ class Rocket(PresetObject):
 
         # I don't know how to explain this, but it took me a solid four hours of debugging to figure out.
         # When the fins are in the air, we still project to the same side, so the sign is wrong
-        if heading[2] < 0:
-            # If we are pointed the downwards, we should still be restoring the fins downwards
+        fins_over_nose = False
+
+        if self.angle_of_attack > np.pi / 2:
+            fins_over_nose = True
+
+        if fins_over_nose:
+            # If we are pointed the downwards, we should still be restoring the fins downwards (on ascent)
             lift_direction *= -1
 
         # When pointed bottom left, lift is wrong direction
@@ -460,7 +466,8 @@ class Rocket(PresetObject):
 
 
     def calculate_center_of_pressure(self):
-        self.CP = 1.8
+        # This should give one caliber of stability
+        self.CP = 1.1
         # cutout = cutout_method()
         # barrowman = barrowman_equation()
 
