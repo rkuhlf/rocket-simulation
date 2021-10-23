@@ -1,3 +1,8 @@
+# DISPLAY 2D FLIGHT WITH BAD GRAPHICS
+# This has basically been obviated by the blender simulation, but I will leave it here for posterity
+# It uses pygame to display a graphic of the rocket's flight over time
+# FIXME: No doubt, it is currently broken because I haven't worked on it in a while
+
 import pygame
 import pandas as pd
 import numpy as np # definitely overkill
