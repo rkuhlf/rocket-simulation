@@ -20,11 +20,10 @@ class Motor(PresetObject):
     # TODO: rewrite so I can have some variable names that actually make sense. Right now, .total_impulse just gives you a value that is literally not the total impulse
 
     def __init__(self, config={}):
-        # https://www.thrustcurve.org/motors/Hypertek/1685CCRGL-L550/
         # Mass including the propellant
-        self.mass = 3.898
-        self.propellant_mass = 1.552
-        self.thrust_curve = "thrustCurve"
+        self.mass = 105 # kg
+        self.propellant_mass = 105 # kg
+        self.thrust_curve = "currentGoddard"
 
         self.thrust_multiplier = 1
         self.time_multiplier = 1
@@ -32,7 +31,6 @@ class Motor(PresetObject):
 
         super().overwrite_defaults(config)
 
-        # somehow it thinks there's more thrust mass than there is
         self.thrust_data = pd.read_csv(
             "Data/Input/" + self.thrust_curve + ".csv")
 

@@ -5,10 +5,10 @@
 
 import pandas as pd
 
-data = pd.read_csv("./Data/Input/thrustCurveToModify.csv")
+data = pd.read_csv("./Data/Input/thrustCurveO6300.csv")
 
-desired_burn_time = 18
-desired_average_thrust = 8100
+desired_burn_time = 22
+desired_average_thrust = 10000
 
 
 
@@ -36,3 +36,6 @@ data["thrust"] *= desired_average_thrust / average_thrust
 
 print(data)
 
+data.set_index("time", inplace=True)
+
+data.to_csv("./Data/Input/currentGoddard.csv")

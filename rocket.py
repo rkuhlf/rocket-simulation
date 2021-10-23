@@ -48,10 +48,10 @@ class Rocket(PresetObject):
         self.angular_acceleration = np.array([0, 0], dtype="float64")
 
         # This is just the mass of the frame, the motor and propellant will be added in a second
-        self.mass = 1.86  # kg
+        self.mass = 100  # kg
 
-        self.radius = 0.05  # meters
-        self.length = 2  # meters
+        self.radius = 0.11 # meters
+        self.length = 7 # meters
 
         self.reference_area = np.pi * self.radius ** 2  # 0.008  # m^2
 
@@ -446,7 +446,7 @@ class Rocket(PresetObject):
 
     def calculate_center_of_pressure(self):
         # This should give one caliber of stability
-        self.CP = 1.2
+        self.CP = 1.7
         # cutout = cutout_method()
         # barrowman = barrowman_equation()
 
