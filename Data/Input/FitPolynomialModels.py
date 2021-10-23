@@ -1,4 +1,10 @@
-# Unfortunately, I have some models that were made using lmfit and some that were made using np polynomials. In te future I would like to use lmfit
+# FIT "EMPIRICAL" MODELS FOR TABLE INPUTS
+# Looking up from high-fidelity csv tables is not particularly fast.
+# Ideally, I can just fit some polynomial models that match the data points exactly and run about 10 times as fast
+# TODO: add tests for every single model that I am using.
+
+
+# Unfortunately, I have some models that were made using lmfit and some that were made using np polynomials. In the future I would like to use lmfit
 
 from numpy.polynomial import Polynomial
 from numpy import polyval
@@ -9,7 +15,6 @@ import matplotlib.pyplot as plt
 
 
 def fit_density():
-    # If you are using VS Code, paths are relative to the project folder
     data = pd.read_csv("Data/Input/airQuantities.csv")
 
     print(data["Altitude"])
