@@ -10,6 +10,7 @@ import sys
 sys.path.append(".")
 
 import SimulateRocket
+from Helpers.general import angle_between
 
 
 class TestSimulateRocket(unittest.TestCase):
@@ -87,6 +88,45 @@ class TestAscent(TestSimulateRocket):
             
             previous_altitude = current_altitude
 
+    def lift_direction(self):
+        # These things should be true for the vast majority of the ascent
+        # There could be small differences depending on off-by-one frame issues
+        # Also atm I am not accounting for different headings so, that part is wrong
+
+
+        # When theta_around is 1.5 and theta_down is 0.2: 
+        # the rocket is heading in the positive y direction and the positive z direction
+        # The lift is in the positive y direction
+        # And the angular accel. down should be negative, pushing the fins down
+        # Therefore, the y+ axis should be causing negative angular acceleration
+        # ? appears to be working still
+
+        # When theta_around is 1.5 and theta_down is 2.8: 
+        # the rocket is heading in the positive y direction and the negative z direction
+        # The lift is in the negative y direction
+        # And the angular accel. down should be negative, pushing the fins down
+        # Therefore, the y+ axis should be causing positive angular acceleration
+        # ? lift looks good
+
+
+        # When theta_around is 4.7 and theta_down is 0.2: 
+        # the rocket is heading in the negative y direction and the positive z direction
+        # The lift is in the negative y direction
+        # And the angular acceleration down should be negative, pushing the fins down
+        # Therefore, the y+ axis should be causing positive angular acceleration
+        # ? This one looks good still
+
+        # When theta_around is 4.7 and theta_down is 2.8: 
+        # the rocket is heading in the negative y direction and the negative z direction
+        # The lift is in the positive y direction
+        # And the angular velocity down should be negative, pushing the fins down
+        # Therefore, the y+ axis should be causing negative angular acceleration
+        # ? This looks like it is correct
+
+        # You know what, it is mildly possible that we have just got an off-by-one error that results in an extra push after we are already over the edge
+        
+
+
 # TODO: implement test to make sure that the rocket flight is nearly identical (with the same/no wind) regardless of which way around the rotation you start (0.05 and -0.05)
 
 class TestWholeFlight(TestSimulateRocket):
@@ -100,3 +140,18 @@ class TestWholeFlight(TestSimulateRocket):
             self.assertLess(abs(row["rotation2"]), np.pi,  
                 "The flipping code is not working correctly. Somehow we got an overrotated rotation down.")
 
+
+    def test_lift_drag_perpendicular(self):
+        # By definition, the lift and the drag on the rocket should be directed perpendicularly
+        data = self.get_current_output()
+
+        for i, row in data.iterrows():
+            lift = np.array([row["Lift1"], row["Lift2"], row["Lift3"]])
+            drag = np.array([row["Drag1"], row["Drag2"], row["Drag3"]])
+
+            if np.any(np.isnan(lift)) or np.any(np.isnan(drag)):
+                continue
+
+            between = angle_between(lift, drag)
+
+            self.assertAlmostEqual(between, np.pi/2)

@@ -13,7 +13,7 @@
 # The CL & CD don't work past four degrees. This is just further impetus to get verifiable CFD data. Until that point I can't really move forwards here.
 
 import numpy as np
-from Helpers.general import vector_from_angle, angle_between, combine, magnitude
+from Helpers.general import angles_from_vector_3d, vector_from_angle, angle_between, combine, magnitude
 from Data.Input.models import get_coefficient_of_drag, get_coefficient_of_lift
 from math import isnan
 
@@ -201,9 +201,12 @@ class Rocket(PresetObject):
         """Update the variables that hold last frame's rocket features"""
         # I am just going to start applying a normal force here because this is super annoying. Hopefully nobody is trying to do one second rocket flights.
         if self.environment.time < 1 and self.position[2] < 0:
-            self.position[2] = 0
-            self.velocity[2] = 0
-            self.acceleration[2] = 0
+            # I think this is making it go through the floor
+            self.position = np.array([0, 0, 0], dtype="float64")
+            self.velocity = np.array([0, 0, 0], dtype="float64")
+            self.acceleration = np.array([0, 0, 0], dtype="float64")
+
+        self.log_data("Target Heading", angles_from_vector_3d(self.velocity))
 
         self.p_position = np.copy(self.position)  # p stands for previous
         self.p_velocity = np.copy(self.velocity)
@@ -233,11 +236,15 @@ class Rocket(PresetObject):
         self.apply_torque(value, direction, distance_from_CG)
 
     def apply_torque(self, value, direction, distance_from_CG):
+        # FIXME: this is broken. I think it breaks once the lift forces dominate while it is rotated over
         # Figure out how the force * the distance affects each direction of rotation
         # Calculate the torque caused by an arbitrary force
         # The drag force fully applies to the translational motion of the rocket, but it also fully applies to the rotational momentum of the object
         # calculate the torque in two perpendicular directions
         # Perpendicular is slightly more complicated in 3D. We need the component of the force that is perpendicular to the current rotation of the rocket. To me, it seems like the easiest thing is to break the force down into each of it's components and calculate that individually
+
+        # Debug: for every region, think through how it behaves at high theta down, as well as on the descent
+        #region Z-component: I am very confident
         z_component = direction[2] * value
         # The z component cannot cause rotation around, only affecting theta down
         z_component_perpendicular = z_component * \
@@ -246,9 +253,10 @@ class Rocket(PresetObject):
 
         # a torque in the vertical direction (positive z component), should cause an increase in theta down
         self.torque[1] += distance_from_CG * z_component_perpendicular
+        #endregion
 
 
-
+        #region X-component: I am relatively certain this doesn't matter at all atm; the x component of lift and drag is virtually non-existant
         x_component = direction[0] * value
         # The around rotation determines what fraction of the force goes to the yaw and what fraction to the pitch. When the rocket hasn't spun at all, all of the x_component goes to the pitch
         # I might just need the value of this
@@ -265,8 +273,16 @@ class Rocket(PresetObject):
         # When the rocket is horizontal, however, the yaw will still be fully applied. I don't think I need any other multiplier
 
         self.torque[0] += x_component * yaw_multiplier * distance_from_CG
+        #endregion
 
+
+
+        # THIS MUST BE THE THING THAT IS BROKEN; about 800 Newtons positive via lift; should come out to negative theta down
         y_component = direction[1] * value
+        # depending on the flipping of the theta_around, this will be positive or negative. I don't want that.
+        # TODO: think really hard; does taking the absolute value of this make sense
+        # The pitch multiplier is supposed to determine how much of this force is pushing us around the y axis 
+        # When we are inclined so that the nose cone points slightly towards the -y-axis, we want a force towards the positive y-axis to push the fins up, giving a positive value, making it negative here
         pitch_multiplier = np.sin(self.theta_around())
         angle_of_incidence_multiplier = np.cos(self.theta_down())
 
@@ -274,6 +290,9 @@ class Rocket(PresetObject):
             angle_of_incidence_multiplier * distance_from_CG
 
 
+
+
+        # This doesn't matter atm because there is no torque[0]
         yaw_multiplier = np.cos(self.theta_around())
         # x and y can't cause yaw in the same direction (I think, so we'll just have them be opposite)
         self.torque[0] -= y_component * yaw_multiplier * distance_from_CG
@@ -286,6 +305,7 @@ class Rocket(PresetObject):
             drag_magnitude, drag_direction, lift_magnitude, lift_direction = self.get_translational_drag()
             self.apply_force(drag_magnitude, drag_direction,
                              self.CP, debug=True, name="Drag")
+            #  TODO: try without lift
             self.apply_force(lift_magnitude, lift_direction,
                              self.CP, debug=True, name="Lift")
 
@@ -318,6 +338,18 @@ class Rocket(PresetObject):
         component_in_drag_direction = project(heading, drag_direction)
 
         lift_direction = heading - component_in_drag_direction
+
+        # I don't know how to explain this, but it took me a solid four hours of debugging to figure out.
+        # When the fins are in the air, we still project to the same side, so the sign is wrong
+        if heading[2] < 0:
+            # If we are pointed the downwards, we should still be restoring the fins downwards
+            lift_direction *= -1
+
+        # When pointed bottom left, lift is wrong direction
+        # When pointed bottom right, lift is wrong direction
+        # When pointed top left, it is correct
+        # When pointed top right, it is correct
+
         if np.all(np.isclose(lift_direction, 0)):
             lift = 0
             lift_direction = np.array([0, 0, -1])
@@ -409,14 +441,22 @@ class Rocket(PresetObject):
             if parachute.deployed:
                 return
         self.log_data("AOA", self.angle_of_attack)
+        
         self.CD = get_coefficient_of_drag(
             self.get_mach(), self.angle_of_attack)
         self.log_data("CD", self.CD)
 
+        # FIXME: This is a debugging thing
+        # self.CD = 1
+
     def calculate_coefficient_of_lift(self):
+        
         self.CL = get_coefficient_of_lift(
             self.get_mach(), self.angle_of_attack)
         self.log_data("CL", self.CL)
+        # FIXME: This is a debugging thing
+        # self.CL = 16 * self.angle_of_attack
+
 
 
     def calculate_center_of_pressure(self):

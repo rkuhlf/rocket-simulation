@@ -2,6 +2,8 @@ import re
 import numpy as np
 
 
+# TODO: find a better naming convention for these: maybe the helpers don't need a keyword and I should assume they return a value
+
 def interpolate(x, x1, x2, y1, y2):
     '''Map one point from one range to another'''
     if x2 == x1:
@@ -161,9 +163,10 @@ def vector_from_angle(np_array):
     # This has great potential to be incorrect
     # I copied it from https://stackoverflow.com/questions/1568568/how-to-convert-euler-angles-to-directional-vector
     around, down = np_array
+
     x = np.cos(around) * np.sin(down)
     y = np.sin(around) * np.sin(down)
-    # Tis is different - right now 0 degrees (straight up, will return 0 in the z axis).
+    # I altered this line to cosine from sine - now 0 degrees (straight up, will return 1 in the z axis).
     z = np.cos(down)
 
     return np.array([x, y, z])
