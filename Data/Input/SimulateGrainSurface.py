@@ -1,4 +1,10 @@
+# MODEL THE GRAIN BURN AREA OVER REGRESSION
 # Generate input-output data for the 2D cross-section surface area of the fuel grain given a base shape and the regression rate
+# It uses a model where whether a pixel is regressed away is determined by that pixel's distance from the combustion area.
+
+# TODO: I don't really feel comfortable using this model until I can show that regression by 50 pixels for a circular thing is accurate
+# I also think that this model really isn't conducive to being solved iteratively, but it must be in order to properly work through cracks and stuff. Maybe I will do some thinking about what the optimum pixel count to regress by is.
+
 
 # SOURCES OF ERROR:
 # It is not totally accurate to represent curved shapes with pixels. I thought this error would go away as pixels -> infinity, but it did not. The error appears to flatten out at about 5% overestimation for a circle, but that number will obviously vary with different shapes

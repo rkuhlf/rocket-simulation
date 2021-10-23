@@ -1,3 +1,12 @@
+# SIMPLIFIED ROTATION SYSTEM GRAPH
+# Displays a simplified version of the rocket simulation in order to provide a gut-check that my intuition was right
+# It basically just demonstrates that the rocket oscillates
+# Takeaways - regardless of the multiplier on the acceleration, the angle will never converge
+# That means that no matter how dense the air is, or drag heavy the rocket is, it will continue oscillating at the exact same rate - unless there is an angular drag always opposed to the direction of rotation
+# Therefore, angular drag *does* have to be working correctly, and it is definitely not negligable
+
+# Nevertheless, I am relatively confident that there is an error in my current implementation
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -8,15 +17,9 @@ import pandas as pd
 
 # TODO: derive equations for these graphs using calculus
 # Unfortunately, there is some extra difficulty
-
-
-# SIMPLIFIED REPRESENTATION OF ROCKET ANGLE:
-# Takeaways - regardless of the multiplier on the acceleration, the angle will never converge
-# That means that no matter how dense the air is, or drag heavy the rocket is, it will continue oscillating at the exact same rate - unless there is an angular drag always opposed to the direction of rotation
-# Therefore, angular drag *does* have to be working correctly, and it is definitely not negligable
 def graphSimple():
     # Graph an angle
-    # Every step, we subtract the sin of the angle with a multiplier
+    # Every step, we subtract the sine of the angle with a multiplier
     # At what multiplier does the amplitude start to expand, and when does it contract
     time_record = []
     t = 0

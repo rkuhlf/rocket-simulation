@@ -1,3 +1,8 @@
+# GENERATE CSV FILE FROM SCRAPED CEA FILES
+# Once you have run the ScrapeCEA file, you need to parse it so that the model can read it
+# Once again, I think it would be great to reimplement this using rocketCEA or something
+
+
 # Out of all of this data, there are a few things that I need
 # Given an input chamber pressure and an input O/F ratio (and an input nozzle; just the expansion ratio)
 
