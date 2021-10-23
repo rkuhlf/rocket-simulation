@@ -1,3 +1,7 @@
+# TESTS FOR THE GENERAL HELPERS
+# You don't really need to run these over and over again, this is just the file where I was making sure that all of the math I copied down and worked out is correct
+
+
 import unittest
 
 from Helpers.general import *

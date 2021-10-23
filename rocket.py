@@ -1,10 +1,11 @@
 # ROCKET OBJECT
-
+# Simulates the flight of a rocket as a rigidbody in five degrees of freedom - three positional coordinates, two rotational coordinates
+# Uses a separate motor class for thrust, and an array of parachutes
+# Uses RASAero for looking up various aerodynamic qualities
 
 # here is my plan: 
-# Debug the current simulation - why is it spinning out
-# Add variable mass and center of gravity from custom things.
 # Scale it up to the current rocket we are using in class
+# Add variable mass and center of gravity from custom things.
 
 
 # There are a few main areas that need improvement
@@ -17,19 +18,21 @@ from Helpers.general import angles_from_vector_3d, vector_from_angle, angle_betw
 from Data.Input.models import get_coefficient_of_drag, get_coefficient_of_lift
 from math import isnan
 
-
-
 from Helpers.general import interpolate, project
-
-# also includes any libraries that are imported in this file
 from preset_object import PresetObject
 
 
 
 class Rocket(PresetObject):
+    """
+        Class that holds all of the aerodynamic calculations for a rocket and very little else
+        Most important function is simulate_step; used in the simulation class and is the main entry point
+        Avoid modifying the original position values, there may be unexpected consequences. If you need to change the launch altitude, do it from the Environment class
+        Feel free to change the starting rotation - it is basically your launch angle.
+        Also, everything is in radians.
+    """
 
     # Torque is in radians per second-squared * kg
-
     def __init__(
             self, config={},
             environment=None, motor=None, parachutes=[], logger=None):
@@ -135,10 +138,7 @@ class Rocket(PresetObject):
         self.torque = np.array([0., 0.])
 
 
-
     # region UPDATING KINEMATICS
-
-
     def apply_velocity(self):
         combined_velocity = combine(self.p_velocity, self.velocity)
         self.position += combined_velocity * self.environment.time_increment
@@ -237,55 +237,44 @@ class Rocket(PresetObject):
         self.apply_torque(value, direction, distance_from_CG)
 
     def apply_torque(self, value, direction, distance_from_CG):
-        # FIXME: this is broken. I think it breaks once the lift forces dominate while it is rotated over
-        # Figure out how the force * the distance affects each direction of rotation
-        # Calculate the torque caused by an arbitrary force
-        # The drag force fully applies to the translational motion of the rocket, but it also fully applies to the rotational momentum of the object
-        # calculate the torque in two perpendicular directions
+        """
+            Figure out how the force * the distance affects each axis of rotation - definitionally torque of an arbitrary force
+        """
+
         # Perpendicular is slightly more complicated in 3D. We need the component of the force that is perpendicular to the current rotation of the rocket. To me, it seems like the easiest thing is to break the force down into each of it's components and calculate that individually
 
-        # Debug: for every region, think through how it behaves at high theta down, as well as on the descent
-        #region Z-component: I am very confident
+
         z_component = direction[2] * value
         # The z component cannot cause rotation around, only affecting theta down
         z_component_perpendicular = z_component * \
-            np.sin(self.theta_down())
+            np.sin(self.theta_down)
         # When rocket is completely horizontal (90 degrees), it should apply 100%, when vertical, 0%. This is sine.
 
         # a torque in the vertical direction (positive z component), should cause an increase in theta down
         self.torque[1] += distance_from_CG * z_component_perpendicular
-        #endregion
 
 
-        #region X-component: I am relatively certain this doesn't matter at all atm; the x component of lift and drag is virtually non-existant
         x_component = direction[0] * value
         # The around rotation determines what fraction of the force goes to the yaw and what fraction to the pitch. When the rocket hasn't spun at all, all of the x_component goes to the pitch
-        # I might just need the value of this
-        pitch_multiplier = np.cos(self.theta_around())
+        pitch_multiplier = np.cos(self.theta_around)
         # If the rocket was travelling horizontally, there wouldn't be any force. 90 -> 0
-        angle_of_incidence_multiplier = np.cos(self.theta_down())
+        angle_of_incidence_multiplier = np.cos(self.theta_down)
 
         self.torque[1] -= x_component * pitch_multiplier * \
             angle_of_incidence_multiplier * distance_from_CG
 
 
         # Only apply the leftover x to the yaw
-        yaw_multiplier = np.sin(self.theta_around())
+        yaw_multiplier = np.sin(self.theta_around)
         # When the rocket is horizontal, however, the yaw will still be fully applied. I don't think I need any other multiplier
 
         self.torque[0] += x_component * yaw_multiplier * distance_from_CG
-        #endregion
 
 
-
-        # THIS MUST BE THE THING THAT IS BROKEN; about 800 Newtons positive via lift; should come out to negative theta down
         y_component = direction[1] * value
-        # depending on the flipping of the theta_around, this will be positive or negative. I don't want that.
-        # TODO: think really hard; does taking the absolute value of this make sense
         # The pitch multiplier is supposed to determine how much of this force is pushing us around the y axis 
-        # When we are inclined so that the nose cone points slightly towards the -y-axis, we want a force towards the positive y-axis to push the fins up, giving a positive value, making it negative here
-        pitch_multiplier = np.sin(self.theta_around())
-        angle_of_incidence_multiplier = np.cos(self.theta_down())
+        pitch_multiplier = np.sin(self.theta_around)
+        angle_of_incidence_multiplier = np.cos(self.theta_down)
 
         self.torque[1] -= y_component * pitch_multiplier * \
             angle_of_incidence_multiplier * distance_from_CG
@@ -293,11 +282,9 @@ class Rocket(PresetObject):
 
 
 
-        # This doesn't matter atm because there is no torque[0]
-        yaw_multiplier = np.cos(self.theta_around())
+        yaw_multiplier = np.cos(self.theta_around)
         # x and y can't cause yaw in the same direction (I think, so we'll just have them be opposite)
         self.torque[0] -= y_component * yaw_multiplier * distance_from_CG
-
 
 
     def apply_air_resistance(self):
@@ -306,11 +293,10 @@ class Rocket(PresetObject):
             drag_magnitude, drag_direction, lift_magnitude, lift_direction = self.get_translational_drag()
             self.apply_force(drag_magnitude, drag_direction,
                              self.CP, debug=True, name="Drag")
-            #  TODO: try without lift
             self.apply_force(lift_magnitude, lift_direction,
                              self.CP, debug=True, name="Lift")
 
-        # Angular drag: not currently implemented
+        # FIXME: Angular drag: not currently implemented
         if not np.all(np.isclose(self.angular_velocity, 0)):
             pass
 
@@ -322,11 +308,11 @@ class Rocket(PresetObject):
         lift = self.dynamic_pressure * self.reference_area * self.CL
 
         relative_velocity = self.velocity - \
-            self.environment.get_air_speed(self.get_altitude())
+            self.environment.get_air_speed(self.altitude)
 
 
         self.log_data('air speed', self.environment.get_air_speed(
-            self.get_altitude()))
+            self.altitude))
         self.log_data('relative velocity', relative_velocity)
 
         # Drag force is applied in the same direction as freestream velocity
@@ -350,11 +336,6 @@ class Rocket(PresetObject):
         if fins_over_nose:
             # If we are pointed the downwards, we should still be restoring the fins downwards (on ascent)
             lift_direction *= -1
-
-        # When pointed bottom left, lift is wrong direction
-        # When pointed bottom right, lift is wrong direction
-        # When pointed top left, it is correct
-        # When pointed top right, it is correct
 
         if np.all(np.isclose(lift_direction, 0)):
             lift = 0
@@ -389,7 +370,7 @@ class Rocket(PresetObject):
     def apply_gravity(self):
 
         gravity = self.environment.get_gravitational_attraction(
-            self.mass, self.get_altitude())
+            self.mass, self.altitude)
 
         self.apply_force(
             gravity, np.array([0, 0, -1]),
@@ -402,19 +383,23 @@ class Rocket(PresetObject):
         if self.logger is not None:
             self.logger.add_items({name: data})
 
+    @property
     def theta_around(self):
         return self.rotation[0]
 
+    @property
     def theta_down(self):
         return self.rotation[1]
 
-    def get_mach(self):
+    @property
+    def mach(self):
         # How many speed of sounds am I going
-        v = self.environment.get_speed_of_sound(self.get_altitude())
+        v = self.environment.get_speed_of_sound(self.altitude)
 
         return magnitude(self.velocity) / v
 
-    def get_altitude(self):
+    @property
+    def altitude(self):
         # Using Z as up vector
         return self.environment.base_altitude + self.position[2]
 
@@ -422,15 +407,15 @@ class Rocket(PresetObject):
 
     def calculate_dynamic_pressure(self):
         relative_velocity = self.velocity - \
-            self.environment.get_air_speed(self.get_altitude())
+            self.environment.get_air_speed(self.altitude)
 
         self.dynamic_pressure = 1 / 2 * self.environment.get_air_density(
-            self.get_altitude()) * magnitude(
+            self.altitude) * magnitude(
             relative_velocity) ** 2
 
     def calculate_angle_of_attack(self):
         relative_velocity = self.velocity - \
-            self.environment.get_air_speed(self.get_altitude())
+            self.environment.get_air_speed(self.altitude)
 
         self.angle_of_attack = angle_between(
             relative_velocity, vector_from_angle(self.rotation))
@@ -452,17 +437,11 @@ class Rocket(PresetObject):
             self.get_mach(), self.angle_of_attack)
         self.log_data("CD", self.CD)
 
-        # FIXME: This is a debugging thing
-        # self.CD = 1
-
     def calculate_coefficient_of_lift(self):
         
         self.CL = get_coefficient_of_lift(
             self.get_mach(), self.angle_of_attack)
         self.log_data("CL", self.CL)
-        # FIXME: This is a debugging thing
-        # self.CL = 16 * self.angle_of_attack
-
 
 
     def calculate_center_of_pressure(self):
@@ -500,7 +479,7 @@ class Rocket(PresetObject):
     #     "Calculate the magnitude of the force opposed to the direction of rotation"
     #     # Angular drag is a completely different calculation from translational drag
 
-    #     air_density = self.environment.get_air_density(self.get_altitude())
+    #     air_density = self.environment.get_air_density(self.altitude)
 
     #     # Some of the radius multiplications come from converting angular velocity to tangent velocity
     #     # just totally ignore shear angular drag and use the equation CD * pi * h * density * Angular velocity ^ 2 * radius ^ 4 from https://physics.stackexchange.com/questions/304742/angular-drag-on-body
@@ -529,7 +508,7 @@ class Rocket(PresetObject):
     #     # This rotation drag is always in the opposite direction of angular velocity. Be aware that that isn't always the same as the direction of torque due to translation
     #     # It is in the 10 ^ -4 range. That seems like it is too low to cause the rotation to converge
     #     # The impulse that this supplies should never be bigger than the impulse that the rocket is rotating with. TODO: Figure out how to calculate the momentum of rotation an object has (mv -> moment of inertia * rotational velocity)
-    #     # TODO: Check if dist_rav_press is correct ere
+    #     # TODO: Check if dist_grav_press is correct here
     #     current_rotational_momentum = self.moment_of_inertia * \
     #         self.angular_velocity * self.dist_gravity_pressure
 

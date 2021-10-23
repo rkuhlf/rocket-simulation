@@ -1,3 +1,7 @@
+# SIMULATION CLASS
+# This is the file for the basic connections between a rocket, a logger, and an environment
+# It doesn't really do much math, but there are a few basic utilities that help in other places
+
 from preset_object import PresetObject
 
 

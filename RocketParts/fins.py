@@ -1,3 +1,8 @@
+# FIN CLASSES
+# Fins are basically just a mass object with a few additional evaluation methods.
+# Since all of the drag data on the rocket is determined by a CD lookup, it is not necessary to include a fin object
+
+
 class Fins(PresetObject):
     def __init__(self, config={}):
         # CR	=	fin root chord

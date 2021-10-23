@@ -1,19 +1,24 @@
+# MOTOR CLASS
+# Started off as just a place to store the code to get a thrust curve up and running for a rocket class
+# Eventually, I need to integrate all of the inherited functions from the base motor class so that they actually work in the custom motor
+# That is a secondary priority however, since the evolution of chamber pressure is just incorrect at the moment
+
+import pandas as pd
+
 import sys
 sys.path.append(".")
 
 from preset_object import PresetObject
 from Helpers.general import interpolate
-import pandas as pd
 
 
-
-
-# You know what, I'm just going to go for a data-oriented design with the whole engine
-# Functions for everything. Later, I can have functions for sensitivity analysis
-# from preset_object import PresetObject
-
+# TODO: have a base Motor class
+# Have a data motor class that inherits from it and has several types of data inputs that work with an enum so as to be serializable
+# That custom motor class also needs to integrate with it
 
 class Motor(PresetObject):
+    # TODO: rewrite so I can have some variable names that actually make sense. Right now, .total_impulse just gives you a value that is literally not the total impulse
+
     def __init__(self, config={}):
         # https://www.thrustcurve.org/motors/Hypertek/1685CCRGL-L550/
         # Mass including the propellant
@@ -88,7 +93,7 @@ class Motor(PresetObject):
         return thrust * self.mass_per_thrust * time / (self.thrust_multiplier * self.time_multiplier)
 
     def get_total_impulse(self):
-        # This has got to be the most confusing way possible to do this. There is a total impulse that is te total impulse of the data without multipliers
+        # This has got to be the most confusing way possible to do this. There is a total impulse that is the total impulse of the data without multipliers
         return self.time_multiplier * self.thrust_multiplier * self.total_impulse
 
     def get_average_thrust(self):
@@ -97,17 +102,22 @@ class Motor(PresetObject):
     def get_burn_time(self):
         return self.time_multiplier * self.burn_time
 
+
+    #region SCALING
     def scale_thrust(self, multiplier):
         self.thrust_multiplier *= multiplier
 
     def reset_thrust_scale(self):
         self.thrust_multiplier = 1
 
+
     def scale_time(self, multiplier):
         self.time_multiplier *= multiplier
 
     def reset_time_scale(self):
         self.time_multiplier = 1
+
+    #endregion
 
 class CustomMotor(Motor):
     def __init__(self, config={}, ox_tank=None, injector=None, combustion_chamber=None, nozzle=None, environment=None):
@@ -188,10 +198,8 @@ class CustomMotor(Motor):
 
 
 
-        
 
-
-# TODO: Figure out the min mass flow rate, if any, for the nozzle to reach mach one at the choke. I don't see how it could instantaneously reach mach speeds
+# TODO: Figure out the min mass flow rate, if any, for the nozzle to reach mach one at the throat. I don't see how it could always reach mach speeds, and if I am going to implement combustion transients, that might be an important factor to consider
 if __name__ == "__main__":
     # some motor tests that should be moved to the actual tests TODO
     # m = CustomMotor()

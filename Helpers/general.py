@@ -1,3 +1,6 @@
+# MISCELLANEOUS HELPERS
+# Mostly mathematical, this is where most of the operations for angles are implemented
+
 import re
 import numpy as np
 
@@ -160,7 +163,6 @@ def angle_from_vector_2d(array):
 
 
 def vector_from_angle(np_array):
-    # This has great potential to be incorrect
     # I copied it from https://stackoverflow.com/questions/1568568/how-to-convert-euler-angles-to-directional-vector
     around, down = np_array
 
@@ -179,9 +181,8 @@ def euler_to_vector_2d(angle):
          np.sin(angle)])  # opposite / hypotenuse (1)
 
 
-
 def unit_vector(vector):
-    """ Returns the unit vector of the vector.  """
+    """ Returns the unit vector of the vector.  (Division by magnitude)"""
     return vector / np.linalg.norm(vector)
 
 

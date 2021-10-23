@@ -95,16 +95,15 @@ I use coordinates x, y, and z in that order, with indicating the vertical axis. 
 Everything in the motor is based off of Paraffin and Nitrous without any pressurant (though it should be easy to add). Again, I am using the explicit (https://en.wikipedia.org/wiki/Explicit_and_implicit_methods) Euler approximation to solve each time step.
 
 ### Ox Tank
-The ox tank is simulated using fitted properties from http://edge.rit.edu/edge/P07106/public/Nox.pdf. The calculations assume the tank is adiabatic and there is thermodynamic equilibrium between the gas and liquid. As I understand it, this should give a good lower bound for pressure, thus a lower bound for ox mass flow.
+The ox tank is simulated using fitted properties from http://edge.rit.edu/edge/P07106/public/Nox.pdf. The calculations assume the tank is adiabatic and there is thermodynamic equilibrium between the gas and liquid. As I understand it, this should give a good lower bound for pressure, thus a lower bound for ox mass flow. You can read more about how I implemented it in [this Google doc](https://docs.google.com/document/d/1wdYWqgM0Wl63pFUSrCRhfAZ8hQWpamdUno7EoJ8Q770/edit?usp=sharing).
 
 ### Injector
 Because Nitrous is an extremely volatile liquid, the calculations performed by the injector must model two-phase flow - the equilibrium of liquid and gas through a small orifice. I plan to eventually implement a calculation proposed by Dyer based on experiments on the Peregrine rocket, in which the mass flow rate is determined by an interpolation between single phase flow and complete phase equilibrium (also assuming thermodynamic equilibrium and equal velocity between the gas and liquid phase).
 
 ### Combustion Chamber
-The combustion chamber only calculates the evolution of conditions within the space. It does not account for the effects of pre or post combustion spaces in anything other than volume. It uses the conservation of mass and assumes the ideal gas law in order to model the pressure over time (you can read through the derivation of the equation [http://mathb.in/66333]), storing the relevant information in pressure, volume, and density variables (notice that we do not need to include moles or mass within the chamber, the information is implicit and can be calculated from what we do store). Most of the combustion characteristics are taken from CEA, and the temperature in the combustion chamber is assumed to reach the combustion flame temperature instantly.
+The combustion chamber only calculates the evolution of conditions within the space. It does not account for the effects of pre or post combustion spaces in anything other than volume. It uses the conservation of mass and assumes the ideal gas law in order to model the pressure over time (you can read through the derivation of the equation [here](https://www.overleaf.com/read/fphwwxgjvqbf)), storing the relevant information in pressure, volume, and density variables (notice that we do not need to include moles or mass within the chamber, the information is implicit and can be calculated from what we do store). Most of the combustion characteristics are taken from CEA, and the temperature in the combustion chamber is assumed to reach the combustion flame temperature instantly.
 
 DISCLAIMER: Right now the combustion chamber pressure over time is not correct at all.
-<!-- TODO: write a pastebin from http://mathb.in/ for the derivation of the pressure evolution equation -->
 
 #### Fuel Grain
 Since the fuel grain is housed in the combustion chamber, it is basically a child object of the combustion chamber in the code. At the moment, I have only implemented the highly-empirical, space-averaged equation that has grown out of Marxman's original research (`r-dot = a * G_ox ** n`), with coefficients collected from https://stacks.stanford.edu/file/druid:ng346xh6244/BenjaminWaxmanFinal-augmented.pdf, but you can probably find equally good numbers from other (much shorter) sources.
@@ -125,7 +124,7 @@ I also have a ToBlender.py file which can export your .csv file to Blender 3D. U
 # Unfortunate Eccentricities
 There are a few artifacts in my code due to my programming environment.
 
-I frequently use  `import sys \ sys.path.append(".")`. This is because when Visual Studio Code runs a file in a folder, it doesn't include the project folder for imports (at least it doesn't on my computer). That code adds it.
+I frequently use `import sys \ sys.path.append(".")`. This is because when Visual Studio Code runs a file in a folder, it doesn't include the project folder for imports (at least it doesn't on my computer). That code adds it.
 
 I use `#region` and VS Code (maybe some extension) to create foldable sections of code. Sorry if it gets in the way a little or it doesn't work with your editor
 
@@ -134,3 +133,8 @@ There is a .replit file for when I occasionally need the configuration to edit m
 Also, the tests for the code are completely disorganized, but there are a few basic ones that I would like to expand on located in the *Tests* folder. I have never been good at keeping track of tests, and I found it extremely difficult to update them regularly.
 
 My Git commit history is also a mess. I have been using Github mainly as a cloud storage service, since I have to use several different devices during the day, and many of the commits are half-finished edits. I apologize. 
+
+# Sources / Further Reading
+- Notes on Multiple Degrees of Freedom for Goddard 2021-2022](https://docs.google.com/document/d/1VEkxpdZ9q7t6uQZ0db8XvYZEkJN-9KKGfAi_a7vk-ag/edit?usp=sharing)
+- I really think this [Topics in Advanced Model Rocketry](https://www.apogeerockets.com/Rocket_Books_Videos/Books/Topics_In_Advanced_Model_Rocketry) book would have been super helpful, but I could never get my hands on it.
+- The designNotes.md file has most of the imformation about programming-oriented decisions that I made.
