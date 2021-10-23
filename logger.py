@@ -109,7 +109,7 @@ class Feedback_Logger(Logger):
             # If the acceleration is going against the velocity, it is decelerating
             if np.sign(self.rocket.velocity[2]) != np.sign(self.rocket.acceleration[2]):
                 print("Top speed was", np.linalg.norm(
-                    self.rocket.velocity), " at Mach", self.rocket.get_mach())
+                    self.rocket.velocity), " at Mach", self.rocket.mach)
 
                 self.should_print_top_speed = False
 

@@ -89,7 +89,7 @@ The general idea is that wind speeds follow a Weibull distribution. Using perlin
 I plan to implement some wind simulations based on a table of wind data from White Sands shortly.
 
 ### Notation of Implementation
-I use coordinates x, y, and z in that order, with indicating the vertical axis. Angles are defined in terms of a rotation around the vertical axis, starting from facing the positive x-axis, and a rotation down from the vertical, basically around the perpendicular of the object. It may be easier to think of the two angles as a rotation down around the y-axis followed by a rotation around the z-axis. These angles don't correspond particularly well with yaw and torque because they are not relative to the way the rocket faces initially.
+I use coordinates x, y, and z in that order, with indicating the vertical axis. Angles are defined in radians in terms of a rotation around the vertical axis, starting from facing the positive x-axis, and a rotation down from the vertical, basically around the perpendicular of the object. It may be easier to think of the two angles as a rotation down around the y-axis followed by a rotation around the z-axis. These angles don't correspond particularly well with yaw and torque because they are not relative to the way the rocket faces initially.
 
 ## Motor Simulation
 Everything in the motor is based off of Paraffin and Nitrous without any pressurant (though it should be easy to add). Again, I am using the explicit (https://en.wikipedia.org/wiki/Explicit_and_implicit_methods) Euler approximation to solve each time step.

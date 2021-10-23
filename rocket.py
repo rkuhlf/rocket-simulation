@@ -51,7 +51,7 @@ class Rocket(PresetObject):
         self.mass = 1.86  # kg
 
         self.radius = 0.05  # meters
-        self.height = 2  # meters
+        self.length = 2  # meters
 
         self.reference_area = np.pi * self.radius ** 2  # 0.008  # m^2
 
@@ -423,9 +423,10 @@ class Rocket(PresetObject):
         self.log_data("AOA1", self.angle_of_attack)
 
     def calculate_moment_of_inertia(self):
-        # FIXME: Actually this sucks and is complicated because moment of inertia isn't a scalar quantity for a complex 3d shape
+        # FIXME: Actually this sucks and is complicated because moment of inertia isn't a scalar quantity for a complex 3d shape. Double actually, I am not even rotating around the center of mass - this calculation rotates around the center of volume.
+        # Right now, it is an underestimate, because the masses are closer than they would actually be. Therefore, a usual stability margin will be more unstable than expected in the model
         # use calculated value from Fusion 360/Other CAD, currently using random one for a cylinder
-        self.moment_of_inertia = 1 / 12 * self.mass * self.height ** 2
+        self.moment_of_inertia = 1 / 12 * self.mass * self.length ** 2
 
     def calculate_coefficient_of_drag(self):
         for parachute in self.parachutes:
@@ -434,19 +435,18 @@ class Rocket(PresetObject):
         self.log_data("AOA", self.angle_of_attack)
         
         self.CD = get_coefficient_of_drag(
-            self.get_mach(), self.angle_of_attack)
+            self.mach, self.angle_of_attack)
         self.log_data("CD", self.CD)
 
     def calculate_coefficient_of_lift(self):
-        
         self.CL = get_coefficient_of_lift(
-            self.get_mach(), self.angle_of_attack)
+            self.mach, self.angle_of_attack)
         self.log_data("CL", self.CL)
 
 
     def calculate_center_of_pressure(self):
         # This should give one caliber of stability
-        self.CP = 1.1
+        self.CP = 1.2
         # cutout = cutout_method()
         # barrowman = barrowman_equation()
 
@@ -459,6 +459,8 @@ class Rocket(PresetObject):
     def calculate_cp_cg_dist(self):
         # Note that this is only used for dynamic stability calculations, nothing during the simulations
         self.dist_press_grav = self.CP - self.CG
+        self.log_data("Stability [Calibers]", self.dist_press_grav / (self.radius * 2))
+        self.log_data("Stability [Lengths]", self.dist_press_grav / (self.length))
 
     def calculate_cached(self):
         self.calculate_dynamic_pressure()
@@ -487,9 +489,9 @@ class Rocket(PresetObject):
 
     #     # This radius is wrong. Should be the radius of the rotating circle?
     #     # TODO: Fix the radius
-    #     drag_around = drag_coefficient * np.pi * self.height * air_density * \
+    #     drag_around = drag_coefficient * np.pi * self.length * air_density * \
     #         (self.angular_velocity[0] ** 2) * self.radius ** 4
-    #     drag_down = drag_coefficient * np.pi * self.height * air_density * \
+    #     drag_down = drag_coefficient * np.pi * self.length * air_density * \
     #         (self.angular_velocity[1] ** 2) * self.radius ** 4
 
     #     # should be opposite the direction of motion
