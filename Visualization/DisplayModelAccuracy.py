@@ -1,3 +1,7 @@
+# USE GRAPHS TO DEMONSTRATE ACCURACY OF DATA MODELS
+# Display the input points along with the fitted line to match them
+# It's important to visually verify that we aren't getting significant error in the inputs
+
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
