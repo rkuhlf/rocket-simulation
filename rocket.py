@@ -14,16 +14,16 @@
 # The CL & CD don't work past four degrees. This is just further impetus to get verifiable CFD data. Until that point I can't really move forwards here.
 
 import numpy as np
-from Helpers.general import angles_from_vector_3d, vector_from_angle, angle_between, combine, magnitude
-from Data.Input.models import get_coefficient_of_drag, get_coefficient_of_lift
 from math import isnan
 
-from Helpers.general import interpolate, project
-from preset_object import PresetObject
+from Helpers.general import interpolate, project, combine
+from Helpers.general import angles_from_vector_3d, vector_from_angle, angle_between, magnitude
+from RocketParts.massObject import MassObject
+from Data.Input.models import get_coefficient_of_drag, get_coefficient_of_lift
 
 
 
-class Rocket(PresetObject):
+class Rocket(MassObject):
     """
         Class that holds all of the aerodynamic calculations for a rocket and very little else
         Most important function is simulate_step; used in the simulation class and is the main entry point
@@ -36,6 +36,7 @@ class Rocket(PresetObject):
     def __init__(
             self, config={},
             environment=None, motor=None, parachutes=[], logger=None):
+        super().__init__(config={})
         # X, Y, Z values, where Z is upwards
         self.position = np.array([0, 0, 0], dtype="float64")
         self.velocity = np.array([0, 0, 0], dtype="float64")
@@ -48,19 +49,58 @@ class Rocket(PresetObject):
         self.angular_acceleration = np.array([0, 0], dtype="float64")
 
         # This is just the mass of the frame, the motor and propellant will be added in a second
-        self.mass = 100  # kg
+        self.mass = 0  # kg
+        # Excluding the motor and other sub mass objects
+        self.center_of_gravity = 4 # m
 
         self.radius = 0.11 # meters
         self.length = 7 # meters
 
         self.reference_area = np.pi * self.radius ** 2  # 0.008  # m^2
 
-        # region SET REFERENCES
+        #region SET REFERENCES
         self.motor = motor
         self.environment = environment
         self.parachutes = parachutes
         self.logger = logger
-        # endregion
+
+        self.mass_objects = [self.motor]
+        self.mass_objects.extend(self.parachutes)
+        #endregion
+
+        #region DEFAULT MASSES
+        nose_cone = MassObject({
+            "center_of_gravity": 0.4,
+            "mass": 10 # kg
+        })
+        ox_tank_shell = MassObject({
+            "center_of_gravity": 3,
+            "mass": 40 # kg
+        })
+        injector = MassObject({
+            "center_of_gravity": 5,
+            "mass": 4 # kg
+        })
+        phenolic = MassObject({
+            "center_of_gravity": 6,
+            "mass": 16 # kg
+        })
+        fins = MassObject({
+            "center_of_gravity": 6.5,
+            "mass": 10
+        })
+        nozzle = MassObject({
+            "center_of_gravity": 7,
+            "mass": 15
+        })
+        avionics_bay = MassObject({
+            "center_of_gravity": 7,
+            "mass": 10
+        })
+
+        self.mass_objects.extend([nose_cone, ox_tank_shell, injector, phenolic, fins, nozzle, avionics_bay])
+        #endregion
+
 
         super().overwrite_defaults(config)
         # Everything before this is saved as a preset including whatever is overridden by config
@@ -69,14 +109,8 @@ class Rocket(PresetObject):
         self.apply_angular_forces = True
 
         self.calculate_cached()
-
         self.update_previous()
 
-
-        # maybe should make an addmotor method
-        self.mass += self.motor.mass
-        for parachute in parachutes:
-            self.mass += parachute.mass
 
         # Indicates whether the rocket has begun to descend
         self.turned = False
@@ -149,8 +183,9 @@ class Rocket(PresetObject):
         self.velocity += combined_acceleration * self.environment.time_increment
 
     def get_acceleration(self):
-        self.acceleration = self.force / self.mass
-        return self.force / self.mass
+        # We only set the self variable here so that it can be logged
+        self.acceleration = self.force / self.total_mass
+        return self.force / self.total_mass
 
 
     def apply_angular_velocity(self):
@@ -193,8 +228,8 @@ class Rocket(PresetObject):
 
 
     def get_angular_acceleration(self):
-        self.angular_acceleration = self.torque / self.moment_of_inertia
-        return self.torque / self.moment_of_inertia
+        self.angular_acceleration = self.torque / self.total_moment_of_inertia
+        return self.torque / self.total_moment_of_inertia
 
 
 
@@ -225,14 +260,14 @@ class Rocket(PresetObject):
             name="Force"):
         # Where direction is a unit vector
         if distance_from_nose is None:
-            distance_from_nose = self.CG
+            distance_from_nose = self.total_CG
 
         if debug:
             self.log_data(name, value * direction)
 
         self.force += value * direction
 
-        distance_from_CG = distance_from_nose - self.CG
+        distance_from_CG = distance_from_nose - self.total_CG
 
         self.apply_torque(value, direction, distance_from_CG)
 
@@ -354,12 +389,8 @@ class Rocket(PresetObject):
 
 
     def apply_thrust(self):
-        thrust = self.motor.get_thrust(self.environment.time)
-
-        new_mass = self.mass - self.motor.thrust_to_mass(
-            thrust, self.environment.time_increment)
-
-        self.mass = new_mass
+        # Calculate indicates there are side effects, namely, the mass decreases
+        thrust = self.motor.calculate_thrust(self.environment.time)
 
         self.log_data("Thrust", thrust)
 
@@ -370,7 +401,7 @@ class Rocket(PresetObject):
     def apply_gravity(self):
 
         gravity = self.environment.get_gravitational_attraction(
-            self.mass, self.altitude)
+            self.total_mass, self.altitude)
 
         self.apply_force(
             gravity, np.array([0, 0, -1]),
@@ -422,11 +453,11 @@ class Rocket(PresetObject):
 
         self.log_data("AOA1", self.angle_of_attack)
 
-    def calculate_moment_of_inertia(self):
-        # FIXME: Actually this sucks and is complicated because moment of inertia isn't a scalar quantity for a complex 3d shape. Double actually, I am not even rotating around the center of mass - this calculation rotates around the center of volume.
-        # Right now, it is an underestimate, because the masses are closer than they would actually be. Therefore, a usual stability margin will be more unstable than expected in the model
-        # use calculated value from Fusion 360/Other CAD, currently using random one for a cylinder
-        self.moment_of_inertia = 1 / 12 * self.mass * self.length ** 2
+    # def calculate_moment_of_inertia(self):
+    # FIXME: Actually this sucks and is complicated because moment of inertia isn't a scalar quantity for a complex 3d shape. Double actually, I am not even rotating around the center of mass - this calculation rotates around the center of volume.
+    # Right now, it is an underestimate, because the masses are closer than they would actually be. Therefore, a usual stability margin will be more unstable than expected in the model
+    # use calculated value from Fusion 360/Other CAD, currently using random one for a cylinder
+    # self.moment_of_inertia = 1 / 12 * self.mass * self.length ** 2
 
     def calculate_coefficient_of_drag(self):
         for parachute in self.parachutes:
@@ -446,30 +477,25 @@ class Rocket(PresetObject):
 
     def calculate_center_of_pressure(self):
         # This should give one caliber of stability
-        self.CP = 1.7
+        self.CP = 5 # meters
         # cutout = cutout_method()
         # barrowman = barrowman_equation()
 
         # self.center_of_pressure = extended_barrowman_equation(
         #     self.get_angle_of_attack(), barrowman, cutout)
 
-    def calculate_center_of_gravity(self):
-        self.CG = 1.0
-
     def calculate_cp_cg_dist(self):
         # Note that this is only used for dynamic stability calculations, nothing during the simulations
-        self.dist_press_grav = self.CP - self.CG
+        self.dist_press_grav = self.CP - self.total_CG
         self.log_data("Stability [Calibers]", self.dist_press_grav / (self.radius * 2))
         self.log_data("Stability [Lengths]", self.dist_press_grav / (self.length))
 
     def calculate_cached(self):
         self.calculate_dynamic_pressure()
         self.calculate_angle_of_attack()
-        self.calculate_moment_of_inertia()
         self.calculate_coefficient_of_drag()
         self.calculate_coefficient_of_lift()
         self.calculate_center_of_pressure()
-        self.calculate_center_of_gravity()
         self.calculate_cp_cg_dist()
 
     # endregion

@@ -3,7 +3,12 @@
 # Since all of the drag data on the rocket is determined by a CD lookup, it is not necessary to include a fin object
 
 
-class Fins(PresetObject):
+import sys
+sys.path.append(".")
+
+from RocketParts.massObject import MassObject
+
+class Fins(MassObject):
     def __init__(self, config={}):
         # CR	=	fin root chord
         self.CR =

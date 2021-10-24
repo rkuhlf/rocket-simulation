@@ -8,7 +8,7 @@ import pandas as pd
 import sys
 sys.path.append(".")
 
-from preset_object import PresetObject
+from RocketParts.massObject import MassObject
 from Helpers.general import interpolate
 
 
@@ -16,11 +16,16 @@ from Helpers.general import interpolate
 # Have a data motor class that inherits from it and has several types of data inputs that work with an enum so as to be serializable
 # That custom motor class also needs to integrate with it
 
-class Motor(PresetObject):
+class Motor(MassObject):
     # TODO: rewrite so I can have some variable names that actually make sense. Right now, .total_impulse just gives you a value that is literally not the total impulse
 
     def __init__(self, config={}):
+        # We don't pass in the actual config because we will do the actual overriding later
+        super().__init__(config={})
+
         # Mass including the propellant
+        self.front = 3 # m
+        self.center_of_gravity = 2 # m
         self.mass = 105 # kg
         self.propellant_mass = 105 # kg
         self.thrust_curve = "currentGoddard"
@@ -63,7 +68,7 @@ class Motor(PresetObject):
         # print(self.mass_per_thrust)
 
 
-    def get_thrust(self, current_time):
+    def calculate_thrust(self, current_time):
         if self.finished_thrusting:
             return 0
 
@@ -78,11 +83,18 @@ class Motor(PresetObject):
             previous_thrust = previous_thrust.iloc[-1]
             next_thrust = next_thrust.iloc[0]
 
-            return self.thrust_multiplier * interpolate(
+            thrust = self.thrust_multiplier * interpolate(
                 current_time, previous_thrust["time"],
                 next_thrust["time"],
                 previous_thrust["thrust"],
                 next_thrust["thrust"])
+
+
+            new_mass = self.total_mass - self.thrust_to_mass(thrust, self.simulation.environment.time_increment)
+            # This section is slightly more complicated with a more complicated motor
+            self.set_mass_constant(new_mass)
+
+            return thrust
         except IndexError as e:
             self.finished_thrusting = True
             return 0
@@ -99,6 +111,9 @@ class Motor(PresetObject):
 
     def get_burn_time(self):
         return self.time_multiplier * self.burn_time
+
+    def specific_impulse(self):
+        return 1 / (self.mass_per_thrust * 9.81)
 
 
     #region SCALING

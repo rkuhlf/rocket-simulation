@@ -19,9 +19,8 @@ from numpy import array
 
 def get_simulation():
     # additional function because it turns out I need access to this in other files
-    env = Environment({"time_increment": 0.01, "apply_wind": False})
+    env = Environment({"time_increment": 0.01, "apply_wind": True})
     motor = Motor()
-    print(motor.get_total_impulse())
     drogue_parachute = ApogeeParachute({"radius": 0.2})
     main_parachute = Parachute()
     rocket = Rocket(environment=env, motor=motor, parachutes=[drogue_parachute, main_parachute])
@@ -36,6 +35,8 @@ def get_simulation():
         {"apply_angular_forces": True, "max_frames": -1,
         "stopping_errors": False},
         env, rocket, logger)
+
+    motor.simulation = sim
     
     return sim
 
