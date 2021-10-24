@@ -13,6 +13,12 @@ def interpolate(x, x1, x2, y1, y2):
         return (y1 + y2) / 2
     return (x - x1) / (x2 - x1) * (y2 - y1) + y1
 
+def interpolate_point(value, input_min, input_max, p1, p2):
+    x = interpolate(value, input_min, input_max, p1[0], p2[0])
+    y = interpolate(value, input_min, input_max, p1[1], p2[1])
+
+    return (x, y)
+
 
 def get_next(index, data, previous_index, direction, target):
     """Get the next closest value in a collection of data starting from a cached index"""
@@ -29,6 +35,20 @@ def get_next(index, data, previous_index, direction, target):
         index += direction
 
         return get_next(index, data, previous_index, direction, target)
+
+
+def linear_intersection(p1, m1, p2, m2):
+    x1, y1 = p1
+    x2, y2 = p2
+    # Solve for x
+    # m1(x - x1) + y1 = m2(x - x2) + y2
+    # m1 * x - m1 * x1 + y1 = m2 * x - m2 * x2 + y2
+    # m1 * x - m2 * x = m1 * x1 - y1 - m2 * x2 + y2
+    # x * (m1 - m2) = m1 * x1 - y1 - m2 * x2 + y2
+    # x = (m1 * x1 - y1 - m2 * x2 + y2) / (m1 - m2)
+    x = (m1 * x1 - y1 - m2 * x2 + y2) / (m1 - m2)
+
+    return (x, m1 * (x - x1) + y1)
 
 
 

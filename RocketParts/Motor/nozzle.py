@@ -5,10 +5,59 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 import sys
 sys.path.append(".")
 
 from preset_object import PresetObject
+from Helpers.general import linear_intersection, interpolate, interpolate_point
+
+
+
+def calculate_nozzle_coordinates(initial_point, initial_angle, final_point, final_angle, divisions=100):
+    """
+        Return a series of x, y coordinate pairs that make up a quadratic Bezier.
+        Supposedly, this curve is an approximation for the Method of Characteristics.
+        Angles should be in radians
+    """
+
+    initial_slope = np.tan(initial_angle)
+    final_slope = np.tan(final_angle)
+    
+    intersection_point = linear_intersection(initial_point, initial_slope, final_point, final_slope)
+
+    points = []
+
+    for i in range(divisions):
+        start_point = interpolate_point(i, 0, divisions - 1, initial_point, intersection_point)
+        end_point = interpolate_point(i, 0, divisions - 1, intersection_point, final_point)
+
+        points.append(interpolate_point(i, 0, divisions - 1, start_point, end_point))
+
+    return points
+
+def display_constructed_nozzle():
+    start_point = (0, 0.1)
+    start_angle = 35 / 180 * np.pi
+
+    end_point = (1, 0.5)
+    end_angle = 8 / 180 * np.pi
+
+    points = calculate_nozzle_coordinates(start_point, start_angle, end_point, end_angle)
+
+    # Convert tuples to 2d numpy - https://stackoverflow.com/questions/39806259/convert-list-of-list-of-tuples-into-2d-numpy-array
+    points = np.array([*points])
+    points = points.transpose()
+
+    plt.plot(points[0], points[1])
+    inputs = np.linspace(start_point[0], end_point[0])
+    plt.plot(inputs, np.tan(start_angle) * (inputs - start_point[0]) + start_point[1])
+    plt.plot(inputs, np.tan(end_angle) * (inputs - end_point[0]) + end_point[1])
+    plt.show()
+
+
+
+
 
 
 # https://www.grc.nasa.gov/www/k-12/rocket/rktthsum.html
@@ -196,14 +245,15 @@ class Nozzle(PresetObject):
 
 
 if __name__ == "__main__":
-    import matplotlib.pyplot as plt
-    import numpy as np
+    display_constructed_nozzle()
 
-    inputs = np.linspace(20, 50)
-    outputs = []
+
+
+    # inputs = np.linspace(20, 50)
+    # outputs = []
     
-    for k in inputs:
-        outputs.append(determine_expansion_ratio(k, 1, 1.3))
+    # for k in inputs:
+    #     outputs.append(determine_expansion_ratio(k, 1, 1.3))
 
-    plt.plot(inputs, outputs)
-    plt.show()
+    # plt.plot(inputs, outputs)
+    # plt.show()
