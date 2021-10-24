@@ -1,3 +1,7 @@
+# NOZZLE CLASS AND DESIGN
+# Script for the nozzle object and the equations that will let us CAD it
+# This may be too many responsibilities for one file
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -5,124 +9,6 @@ import sys
 sys.path.append(".")
 
 from preset_object import PresetObject
-
-
-#region NOZZLE EQUATION
-from scipy.optimize import fsolve
-
-
-
-def get_point(t, parameters):
-    x0, x1, x2, y0, y1, y2 = parameters
-
-    return (
-        (1 - t)**2 * x0 + 2 * t * (1 - t) * x1 + t ** 2 * x2,
-        (1 - t)**2 * y0 + 2 * t * (1 - t) * y1 + t ** 2 * y2
-    )
-
-def generate_points(parameters):
-    ti = parameters[-2]
-    tf = parameters[-1]
-    parameters = parameters[:-2]
-    
-    points = []
-
-    for t in np.linspace(ti, tf, num=100):
-        points.append(np.asarray(get_point(t, parameters)))
-
-    return np.asarray(points)
-
-def display_nozzle(parameters):
-    print(parameters)
-
-    points = generate_points(parameters)
-
-    points = points.transpose()
-
-    plt.plot(points[0], points[1])
-    # plt.xlim(0, 1)
-    # plt.ylim(0, 1)
-    plt.title("Nozzle Contour")
-    plt.show()
-
-def equations(p):
-    x0, x1, x2, y0, y1, y2, ti, tf = p
-    # Each of these equations should be rearranged to equal zero
-
-    x_start = 0
-    x_end = 10
-
-    y_start = 0
-    y_end = 0
-
-    theta_opening = np.radians(20)
-    theta_exit = np.radians(8)
-
-    slope_opening = np.tan(theta_opening)
-    slope_exit = np.tan(theta_exit)
-
-    return (
-        x0 * (1-ti)**2 + x1 * 2*ti * (1-ti) + x2*ti**2 - x_start,
-        x0 * (1-tf)**2 + x1 * 2*tf * (1-tf) + x2*tf**2 - x_end,
-        2 * (-x0 * (1-ti) + x1 * (1-2*ti) + x2 * ti) - 1,
-        2 * (-x0 * (1-tf) + x1 * (1-2*tf) + x2 * tf) - 1,
-
-        y0 * (1-ti)**2 + y1 * 2*ti * (1-ti) + y2*ti**2 - y_start,
-        y0 * (1-tf)**2 + y1 * 2*tf * (1-tf) + y2*tf**2 - y_end,
-        2 * (-y0 * (1-ti) + y1 * (1-2*ti) + y2 * ti) - slope_opening,
-        2 * (-y0 * (1-tf) + y1 * (1-2*tf) + y2 * tf) - slope_exit,
-    )
-
-iters = 1
-least_error = 1e10
-best_parameters = []
-
-# TODO: Just write an algorithm to solve it totally randomly, recording the inputs that minimize the 8 equations
-for i in range(iters):
-    if i % 1000 == 0:
-        print(i)
-    inputs = tuple(np.random.randn((8)))
-    # print("INPUTS", inputs)
-    # (0, 0.5, 1, 0, 1, 0.9, 0, 1)
-    parameters = fsolve(equations, inputs)
-    # print(parameters)
-
-    outputs = equations(parameters)
-    total_error = 0
-    for output in outputs:
-        total_error += abs(output)
-    if total_error < least_error:
-        print("Found better parameters")
-        print(outputs)
-        least_error = total_error
-        best_parameters = parameters
-    
-    # print("OUTPUTS", outputs)
-    # print(error)
-    # print("FAILED")
-    # plt.cla()
-
-print(least_error)
-print(best_parameters)
-display_nozzle(best_parameters)
-
-
-parameters = fsolve(equations, (0.15470709552420203, -0.03718261636217335, 0.401636215953701, 0.29084105509625857, -0.11101274275171547, 0.013110433950737174, -0.3689025055437478, -0.10153484052973501))
-
-display_nozzle(parameters)
-
-
-'''
-## -- End pasted text --
-(0.0, 0.0)
-
-In [2]: x
-Out[2]: 3.5000000414181831
-
-In [3]: y
-Out[3]: 1.7500000828363667
-'''
-#endrregion
 
 
 # https://www.grc.nasa.gov/www/k-12/rocket/rktthsum.html
