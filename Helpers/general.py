@@ -5,6 +5,12 @@ import re
 import numpy as np
 
 
+def transpose_tuple(iterable):
+    iterable = np.array([*iterable])
+    return iterable.transpose()
+
+
+
 # TODO: find a better naming convention for these: maybe the helpers don't need a keyword and I should assume they return a value
 
 def interpolate(x, x1, x2, y1, y2):

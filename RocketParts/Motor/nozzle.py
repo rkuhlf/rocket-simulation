@@ -10,11 +10,11 @@ import sys
 sys.path.append(".")
 
 from preset_object import PresetObject
-from Helpers.general import linear_intersection, interpolate, interpolate_point
+from Helpers.general import linear_intersection, interpolate, interpolate_point, transpose_tuple
 
 
 
-def calculate_nozzle_coordinates(initial_point, initial_angle, final_point, final_angle, divisions=100):
+def calculate_nozzle_coordinates_bezier(initial_point, initial_angle, final_point, final_angle, divisions=100):
     """
         Return a series of x, y coordinate pairs that make up a quadratic Bezier.
         Supposedly, this curve is an approximation for the Method of Characteristics.
@@ -36,14 +36,52 @@ def calculate_nozzle_coordinates(initial_point, initial_angle, final_point, fina
 
     return points
 
-def display_constructed_nozzle():
+
+def calculate_nozzle_coordinates_truncated_parabola(initial_point, initial_angle, final_point, divisions=100):
+    # Calculate the extrapolated vertex point
+    # Print the length fraction based on the passed final point
+
+    # Assuming x^2 parabola
+
+    initial_slope = np.tan(initial_angle)
+
+    x1, y1 = initial_point
+    x2, y2 = final_point
+
+    numerator = y2 - y1 - initial_slope * x2 + initial_slope * x1
+    denominator = x2 ** 2 - 2 * x1 * x2 - x1 ** 2 + 2 * x1 ** 2
+
+    a = numerator / denominator
+    b = initial_slope - 2 * a * x1
+    c = y1 - a * x1 ** 2 - b * x1
+
+    nozzle_height = lambda x : a * x ** 2 + b * x + c
+    angle = lambda x : 2 * a * x + b
+
+    print(f"The exit angle for the truncated bell is {angle(final_point[0])} radians or {angle(final_point[0]) * 180 / np.pi} degrees")
+
+    inputs = np.linspace(initial_point[0], final_point[0], divisions)
+    outputs = nozzle_height(inputs)
+
+
+    points = [inputs, outputs]
+
+    # Convert tuples to 2d numpy - https://stackoverflow.com/questions/39806259/convert-list-of-list-of-tuples-into-2d-numpy-array
+    points = np.array([*points])
+    points = points.transpose()
+
+    return points
+
+
+#region FUNCTIONS FOR MAIN
+def display_constructed_quadratic():
     start_point = (0, 0.1)
     start_angle = 35 / 180 * np.pi
 
     end_point = (1, 0.5)
     end_angle = 8 / 180 * np.pi
 
-    points = calculate_nozzle_coordinates(start_point, start_angle, end_point, end_angle)
+    points = calculate_nozzle_coordinates_bezier(start_point, start_angle, end_point, end_angle)
 
     # Convert tuples to 2d numpy - https://stackoverflow.com/questions/39806259/convert-list-of-list-of-tuples-into-2d-numpy-array
     points = np.array([*points])
@@ -56,7 +94,33 @@ def display_constructed_nozzle():
     plt.show()
 
 
+def compare_truncated_to_quadratic():
+    start_point = (0, 0.1)
+    start_angle = 35 / 180 * np.pi
 
+    end_point = (1, 0.5)
+    end_angle = 5.717686887804168 / 180 * np.pi
+
+    quadratic_points_nonzero = transpose_tuple(calculate_nozzle_coordinates_bezier(start_point, start_angle, end_point, end_angle))
+    quadratic_points_zero = transpose_tuple(calculate_nozzle_coordinates_bezier(start_point, start_angle, end_point, 0))
+    truncated_points = transpose_tuple(calculate_nozzle_coordinates_truncated_parabola(start_point, start_angle, end_point))
+
+    fig, ((ax1, hide_me_1), (ax2, hide_me_2)) = plt.subplots(2, 2)
+
+    ax1.plot(quadratic_points_nonzero[0], quadratic_points_nonzero[1])
+    ax1.plot(truncated_points[0], truncated_points[1])
+
+    ax2.plot(quadratic_points_zero[0], quadratic_points_zero[1])
+    ax2.plot(truncated_points[0], truncated_points[1])
+
+    hide_me_1.axis('off')
+    hide_me_2.axis('off')
+
+    hide_me_1.text(-0.1, 0, "When the exit angles are equivalent, the \nnozzles appear to be an exact match. \nThe quadratic bezier adds another degree \nof freedom, allowing you to vary the exit \nangle. I have yet to do research on the \noptimal exit angle, but I would assume \nit to be zero. In that case, there is \nnoticable difference.")
+
+    plt.show()
+
+#endregion
 
 
 
@@ -245,9 +309,9 @@ class Nozzle(PresetObject):
 
 
 if __name__ == "__main__":
-    display_constructed_nozzle()
-
-
+    # display_constructed_quadratic()
+    # calculate_nozzle_coordinates_truncated_parabola((0, 0.1), 35 * np.pi / 180, (1, 0.5))
+    compare_truncated_to_quadratic()
 
     # inputs = np.linspace(20, 50)
     # outputs = []
