@@ -66,6 +66,7 @@ class CombustionChamber(PresetObject):
 
         # Calculates the O/F ratio based on a given ox mass flow and the fuel we just calculated
         OF = ox_mass_flow / fuel_flow
+        # TODO: add a graph of O/F over time (this is the most important thing for balancing stuff)
 
         # Calculate the mass flow out (requires nozzle throat)
         mass_flow_out = self.pressure * nozzle.throat_area / self.cstar
@@ -79,8 +80,7 @@ class CombustionChamber(PresetObject):
         # It's hard to say whether it is more accurate to multiply by temperature first or do the addition first.
         # The difference between approaches should tend to zero as the time increment approaches zero
         self.pressure *= self.temperature / self.p_temperature
-        # print("Ratio", self.temperature / self.p_temperature)
-        # print("Temp", self.temperature)
+
         self.p_temperature = self.temperature
 
         pressure_increase_rate = self.get_change_in_pressure(effective_mass_flow_total)
