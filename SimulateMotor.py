@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-
+import numpy as np
 
 from RocketParts.motor import CustomMotor
 from RocketParts.Motor.oxTank import OxTank
@@ -13,7 +13,7 @@ from environment import Environment
 
 if __name__ == "__main__":
     ox = OxTank()
-    grain = Grain()
+    grain = Grain({"debug": True})
     chamber = CombustionChamber(fuel_grain=grain)
     injector = Injector(ox_tank=ox, combustion_chamber=chamber)
     nozzle = Nozzle(fuel_grain=grain)
@@ -51,17 +51,18 @@ if __name__ == "__main__":
             print("Stopping sim because ox drained completely")
             break
 
-    plt.subplot(2, 2, 1)
-    plt.plot(times, pressures)
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
+    ax1.plot(times, np.asarray(pressures) / 10 ** 5)
+    ax1.set(xlabel="Chamber Pressure [bar]")
 
-    plt.subplot(2, 2, 2)
-    plt.plot(times, thrusts)
+    ax2.plot(times, thrusts)
+    ax2.set(title="Thrust over Time", xlabel="Time [s]", ylabel="Thrust [N]")
 
-    plt.subplot(2, 2, 3)
-    plt.plot(times, temperatures)
+    ax3.plot(times, temperatures)
 
-    plt.subplot(2, 2, 4)
-    plt.plot(times, grain_diameters)
+    ax4.plot(times, grain_diameters)
+
+    fig.tight_layout()
 
     plt.show()
 

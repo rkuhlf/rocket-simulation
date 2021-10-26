@@ -9,7 +9,7 @@ import sys
 sys.path.append(".")
 
 from preset_object import PresetObject
-
+from Helpers.general import cylindrical_volume
 from RocketParts.Motor.nitrousProperties import *
 
 
@@ -179,7 +179,7 @@ class OxTank(PresetObject):
         '''
             Calculate the volume of a cylinder with flat heads
         '''
-        return self.length * np.pi * self.radius ** 2
+        return cylindrical_volume(self.length, self.radius)
 
     def get_gas_volume(self):
         return self.get_volume() * self.ullage

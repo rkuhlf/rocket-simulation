@@ -10,6 +10,8 @@ def transpose_tuple(iterable):
     return iterable.transpose()
 
 
+def cylindrical_volume(length, radius):
+    return length * np.pi * radius ** 2
 
 # TODO: find a better naming convention for these: maybe the helpers don't need a keyword and I should assume they return a value
 

@@ -116,6 +116,8 @@ def compare_truncated_to_quadratic():
     hide_me_1.axis('off')
     hide_me_2.axis('off')
 
+    # TODO: ask Cristian how many inputs he has for this to ensure that his truncated construction matches mine. 
+    # He seems to think that the truncation can match the zero exit angle. Mine definitely can't at the moment
     hide_me_1.text(-0.1, 0, "When the exit angles are equivalent, the \nnozzles appear to be an exact match. \nThe quadratic bezier adds another degree \nof freedom, allowing you to vary the exit \nangle. I have yet to do research on the \noptimal exit angle, but I would assume \nit to be zero. In that case, there is \nnoticable difference.")
 
     plt.show()
@@ -265,7 +267,7 @@ class Nozzle(PresetObject):
     """
 
     def __init__(self, config={}, fuel_grain=None):
-        self.throat_diameter = 0.03048 # meters
+        self.throat_diameter = 0.05 # 0.03048 # meters
         self.throat_area = self.get_throat_area()
         self.area_ratio = 4
         self.throat_temperature = 800 # Kelvin

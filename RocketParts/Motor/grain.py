@@ -3,6 +3,7 @@ import sys
 sys.path.append(".")
 
 from preset_object import PresetObject
+from Helpers.general import cylindrical_volume
 
 
 class Grain(PresetObject):
@@ -12,9 +13,25 @@ class Grain(PresetObject):
         # of the fuel
         self.mass_flow = 0
         self.density = 920 # kg / m^3
-        self.length = 1.4 # m
+        # This length is not really feasible
+        # To get the proper O/F we need a much higher oxidizer mass flow rate
+        self.length = 0.4 # m
+
+        self.debug = False
 
         super().overwrite_defaults(config)
+
+        if self.debug:
+            # Print the total mass of fuel that we have
+            print(self.fuel_mass)
+
+    @property
+    def fuel_mass(self):
+        return self.fuel_volume * self.density
+
+    @property
+    def fuel_volume(self):
+        return cylindrical_volume(self.length, self.outer_radius) - cylindrical_volume(self.length, self.inner_radius)
 
     def get_outer_cross_sectional_area(self):
         return np.pi * self.outer_radius ** 2

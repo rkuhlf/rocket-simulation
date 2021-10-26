@@ -57,6 +57,7 @@ class CombustionChamber(PresetObject):
         # TODO: R is broken right now. I don't know how to calculate; probably just use the M value from CEA
         # So this gives the change in pressure due to mass flow, but it doesn't account for any change in pressure due to temperature change
         # Look: PV = nRT. We are assuming this to be true; it's pretty safe. We are accounting for the change in n right now. V is not changing and P is the output. However, T is also changing, and we need to deal with that. Probably, the easiest thing is to store the previous frame's temperature and multiply by the ratio. 
+        print(apparent_mass_flow)
         return apparent_mass_flow * self.ideal_gas_constant * self.temperature / self.get_volume()
 
     def update_combustion(self, ox_mass_flow, nozzle, time_increment):
