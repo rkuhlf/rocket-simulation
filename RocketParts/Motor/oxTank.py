@@ -9,7 +9,7 @@ import sys
 sys.path.append(".")
 
 from preset_object import PresetObject
-from Helpers.general import cylindrical_volume
+from Helpers.general import cylindrical_volume, cylindrical_length
 from RocketParts.Motor.nitrousProperties import *
 
 
@@ -137,7 +137,9 @@ def find_ullage(
 
     return [ullage, temperature_change_so_far]
 
-
+def find_required_length(ox_mass, diameter, temperature, ullage=0.15):
+    # This requires a teeny bit more algebra. I need to rearrange the continuity equations to get the required volume from the ullage and the mass
+    pass
 #endregion
 
 

@@ -25,9 +25,11 @@ if __name__ == "__main__":
 
     time = 0
     times = []
-    pressures = []
+    ox_pressures = []
+    combustion_pressures = []
     thrusts = []
-    temperatures = []
+    chamber_temperatures = []
+    ox_temperatures = []
     OFs = []
     grain_diameters = []
 
@@ -37,9 +39,11 @@ if __name__ == "__main__":
         times.append(time)
         time += env.time_increment
 
-        pressures.append(motor.combustion_chamber.pressure)
+        combustion_pressures.append(motor.combustion_chamber.pressure)
+        ox_pressures.append(ox.get_pressure())
         thrusts.append(motor.thrust)
-        temperatures.append(motor.combustion_chamber.temperature)
+        chamber_temperatures.append(motor.combustion_chamber.temperature)
+        ox_temperatures.append(ox.temperature)
         grain_diameters.append(grain.inner_radius * 2)
         OFs.append(motor.OF)
 
@@ -51,16 +55,25 @@ if __name__ == "__main__":
             print("Stopping sim because ox drained completely")
             break
 
+
+    total_impulse = np.sum(thrusts) * env.time_increment
+    print(f"TOTAL IMPULSE: {total_impulse}")
+
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
-    ax1.plot(times, np.asarray(pressures) / 10 ** 5)
-    ax1.set(xlabel="Chamber Pressure [bar]")
+    ax1.plot(times, np.asarray(combustion_pressures) / 10 ** 5)
+    ax1.plot(times, np.asarray(ox_pressures) / 10 ** 5)
+    ax1.set(title="Pressures over Time", xlabel="Time [s]", ylabel="Pressure [bar]")
+
+    ax2.set(title="Ox Tank Pressure over Time")
 
     ax2.plot(times, thrusts)
     ax2.set(title="Thrust over Time", xlabel="Time [s]", ylabel="Thrust [N]")
 
-    ax3.plot(times, temperatures)
+    ax3.plot(times, chamber_temperatures)
+    ax3.set(title="Chamber Temperatures over Time")
 
-    ax4.plot(times, grain_diameters)
+    ax4.plot(times, ox_temperatures)
+    ax4.set(title="Ox Temperatures over Time", xlabel="Time [s]", ylabel="Temperature [K]")
 
     fig.tight_layout()
 
@@ -69,6 +82,11 @@ if __name__ == "__main__":
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
 
     ax1.plot(times, OFs)
+    ax1.set(title="Mixing Ratio", xlabel="Time [s]", ylabel="O/F")
 
+    ax2.plot(times, np.array(grain_diameters) * 100)
+    ax2.set(title="Grain Diameter", xlabel="Time [s]", ylabel="Diameter [cm]")
+
+    fig.tight_layout()
 
     plt.show()

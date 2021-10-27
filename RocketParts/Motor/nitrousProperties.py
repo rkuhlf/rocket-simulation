@@ -70,6 +70,7 @@ def find_specific_enthalpy_of_gaseous_nitrous(temperature):
 
 
 def find_heat_of_vaporization(temperature):
+    # kJ / kg
     return find_specific_enthalpy_of_gaseous_nitrous(temperature) - find_specific_enthalpy_of_liquid_nitrous(temperature)
 
 
