@@ -1,12 +1,16 @@
 import numpy as np
 
+# This is Nitrous's boiling point. Below this, the solution is no longer saturated, and you need to use a different model
+minimum_temperature = 273.15 - 90 # Kelvin
+critical_temperature = 273.15 + 36 # Kelvin
+
 def confirm_range(temperature):
     return True
     # Errors if temperature is outside the acceptable range
-    if temperature > 273.15 + 36:
+    if temperature > critical_temperature:
         raise ValueError(
             "The model is not accurate beyond nitrous's critical point. You may not be there yet, but it is close enough that everything gets weird")
-    if temperature < 273.15 - 90:
+    if temperature < minimum_temperature:
         raise ValueError(
             "The model is not accurate below Nitrous's boiling point. I don't know why this would happen (check that your temperature is in Kelvin?)")
 
@@ -23,13 +27,15 @@ def get_nitrous_vapor_pressure(temperature):
 
 
 def get_liquid_nitrous_density(temperature):
-    # kg/m**3
+    # kg / m**3
     confirm_range(temperature)
     return 452 * np.e ** (1.72328 * (1 - (temperature / 309.57)) ** (1 / 3) -
                           0.8395 * (1 - (temperature / 309.57)) ** (2 / 3) +
                           0.5106 * (1 - (temperature / 309.57)) - 0.10412 *
                           (1 - (temperature / 309.57)) ** (4 / 3))
 
+
+minimum_liquid_density = get_liquid_nitrous_density(critical_temperature)
 
 def get_gaseous_nitrous_density(temperature):
     # kg / m**3
@@ -70,6 +76,7 @@ def find_specific_enthalpy_of_gaseous_nitrous(temperature):
 
 
 def find_heat_of_vaporization(temperature):
+    # kJ / kg
     return find_specific_enthalpy_of_gaseous_nitrous(temperature) - find_specific_enthalpy_of_liquid_nitrous(temperature)
 
 
@@ -92,6 +99,16 @@ def find_gaseous_heat_capacity(temperature):
 
     return 132.632 * total
 
+
+def calculate_maximum_liquid_expansion(temperature, max_temperature=None):
+    min_density = minimum_liquid_density
+    if max_temperature is not None:
+        min_density = get_liquid_nitrous_density(max_temperature)
+        
+    current_density = get_liquid_nitrous_density(temperature)
+
+    # The maximum expansion - you want big over small. At a higher temperature, the density will be smaller
+    return current_density / min_density
 
 
 

@@ -42,7 +42,8 @@ class CombustionChamber(PresetObject):
 
         #endregion
 
-    def get_volume(self):
+    @property
+    def volume(self):
         return np.pi * self.fuel_grain.inner_radius ** 2
 
     def get_change_in_pressure(self, apparent_mass_flow):
@@ -57,7 +58,8 @@ class CombustionChamber(PresetObject):
         # TODO: R is broken right now. I don't know how to calculate; probably just use the M value from CEA
         # So this gives the change in pressure due to mass flow, but it doesn't account for any change in pressure due to temperature change
         # Look: PV = nRT. We are assuming this to be true; it's pretty safe. We are accounting for the change in n right now. V is not changing and P is the output. However, T is also changing, and we need to deal with that. Probably, the easiest thing is to store the previous frame's temperature and multiply by the ratio. 
-        return apparent_mass_flow * self.ideal_gas_constant * self.temperature / self.get_volume()
+        print(apparent_mass_flow)
+        return apparent_mass_flow * self.ideal_gas_constant * self.temperature / self.volume
 
     def update_combustion(self, ox_mass_flow, nozzle, time_increment):
         # From the grain and the ox mass flow, calculate the mass flow of fuel
@@ -66,6 +68,7 @@ class CombustionChamber(PresetObject):
 
         # Calculates the O/F ratio based on a given ox mass flow and the fuel we just calculated
         OF = ox_mass_flow / fuel_flow
+        # TODO: add a graph of O/F over time (this is the most important thing for balancing stuff)
 
         # Calculate the mass flow out (requires nozzle throat)
         mass_flow_out = self.pressure * nozzle.throat_area / self.cstar
@@ -79,8 +82,7 @@ class CombustionChamber(PresetObject):
         # It's hard to say whether it is more accurate to multiply by temperature first or do the addition first.
         # The difference between approaches should tend to zero as the time increment approaches zero
         self.pressure *= self.temperature / self.p_temperature
-        # print("Ratio", self.temperature / self.p_temperature)
-        # print("Temp", self.temperature)
+
         self.p_temperature = self.temperature
 
         pressure_increase_rate = self.get_change_in_pressure(effective_mass_flow_total)
