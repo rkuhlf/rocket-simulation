@@ -273,41 +273,47 @@ class Rocket(MassObject):
 
     def apply_torque(self, value, direction, distance_from_CG):
         """
-            Figure out how the force * the distance affects each axis of rotation - definitionally torque of an arbitrary force
+            Figure out how the force * the distance affects each axis of rotation
+            Apply the arbitrary force in-place
         """
 
-        # Perpendicular is slightly more complicated in 3D. We need the component of the force that is perpendicular to the current rotation of the rocket. To me, it seems like the easiest thing is to break the force down into each of it's components and calculate that individually
+        # Perpendicular is slightly more complicated in 3D
+        # We need the component of force perpendicular to the current rotation 
+        # To me, it seems like the easiest thing is to break the force down 
+        # into each component calculated individually
 
 
         z_component = direction[2] * value
-        # The z component cannot cause rotation around, only affecting theta down
-        z_component_perpendicular = z_component * \
-            np.sin(self.theta_down)
-        # When rocket is completely horizontal (90 degrees), it should apply 100%, when vertical, 0%. This is sine.
+        # When rocket is completely horizontal (90 degrees), it should apply 100%.
+        # when vertical, 0%. This is sine.
+        z_component_perpendicular = z_component * np.sin(self.theta_down)
 
-        # a torque in the vertical direction (positive z component), should cause an increase in theta down
+        # The z component cannot cause rotation around, it only affects theta down
+        # a torque in the vertical direction (z+), should cause an increase in theta down
         self.torque[1] += distance_from_CG * z_component_perpendicular
 
 
         x_component = direction[0] * value
-        # The around rotation determines what fraction of the force goes to the yaw and what fraction to the pitch. When the rocket hasn't spun at all, all of the x_component goes to the pitch
+        # When the rocket hasn't spun at all, all of the x_component goes to the pitch
         pitch_multiplier = np.cos(self.theta_around)
         # If the rocket was travelling horizontally, there wouldn't be any force. 90 -> 0
         angle_of_incidence_multiplier = np.cos(self.theta_down)
 
-        self.torque[1] -= x_component * pitch_multiplier * \
+        # The negative sign and pitch multiplier provide the correct rotational direction
+        self.torque[1] -= x_component * pitch_multiplier * \ 
             angle_of_incidence_multiplier * distance_from_CG
 
 
         # Only apply the leftover x to the yaw
         yaw_multiplier = np.sin(self.theta_around)
-        # When the rocket is horizontal, however, the yaw will still be fully applied. I don't think I need any other multiplier
-
-        self.torque[0] += x_component * yaw_multiplier * distance_from_CG
+        # When the rocket is horizontal, the yaw will still be fully applied
+        # so no angle of incidence component is necessary.
+        self.torque[0] += x_component * \
+            yaw_multiplier * distance_from_CG
 
 
         y_component = direction[1] * value
-        # The pitch multiplier is supposed to determine how much of this force is pushing us around the y axis 
+        # The pitch multiplier shows force around y axis 
         pitch_multiplier = np.sin(self.theta_around)
         angle_of_incidence_multiplier = np.cos(self.theta_down)
 
@@ -315,10 +321,8 @@ class Rocket(MassObject):
             angle_of_incidence_multiplier * distance_from_CG
 
 
-
-
         yaw_multiplier = np.cos(self.theta_around)
-        # x and y can't cause yaw in the same direction (I think, so we'll just have them be opposite)
+        # x and y can't cause yaw in the same direction
         self.torque[0] -= y_component * yaw_multiplier * distance_from_CG
 
 
