@@ -71,6 +71,21 @@ def find_combined_total_heat_capacity(gaseous_mass, liquid_mass,
     '''
     return gaseous_mass * gaseous_specific_heat + liquid_mass * liquid_specific_heat
 
+def find_required_length(ox_mass, volume, diameter, temperature, ullage=0.15):
+    """Calculate the required length for an ox tank given a constant temperature (in kelvin) and a desired ullage (as a proportion)"""
+    liquid_density = get_liquid_nitrous_density(temperature)
+    gas_density = get_gas_nitrous_density(temperature)
+    
+    # ullage * V_tot = V_gas
+    # (1 - ullage) * V_tot = V_liquid
+    # m_tot = V_gas * p_gas + V_liquid * p_liquid
+    # m_tot = ullage * V_tot * p_gas + (1 - ullage) * V_tot * p_liquid
+    # m_tot = V_tot * (ullage * p_gas + (1 - ullage) * p_liquid)
+    # m_tot / (ullage * p_gas + (1 - ullage) * p_liquid) = V_tot
+    required_volume = ox_mass / (ullage * gas_density + (1 - ullage) * liquid_density)
+    
+    # Assumes flat circular heads
+    return cylindrical_length(required_volume, diameter / 2)
 
 def find_ullage(
         ox_mass, volume, temperature, constant_temperature=True,
