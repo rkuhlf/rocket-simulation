@@ -10,6 +10,8 @@
 import numpy as np
 
 from Helpers.general import cylindrical_length
+from RocketParts.Motor.grain import determine_optimal_starting_diameter
+# TODO: also add the one for ox
 
 
 # We will assume that the rocket is a hollow cylinder with flat heads in order to calculate the length
