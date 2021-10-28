@@ -71,10 +71,10 @@ def find_combined_total_heat_capacity(gaseous_mass, liquid_mass,
     '''
     return gaseous_mass * gaseous_specific_heat + liquid_mass * liquid_specific_heat
 
-def find_required_length(ox_mass, volume, diameter, temperature, ullage=0.15):
+def find_required_length(ox_mass, diameter, temperature, ullage=0.15):
     """Calculate the required length for an ox tank given a constant temperature (in kelvin) and a desired ullage (as a proportion)"""
     liquid_density = get_liquid_nitrous_density(temperature)
-    gas_density = get_gas_nitrous_density(temperature)
+    gas_density = get_gaseous_nitrous_density(temperature)
     
     # ullage * V_tot = V_gas
     # (1 - ullage) * V_tot = V_liquid
@@ -83,7 +83,6 @@ def find_required_length(ox_mass, volume, diameter, temperature, ullage=0.15):
     # m_tot = V_tot * (ullage * p_gas + (1 - ullage) * p_liquid)
     # m_tot / (ullage * p_gas + (1 - ullage) * p_liquid) = V_tot
     required_volume = ox_mass / (ullage * gas_density + (1 - ullage) * liquid_density)
-    
     # Assumes flat circular heads
     return cylindrical_length(required_volume, diameter / 2)
 
@@ -151,11 +150,6 @@ def find_ullage(
             "Your ox tank is overfull. I don't know what happens when you put more volume of liquid than can fit into a container, but there are likely going to be some extra stresses here.")
 
     return [ullage, temperature_change_so_far]
-
-def find_required_length(ox_mass, diameter, temperature, ullage=0.15):
-    # This requires a teeny bit more algebra. I need to rearrange the continuity equations to get the required volume from the ullage and the mass
-    pass
-#endregion
 
 
 

@@ -14,6 +14,15 @@ def regression_rate_paraffin_nitrous(mass_flux):
     exponential_ballistic_coefficient = 0.5
     return leading_ballistic_coefficient * mass_flux ** exponential_ballistic_coefficient
 
+def regression_rate_HTPB_nitrous(mass_flux):
+    # https://classroom.google.com/u/0/c/MzgwNjcyNDIwMDg3/m/NDA0NTQyMjUyODI4/details
+    leading_ballistic_coefficient = 1.8756 * 10 ** -4
+    # Notice that n is even less than 0.5, which means that your burn will end fuel-rich with annular
+    exponential_ballistic_coefficient = 0.347
+    return leading_ballistic_coefficient * mass_flux ** exponential_ballistic_coefficient
+
+
+
 #endregion
 
 
@@ -21,7 +30,7 @@ def regression_rate_paraffin_nitrous(mass_flux):
 
 #region DESIGN-ORIENTED FUNCTIONS
 
-def required_length(inner_diameter, outer_diameter, mass, density):
+def find_required_length(inner_diameter, outer_diameter, mass, density):
     """Determine the required length of the grain given the amount that is needed and the diameters of the grain."""
     inner_radius = inner_diameter / 2
     outer_radius = outer_diameter / 2
@@ -51,7 +60,8 @@ def determine_optimal_starting_diameter(outer_diameter, target_mass, density, ox
     sign_difference = 0
     for inner_radius in np.linspace(smallest_radius, outer_diameter / 2, iterations):
         port_area = np.pi * inner_radius ** 2
-        length = required_length(inner_radius * 2, outer_diameter, target_mass, density)
+        length = find_required_length(inner_radius * 2, outer_diameter, target_mass, density)
+        print("Testing length", length, "inner radius", inner_radius)
         burn_area = length * np.pi * 2 * inner_radius
         
         fuel_flow = regression_func(ox_flow / port_area) * burn_area * density
@@ -133,4 +143,8 @@ class Grain(PresetObject):
         self.inner_radius += regressed_distance
 
 
-        
+if __name__ == "__main__":
+    best_ID = determine_optimal_starting_diameter(0.2032, 15, 920, 4.8, regression_rate_HTPB_nitrous, 6) 
+    print(best_ID)
+
+    print(find_required_length(0.0552 * 2, 0.1016 * 2, 9.8, 920))
