@@ -5,7 +5,20 @@
 
 import pandas as pd
 
+def scale_saved_curve(path, desired_burn_time, desired_average_thrust, target_path=None):
+    if target_path is None:
+        if path.endswith("csv"):
+            target_path = path[:-4] + "Scaled" + ".csv"
+        else:
+            target_path = path + "Scaled"
+    
+    data = pd.read_csv(path)
 
+    data = scale_curve(data, desired_burn_time, desired_average_thrust)
+        
+    data.set_index("time", inplace=True)
+
+    data.to_csv(target_path)
 
 
 def scale_curve(data, desired_burn_time, desired_average_thrust):
@@ -33,14 +46,6 @@ def scale_curve(data, desired_burn_time, desired_average_thrust):
     return data
 
 
-if __name__ == "__main__":
-    data = pd.read_csv("./Data/Input/thrustCurveO6300.csv")
-
-    data = scale_curve(data, 22, 10000)
-    
-    print(data)
-    
-    data.set_index("time", inplace=True)
-
-    data.to_csv("./Data/Input/currentGoddard.csv")
+if __name__ == "__main__":        
+    scale_saved_curve("./Data/Input/thrustCurveO6300.csv", 22, 10000, "./Data/Input/currentGoddard.csv")
     
