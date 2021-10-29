@@ -73,7 +73,7 @@ def calculate_nozzle_coordinates_truncated_parabola(initial_point, initial_angle
     return points
 
 
-#region FUNCTIONS FOR MAIN
+#region FUNCTIONS TO BE RUN FOR DISPLAY
 def display_constructed_quadratic():
     start_point = (0, 0.1)
     start_angle = 35 / 180 * np.pi
@@ -259,6 +259,24 @@ def determine_expansion_ratio(combustion_chamber_pressure, atmospheric_pressure,
 
     return 1 / throat_to_exit
 
+def find_equilibrium_throat_area(Cstar, combustion_chamber_pressure, mass_flow):
+    # c* = P_c * A_t / m-dot
+    return Cstar * mass_flow / combustion_chamber_pressure
+
+def find_nozzle_length(converging_angle, entrance_diameter, throat_diameter, diverging_angle, exit_diameter):
+    """
+    Find the length of the nozzle consisting of two purely conical sections
+    Converging angle is the radians north of west at the throat
+    Diverging angle is the radians north of east at the throat
+    """
+    entrance_displacement = (entrance_diameter - throat_diameter) / 2
+    exit_displacement = (exit_diameter - throat_diameter) / 2
+
+    entrance_distance = entrance_displacement / np.tan(converging_angle)
+    exit_distance = exit_displacement / np.tan(diverging_angle)
+
+    return entrance_distance + exit_distance
+
 
 class Nozzle(PresetObject):
     """
@@ -313,10 +331,12 @@ class Nozzle(PresetObject):
 if __name__ == "__main__":
     # display_constructed_quadratic()
     # calculate_nozzle_coordinates_truncated_parabola((0, 0.1), 35 * np.pi / 180, (1, 0.5))
-    compare_truncated_to_quadratic()
+    # compare_truncated_to_quadratic()
 
     # inputs = np.linspace(20, 50)
     # outputs = []
+
+    print(determine_expansion_ratio(30, 0.8, 1.2))
     
     # for k in inputs:
     #     outputs.append(determine_expansion_ratio(k, 1, 1.3))

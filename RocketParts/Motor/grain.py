@@ -61,7 +61,6 @@ def determine_optimal_starting_diameter(outer_diameter, target_mass, density, ox
     for inner_radius in np.linspace(smallest_radius, outer_diameter / 2, iterations):
         port_area = np.pi * inner_radius ** 2
         length = find_required_length(inner_radius * 2, outer_diameter, target_mass, density)
-        print("Testing length", length, "inner radius", inner_radius)
         burn_area = length * np.pi * 2 * inner_radius
         
         fuel_flow = regression_func(ox_flow / port_area) * burn_area * density

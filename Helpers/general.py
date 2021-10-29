@@ -16,6 +16,12 @@ def cylindrical_volume(length, radius):
 def cylindrical_length(volume, radius):
     return volume / (np.pi * radius ** 2)
 
+def get_radius(area):
+    # A = pi * r ^ 2
+    # sqrt(A/pi) = r
+    
+    return (area / np.pi) ** (1/2)
+
 # TODO: find a better naming convention for these: maybe the helpers don't need a keyword and I should assume they return a value
 
 def interpolate(x, x1, x2, y1, y2):
@@ -30,6 +36,12 @@ def interpolate_point(value, input_min, input_max, p1, p2):
 
     return (x, y)
 
+def normalized(array):
+    array = array.copy()
+    range = np.max(array) - np.min(array)
+    array -= np.min(array)
+    array /= range
+    return array
 
 def get_next(index, data, previous_index, direction, target):
     """Get the next closest value in a collection of data starting from a cached index"""
