@@ -33,6 +33,9 @@ class Environment(PresetObject):
         self.earth_radius = 6371071.03  # m
         self.base_altitude = 4  # m
 
+
+        self.rail_length = 13.1064 # meters based on 43 feet at White Sands
+
         self.density_location = "airQuantities"
 
         self.previous_air_density_index = 0
@@ -54,6 +57,7 @@ class Environment(PresetObject):
 
     def simulate_step(self):
         self.time += self.time_increment
+
         # Update the wind
 
 

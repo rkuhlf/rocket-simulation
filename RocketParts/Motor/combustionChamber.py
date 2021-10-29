@@ -26,6 +26,7 @@ class CombustionChamber(PresetObject):
         # FIXME: For some reason I am not using this temperature value anywhere. I am 40% sure that I should be. The other 60% thinks that we have the system defined in terms of pressure, and the only thing we need the temperature for is to find the density, which CEA already knows
         self.temperature = 273.15 + 23 # Kelvin
         self.p_temperature = self.temperature
+        self.mass_flow_out = 0
         # P / RT = rho
         # Actually it turns out there is a wacko condition in the way MW is calculated and it is easiest just to use the density output by CEA; I think it does it with M but it might be with MW
         # Please do not use the value from CEA here, that will ruin the whole point of the calculations. We have to find our own pressure, because we have to find our own mass
@@ -71,13 +72,14 @@ class CombustionChamber(PresetObject):
         # TODO: add a graph of O/F over time (this is the most important thing for balancing stuff)
 
         # Calculate the mass flow out (requires nozzle throat)
-        mass_flow_out = self.pressure * nozzle.throat_area / self.cstar
+        self.mass_flow_out = self.pressure * nozzle.throat_area / self.cstar
+        
 
         volume_regressed = self.fuel_grain.get_volume_flow() * time_increment
 
         # Update the pressure in the system. Uses the previously calculated mass flux out
         # mass flow into the chamber
-        effective_mass_flow_total = ox_mass_flow + (self.fuel_grain.density - self.density) * volume_regressed - mass_flow_out
+        effective_mass_flow_total = ox_mass_flow + (self.fuel_grain.density - self.density) * volume_regressed - self.mass_flow_out
 
         # It's hard to say whether it is more accurate to multiply by temperature first or do the addition first.
         # The difference between approaches should tend to zero as the time increment approaches zero

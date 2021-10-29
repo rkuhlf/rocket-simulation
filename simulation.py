@@ -29,6 +29,8 @@ class Simulation(PresetObject):
 
         self.override_subobjects()
 
+        self.rail_gees = None
+
     def reset(self):
         super().reset()
 
@@ -55,6 +57,10 @@ class Simulation(PresetObject):
         if self.logger is not None:
             # Also saves the row
             self.logger.handle_frame()
+        
+        # TODO: check that this rail_gees is good based on the output.csv file. Right now it seems a teeny bit high
+        if self.environment.rail_length < self.rocket.altitude and self.rail_gees is None:
+            self.rail_gees = self.rocket.gees
 
         self.frames += 1
 
