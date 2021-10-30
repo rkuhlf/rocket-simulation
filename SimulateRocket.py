@@ -52,5 +52,5 @@ def simulate_rocket():
 if __name__ == "__main__":
     sim = simulate_rocket()
 
-    from Visualization.OpticalAnalysis import display_optical_analysis
+    from Visualization.FlightOpticalAnalysis import display_optical_analysis
     display_optical_analysis(sim.logger.full_path)

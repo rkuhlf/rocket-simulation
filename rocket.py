@@ -301,7 +301,7 @@ class Rocket(MassObject):
         angle_of_incidence_multiplier = np.cos(self.theta_down)
 
         # The negative sign and pitch multiplier provide the correct rotational direction
-        self.torque[1] -= x_component * pitch_multiplier * \ 
+        self.torque[1] -= x_component * pitch_multiplier * \
             angle_of_incidence_multiplier * distance_from_CG
 
 
