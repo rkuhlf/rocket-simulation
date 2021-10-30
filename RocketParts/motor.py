@@ -28,7 +28,7 @@ class Motor(MassObject):
         self.center_of_gravity = 2 # m
         self.mass = 105 # kg
         self.propellant_mass = 105 # kg
-        self.thrust_curve = "currentGoddard"
+        self.thrust_curve = "Data/Input/currentGoddard.csv"
 
         self.thrust_multiplier = 1
         self.time_multiplier = 1
@@ -36,17 +36,18 @@ class Motor(MassObject):
 
         super().overwrite_defaults(config)
 
-        self.thrust_data = pd.read_csv(
-            "Data/Input/" + self.thrust_curve + ".csv")
-
-
-        self.set_thrust_data(self.thrust_data)
+        self.set_thrust_data_path(self.thrust_curve)
 
 
         self.finished_thrusting = False
 
+    def set_thrust_data_path(self, path):
+        self.thrust_curve = path
+        dataframe = pd.read_csv(path)
+        self.set_thrust_data(dataframe)
 
     def set_thrust_data(self, dataframe):
+        self.thrust_curve = None
         self.thrust_data = dataframe
 
         total_thrust = 0
@@ -66,8 +67,6 @@ class Motor(MassObject):
 
         self.mass_per_thrust = self.propellant_mass / total_thrust
         # print(self.mass_per_thrust)
-
-
 
 
     def calculate_thrust(self, current_time):

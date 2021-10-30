@@ -8,7 +8,7 @@ import sys
 sys.path.append(".")
 
 from simulation import Simulation
-from Visualization.OpticalAnalysis import display_optical_analysis
+from Visualization.FlightOpticalAnalysis import display_optical_analysis
 
 import unittest
 
@@ -26,6 +26,7 @@ class VerifiedSimulation(Simulation):
         runner.run(suite)
 
     def open_optical_analysis(self):
+        #TODO: Throw some errors if you are going unstable at the beginning
         display_optical_analysis()
 
     def run_simulation(self):

@@ -19,6 +19,7 @@ from math import isnan
 from Helpers.general import interpolate, project, combine
 from Helpers.general import angles_from_vector_3d, vector_from_angle, angle_between, magnitude
 from RocketParts.massObject import MassObject
+from environment import Environment
 from Data.Input.models import get_coefficient_of_drag, get_coefficient_of_lift
 
 
@@ -35,7 +36,7 @@ class Rocket(MassObject):
     # Torque is in radians per second-squared * kg
     def __init__(
             self, config={},
-            environment=None, motor=None, parachutes=[], logger=None):
+            environment:Environment=None , motor=None, parachutes=[], logger=None):
         super().__init__(config={})
         # X, Y, Z values, where Z is upwards
         self.position = np.array([0, 0, 0], dtype="float64")
@@ -432,6 +433,15 @@ class Rocket(MassObject):
         v = self.environment.get_speed_of_sound(self.altitude)
 
         return magnitude(self.velocity) / v
+
+    @property
+    def gees(self):
+        """
+        Return the number of gees the rocket is accelerating at
+        Adjusted for the variation as the rocket leaves the atmosphere (because I can)
+        """
+        grav_acceleration = self.environment.get_gravitational_attraction(self.total_mass, self.altitude) / self.total_mass
+        return magnitude(self.acceleration) / grav_acceleration
 
     @property
     def altitude(self):

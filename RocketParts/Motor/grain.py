@@ -85,7 +85,7 @@ def determine_optimal_starting_diameter(outer_diameter, target_mass, density, ox
 class Grain(PresetObject):
     def __init__(self, config={}):
         self.inner_radius = 0.05 # random
-        self.outer_radius = 0.1016 # random
+        self.outer_radius = 0.5 # random
         # of the fuel
         self.mass_flow = 0
         self.density = 920 # kg / m^3

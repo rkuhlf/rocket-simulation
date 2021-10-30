@@ -4,6 +4,12 @@
 import re
 import numpy as np
 
+#region CONSTANTS
+inputs_path = "./Data/Input/"
+outputs_path = "./Data/Output/"
+
+#endregion
+
 
 def transpose_tuple(iterable):
     iterable = np.array([*iterable])

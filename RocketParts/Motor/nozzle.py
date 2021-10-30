@@ -285,7 +285,7 @@ class Nozzle(PresetObject):
     """
 
     def __init__(self, config={}, fuel_grain=None):
-        self.throat_diameter = 0.05 # 0.03048 # meters
+        self.throat_diameter = 0.1 # 0.03048 # meters
         self.throat_area = self.get_throat_area()
         self.area_ratio = 4
         self.throat_temperature = 800 # Kelvin
@@ -298,7 +298,7 @@ class Nozzle(PresetObject):
         super().overwrite_defaults(config)
 
     def get_throat_area(self):
-        return np.pi * self.throat_diameter ** 2
+        return np.pi * (self.throat_diameter / 2) ** 2
 
     def get_nozzle_coefficient(self, chamber_pressure, atmospheric_pressure):
         """

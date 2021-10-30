@@ -91,11 +91,17 @@ class Feedback_Logger(Logger):
         self.p_turned = False
         self.p_thrusted = False
         self.should_print_top_speed = True
+        self.printed_rail_stats = False
 
         super().__init__(rocket, to_record, target)
 
     def handle_frame(self):
         super().handle_frame()
+
+        if not self.printed_rail_stats and self.rocket.position[2] > self.rocket.environment.rail_length:
+            self.printed_rail_stats = True
+
+            print(f"Off the rail, the rocket has {self.rocket.gees} gees")
 
         if not self.p_turned and self.rocket.turned:
             print('Reached the turning point at %.3s seconds with a height of %.5s meters' % (

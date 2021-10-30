@@ -32,6 +32,8 @@ if __name__ == "__main__":
     ox_temperatures = []
     OFs = []
     grain_diameters = []
+    c_stars = []
+    specific_impulses = []
 
     # TODO: refactor this into a separate simulation class
     while True:
@@ -46,6 +48,8 @@ if __name__ == "__main__":
         ox_temperatures.append(ox.temperature)
         grain_diameters.append(grain.inner_radius * 2)
         OFs.append(motor.OF)
+        c_stars.append(motor.combustion_chamber.cstar)
+        specific_impulses.append(motor.thrust / (motor.combustion_chamber.mass_flow_out * 9.81))
 
         if ox.get_pressure() < chamber.pressure:
             print("Stopping Sim because pressure difference flipped.")
@@ -86,6 +90,13 @@ if __name__ == "__main__":
 
     ax2.plot(times, np.array(grain_diameters) * 100)
     ax2.set(title="Grain Diameter", xlabel="Time [s]", ylabel="Diameter [cm]")
+
+    # FIXME: The C* values for combustion seem to be slightly low. I think it is probably just a combination
+    ax3.plot(times, c_stars)
+    ax3.set(title="Combustion Efficiency", xlabel="Time [s]", ylabel="C* [m/s]")
+
+    ax4.plot(times, specific_impulses)
+    ax4.set(title="Combustion Efficiency", xlabel="Time [s]", ylabel="Specific Impulse [s]")
 
     fig.tight_layout()
 
