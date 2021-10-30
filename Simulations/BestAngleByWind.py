@@ -1,5 +1,5 @@
 # OPTIMIZE ANGLE GIVEN WIND
-
+# TODO: move some of these optimization files into the analysis section
 
 import sys
 sys.path.append(".")

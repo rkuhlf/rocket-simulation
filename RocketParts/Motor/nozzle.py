@@ -10,10 +10,10 @@ import sys
 sys.path.append(".")
 
 from preset_object import PresetObject
-from Helpers.general import linear_intersection, interpolate, interpolate_point, transpose_tuple
+from Helpers.general import linear_intersection, interpolate, interpolate_point, transpose_tuple, get_radius
 
 
-
+#region NOZZLE CONSTRUCTION MEHODS
 def calculate_nozzle_coordinates_bezier(initial_point, initial_angle, final_point, final_angle, divisions=100):
     """
         Return a series of x, y coordinate pairs that make up a quadratic Bezier.
@@ -72,6 +72,7 @@ def calculate_nozzle_coordinates_truncated_parabola(initial_point, initial_angle
 
     return points
 
+#endregion
 
 #region FUNCTIONS TO BE RUN FOR DISPLAY
 def display_constructed_quadratic():
@@ -233,7 +234,7 @@ def compare_truncated_to_quadratic():
             self.exit_pressure() - self.get_free_stream_pressure())
 '''
 
-
+#region DESIGN EQUATIONS
 def determine_expansion_ratio(combustion_chamber_pressure, atmospheric_pressure, isentropic_exponent):
     """
     Outputs the optimum expansion ratio for a converging-diverging nozzle based on a known atmospheric pressure and a combustion chamber pressure, as well as the isentropic expansion coefficient.
@@ -263,6 +264,9 @@ def find_equilibrium_throat_area(Cstar, combustion_chamber_pressure, mass_flow):
     # c* = P_c * A_t / m-dot
     return Cstar * mass_flow / combustion_chamber_pressure
 
+def find_equilibrium_throat_diameter(Cstar, combustion_chamber_pressure, mass_flow):
+    return 2 * get_radius(find_equilibrium_throat_area(Cstar, combustion_chamber_pressure, mass_flow))
+
 def find_nozzle_length(converging_angle, entrance_diameter, throat_diameter, diverging_angle, exit_diameter):
     """
     Find the length of the nozzle consisting of two purely conical sections
@@ -276,7 +280,7 @@ def find_nozzle_length(converging_angle, entrance_diameter, throat_diameter, div
     exit_distance = exit_displacement / np.tan(diverging_angle)
 
     return entrance_distance + exit_distance
-
+#endregion
 
 class Nozzle(PresetObject):
     """
@@ -285,8 +289,7 @@ class Nozzle(PresetObject):
     """
 
     def __init__(self, config={}, fuel_grain=None):
-        self.throat_diameter = 0.1 # 0.03048 # meters
-        self.throat_area = self.get_throat_area()
+        self.throat_diameter = 0.09 # 0.03048 # meters
         self.area_ratio = 4
         self.throat_temperature = 800 # Kelvin
 
@@ -297,17 +300,26 @@ class Nozzle(PresetObject):
 
         super().overwrite_defaults(config)
 
+        self.throat_area = self.get_throat_area()
+
+    # TODO: I think I need a self._throat_diameter, but that would break the config functionality (probably). First implement **kwargs, then make setters work properly
+    # @throat_diameter.setter
+    # def throat_diameter(self, value):
+    #     self.throat_diameter = value
+    #     self.throat_area = self.get_throat_area()
+
     def get_throat_area(self):
         return np.pi * (self.throat_diameter / 2) ** 2
 
     def get_nozzle_coefficient(self, chamber_pressure, atmospheric_pressure):
         """
             Calculate the multiplicative effect that the nozzle has on thrust
+            Uses an exit pressure calculated from CEA
 
             Notice that pressure can be in any units so long as they are all the same
         """
         
-        # The isentropic exponent and the exit pressure is determined by CEA software and updated by our motor class
+        # The isentropic exponent and the exit pressure is determined by CEA software and updated by our motor class. TODO: implement exit pressure calculations myself to validate
 
         isentropic_less = self.isentropic_exponent - 1
         isentropic_more = self.isentropic_exponent + 1

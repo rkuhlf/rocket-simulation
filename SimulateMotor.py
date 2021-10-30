@@ -1,3 +1,10 @@
+# RUN A BASIC SIMULATION OF A HYBRID MOTOR
+# All of the math is located within different files, and the motor file brings them all together
+# This script simply instantiates them, runs the simulation, then makes a ton of graphs
+# Right now, all of the inputs are based off of the Heros 3 rocket, developed at Stuttgart, because I am trying to confirm that my simulated output vaguely matches theirs
+# FIXME: at the moment, the combustion chamber pressure is at ~10 bar when it should be 30-35 bar
+
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -13,10 +20,17 @@ from environment import Environment
 
 if __name__ == "__main__":
     ox = OxTank()
-    grain = Grain({"debug": True})
+    grain = Grain({
+        "debug": True
+
+    })
     chamber = CombustionChamber(fuel_grain=grain)
     injector = Injector(ox_tank=ox, combustion_chamber=chamber)
-    nozzle = Nozzle(fuel_grain=grain)
+    # Stuttgart optimized at 30 bar, but that gives me a totally funny shape because the pressure never reaches it
+    # 0.08 gives me a reasonable thrust profile for the pressure I am workin at
+    nozzle = Nozzle({
+        "throat_diameter": 0.08 # meters
+    }, fuel_grain=grain)
     env = Environment({
         "time_increment": 0.25
     })
