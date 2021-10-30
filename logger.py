@@ -98,7 +98,7 @@ class Feedback_Logger(Logger):
     def handle_frame(self):
         super().handle_frame()
 
-        if not self.printed_rail_stats and self.rocket.altitude > self.rocket.environment.rail_length + self.rocket.environment.base_altitude:
+        if not self.printed_rail_stats and self.rocket.position[2] > self.rocket.environment.rail_length:
             self.printed_rail_stats = True
 
             print(f"Off the rail, the rocket has {self.rocket.gees} gees")

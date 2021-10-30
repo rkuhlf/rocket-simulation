@@ -4,6 +4,10 @@
 # Displays the apogee and gees off of the rail as measures of success and risk
 
 # Conclusion:
+# I would say that we will go highest if our burn time is around 28 seconds. 
+# It looks like stability off the rail is not really an issue, ignoring all frictional effects
+# After 30 seconds of burn time, any increase results in highly variable apogee. I am slightly concerned that this is highly determined by my totally random wind simulation
+# All of this assumes we are using a O6300 shape exactly - meaning that the liquid-phase would run out at 22-ish seconds
 
 
 import numpy as np
@@ -17,15 +21,19 @@ from SimulateRocket import get_simulation
 
 base_curve = "Data/Input/thrustCurveO6300.csv"
 
+# With only 60 kg of propellant, it is more like 200 * 60 * 9.81 = 117720
+# Right now, the original simulation uses 220000
 total_impulse = 200000 # Ns
 
+# Iterating from the limits of theoretically possible to the probably completely unstable in terms of burn time
 min_time = 3
 max_time = 50
 
-iterations = 20
+iterations = 100
 burn_times = np.linspace(min_time, max_time, iterations)
 apogees = []
 gees_off_rail = []
+velocities_off_rail = []
 
 for burn_time in burn_times:
     # Create a new thrust curve with the new burn time
@@ -41,6 +49,7 @@ for burn_time in burn_times:
 
     apogees.append(sim.apogee)
     gees_off_rail.append(sim.rail_gees)
+    velocities_off_rail.append(sim.rail_velocity)
     
 
 fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
@@ -52,7 +61,13 @@ print(gees_off_rail)
 ax2.plot(burn_times, gees_off_rail)
 ax2.set(title="Acceleration Stability off Rail", xlabel="Burn Time [s]", ylabel="gees")
 
+print(velocities_off_rail)
+ax4.plot(burn_times, velocities_off_rail)
+ax4.set(title="Velocity Stability off Rail", xlabel="Burn Time [s]", ylabel="Velocity [m/s]")
+
 
 fig.tight_layout()
 
 plt.show()
+
+

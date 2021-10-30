@@ -21,6 +21,7 @@ def get_simulation():
     # additional function because it turns out I need access to this in other files
     env = Environment({"time_increment": 0.01, "apply_wind": True})
     motor = Motor()
+
     drogue_parachute = ApogeeParachute({"radius": 0.2})
     main_parachute = Parachute()
     rocket = Rocket(environment=env, motor=motor, parachutes=[drogue_parachute, main_parachute])

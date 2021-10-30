@@ -4,6 +4,8 @@
 
 from preset_object import PresetObject
 
+from Helpers.general import magnitude
+
 
 class Simulation(PresetObject):
     def override_subobjects(self):
@@ -30,6 +32,7 @@ class Simulation(PresetObject):
         self.override_subobjects()
 
         self.rail_gees = None
+        self.rail_velocity = None
 
     def reset(self):
         super().reset()
@@ -59,8 +62,9 @@ class Simulation(PresetObject):
             self.logger.handle_frame()
         
         # TODO: check that this rail_gees is good based on the output.csv file. Right now it seems a teeny bit high
-        if self.environment.rail_length < self.rocket.altitude and self.rail_gees is None:
+        if self.environment.rail_length < self.rocket.position[2] and self.rail_gees is None:
             self.rail_gees = self.rocket.gees
+            self.rail_velocity = magnitude(self.rocket.velocity)
 
         self.frames += 1
 
