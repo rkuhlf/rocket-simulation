@@ -5,64 +5,63 @@ import sys
 sys.path.append(".")
 
 
-from RocketParts.Motor.oxTank import find_center_of_mass, find_ullage
+from RocketParts.Motor.oxTank import OxTank
 from RocketParts.Motor.nitrousProperties import get_gaseous_nitrous_density, get_nitrous_vapor_pressure, get_liquid_nitrous_density
 
-# TODO: Finish implementing the injector stuff then start using another one
-from RocketParts.Motor.injector import find_mass_flow_single_phase_incompressible, find_total_cross_sectional_area
+from RocketParts.Motor.injector import Injector
 import matplotlib.pyplot as plt
 
 # Alright, actually this depends on the combustion chamber pressure and the injector; I don't even have an approximation for the combustion chamber pressure
 # Right now, I think I will go ahead and assume like 33 bar = 3.3e+6 Pa
 
-ox_mass = 68.5  # kg
-# 3ish cubic feet converted to meters cubed
-volume = 3 / 35.3147
-# 4 feet long to 3.3 feet long
-length = 4 / 3.28084
+# ox_mass = 52.5  # kg
+
 temperature = 273.15 + 22
 
+tank = OxTank({
+    "ox_mass": 52.5,
+    "length": 2.65,
+    "radius": 0.1905 / 2,
+    "temperature": 293.15
+})
 # assumes constant temperature
-ullage = find_ullage(ox_mass, volume, 273)[0]
-tank_pressure = get_nitrous_vapor_pressure(temperature) * 10**5
-print("TNK PRES", tank_pressure)
+ullage = tank.ullage
+
+print("TNK PRES", tank.get_pressure())
 chamber_pressure = 3.3e+6
-injector_area = find_total_cross_sectional_area(5, 0.005)
-# This doesn't really matter, it is a tiny effect so long as it is much higher than the orifice total area
-injector_face_area = np.pi * 0.5 **2
-
-print(injector_area)
-print(injector_face_area)
-
-print("SPI", find_mass_flow_single_phase_incompressible(get_liquid_nitrous_density(temperature), 
-                                                                            tank_pressure - chamber_pressure,
-                                                                            injector_area, injector_face_area))
+# TODO: reimplement injector here
+# injector_area = find_total_cross_sectional_area(5, 0.005)
+# # This doesn't really matter, it is a tiny effect so long as it is much higher than the orifice total area
+# injector_face_area = np.pi * 0.5 **2
 
 time = 0
 time_increment = 0.1
 
 times = []
 masses = []
+ullages = []
+gas_masses = []
+liquid_masses = []
 center_of_masses = []
 
-while ox_mass > 0:
-    old_gas_mass = volume * ullage * get_gaseous_nitrous_density(temperature)
-    # m-dot_SPI is currently imaginary
-    ox_mass -= time_increment * find_mass_flow_single_phase_incompressible(get_liquid_nitrous_density(temperature), 
-                                                                            tank_pressure - chamber_pressure,
-                                                                            injector_area, injector_face_area)
+while tank.ox_mass > 0:
+    tank.update_drain(time_increment * 5)
 
-    ullage, temperature_change = find_ullage(ox_mass, volume, temperature, constant_temperature=False, already_gas_mass=old_gas_mass)
-    print(temperature_change)
     times.append(time)
-    masses.append(ox_mass)
-    center_of_masses.append(find_center_of_mass(ullage, volume, length, temperature))
+    masses.append(tank.ox_mass)
+    liquid_masses.append(tank.get_liquid_mass())
+    gas_masses.append(tank.get_gas_mass())
+    ullages.append(tank.ullage)
+    # center_of_masses.append(find_center_of_mass(ullage, volume, length, temperature))
 
     time += time_increment
 
+fig, (ax1, ax2) = plt.subplots(2, 1)
 
+ax1.plot(times, masses)
+ax1.plot(times, liquid_masses)
+ax1.plot(times, gas_masses)
 
-plt.plot(time, masses)
-plt.plot(time, center_of_masses)
+ax2.plot(times, ullages)
 
 plt.show()

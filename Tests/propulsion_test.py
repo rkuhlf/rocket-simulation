@@ -5,6 +5,30 @@ sys.path.append(".")
 
 from RocketParts.Motor.grain import *
 
+
+class TestingChamber(unittest.TestCase):
+    def test_flow_out(self):
+        # TODO: implement test
+
+        # Check that the mass flow rate we are using from CEA is similar to this one
+        """
+        def mass_flow_rate(self, mach=1):
+        # TODO: add mach adjustment into here
+        # I believe this is for the conditions given that mass flow rate is choked at sonic conditions
+        # I suspect this is where a CFD would be much more accurate
+        # tis is were the problems are
+
+        ans = self.throat_area * self.total_pressure / \
+            (self.total_temperature) ** (1 / 2)
+
+        ans *= (self.specific_heat_ratio / self.gas_constant) ** (1 / 2)
+
+        ans *= ((self.specific_heat_ratio + 1) / 2) ** -self.specific_heat_exponent
+
+        return ans
+        """
+        pass
+
 class TestingGrain(unittest.TestCase):
     def test_optimizing_length(self):
         # The length we end up with should have the correct total O/F ratio

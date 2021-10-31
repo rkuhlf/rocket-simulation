@@ -146,24 +146,6 @@ def compare_truncated_to_quadratic():
         super().overwrite_defaults(config)
 
 
-    def mass_flow_rate(self, mach=1):
-        # TODO: add mach adjustment into here
-        # I believe this is for the conditions given that mass flow rate is choked at sonic conditions
-        # I suspect this is where a CFD would be much more accurate
-        # tis is were the problems are
-
-        ans = self.throat_area * self.total_pressure / \
-            (self.total_temperature) ** (1 / 2)
-
-        ans *= (self.specific_heat_ratio / self.gas_constant) ** (1 / 2)
-
-        ans *= ((self.specific_heat_ratio + 1) / 2) ** -self.specific_heat_exponent
-
-        return ans
-
-
-
-
     def exit_mach(self):
         # The algebra is much more complicated
         # The exit mach is zero makes it undefined
@@ -267,7 +249,7 @@ def find_equilibrium_throat_area(Cstar, combustion_chamber_pressure, mass_flow):
 def find_equilibrium_throat_diameter(Cstar, combustion_chamber_pressure, mass_flow):
     return 2 * get_radius(find_equilibrium_throat_area(Cstar, combustion_chamber_pressure, mass_flow))
 
-def find_nozzle_length(converging_angle, entrance_diameter, throat_diameter, diverging_angle, exit_diameter):
+def find_nozzle_length(converging_angle, entrance_diameter, throat_diameter, diverging_angle, exit_diameter, conical_proportion=1):
     """
     Find the length of the nozzle consisting of two purely conical sections
     Converging angle is the radians north of west at the throat
@@ -279,7 +261,7 @@ def find_nozzle_length(converging_angle, entrance_diameter, throat_diameter, div
     entrance_distance = entrance_displacement / np.tan(converging_angle)
     exit_distance = exit_displacement / np.tan(diverging_angle)
 
-    return entrance_distance + exit_distance
+    return entrance_distance + exit_distance * conical_proportion
 #endregion
 
 class Nozzle(PresetObject):
@@ -307,6 +289,9 @@ class Nozzle(PresetObject):
     # def throat_diameter(self, value):
     #     self.throat_diameter = value
     #     self.throat_area = self.get_throat_area()
+
+    def get_exit_mach(self, chamber_pressure, atmospheric_pressure):
+        pass
 
     def get_throat_area(self):
         return np.pi * (self.throat_diameter / 2) ** 2

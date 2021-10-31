@@ -71,7 +71,7 @@ def find_combined_total_heat_capacity(gaseous_mass, liquid_mass,
     '''
     return gaseous_mass * gaseous_specific_heat + liquid_mass * liquid_specific_heat
 
-def find_required_length(ox_mass, diameter, temperature, ullage=0.15):
+def find_required_length(ox_mass, diameter, temperature=293.15, ullage=0.15):
     """Calculate the required length for an ox tank given a constant temperature (in kelvin) and a desired ullage (as a proportion)"""
     liquid_density = get_liquid_nitrous_density(temperature)
     gas_density = get_gaseous_nitrous_density(temperature)
@@ -167,7 +167,7 @@ class OxTank(PresetObject):
     def __init__(self, config={}):
 
         # TODO: figure out the optimal value for this
-        self.temperature = 30 + 273.15 # Kelvin
+        self.temperature = 293.15 # Kelvin
         self.length = 3.7 # m
         self.radius = 0.1016 # m
         self.ox_mass = 70.0 # kg
