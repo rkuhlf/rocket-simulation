@@ -64,8 +64,11 @@ def determine_optimal_starting_diameter(outer_diameter, target_mass, density, ox
         inner_radius = interpolate(optimize_for, 0, 1, initial_inner_radius, outer_diameter / 2)
 
         port_area = np.pi * inner_radius ** 2
+        # We want to have the correct amount of stuff there regardless of whether the regression rates match
         length = find_required_length(inner_radius * 2, outer_diameter, target_mass, density)
         burn_area = length * np.pi * 2 * inner_radius
+
+        print(regression_func(ox_flow / port_area))
         
         fuel_flow = regression_func(ox_flow / port_area) * burn_area * density
         

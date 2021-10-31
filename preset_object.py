@@ -2,7 +2,7 @@ import copy
 import pickle
 
 # Parent of all objects that take a config
-
+# TODO: Fix naming convention everywhere
 
 class PresetObject:
     def __init__(self, config={}):

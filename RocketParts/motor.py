@@ -215,10 +215,8 @@ class CustomMotor(Motor):
 
 
 
-        
+    
 
-
-# TODO: Figure out the min mass flow rate, if any, for the nozzle to reach mach one at the choke. I don't see how it could instantaneously reach mach speeds
+# TODO: Figure out the min mass flow rate, if any, for the nozzle to reach mach one at the choke. I don't see how it could instantaneously reach mach speeds; I think CEA has some outputs for this
 if __name__ == "__main__":
-    # some motor tests that should be moved to the actual tests TODO
     pass

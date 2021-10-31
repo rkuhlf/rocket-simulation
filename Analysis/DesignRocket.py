@@ -19,8 +19,9 @@ from Helpers.design import get_propellant_mass, get_ox_mass, get_fuel_mass
 # from Helpers.general import get_radius
 
 from RocketParts.Motor.grain import determine_optimal_starting_diameter, regression_rate_HTPB_nitrous, find_required_length as find_required_length_fuel
+from RocketParts.Motor.nitrousProperties import get_liquid_nitrous_density, get_gaseous_nitrous_density
 from RocketParts.Motor.oxTank import find_required_length as find_required_length_oxidizer
-from RocketParts.Motor.injector import determine_required_thickness
+from RocketParts.Motor.injector import determine_required_thickness, determine_orifice_count_MR
 from RocketParts.Motor.nozzle import find_nozzle_length, find_equilibrium_throat_area, find_equilibrium_throat_diameter, determine_expansion_ratio
 
 
@@ -37,11 +38,19 @@ OF = 6.93
 # Based on the combustion chamber and a constant optimum OF, we can figure out what C* to optimize to - it looks like we should get around 1600 m/s, theoretically
 # Once again, it would be better to do the adjustments for the nozzle programmatically
 cstar = 1600 # m/s
+fuel_density = 920 # kg / m^3
 
 # TODO: redesign this so that we can atmospheric pressure programatically - I will have to rewrite environment to take data for atmospheric pressure as a function of time, then do the motor simulation repeatedly with different area ratios
 # This number is slightly lower than where I predict the rocket to be about halfway through the burn (10-ish seconds)
 # TODO: check that it isn't going to get seriously over-expanded at the bottom and break the flow
 exterior_pressure = 75000 # Pa
+
+
+# Calculated from OxTankCG.py
+ox_tank_average_temperature = 283 # Kelvin
+
+injector_CD = 0.68
+injector_diameter = 0.005
 #endregion
 
 propellant_mass = get_propellant_mass(total_mass)
@@ -50,6 +59,7 @@ fuel_mass = get_fuel_mass(propellant_mass, OF)
 
 # Looks like we always end up with about 5 kg of oxidizer left over as gas, that means we need to burn through 5 less than that to get the right burn time for the liquid; Scale it up to include fuel proportional to OF
 nozzle_mass_flow = (ox_mass - 5) * (1 + 1 / OF) / liquid_burn_time
+
 
 # TODO: double check this gamma value after I finish optimizing the other stuff; it is very important to get it right
 optimized_area_ratio = determine_expansion_ratio(combustion_chamber_pressure, exterior_pressure, 1.22)
@@ -64,9 +74,29 @@ nozzle_length = find_nozzle_length(40 * np.pi / 180, inlet_diameter, throat_diam
 print(f"The rocket's throat diameter should be {throat_diameter} meters and the exit diameter should be {exit_diameter} meters, giving an area ratio of {optimized_area_ratio}. Inlet diameter is guesstimated at {inlet_diameter} meters")
 
 
+ox_flow = nozzle_mass_flow * OF / (OF + 1)
 
-# TODO: Optimizations for injector (I need to confirm the temperature change of the ox tank first)
+# 4030567.1520320475 Pa is taken from OxTankCG.py
+unrounded_orifices = determine_orifice_count_MR(ox_flow, (4030567.1520320475 - combustion_chamber_pressure), get_liquid_nitrous_density(ox_tank_average_temperature), get_gaseous_nitrous_density(ox_tank_average_temperature), injector_diameter, injector_CD)
+orifices = round(unrounded_orifices)
+print(f"To be fully optimized, you should really have {unrounded_orifices} orifices. Unfortunately, the closest you can get is {orifices}")
+
+# This only works because the area scales linearly with the flow
+new_nozzle_flow = nozzle_mass_flow * orifices / unrounded_orifices
+new_burn_time = liquid_burn_time * unrounded_orifices / orifices
+
+print(f"This gives you a flow rate of {new_nozzle_flow} kg/s and a total burn time of {new_burn_time} seconds to optimize your fuel grain with")
+
+fuel_flow = new_nozzle_flow / (OF + 1)
+ox_flow = new_nozzle_flow * OF / (OF + 1)
+
+
 # TODO: Optimizations for fuel grain
+port_diameter = determine_optimal_starting_diameter(inner_diameter, fuel_mass, fuel_density, ox_flow, regression_rate_HTPB_nitrous, OF)
+grain_length = find_required_length_fuel(port_diameter, inner_diameter, fuel_mass, fuel_density)
+
+print(f"A port diameter of {port_diameter} meters and a length of {grain_length} meters should mean that your fuel burns up at about the same time as your ox runs out.")
+print(f"That is {port_diameter * 3.28 * 12} inches and {grain_length * 3.28} feet")
 
 
 # Calculate the total length of the rocket that we are looking at

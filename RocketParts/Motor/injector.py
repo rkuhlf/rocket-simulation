@@ -19,6 +19,24 @@ def determine_injector_volume(thickness, radius):
 def determine_injector_mass(thickness, radius, density):
     return determine_injector_volume(thickness, radius) * density
 
+def determine_orifice_count_SPI(mass_flow_rate, pressure_drop, density, orifice_diameter, coefficient_of_discharge=0.7):
+    individual_orifice_area = np.pi * (orifice_diameter / 2) ** 2
+
+    # m = C_d * (N * a) * sqrt(2 * rho * delta-P)
+    # m / (C_d * a * sqrt(2 * rho * delta-P)) = N
+
+    return mass_flow_rate / (coefficient_of_discharge * individual_orifice_area * (2 * density * pressure_drop) ** (1/2))
+
+def determine_orifice_count_MR(mass_flow_rate, pressure_drop, liquid_density, gas_density, orifice_diameter, coefficient_of_discharge=0.7, mixing_ratio=0.2552):
+    individual_orifice_area = np.pi * (orifice_diameter / 2) ** 2
+
+    # m = C_d * (N * a) * sqrt(2 * rho * delta-P)
+    # m / (C_d * a * sqrt(2 * rho * delta-P)) = N
+
+    density = mixing_ratio * gas_density + (1 - mixing_ratio) * liquid_density
+
+    return mass_flow_rate / (coefficient_of_discharge * individual_orifice_area * (2 * density * pressure_drop) ** (1/2))
+
 #endregion
 
 #region MASS FLOW CHARACTERISTICS
@@ -154,5 +172,6 @@ if __name__ == "__main__":
 
     print(mass, "kg")
 
+    print(determine_orifice_count_MR(2.258752177, (39.92607209 - 25) * 10**5, 854.4, 113.9, 0.005, 0.68106))
     
  
