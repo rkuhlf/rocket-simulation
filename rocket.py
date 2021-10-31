@@ -491,7 +491,8 @@ class Rocket(MassObject):
 
     def calculate_center_of_pressure(self):
         # This should give one caliber of stability
-        self.CP = 5 # meters
+        # FIXME: change back to 5 so the other one works
+        self.CP = 3.75 # meters
         # cutout = cutout_method()
         # barrowman = barrowman_equation()
 

@@ -67,12 +67,11 @@ print(f"The rocket's throat diameter should be {throat_diameter} meters and the 
 
 # TODO: Optimizations for injector (I need to confirm the temperature change of the ox tank first)
 # TODO: Optimizations for fuel grain
-# TODO: Update values in standard inputs for the main rocket
-# TODO: provide a table with a ton of CEA data
 
 
 # Calculate the total length of the rocket that we are looking at
-print(find_required_length_oxidizer(ox_mass, inner_diameter))
+tank_length = find_required_length_oxidizer(ox_mass, inner_diameter, ullage=0.1)
+print(f"The ox tank has a length of {tank_length} meters, or {tank_length * 3.28} feet")
 
 
 print(f"The nozzle has a total length of {nozzle_length} meters, or {nozzle_length * 3.28 * 12} inches")

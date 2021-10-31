@@ -3,7 +3,7 @@ import sys
 sys.path.append(".")
 
 from preset_object import PresetObject
-from Helpers.general import cylindrical_volume
+from Helpers.general import cylindrical_volume, interpolate
 
 
 #region REGRESSION-RATE EQUATIONS
@@ -41,12 +41,14 @@ def find_required_length(inner_diameter, outer_diameter, mass, density):
     return required_volume / cross_sectional_area
 
 
-def determine_optimal_starting_diameter(outer_diameter, target_mass, density, ox_flow, regression_func, target_OF, iterations=100):
+def determine_optimal_starting_diameter(outer_diameter, target_mass, density, ox_flow, regression_func, target_OF, optimize_for=0.5, iterations=100):
     """
         Iteratively determine the starting port diameter to match a target initial O/F ratio and the correct total O/F ratio.
         Note that you must input in base SI units - your diameters must be in meters, and your flow must be in kilograms per second
         This will not give you a perfectly balanced engine - it will give you perfect combustion at the beginning, but it will probably be fuel-lean as it continues to regress.
         Read more about O/F over time at # TODO: add a link to a google doc that I still need to write.
+
+        Optimize for uses the start O/F if you choose 0, the midpoint if you choose 0.5, and the end if you choose 1
     """
     # Loop through all of the possible inner diameters, starting as small as possible 
     
@@ -58,7 +60,9 @@ def determine_optimal_starting_diameter(outer_diameter, target_mass, density, ox
     smallest_radius = (ox_flow / (np.pi * 500)) ** (1/2)
     
     sign_difference = 0
-    for inner_radius in np.linspace(smallest_radius, outer_diameter / 2, iterations):
+    for initial_inner_radius in np.linspace(smallest_radius, outer_diameter / 2, iterations):
+        inner_radius = interpolate(optimize_for, 0, 1, initial_inner_radius, outer_diameter / 2)
+
         port_area = np.pi * inner_radius ** 2
         length = find_required_length(inner_radius * 2, outer_diameter, target_mass, density)
         burn_area = length * np.pi * 2 * inner_radius

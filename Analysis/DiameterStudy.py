@@ -11,6 +11,8 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
+sys.path.append(".")
 
 from RocketParts.Motor.nitrousProperties import calculate_maximum_liquid_expansion
 from RocketParts.Motor.grain import determine_optimal_starting_diameter, regression_rate_HTPB_nitrous, find_required_length as find_required_length_fuel
@@ -25,12 +27,13 @@ from Helpers.general import get_radius, normalized
 # We are assuming the ox starts at 68 F based on past conditions launching at White Sands (740ish psia in ox tank under vapor pressure only - https://www.desmos.com/calculator/x9m7xb6mrb)
 
 # Inner diameters in inches
-possible_diameters = np.linspace(7, 10, 50)
+# possible_diameters = np.linspace(7, 10, 50)
+possible_diameters = np.array([7.5])
 # inches to meters is 0.0254
 possible_diameters *= 0.0254
 lengths = []
 
-oxidizer_mass = 52.5 # kg
+oxidizer_mass = 52.43 # kg
 oxidizer_temperature = 293.15
 
 target_OF = 7
@@ -59,13 +62,24 @@ for d in possible_diameters:
     print(f"{tank_length} meters")
     print(f"{tank_length * 3.281} feet")
 
-    port_diameter = determine_optimal_starting_diameter(d, fuel_mass, fuel_density, 4.8, regression_rate_HTPB_nitrous, target_OF)
+    port_diameter = determine_optimal_starting_diameter(d, fuel_mass, fuel_density, 2, regression_rate_HTPB_nitrous, target_OF)
     grain_length = find_required_length_fuel(port_diameter, d, fuel_mass, fuel_density)
 
     print("FUEL GRAIN LENGTHS")
     print(f"Lengths are for a port diameter of {port_diameter / 0.0254} inches")
     print(f"{grain_length} meters")
     print(f"{grain_length * 3.281} feet")
+
+    print("AUXILIARY COMBUSTION LENGTHS")
+    precombustion = d / 2
+    postcombustion = d
+    print(f"Precombustion: {precombustion} meters")
+    print(f"Precombustion: {precombustion * 3.281} feet")
+    print(f"Postcombustion: {postcombustion} meters")
+    print(f"Postcombustion: {postcombustion * 3.281} feet")
+
+    print("TOTAL COMBUSTION CHAMBER LENGTH")
+    print(f"{precombustion + grain_length + postcombustion} meters")
 
     print("NOSE CONE LENGTHS")
     nose_cone_length = d * 5
@@ -86,18 +100,10 @@ for d in possible_diameters:
     print(f"{nozzle_length} meters")
     print(f"{nozzle_length * 3.281} feet")
 
-    print("AUXILIARY COMBUSTION LENGTHS")
-    precombustion = d / 2
-    postcombustion = d
-    print(f"Precombustion: {precombustion} meters")
-    print(f"Precombustion: {precombustion * 3.281} feet")
-    print(f"Postcombustion: {postcombustion} meters")
-    print(f"Postcombustion: {postcombustion * 3.281} feet")
-
     print("INJECTOR LENGTHS")
     injector_length = determine_required_thickness(30 * 10 ** 5, d / 2, 0.31, 2.7579e+8)
-    print(f"Injector: {precombustion} meters")
-    print(f"Injector: {precombustion * 3.281} feet")
+    print(f"Injector: {injector_length} meters")
+    print(f"Injector: {injector_length * 3.281 * 12} in")
 
     # I can't remember if fins were mounted on top of any of this, so we are going to add a foot for the fin mount
     fin_mount = 0.3 # meters
@@ -108,7 +114,11 @@ for d in possible_diameters:
     print(f"TOTAL LENGTH: {total_length} meters")
     print(f"TOTAL LENGTH: {total_length * 3.281} feet")
 
-    aspect_ratios.append(total_length / d)
+    aspect_ratio = total_length / d
+
+    print(f"ASPECT RATIO: {aspect_ratio}")
+
+    aspect_ratios.append(aspect_ratio)
 
     print()
 

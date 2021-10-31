@@ -34,6 +34,10 @@ class Simulation(PresetObject):
         self.rail_gees = None
         self.rail_velocity = None
 
+    def set_logger(self, value):
+        self.logger = value
+        self.rocket.logger = value
+
     def reset(self):
         super().reset()
 

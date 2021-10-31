@@ -8,8 +8,8 @@ from RocketParts.Motor.nitrousProperties import get_nitrous_vapor_pressure, get_
 
 
 #region DESIGN/WEIGHT FUNCTIONS
-
 def determine_required_thickness(pressure_drop, radius, poisson_ratio, failure_stress):
+    """There is no unit for Poisson's Ratio, but your pressure drop and failure stress both must be in Pascals"""
     numerator = 0.375 * pressure_drop * radius**3 * (1 + poisson_ratio)
     return (numerator / failure_stress) ** (1/2)
 
@@ -147,9 +147,10 @@ class Injector(PresetObject):
 
 
 if __name__ == "__main__":
-    # These are the numbers from memory for aluminum, they do not include the effects of heat (probably important, considering aluminum melts at 1,221 F and our combustion will probably be around 3300 F)
-    thickness = (determine_required_thickness(450, 4, 0.31, 40000)) # everything in psi
-    mass = determine_injector_mass(thickness, 4, 0.0442451) # density in kg/m^3
+    # These are the numbers for aluminum, they do not include the effects of heat (probably important, considering aluminum melts at 1,221 F and our combustion will probably be around 3300 K)
+    thickness = (determine_required_thickness(33.5775* 10**5, 0.1016, 0.31, 2757.9029*10**5)) # everything in meters
+    print(thickness, "m", thickness * 39.3701, "in")
+    mass = determine_injector_mass(thickness, 0.1016, 2710) # density in kg/m^3
 
     print(mass, "kg")
 

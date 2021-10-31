@@ -39,12 +39,21 @@ class MassObject(PresetObject):
 
     @property
     def total_mass(self):
+        return self.get_total_mass()       
+
+    def get_total_mass(self, exclude_objects=[]):
         if self.mass_data_type == DataType.DEFAULT:
+            if self in exclude_objects:
+                return 0
+            
             total = self.mass
             for mass_object in self.mass_objects:
-                # This is the part that means you have to make sure not to double count objects
-                # There is a potential fix where you just pass mass_objects up the chain and check for duplicates, but I don't want to do it
-                total += mass_object.total_mass
+                if mass_object in exclude_objects:
+                    continue
+
+                total += mass_object.get_total_mass(exclude_objects)
+                # To prevent double counting masses, I will not count it if the reference has already been counted
+                exclude_objects.append(mass_object)
             
             return total
         
@@ -52,8 +61,7 @@ class MassObject(PresetObject):
             return self.mass
 
         if self.mass_data_type == DataType.FUNCTION_TIME:
-            return self.mass_given_time(self.simulation.environment.time)            
-
+            return self.mass_given_time(self.simulation.environment.time)
 
     def mass_given_time(self, time):
         raise NotImplementedError("If you are going to use a custom function for the mass over the time, you have to specify it by using 'set_mass_as_function_of_time'")
@@ -65,6 +73,29 @@ class MassObject(PresetObject):
     def set_mass_constant(self, value):
         self.mass_data_type = DataType.CONSTANT
         self.mass = value
+
+    def change_mass(self, amount, proportional=True, exclude_objects=[]):
+        """
+        Add the amount to the local mass of the object, distributing it evenly among all subobjects so that the total mass stays the same
+        If it is proportional, then you can specify mass subobjects to exclude by passing their reference in the form of an array
+        """
+
+        if proportional:
+            if self in exclude_objects:
+                raise Exception("Cannot change the mass of an excluded object")
+
+            initial_mass = self.get_total_mass(exclude_objects)
+
+            new_mass = initial_mass + amount
+            scaling_fraction = new_mass / initial_mass
+
+            print(scaling_fraction)
+            tuples = self.get_flattened_mass_objects(exclude_objects=exclude_objects)
+            print(tuples)
+            for CG_from_tip, mass_object in tuples:
+                mass_object.mass *= scaling_fraction
+        else:
+            self.mass += amount
 
 
     @property
@@ -135,21 +166,30 @@ class MassObject(PresetObject):
         self.moment_data_type = DataType.CONSTANT
         self.moment = value
 
-    def get_flattened_mass_objects(self, distance_from_original_front):
+
+    def get_flattened_mass_objects(self, distance_from_original_front=0, exclude_objects=[]):
+        if self in exclude_objects:
+            print("Excluding self")
+            return []
+
         flattened = [(distance_from_original_front + self.front + self.center_of_gravity, self)]
 
         for mass_object in self.mass_objects:
-            newly_flattened = mass_object.get_flattened_mass_objects(distance_from_original_front + self.front)
+            if mass_object in exclude_objects:
+                continue
+
+            newly_flattened = mass_object.get_flattened_mass_objects(distance_from_original_front + self.front, exclude_objects)
             flattened.extend(newly_flattened)
+            exclude_objects.extend(newly_flattened)
         
         return flattened
 
     @property
-    def flattened_mass_objects(self, distance_from_original_front=0):
+    def flattened_mass_objects(self):
         """
         Return a flattened array of all of tuples of the mass objects that are underneath this
         First index is the CG distance from the start
         Second index is the actual mass object without any parent information
         """
-        return self.get_flattened_mass_objects(distance_from_original_front)
+        return self.get_flattened_mass_objects(0, [])
         

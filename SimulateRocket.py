@@ -2,10 +2,7 @@
 # This is the main entry point into the program
 # If you want some other examples for how to run a simulation, or other applications of the rocket simulation, look under Simulations/
 
-# Tanner's model currently reaces apogee at 3158 meters
-# My model reaches 2949
-# RASAero reaces 3350 with a converted rocket that is probably too long for how light it is
-# The difference is probably due to drag_coefficient implementation and momentum calculations
+from numpy import array
 
 from environment import Environment
 from RocketParts.motor import Motor
@@ -14,7 +11,6 @@ from RocketParts.parachute import ApogeeParachute, Parachute
 from logger import Feedback_Logger  # , Logger
 from simulation import Simulation
 from Simulations.verifiedSimulation import VerifiedSimulation
-from numpy import array
 
 
 def get_simulation():
@@ -25,6 +21,7 @@ def get_simulation():
     drogue_parachute = ApogeeParachute({"radius": 0.2})
     main_parachute = Parachute()
     rocket = Rocket(environment=env, motor=motor, parachutes=[drogue_parachute, main_parachute])
+    rocket.mass_objects()
     logger = Feedback_Logger(
         rocket,
         ['position', 'velocity', 'acceleration', 'rotation', 'angular_velocity',

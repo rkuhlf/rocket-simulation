@@ -31,7 +31,7 @@ class Environment(PresetObject):
         self.earth_mass = 5.972 * 10 ** 24  # kg
         self.gravitational_constant = 6.67 * 10 ** -11  # Newtons kg^-2 m^2
         self.earth_radius = 6371071.03  # m
-        self.base_altitude = 4  # m
+        self.base_altitude = 1300  # m
 
 
         self.rail_length = 13.1064 # meters based on 43 feet at White Sands

@@ -14,7 +14,7 @@ import SimulateRocket
 from Helpers.general import angle_between
 
 
-class TestSimulateRocket(unittest.TestCase):
+class TestSimulateRocket(unittest.TestCase):        
     def get_current_simulation(self):
         if not hasattr(self, "sim"):
             self.sim = SimulateRocket.simulate_rocket()

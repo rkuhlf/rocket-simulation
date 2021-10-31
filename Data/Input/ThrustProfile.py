@@ -47,5 +47,5 @@ def scale_curve(data, desired_burn_time, desired_average_thrust):
 
 
 if __name__ == "__main__":        
-    scale_saved_curve("./Data/Input/thrustCurveO6300.csv", 22, 10000, "./Data/Input/currentGoddard.csv")
+    scale_saved_curve("./Data/Input/thrustCurveO6300.csv", 22, 5000, "./Data/Input/thrustCurveSmaller.csv")
     
