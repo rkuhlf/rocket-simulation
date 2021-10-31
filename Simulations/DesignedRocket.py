@@ -1,6 +1,7 @@
 # SIMULATION OF DESIGNED ROCKET
 # For our first math model review, we need a design for our rocket
 # I simulate it here
+# NOTE: for this to be realistic, you have to go into the rocket.py file and change the calculate_cp method to set self.CP = 3.75. Otherwise this is a demonstration in the perilous effects of overstability. FIXME: I don't know why I haven't written a way to set CP properly yet
 
 import sys
 sys.path.append(".")

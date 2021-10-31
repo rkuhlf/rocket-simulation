@@ -21,7 +21,7 @@ def get_simulation():
     drogue_parachute = ApogeeParachute({"radius": 0.2})
     main_parachute = Parachute()
     rocket = Rocket(environment=env, motor=motor, parachutes=[drogue_parachute, main_parachute])
-    rocket.mass_objects()
+    
     logger = Feedback_Logger(
         rocket,
         ['position', 'velocity', 'acceleration', 'rotation', 'angular_velocity',
