@@ -163,7 +163,7 @@ def saveOutput():
     global iters
     output = driver.find_element_by_tag_name("body").text
 
-    f = open("./Data/Input/CEAOutput/" + str(iters), "w")
+    f = open("./Data/Input/CEAOutput/ParaffinNitrous" + str(iters), "w")
     f.write(output)
     f.close()
     print("Saved output")

@@ -120,7 +120,7 @@ def read_cea_lines(lines):
 
 for num in range(max_file_num):
     print("EXTRACTING FROM FILE", num)
-    f = open("Data/Input/CEAOutput/" + str(num))
+    f = open("Data/Input/CEAOutput/ParaffinNitrous" + str(num))
     lines = f.readlines()
 
     while "supar" not in lines[0]:
@@ -160,6 +160,6 @@ dataframe = dataframe.sort_values(["O/F Ratio", "Chamber Pressure [psia]"])
 print(dataframe)
 
 
-dataframe.to_csv("./Data/Input/CombustionLookup.csv")
+dataframe.to_csv("./Data/Input/CombustionLookupParaffinNitrous.csv")
 
 
