@@ -46,6 +46,9 @@ def scale_curve(data, desired_burn_time, desired_average_thrust):
     return data
 
 
-if __name__ == "__main__":        
-    scale_saved_curve("./Data/Input/thrustCurveO6300.csv", 22, 5000, "./Data/Input/thrustCurveSmaller.csv")
+if __name__ == "__main__":
+    burn_time = 26
+    # Actually is about 21 seconds for liquid burn
+    total_impulse = 129492
+    scale_saved_curve("./Data/Input/thrustCurveSmaller.csv", burn_time, total_impulse / burn_time, "./Data/Input/thrustCurveSmaller.csv")
     

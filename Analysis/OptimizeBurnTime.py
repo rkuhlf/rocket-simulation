@@ -27,7 +27,7 @@ base_curve = "Data/Input/thrustCurveO6300.csv"
 
 # With only 60 kg of propellant, it is more like 200 * 60 * 9.81 = 117720
 # Right now, the original simulation uses 220000
-total_impulse = 130000 # Ns
+total_impulse = 129492 # Ns
 
 # Iterating from the limits of theoretically possible to the probably completely unstable in terms of burn time
 min_time = 3

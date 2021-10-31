@@ -53,7 +53,7 @@ class MassObject(PresetObject):
 
                 total += mass_object.get_total_mass(exclude_objects)
                 # To prevent double counting masses, I will not count it if the reference has already been counted
-                exclude_objects.append(mass_object)
+                # exclude_objects.append(mass_object)
             
             return total
         
@@ -89,9 +89,8 @@ class MassObject(PresetObject):
             new_mass = initial_mass + amount
             scaling_fraction = new_mass / initial_mass
 
-            print(scaling_fraction)
             tuples = self.get_flattened_mass_objects(exclude_objects=exclude_objects)
-            print(tuples)
+
             for CG_from_tip, mass_object in tuples:
                 mass_object.mass *= scaling_fraction
         else:
@@ -169,18 +168,16 @@ class MassObject(PresetObject):
 
     def get_flattened_mass_objects(self, distance_from_original_front=0, exclude_objects=[]):
         if self in exclude_objects:
-            print("Excluding self")
             return []
 
         flattened = [(distance_from_original_front + self.front + self.center_of_gravity, self)]
-
         for mass_object in self.mass_objects:
             if mass_object in exclude_objects:
                 continue
 
             newly_flattened = mass_object.get_flattened_mass_objects(distance_from_original_front + self.front, exclude_objects)
             flattened.extend(newly_flattened)
-            exclude_objects.extend(newly_flattened)
+            # exclude_objects.extend(newly_flattened)
         
         return flattened
 

@@ -2,6 +2,7 @@
 # Because drag is not proportional to mass, it is minimized the more dry mass we have in the rocket (same concept as ballistic coefficient in bullets)
 # Loops over a predetermined set of mass changes to figure which ones give the best apogee
 # More than likely, less mass will be better. I just want to confirm it so we don't waste a ton of time on mass reduction studies
+# It is pretty clear that more mass is better. It is also pretty clear that something is going wrong, either in the simulation or in the rocket, when dry mass is less than 20. However, the best dry mass looks like it is about 30 kg
 
 
 import numpy as np
@@ -13,13 +14,15 @@ sys.path.append(".")
 from Simulations.DesignedRocket import get_sim
 
 
-# TODO: Changing the mass like this will affect stability slightly because it changes the moment of inertia. I need to understand stability better, because I don't know if we want a higher or lower moment
 
-
-min_change = -20
-max_change = 20
-iterations = 3
+min_change = -50
+max_change = 10
+iterations = 100
 mass_changes = np.linspace(min_change, max_change, iterations)
+
+apogees = []
+gees_off_rail = []
+velocities_off_rail = []
 
 for mass_change in mass_changes:
     sim = get_sim()
