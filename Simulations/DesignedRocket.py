@@ -11,7 +11,7 @@ from RocketParts.motor import Motor
 from RocketParts.massObject import MassObject
 from rocket import Rocket
 from RocketParts.parachute import ApogeeParachute, Parachute
-from logger import Feedback_Logger  # , Logger
+from logger import Feedback_Logger
 from simulation import Simulation
 from Visualization.FlightOpticalAnalysis import display_optical_analysis
 

@@ -52,7 +52,11 @@ def find_mass_flow_single_phase_incompressible(
     return ((2 * liquid_density * pressure_drop) /
             (1 - (orifice_area / upstream_cross_sectional_area) ** 2)) ** (1 / 2)
 
-# TODO: figure out which point this pressure is referring to
+
+def find_mass_flow_MR(pressure_drop, liquid_density, gas_density, total_area, coefficient_of_discharge=0.7, mixing_ratio=0.2552):
+    density = mixing_ratio * gas_density + (1 - mixing_ratio) * liquid_density
+
+    return total_area * coefficient_of_discharge * (2 * density * pressure_drop) ** (1/2)
 
 
 def find_mass_flow_homogenous_equilibrium(
