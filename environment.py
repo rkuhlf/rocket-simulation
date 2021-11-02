@@ -52,6 +52,7 @@ class Environment(PresetObject):
     @density_path.setter
     def density_path(self, p):
         self._density_path = p
+        self.load_density_data()
 
     def load_density_data(self):
         # https://www.digitaldutch.com/
