@@ -18,8 +18,12 @@ class Simulation(PresetObject):
     """
 
     def override_subobjects(self):
-        # Theoretically, you could have a simulation where you don't need to do this. However, it is so common that I will add a call in the base __init__ anyways
-        pass
+        """
+        Ensure that all of the subobjects the simulation references have the correct memory addresses in there
+        This should almost always be overriden
+        """
+        if self.logger is not None:
+            self.logger.simulation = self
 
     def __init__(self, **kwargs):
         """
@@ -104,6 +108,8 @@ class RocketSimulation(Simulation):
     """
 
     def override_subobjects(self):
+        super().override_subobjects()
+
         # This might be called by the environment setter before we have established the rocket
         if self.rocket is not None:
             self.rocket.apply_angular_forces = self.apply_angular_forces
@@ -168,6 +174,10 @@ class RocketSimulation(Simulation):
 
     @property
     def should_continue_simulating(self):
+        """
+        Return true if the rocket hasn't landed, false if it has.
+        Used in run_simulation
+        """
         return not self.rocket.landed
 
 
@@ -210,6 +220,8 @@ class MotorSimulation(Simulation):
     # TODO: finish implementing this
 
     def override_subobjects(self):
+        super().override_subobjects()
+        
         if self.motor.logger is not self.logger:
             self.motor.logger = self.logger
 

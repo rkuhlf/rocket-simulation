@@ -146,21 +146,22 @@ class Rocket(MassObject):
     @property
     def has_lifted(self):
         """Return whether the rocket was above ground in the previous or current frame"""
-        self.position[2] > 0 or self.p_position[2] > 0
+        return self.position[2] > 0 or self.p_position[2] > 0
 
     @property
     def ascending(self):
-        return self.position[2] > self.p_position[2]
+        return self.velocity[2] > 0
 
     @property
     def descending(self):
-        return self.position[2] < self.p_position[2]
+        return self.velocity[2] < 0
 
 
     def update_maxes(self):
         if self.position[2] < -100 and not self.has_lifted:
             raise Exception("Your rocket fell straight into the ground")
 
+        # If the current position is less than zero and the previous position was greater than zero, then the rocket has landed
         if self.position[2] < 0 and self.has_lifted:
             self.landed = True
 
