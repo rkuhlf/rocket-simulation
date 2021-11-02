@@ -104,8 +104,8 @@ class RocketLogger(Logger):
         self.to_record = ['position', 'velocity', 'acceleration', 'rotation', 'angular_velocity',
         'angular_acceleration']
         
-
-        super().__init__(rocket, **kwargs)
+        # You need to make sure the parent's override doesn't override the self values we have already established
+        super().__init__(rocket, **self.__dict__, **kwargs)
 
         self.printed_rail_stats = False
         self.printed_thrusted = False

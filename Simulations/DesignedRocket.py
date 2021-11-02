@@ -43,7 +43,7 @@ def get_sim():
 
     drogue_parachute = ApogeeParachute(radius=0.2)
     main_parachute = Parachute()
-    rocket = Rocket(radius = 0.2032 / 2,length=5.7912, environment=env, motor=motor, parachutes=[drogue_parachute, main_parachute])
+    rocket = Rocket(radius = 0.2032/2, length=5.7912, environment=env, motor=motor, parachutes=[drogue_parachute, main_parachute])
 
     mass_objects = [motor]
     mass_objects.extend(get_mass_objects())
