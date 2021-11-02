@@ -3,11 +3,6 @@
 # Uses a separate motor class for thrust, and an array of parachutes
 # Uses RASAero for looking up various aerodynamic qualities
 
-# here is my plan: 
-# Scale it up to the current rocket we are using in class
-# Add variable mass and center of gravity from custom things.
-
-
 # There are a few main areas that need improvement
 # There is no variable center of gravity. This is relatively easy to fix and will play a large role in stability
 # There is no variable center of pressure. This is much harder to fix. I can get a crappy solution from Rasaero, but I would really like to use CFD data
@@ -129,7 +124,6 @@ class Rocket(MassObject):
         self.update_maxes()
 
         # TODO: Figure out how parachute deployment mechanisms tend to work. Is it always as soon as it turns? How long does it take? Calculate the forces on the parachute chord
-
         if False: #self.environment.time > self.motor.get_burn_time():
             for parachute in self.parachutes:
                 if parachute.should_deploy(self):
@@ -240,7 +234,6 @@ class Rocket(MassObject):
         """Update the variables that hold last frame's rocket features"""
         # I am just going to start applying a normal force here because this is super annoying. Hopefully nobody is trying to do one second rocket flights.
         if self.environment.time < 1 and self.position[2] < 0:
-            # I think this is making it go through the floor
             self.position = np.array([0, 0, 0], dtype="float64")
             self.velocity = np.array([0, 0, 0], dtype="float64")
             self.acceleration = np.array([0, 0, 0], dtype="float64")
@@ -469,11 +462,6 @@ class Rocket(MassObject):
 
         self.log_data("AOA1", self.angle_of_attack)
 
-    # def calculate_moment_of_inertia(self):
-    # FIXME: Actually this sucks and is complicated because moment of inertia isn't a scalar quantity for a complex 3d shape. Double actually, I am not even rotating around the center of mass - this calculation rotates around the center of volume.
-    # Right now, it is an underestimate, because the masses are closer than they would actually be. Therefore, a usual stability margin will be more unstable than expected in the model
-    # use calculated value from Fusion 360/Other CAD, currently using random one for a cylinder
-    # self.moment_of_inertia = 1 / 12 * self.mass * self.length ** 2
 
     def calculate_coefficient_of_drag(self):
         for parachute in self.parachutes:
@@ -492,9 +480,7 @@ class Rocket(MassObject):
 
 
     def calculate_center_of_pressure(self):
-        # This should give one caliber of stability for the rocket in SimulateRocket.py, but it will probably break DesignedRocket.py
         if self.CP_data_type is DataType.CONSTANT:
-            # self.CP = 3.75 # meters
             pass
 
 

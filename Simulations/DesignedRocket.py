@@ -1,7 +1,6 @@
 # SIMULATION OF DESIGNED ROCKET
 # For our first math model review, we need a design for our rocket
 # I simulate it here
-# NOTE: for this to be realistic, you have to go into the rocket.py file and change the calculate_cp method to set self.CP = 3.75. Otherwise this is a demonstration in the perilous effects of overstability. FIXME: I don't know why I haven't written a way to set CP properly yet
 
 import sys
 sys.path.append(".")
@@ -18,8 +17,8 @@ from Visualization.FlightOpticalAnalysis import display_optical_analysis
 
 def get_mass_objects():
     # Everything in meters and kilograms designed around a rocket of length 19 feet or 5.7 meters
-    # You can't really fudge this because it is also necessary for moment of inertia
-    # Thickness estimated at 0.0875 inches
+    # You can't really fudge this too much because it is also necessary for moment of inertia
+
     nose_cone_tip = MassObject(center_of_gravity=0.005, mass=0.1)
     nose_cone = MassObject(center_of_gravity=0.699, mass=1.975)
     fiberglass_avionics_tube = MassObject(center_of_gravity=1.52, mass=2.596)
@@ -44,6 +43,7 @@ def get_sim():
     drogue_parachute = ApogeeParachute(radius=0.2)
     main_parachute = Parachute()
     rocket = Rocket(radius = 0.2032/2, length=5.7912, environment=env, motor=motor, parachutes=[drogue_parachute, main_parachute])
+    rocket.set_CP_constant(3.75) # meters
 
     mass_objects = [motor]
     mass_objects.extend(get_mass_objects())
