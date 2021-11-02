@@ -30,11 +30,11 @@ def regression_rate_HTPB_nitrous(mass_flux):
 
 #region DESIGN-ORIENTED FUNCTIONS
 
-def find_required_length(inner_diameter, outer_diameter, mass, density):
+def find_required_length(port_diameter, outer_diameter, mass, density):
     """Determine the required length of the grain given the amount that is needed and the diameters of the grain."""
-    inner_radius = inner_diameter / 2
+    port_radius = port_diameter / 2
     outer_radius = outer_diameter / 2
-    cross_sectional_area = np.pi * outer_radius ** 2 - np.pi * inner_radius ** 2
+    cross_sectional_area = np.pi * outer_radius ** 2 - np.pi * port_radius ** 2
     
     required_volume = mass / density
     
@@ -50,7 +50,7 @@ def determine_optimal_starting_diameter(outer_diameter, target_mass, density, ox
 
         Optimize for uses the start O/F if you choose 0, the midpoint if you choose 0.5, and the end if you choose 1
     """
-    # Loop through all of the possible inner diameters, starting as small as possible 
+    # Loop through all of the possible port diameters, starting as small as possible 
     
     # 500 kg/m^2-s = ox_flow / (pi * smallest_radius ** 2)
     # 500 * pi * r ^ 2 = ox_flow
@@ -60,13 +60,13 @@ def determine_optimal_starting_diameter(outer_diameter, target_mass, density, ox
     smallest_radius = (ox_flow / (np.pi * 500)) ** (1/2)
     
     sign_difference = 0
-    for initial_inner_radius in np.linspace(smallest_radius, outer_diameter / 2, iterations):
-        inner_radius = interpolate(optimize_for, 0, 1, initial_inner_radius, outer_diameter / 2)
+    for initial_port_radius in np.linspace(smallest_radius, outer_diameter / 2, iterations):
+        port_radius = interpolate(optimize_for, 0, 1, initial_port_radius, outer_diameter / 2)
 
-        port_area = np.pi * inner_radius ** 2
+        port_area = np.pi * port_radius ** 2
         # We want to have the correct amount of stuff there regardless of whether the regression rates match
-        length = find_required_length(inner_radius * 2, outer_diameter, target_mass, density)
-        burn_area = length * np.pi * 2 * inner_radius
+        length = find_required_length(port_radius * 2, outer_diameter, target_mass, density)
+        burn_area = length * np.pi * 2 * port_radius
 
         print(regression_func(ox_flow / port_area))
         
@@ -77,7 +77,7 @@ def determine_optimal_starting_diameter(outer_diameter, target_mass, density, ox
         new_sign = np.sign(current_OF - target_OF)
         if sign_difference != 0 and new_sign != sign_difference:
             # We moved from having an OF that is too small to an OF that is too large (or vice-versa)
-            return inner_radius * 2
+            return port_radius * 2
         
         sign_difference = new_sign
         
@@ -91,34 +91,51 @@ def determine_optimal_starting_diameter(outer_diameter, target_mass, density, ox
 
 class Grain(PresetObject):
     def __init__(self, **kwargs):
-        self.inner_radius = 0.05 # random
+        self.port_radius = 0.05 # random
         self.outer_radius = 0.5 # random
         # of the fuel
         self.mass_flow = 0
         self.density = 920 # kg / m^3
-        # This length is not really feasible
-        # To get the proper O/F we need a much higher oxidizer mass flow rate
         self.length = 0.4 # m
 
         self.verbose = False
+        # Should usually be overriden in MotorSimulation
+        self.stop_on_error = True
 
         super().overwrite_defaults(**kwargs)
 
         if self.verbose:
-            # Print the total mass of fuel that we have
-            print(self.fuel_mass)
+            print(f"Initialized fuel grain with {self.fuel_mass} kg of fuel. It has an {self.port_diameter} m port diameter and a {self.outer_diameter} m outer diameter.")
 
+    #region Ease of access properties
     @property
     def fuel_mass(self):
         return self.fuel_volume * self.density
 
     @property
     def fuel_volume(self):
-        return cylindrical_volume(self.length, self.outer_radius) - cylindrical_volume(self.length, self.inner_radius)
+        return cylindrical_volume(self.length, self.outer_radius) - cylindrical_volume(self.length, self.port_radius)
+
+    @property
+    def port_diameter(self):
+        return self.port_radius * 2
+
+    @port_diameter.setter
+    def port_diameter(self, d):
+        self.port_radius = d / 2
+
+    @property
+    def outer_diameter(self):
+        return self.outer_radius * 2
+
+    @outer_diameter.setter
+    def outer_diameter(self, d):
+        self.outer_radius = d / 2
+
+    #endregion
 
     def get_outer_cross_sectional_area(self):
         return np.pi * self.outer_radius ** 2
-
 
     def get_regression_rate(self, mass_flux):
         # This is the famous regression rate equation that is so hard to get right. I think this is an equation for Paraffin-Nitrous
@@ -130,23 +147,23 @@ class Grain(PresetObject):
         return self.mass_flow / self.density
 
     def update_regression(self, ox_flow, time_increment):
-        port_area = np.pi * self.inner_radius ** 2
+        port_area = np.pi * self.port_radius ** 2
         ox_flux = ox_flow / port_area
         # Give a warning if ox flux is too big: might blow fire out, might cause combustion instability
         if ox_flux > 700: # assumes kg/m^2
             raise Warning("McLeod told us not to go past 500 kg/m^2-s. He warned of blowing the flame out, but I have also seen some combustion instability stuff.")
 
-        if self.inner_radius > self.outer_radius:
+        if self.port_radius > self.outer_radius:
             raise Warning("You have burned through the entire fuel grain")
             return
 
         # Right now this is space-averaged. TODO: It might be kind of fun to do a not space-averaged thing, just simulating about 25 separate points along the grain
-        burn_area = 2 * np.pi * self.inner_radius * self.length
+        burn_area = 2 * np.pi * self.port_radius * self.length
         regression_rate = self.get_regression_rate(ox_flux)
         self.mass_flow = regression_rate * burn_area * self.density
 
         regressed_distance = regression_rate * time_increment
-        self.inner_radius += regressed_distance
+        self.port_radius += regressed_distance
 
 
 if __name__ == "__main__":

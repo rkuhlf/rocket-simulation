@@ -8,6 +8,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+from simulation import MotorSimulation
+
 from RocketParts.motor import CustomMotor
 from RocketParts.Motor.oxTank import OxTank
 from RocketParts.Motor.injector import Injector
@@ -30,6 +32,8 @@ if __name__ == "__main__":
 
     motor = CustomMotor(ox_tank=ox, injector=injector, combustion_chamber=chamber, nozzle=nozzle, environment=env)
 
+    sim = MotorSimulation()
+
     time = 0
     times = []
     ox_pressures = []
@@ -42,7 +46,6 @@ if __name__ == "__main__":
     c_stars = []
     specific_impulses = []
 
-    # TODO: refactor this into a separate simulation class
     while True:
         motor.simulate_step()
         times.append(time)
@@ -58,13 +61,7 @@ if __name__ == "__main__":
         c_stars.append(motor.combustion_chamber.cstar)
         specific_impulses.append(motor.thrust / (motor.combustion_chamber.mass_flow_out * 9.81))
 
-        if ox.pressure < chamber.pressure:
-            print("Stopping Sim because pressure difference flipped.")
-            break
-
-        if ox.ox_mass <= 0:
-            print("Stopping sim because ox drained completely")
-            break
+        
 
 
     total_impulse = np.sum(thrusts) * env.time_increment

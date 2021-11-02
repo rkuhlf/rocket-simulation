@@ -30,7 +30,7 @@ class Simulation(PresetObject):
         self._logger = Logger(self)
         self.max_frames = -1
         self.frames = 0
-        self.stopping_errors = True
+        self.stop_on_error = True
 
         super().overwrite_defaults(**kwargs)
 
@@ -82,16 +82,16 @@ class Simulation(PresetObject):
 
     def run_simulation(self):
         try:
-            if self.stopping_errors:
+            if self.stop_on_error:
+                while self.should_continue_simulating and self.frames_remaining:
+                    self.simulate_step()
+            else:
                 try:
                     while self.should_continue_simulating and self.frames_remaining:
                         self.simulate_step()
                 except (Exception) as e:
                     print(e)
-
-            else:
-                while self.should_continue_simulating and self.frames_remaining:
-                    self.simulate_step()
+                
         finally:
             self.end()
 
@@ -205,16 +205,20 @@ class RocketSimulation(Simulation):
 
 class MotorSimulation(Simulation):
     """
-    A class designed to piece together the components of a frame-by-frame motor simulation
+    A class designed to piece together the components of a frame-by-frame custom motor simulation.
+    It will not work with a pre-designed thrust curve, but I don't know why you would bother simulating that
+    Only the motor argument is required, but it should already contain references to the other objects (ox tank, injector, chamber, and nozzle)
     """
-    # TODO: finish implementing this
 
     def override_subobjects(self):
-        if self.motor.logger is not self.logger:
-            self.motor.logger = self.logger
+        if self.motor is not None:
+            if self.motor.logger is not self.logger:
+                self.motor.logger = self.logger
 
-        if self.motor.environment is not self.environment:
-            self.motor.environment = self.environment
+            if self.motor.environment is not self.environment:
+                self.motor.environment = self.environment
+
+            self.grain.stop_on_error = self.stop
 
     def __init__(self, **kwargs):
         self._environment = Environment()
@@ -248,9 +252,32 @@ class MotorSimulation(Simulation):
     def simulate_step(self):
         super().simulate_step()
 
-    # @property
-    # def should_continue_simulating(self):
+    @property
+    def should_continue_simulating(self):
+        return self.tank.pressure < self.chamber.pressure or self.tank.ox_mass <= 0 or self.grain.inn
+        
+    #region Shortcuts for easier access
+    @property
+    def tank(self):
+        return self.motor.ox_tank
 
+    @property
+    def injector(self):
+        return self.motor.injector
+
+    @property
+    def chamber(self):
+        return self.motor.combustion_chamber
+
+    @property
+    def grain(self):
+        return self.motor.combustion_chamber.fuel_grain
+
+    @property
+    def nozzle(self):
+        return self.nozzle
+
+    #endregion
 
     #region Helpers to evaluate the burn
 

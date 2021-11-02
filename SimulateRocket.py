@@ -10,29 +10,22 @@ from rocket import Rocket
 from RocketParts.parachute import ApogeeParachute, Parachute
 from logger import RocketLogger
 from simulation import RocketSimulation
-# from Simulations.verifiedSimulation import VerifiedRocketSimulation
 
 
 def get_simulation():
-    # additional function because it turns out I need access to this in other files
-    env = Environment({"time_increment": 0.01, "apply_wind": True})
+    env = Environment(time_increment=0.01,apply_wind=True)
     motor = Motor()
 
-    drogue_parachute = ApogeeParachute({"radius": 0.2})
+    drogue_parachute = ApogeeParachute(radius=0.2)
     main_parachute = Parachute()
     rocket = Rocket(environment=env, motor=motor, parachutes=[drogue_parachute, main_parachute])
+    rocket.set_CP_constant(5) # meters
     
-    logger = RocketLogger(
-        rocket,
-        ['position', 'velocity', 'acceleration', 'rotation', 'angular_velocity',
-        'angular_acceleration'], target="output.csv")
+    logger = RocketLogger(rocket)
 
     logger.splitting_arrays = True
 
-    sim = RocketSimulation(
-        {"apply_angular_forces": True, "max_frames": -1,
-        "stopping_errors": False},
-        env, rocket, logger)
+    sim = RocketSimulation(apply_angular_forces=True, max_frames=-1, stopping_errors=False, environment=env, rocket=rocket, logger=logger)
 
     motor.simulation = sim
     

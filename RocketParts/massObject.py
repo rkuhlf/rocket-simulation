@@ -42,7 +42,7 @@ class MassObject(PresetObject):
         return self.get_total_mass()       
 
     def get_total_mass(self, exclude_objects=[]):
-        if self.mass_data_type == DataType.DEFAULT:
+        if self.mass_data_type is DataType.DEFAULT:
             if self in exclude_objects:
                 return 0
             

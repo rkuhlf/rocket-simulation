@@ -19,6 +19,7 @@ from math import isnan
 from Helpers.general import interpolate, project, combine
 from Helpers.general import angles_from_vector_3d, vector_from_angle, angle_between, magnitude
 from RocketParts.massObject import MassObject
+from Helpers.data import DataType
 from Data.Input.models import get_coefficient_of_drag, get_coefficient_of_lift
 
 # Import some stuff for defaults
@@ -54,6 +55,8 @@ class Rocket(MassObject):
         self.mass = 0  # kg
         # Excluding the motor and other sub mass objects
         self.center_of_gravity = 4 # m
+        self.CP_data_type = DataType.CONSTANT
+        self.CP = 5
 
         self.radius = 0.11 # meters
         self.length = 7 # meters
@@ -489,12 +492,10 @@ class Rocket(MassObject):
 
     def calculate_center_of_pressure(self):
         # This should give one caliber of stability for the rocket in SimulateRocket.py, but it will probably break DesignedRocket.py
-        self.CP = 3.75 # meters
-        # cutout = cutout_method()
-        # barrowman = barrowman_equation()
+        if self.CP_data_type is DataType.CONSTANT:
+            # self.CP = 3.75 # meters
+            pass
 
-        # self.center_of_pressure = extended_barrowman_equation(
-        #     self.get_angle_of_attack(), barrowman, cutout)
 
     def calculate_cp_cg_dist(self):
         # Note that this is only used for dynamic stability calculations, nothing during the simulations
@@ -513,6 +514,13 @@ class Rocket(MassObject):
     # endregion
     # endregion
 
+
+    # region DATA INPUTS
+    def set_CP_constant(self, value):
+        self.CP_data_type = DataType.CONSTANT
+        self.CP = value
+
+    # endregion
 
     # TODO: Add tis back in better
     # def get_drag_torque(self, drag_coefficient):
