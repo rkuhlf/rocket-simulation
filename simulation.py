@@ -14,7 +14,7 @@ class Simulation(PresetObject):
     """
     Provide a base class for all frame-by-frame iterative simulations
     They always provide integration with a logger
-    I don't really expect anyone to instantiate this class, you should use RocketSimulation or MotorSimulation
+    I don't really expect anyone to instantiate this class, you should use RocketSimulation or MotorSimulation.
     """
 
     def override_subobjects(self):
@@ -22,6 +22,10 @@ class Simulation(PresetObject):
         pass
 
     def __init__(self, **kwargs):
+        """
+        You could potentially pass in a logger, but a default one will be created for you
+        Other variables are max_frames and stopping_errors
+        """
         # FIXME: this one is not going to work with keyword arguments
         self._logger = Logger(self)
         self.max_frames = -1
@@ -100,13 +104,15 @@ class RocketSimulation(Simulation):
     """
 
     def override_subobjects(self):
-        self.rocket.apply_angular_forces = self.apply_angular_forces
+        # This might be called by the environment setter before we have established the rocket
+        if self.rocket is not None:
+            self.rocket.apply_angular_forces = self.apply_angular_forces
 
-        if self.rocket.logger is not self.logger:
-            self.rocket.logger = self.logger
+            if self.rocket.logger is not self.logger:
+                self.rocket.logger = self.logger
 
-        if self.rocket.environment is not self.environment:
-            self.rocket.environment = self.environment
+            if self.rocket.environment is not self.environment:
+                self.rocket.environment = self.environment
 
     def __init__(self, **kwargs):
         self._environment = Environment()
@@ -114,7 +120,9 @@ class RocketSimulation(Simulation):
 
         self.apply_angular_forces = True
 
+        # This should already override the defaults in here, but I have an additional one because it wasn't working
         super().__init__(**kwargs)
+        # super().overwrite_defaults(**kwargs)
 
         self.rail_gees = None
         self.rail_velocity = None
@@ -209,8 +217,8 @@ class MotorSimulation(Simulation):
             self.motor.environment = self.environment
 
     def __init__(self, **kwargs):
-        self._environment = environment
-        self.motor = motor
+        self._environment = Environment()
+        self.motor = None
 
         super().__init__(**kwargs)
 

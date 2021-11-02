@@ -49,6 +49,10 @@ class Environment(PresetObject):
         self.wind = Wind(self.time_increment)
         self.wind.randomize_direction()
 
+    @property
+    def density_path(self):
+        return self._density_path
+
     @density_path.setter
     def density_path(self, p):
         self._density_path = p

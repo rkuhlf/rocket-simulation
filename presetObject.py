@@ -5,28 +5,16 @@
 import copy
 import pickle
 
-
 class PresetObject:
     def __init__(self, **kwargs):
         self.overwrite_defaults(**kwargs)
 
 
     def overwrite_defaults(self, **kwargs):
-        # extract config to self
-        # I think this should work
-        # print(kwargs)
+        # extract kwargs to self
         for key, value in kwargs.items():
-            print(type(self))
-            print(type(self).__dict__)
-            print(self.__dict__)
-            print(type(self).__dict__[key])
-            
-            try:
-                type(self).__dict__[key].__set__(self, value)
-
-                print("The setter actually worked")
-            except:
-                self.__dict__[key] = value
+            # Automatically calls the setter if it is defined            
+            setattr(self, key, value)
         
         
         # self.__dict__.update(**kwargs)
@@ -65,3 +53,5 @@ class PresetObject:
 
     def copy(self):
         return copy.deepcopy(self)
+
+

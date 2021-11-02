@@ -113,6 +113,16 @@ class RocketLogger(Logger):
 
         self.print("Logger is prepared to launch rocket")
 
+    # Make it so that you can access it via either the logging_object or rocket property
+    # TODO: do the same for Motor
+    @property
+    def rocket(self):
+        return self.logging_object
+
+    @rocket.setter
+    def rocket(self, r):
+        self.logging_object = r
+
     def handle_frame(self):
         super().handle_frame()
 
