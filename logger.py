@@ -25,6 +25,9 @@ class Logger(PresetObject):
         self.to_record = []
         self.target = "output.csv"
 
+        # This isn't necessary for every type of logger, but it is overriden in the base simulation class
+        self.simulation = None
+
         super().overwrite_defaults(**kwargs)
 
         self.rows = []
@@ -136,7 +139,7 @@ class RocketLogger(Logger):
                 self.rocket.environment.time, self.rocket.position[2]))
             self.turned = True
             self.print('The highest velocity during ascent was %.1f m/s, and the highest mach number was %.2f' % (
-                self.rocket.simulation.max_velocity, self.rocket.simulation.max_mach))
+                self.simulation.max_velocity, self.simulation.max_mach))
 
 
         if not self.printed_thrusted and self.rocket.motor.finished_thrusting:

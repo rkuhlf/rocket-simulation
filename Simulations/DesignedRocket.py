@@ -55,10 +55,6 @@ def get_sim():
 
 
     sim = RocketSimulation(apply_angular_forces=True, max_frames=-1, environment=env, rocket=rocket, logger=logger)
-
-    print(sim.logger)
-    print(logger)
-
     motor.simulation = sim
 
     return sim
