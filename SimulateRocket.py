@@ -8,9 +8,9 @@ from environment import Environment
 from RocketParts.motor import Motor
 from rocket import Rocket
 from RocketParts.parachute import ApogeeParachute, Parachute
-from logger import Feedback_Logger  # , Logger
-from simulation import Simulation
-from Simulations.verifiedSimulation import VerifiedSimulation
+from logger import RocketLogger
+from simulation import RocketSimulation
+# from Simulations.verifiedSimulation import VerifiedRocketSimulation
 
 
 def get_simulation():
@@ -22,14 +22,14 @@ def get_simulation():
     main_parachute = Parachute()
     rocket = Rocket(environment=env, motor=motor, parachutes=[drogue_parachute, main_parachute])
     
-    logger = Feedback_Logger(
+    logger = RocketLogger(
         rocket,
         ['position', 'velocity', 'acceleration', 'rotation', 'angular_velocity',
         'angular_acceleration'], target="output.csv")
 
     logger.splitting_arrays = True
 
-    sim = Simulation(
+    sim = RocketSimulation(
         {"apply_angular_forces": True, "max_frames": -1,
         "stopping_errors": False},
         env, rocket, logger)

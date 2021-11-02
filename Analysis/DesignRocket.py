@@ -18,10 +18,11 @@ sys.path.append(".")
 from Helpers.design import get_propellant_mass, get_ox_mass, get_fuel_mass
 # from Helpers.general import get_radius
 
+from RocketParts.Motor.nitrousProperties import get_liquid_nitrous_density, get_gaseous_nitrous_density, get_nitrous_vapor_pressure
+
 from RocketParts.Motor.grain import determine_optimal_starting_diameter, regression_rate_HTPB_nitrous, find_required_length as find_required_length_fuel
-from RocketParts.Motor.nitrousProperties import get_liquid_nitrous_density, get_gaseous_nitrous_density
 from RocketParts.Motor.oxTank import find_required_length as find_required_length_oxidizer
-from RocketParts.Motor.injector import determine_required_thickness, determine_orifice_count_MR
+from RocketParts.Motor.injector import determine_required_thickness, determine_orifice_count_MR, find_mass_flow_MR, get_cross_sectional_area
 from RocketParts.Motor.nozzle import find_nozzle_length, find_equilibrium_throat_area, find_equilibrium_throat_diameter, determine_expansion_ratio
 
 
@@ -30,7 +31,7 @@ total_mass = 120 # kg
 outer_diameter = 0.2032 # meters
 inner_diameter = outer_diameter - 0.0127 # meters
 
-liquid_burn_time = 22 # seconds
+liquid_burn_time = 21 # seconds
 
 combustion_chamber_pressure = 25 * 10 ** 5
 # Determined in the OptimizeOFAtPressure.py script
@@ -46,6 +47,7 @@ fuel_density = 920 # kg / m^3
 exterior_pressure = 75000 # Pa
 
 
+ox_tank_initial_temperature = 293 # Kelvin
 # Calculated from OxTankCG.py
 ox_tank_average_temperature = 283 # Kelvin
 
@@ -59,7 +61,7 @@ fuel_mass = get_fuel_mass(propellant_mass, OF)
 
 # Looks like we always end up with about 5 kg of oxidizer left over as gas, that means we need to burn through 5 less than that to get the right burn time for the liquid; Scale it up to include fuel proportional to OF
 nozzle_mass_flow = (ox_mass - 5) * (1 + 1 / OF) / liquid_burn_time
-
+print(nozzle_mass_flow)
 
 # TODO: double check this gamma value after I finish optimizing the other stuff; it is very important to get it right
 optimized_area_ratio = determine_expansion_ratio(combustion_chamber_pressure, exterior_pressure, 1.22)
@@ -75,9 +77,11 @@ print(f"The rocket's throat diameter should be {throat_diameter} meters and the 
 
 
 ox_flow = nozzle_mass_flow * OF / (OF + 1)
+print(ox_flow)
 
-# 4030567.1520320475 Pa is taken from OxTankCG.py
-unrounded_orifices = determine_orifice_count_MR(ox_flow, (4030567.1520320475 - combustion_chamber_pressure), get_liquid_nitrous_density(ox_tank_average_temperature), get_gaseous_nitrous_density(ox_tank_average_temperature), injector_diameter, injector_CD)
+# 4030567 Pa is taken from OxTankCG.py
+# Side note, injector design is extremely dependent on ox tank pressure
+unrounded_orifices = determine_orifice_count_MR(ox_flow, (4030567 - combustion_chamber_pressure), get_liquid_nitrous_density(ox_tank_average_temperature), get_gaseous_nitrous_density(ox_tank_average_temperature), injector_diameter, injector_CD)
 orifices = round(unrounded_orifices)
 print(f"To be fully optimized, you should really have {unrounded_orifices} orifices. Unfortunately, the closest you can get is {orifices}")
 
@@ -85,13 +89,17 @@ print(f"To be fully optimized, you should really have {unrounded_orifices} orifi
 new_nozzle_flow = nozzle_mass_flow * orifices / unrounded_orifices
 new_burn_time = liquid_burn_time * unrounded_orifices / orifices
 
-print(f"This gives you a flow rate of {new_nozzle_flow} kg/s and a total burn time of {new_burn_time} seconds to optimize your fuel grain with")
+print(f"This gives you a nozzle flow rate of {new_nozzle_flow} kg/s and a total burn time of {new_burn_time} seconds to optimize your fuel grain with")
 
 fuel_flow = new_nozzle_flow / (OF + 1)
 ox_flow = new_nozzle_flow * OF / (OF + 1)
 
+print(f"Your target average fuel flow is now {fuel_flow} kg/s, and you target ox flow is {ox_flow} kg/s")
 
-# TODO: Optimizations for fuel grain
+# Assumes the combustion chamber pressurizes instantly
+print(f"In addition, you now have an initial ox flow rate of {find_mass_flow_MR(get_nitrous_vapor_pressure(ox_tank_initial_temperature) * 10**5 - combustion_chamber_pressure, get_liquid_nitrous_density(ox_tank_initial_temperature), get_gaseous_nitrous_density(ox_tank_initial_temperature), get_cross_sectional_area(orifices, injector_diameter), coefficient_of_discharge=0.68)}")
+
+
 port_diameter = determine_optimal_starting_diameter(inner_diameter, fuel_mass, fuel_density, ox_flow, regression_rate_HTPB_nitrous, OF)
 grain_length = find_required_length_fuel(port_diameter, inner_diameter, fuel_mass, fuel_density)
 

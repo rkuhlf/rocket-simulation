@@ -17,9 +17,8 @@ for rot in rotations:
     parachute = Parachute()
     rocket = Rocket({'rotation': rot.copy()}, environment=env,
                     motor=motor, parachute=parachute)
-    # for some reason this breaks the logger
 
-    logger = Feedback_Logger(
+    logger = RocketLogger(
         rocket,
         ['position', 'velocity', 'acceleration', 'rotation',
          'angular_velocity', 'angular_acceleration'],
@@ -27,7 +26,7 @@ for rot in rotations:
 
     logger.splitting_arrays = True
 
-    sim = Simulation({}, env, rocket, logger)
+    sim = RocketSimulation({}, env, rocket, logger)
     sim.run_simulation()
 """
 
@@ -38,13 +37,13 @@ motor = Motor()
 rocket = Rocket(environment=environment, motor=motor)
 
 
-logger = Feedback_Logger(
+logger = RocketLogger(
     rocket,
     ['position', 'velocity', 'acceleration', 'rotation',
      'angular_velocity', 'angular_acceleration'])
 rocket.logger = logger
 
-sim = Simulation(environment, rocket, logger)
+sim = RocketSimulation(environment, rocket, logger)
 
 sim.run_simulation()
 """
@@ -58,7 +57,7 @@ rocket.load_preset("TannerModel")
 
 logger = Logger(rocket, ['position', 'rotation'])
 
-sim = Simulation(rocket.environment, rocket, logger)
+sim = RocketSimulation(rocket.environment, rocket, logger)
 
 sim.run_simulation()
 """

@@ -1,17 +1,19 @@
+# DEFINE A PRESET OBJECT
+# Parent of all objects that take override self with kwargs
+# Each should be saveable individually and as a whole
+
 import copy
 import pickle
 
-# Parent of all objects that take a config
-# TODO: Fix naming convention everywhere
 
 class PresetObject:
-    def __init__(self, config={}):
-        overwrite_defaults({}, config)
+    def __init__(self, **kwargs):
+        self.overwrite_defaults(**kwargs)
 
 
-    def overwrite_defaults(self, config):
+    def overwrite_defaults(self, **kwargs):
         # extract config to self
-        self.__dict__.update(config)
+        self.__dict__.update(**kwargs)
 
         self.update_saved_state()
 
@@ -40,7 +42,7 @@ class PresetObject:
         with open('Data/Input/Presets/' + name + '.pkl', 'rb') as f:
             config = pickle.load(f)
 
-        self.__init__(config)
+        self.__init__(**config)
 
     def reset(self):
         self.overwrite_defaults(self.saved_state)

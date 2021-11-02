@@ -8,8 +8,8 @@ from Helpers.general import angles_from_vector_3d
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy import array
-from simulation import Simulation
-from logger import Feedback_Logger  # , Logger
+from simulation import RocketSimulation
+from logger import RocketLogger
 from RocketParts.parachute import ApogeeParachute
 from rocket import Rocket
 from RocketParts.motor import Motor
@@ -41,7 +41,7 @@ for time_delta in time_deltas:
     motor = Motor()
     rocket = Rocket(environment=env, motor=motor, parachutes=[])
 
-    sim = Simulation(
+    sim = RocketSimulation(
         {"apply_angular_forces": True, "max_frames": -1,
          "stopping_errors": False},
         env, rocket)

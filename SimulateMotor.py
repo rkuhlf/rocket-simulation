@@ -20,20 +20,13 @@ from environment import Environment
 
 if __name__ == "__main__":
     ox = OxTank()
-    grain = Grain({
-        "debug": True
-
-    })
+    grain = Grain(verbose=True)
     chamber = CombustionChamber(fuel_grain=grain)
     injector = Injector(ox_tank=ox, combustion_chamber=chamber)
     # Stuttgart optimized at 30 bar, but that gives me a totally funny shape because the pressure never reaches it
     # 0.08 gives me a reasonable thrust profile for the pressure I am workin at
-    nozzle = Nozzle({
-        "throat_diameter": 0.08 # meters
-    }, fuel_grain=grain)
-    env = Environment({
-        "time_increment": 0.25
-    })
+    nozzle = Nozzle(throat_diameter=0.08, fuel_grain=grain) # meters
+    env = Environment(time_increment=0.25)
 
     motor = CustomMotor(ox_tank=ox, injector=injector, combustion_chamber=chamber, nozzle=nozzle, environment=env)
 
@@ -56,7 +49,7 @@ if __name__ == "__main__":
         time += env.time_increment
 
         combustion_pressures.append(motor.combustion_chamber.pressure)
-        ox_pressures.append(ox.get_pressure())
+        ox_pressures.append(ox.pressure)
         thrusts.append(motor.thrust)
         chamber_temperatures.append(motor.combustion_chamber.temperature)
         ox_temperatures.append(ox.temperature)
@@ -65,7 +58,7 @@ if __name__ == "__main__":
         c_stars.append(motor.combustion_chamber.cstar)
         specific_impulses.append(motor.thrust / (motor.combustion_chamber.mass_flow_out * 9.81))
 
-        if ox.get_pressure() < chamber.pressure:
+        if ox.pressure < chamber.pressure:
             print("Stopping Sim because pressure difference flipped.")
             break
 

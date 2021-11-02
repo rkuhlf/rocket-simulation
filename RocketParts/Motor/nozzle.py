@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import sys
 sys.path.append(".")
 
-from preset_object import PresetObject
+from presetObject import PresetObject
 from Helpers.general import linear_intersection, interpolate, interpolate_point, transpose_tuple, get_radius
 
 
@@ -270,7 +270,7 @@ class Nozzle(PresetObject):
     Maybe in the future it will also be the parent class for a simpler nozzle as well.
     """
 
-    def __init__(self, config={}, fuel_grain=None):
+    def __init__(self, **kwargs):
         self.throat_diameter = 0.09 # 0.03048 # meters
         self.area_ratio = 4
         self.throat_temperature = 800 # Kelvin
@@ -280,7 +280,7 @@ class Nozzle(PresetObject):
 
         self.overexpanded = False
 
-        super().overwrite_defaults(config)
+        super().overwrite_defaults(**kwargs)
 
         self.throat_area = self.get_throat_area()
 

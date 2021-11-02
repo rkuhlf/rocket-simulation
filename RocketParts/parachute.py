@@ -11,8 +11,8 @@ class Parachute(MassObject):
 
         self.area = pi * self.radius ** 2
 
-    def __init__(self, config={}):
-        super().__init__(config={})
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.radius = 1  # meters, I'm just making it up
         self.drag_coefficient = 1.0
         self.mass = 0.01  # kg
@@ -22,7 +22,7 @@ class Parachute(MassObject):
 
         self.deployed = False
 
-        super().overwrite_defaults(config)
+        super().overwrite_defaults(**kwargs)
 
         self.calculate_area()
 

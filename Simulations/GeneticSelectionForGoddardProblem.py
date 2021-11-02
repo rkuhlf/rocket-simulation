@@ -2,8 +2,8 @@
 # Repeating simulations multiple times, determine which thrust profile optimizes apogee with a given total impulse and no limits on thrust shape.
 # The file uses an evolution-based implementation of a Monte Carlo algorithm, in which many rockets are generated, simulated, and then either saved, mutated, or randomized
 # By the end, the best shape for thrust should be clear.
-# Side note: the solution to this problem is not very important for hybrid rockets (a short explanation that I wrote is available at TODO: write this). Nevertheless, I think it is an interesting application of a python sim.
-# There is a slightly more relevant simulation under GeneticSimulationForBurnTime.py, which just scales the thrust profile linearly
+# Side note: the solution to this problem is not very important for hybrid rockets (a short explanation that I wrote is available at TODO: write this; should be same as variable O/F). Nevertheless, I think it is an interesting application of a python sim.
+# There is a slightly more relevant simulation under OptimizeBurnTime.py, which just scales the thrust profile linearly
 
 import numpy as np
 import pandas as pd
@@ -16,11 +16,11 @@ import sys
 sys.path.append(".")
 
 from environment import Environment
-from simulation import Simulation
+from simulation import RocketSimulation
 from rocket import Rocket
 from RocketParts.motor import Motor
 from RocketParts.parachute import ApogeeParachute, Parachute
-from logger import Feedback_Logger
+from logger import RocketLogger
 
 
 def create_random_motor(target_total_impulse, point_count=10):
@@ -125,22 +125,12 @@ def mutated_simulation(sim):
 
 
 if __name__ == "__main__":
-    '''
-    m = create_random_motor(2400)
-    print(m.get_total_impulse())
 
-    d = m.thrust_data
+    base_env = Environment(time_increment=0.1, apply_wind=False)
 
-    plt.plot(d["time"], d["thrust"])
-    plt.show()
-    '''
+    num_rockets = 2
 
-
-    base_env = Environment({"time_increment": 0.1, "apply_wind": False})
-
-    num_rockets = 100
-
-    num_iterations = 10
+    num_iterations = 1
     sims = []
     fits = []
     average_fits = []
@@ -148,14 +138,7 @@ if __name__ == "__main__":
 
     for i in range(num_rockets):
         new_rocket = create_random_rocket()
-        logger = Feedback_Logger(
-            new_rocket,
-            ['position', 'velocity', 'acceleration'], target="GoddardSim" + str(i) + ".csv")
-
-        logger.splitting_arrays = True
-        sims.append(Simulation({}, deepcopy(base_env), new_rocket))#, logger=logger))
-
-    # print("Initialized Rockets: ", sims)
+        sims.append(RocketSimulation(environment=deepcopy(base_env), rocket=new_rocket))
 
 
     for iteration in range(num_iterations):
@@ -256,7 +239,7 @@ if __name__ == "__main__":
             new_rocket = create_random_rocket()
 
             new_sims.append(
-                Simulation(
+                RocketSimulation(
                     {},
                     deepcopy(base_env),
                     new_rocket))

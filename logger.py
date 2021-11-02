@@ -4,11 +4,13 @@
 
 import numpy as np
 import pandas as pd
+from presetObject import PresetObject
+from copy import deepcopy
 
 # TODO: import the magnitude method from helpers instead of np.linalg.norm
 
 
-class Logger:
+class Logger(PresetObject):
     """
         Logs only the data.
         Should be hooked into the Simulation object, but a reference also has to be set in the Rocket object.
@@ -16,14 +18,17 @@ class Logger:
         Stores an array of objects, since I think that is slightly better than appending to a dataframe.
     """
 
-    def __init__(self, rocket, to_record, target="output.csv"):
-        self.rows = []
+    def __init__(self, logging_object, **kwargs):
         # Use the actual rocket object to determine the data
-        self.rocket = rocket
+        self.logging_object = logging_object
         self.splitting_arrays = False
-        self.to_record = to_record
+        self.to_record = []
+        self.target = "output.csv"
+
+        super().overwrite_defaults(**kwargs)
+
+        self.rows = []
         self.current_row = {}
-        self.target = target
 
     def copy(self):
         # Hopefully this is being called from the simulation and the rocket I am about to make gets overridden (This comment exists from a time when I was working on the Goddard Problem Optimization)
@@ -74,26 +79,39 @@ class Logger:
 
         df.to_csv(self.full_path)
 
+        return df
+
     def reset(self):
         """
             Reinitialize the Logger object
         """
-        self.__init__(self.rocket, self.to_record)
+        self.__init__(self.logging_object, self.to_record)
 
 
-class Feedback_Logger(Logger):
+class RocketLogger(Logger):
     """
         Logs the progress of the rocket simulation along with some print statements.
     """
 
-    def __init__(self, rocket, to_record, target="output.csv"):
-        print("Logger is prepared to launch rocket")
-        self.p_turned = False
-        self.p_thrusted = False
-        self.should_print_top_speed = True
-        self.printed_rail_stats = False
+    def print(self, statement):
+        if self.verbose:
+            print(statement)
 
-        super().__init__(rocket, to_record, target)
+    def __init__(self, rocket, **kwargs):
+        self.verbose = True
+
+        # We have some slightly different defaults in this child class
+        self.to_record = ['position', 'velocity', 'acceleration', 'rotation', 'angular_velocity',
+        'angular_acceleration']
+        
+
+        super().__init__(rocket, **kwargs)
+
+        self.printed_rail_stats = False
+        self.printed_thrusted = False
+        self.turned = False
+
+        self.print("Logger is prepared to launch rocket")
 
     def handle_frame(self):
         super().handle_frame()
@@ -101,39 +119,28 @@ class Feedback_Logger(Logger):
         if not self.printed_rail_stats and self.rocket.position[2] > self.rocket.environment.rail_length:
             self.printed_rail_stats = True
 
-            print(f"Off the rail, the rocket has {self.rocket.gees} gees")
+            self.print(f"Off the rail, the rocket has {self.rocket.gees} gees")
 
-        if not self.p_turned and self.rocket.turned:
-            print('Reached the turning point at %.3s seconds with a height of %.5s meters' % (
+        if self.rocket.descending and not self.turned:
+            self.print('Reached the turning point at %.3s seconds with a height of %.5s meters' % (
                 self.rocket.environment.time, self.rocket.position[2]))
-            self.p_turned = True
-            self.should_print_top_speed
-            self.apogee = self.rocket.position[2]
-
-        # TODO: I should probably print the maximum Mach and Max Q as well
-        if self.should_print_top_speed:
-            # If the acceleration is going against the velocity, it is decelerating
-            if np.sign(self.rocket.velocity[2]) != np.sign(self.rocket.acceleration[2]):
-                print("Top speed was", np.linalg.norm(
-                    self.rocket.velocity), " at Mach", self.rocket.mach)
-
-                self.should_print_top_speed = False
+            self.turned = True
+            self.print('The highest velocity during ascent was %.1f m/s, and the highest mach number was %.2f' % (
+                self.rocket.simulation.max_velocity, self.rocket.simulation.max_mach))
 
 
-        if not self.p_thrusted and self.rocket.motor.finished_thrusting:
-            print('Finished thrusting after %.3s seconds' %
-                  self.rocket.environment.time)
-            self.p_thrusted = True
+        if not self.printed_thrusted and self.rocket.motor.finished_thrusting:
+            self.print('Finished thrusting after %.3s seconds' % self.rocket.environment.time)
+            self.printed_thrusted = True
 
-        # If the position off of the base altitude is less than or equal to zero, we hit the ground
         if self.rocket.landed:
-            print(
+            self.print(
                 "Rocket landed with a speed of %.3s m/s after %.4s seconds of flight time" %
                 (np.linalg.norm(self.rocket.velocity),
                  self.rocket.environment.time))
 
 
     def save_to_csv(self):
-        super().save_to_csv()
+        self.print(super().save_to_csv())
 
-        print(f"Saved the trial to csv at {self.full_path}")
+        self.print(f"Saved the trial to csv at {self.full_path}")

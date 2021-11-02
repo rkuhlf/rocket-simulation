@@ -9,21 +9,20 @@ import numpy as np
 import sys
 sys.path.append(".")
 
-from preset_object import PresetObject
-
+from presetObject import PresetObject
+from RocketParts.Motor.grain import Grain
 
 
 
 class CombustionChamber(PresetObject):
 
-    def __init__(self, config={}, fuel_grain=None):
-        self.fuel_grain = fuel_grain
+    def __init__(self, **kwargs):
+        self.fuel_grain = Grain()
 
         # The inside of the engine starts off at atmospheric conditions
         # Starts at this and we change it manually
         self.pressure = 101300 # Pa
         # Instantly goes to the adiabatic (?) flame temperature
-        # FIXME: For some reason I am not using this temperature value anywhere. I am 40% sure that I should be. The other 60% thinks that we have the system defined in terms of pressure, and the only thing we need the temperature for is to find the density, which CEA already knows
         self.temperature = 273.15 + 23 # Kelvin
         self.p_temperature = self.temperature
         self.mass_flow_out = 0
@@ -35,7 +34,7 @@ class CombustionChamber(PresetObject):
         self.density = 4  # kg/m^3
         self.cstar = 1500 # m/s
 
-        super().overwrite_defaults(config)
+        super().overwrite_defaults(**kwargs)
 
         #region CALCULATED
         # TODO: actually calculate it based on P = pRT

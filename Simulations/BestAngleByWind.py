@@ -7,7 +7,7 @@ sys.path.append(".")
 
 from Helpers.general import angles_from_vector_3d
 from numpy import array
-from simulation import Simulation
+from simulation import RocketSimulation
 from logger import Feedback_Logger  # , Logger
 from RocketParts.parachute import Parachute
 from rocket import Rocket
@@ -27,7 +27,7 @@ motor = Motor()
 parachute = Parachute()
 rocket = Rocket(environment=env, motor=motor, parachutes=[parachute])
 
-sim = Simulation({}, env, rocket)
+sim = RocketSimulation({}, env, rocket)
 
 air_direction = angles_from_vector_3d(env.get_air_speed())[0]
 

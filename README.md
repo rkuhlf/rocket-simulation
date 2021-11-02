@@ -15,22 +15,22 @@ from environment import Environment
 from RocketParts.motor import Motor
 from rocket import Rocket
 from RocketParts.parachute import ApogeeParachute, Parachute
-from logger import Feedback_Logger 
-from simulation import Simulation
+from logger import RocketLogger 
+from simulation import RocketSimulation
 
 env = Environment({"time_increment": 0.1})
 motor = Motor()
 drogue_parachute = ApogeeParachute({"radius": 0.2})
 main_parachute = Parachute()
 rocket = Rocket(environment=env, motor=motor, parachutes=[drogue_parachute, main_parachute])
-logger = Feedback_Logger(
+logger = RocketLogger(
     rocket,
     ['position', 'velocity', 'acceleration', 'rotation', 'angular_velocity',
      'angular_acceleration'])
 
 logger.splitting_arrays = True
 
-sim = Simulation(environment=env, rocket=rocket, logger=logger)
+sim = RocketSimulation(environment=env, rocket=rocket, logger=logger)
 
 sim.run_simulation()
 ```

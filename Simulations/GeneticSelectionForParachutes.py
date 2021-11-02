@@ -3,7 +3,6 @@ from simulation import Simulation
 from rocket import Rocket
 from RocketParts.motor import Motor
 from RocketParts.parachute import ApogeeParachute, Parachute
-from logger import Feedback_Logger
 import numpy as np
 from random import random, normalvariate
 from copy import deepcopy
@@ -124,12 +123,7 @@ fits = []
 
 for i in range(num_rockets):
     new_rocket = create_random_rocket()
-    # logger = Feedback_Logger(
-    #     new_rocket,
-    #     ['position', 'velocity', 'acceleration', 'rotation',
-    #      'angular_velocity', 'angular_acceleration'])
 
-    # logger.splitting_arrays = True
     sims.append(Simulation({}, deepcopy(base_env), new_rocket))
 
 print("Initialized Rockets: ", sims)

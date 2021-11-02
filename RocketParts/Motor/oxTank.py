@@ -8,7 +8,7 @@ import sys
 
 sys.path.append(".")
 
-from preset_object import PresetObject
+from presetObject import PresetObject
 from Helpers.general import cylindrical_volume, cylindrical_length
 from RocketParts.Motor.nitrousProperties import *
 
@@ -152,7 +152,7 @@ def find_ullage(
     return [ullage, temperature_change_so_far]
 
 
-
+# TODO: these components of the motor should really be mass objects
 class OxTank(PresetObject):
     '''
         Ox tank model of the rocket
@@ -164,16 +164,14 @@ class OxTank(PresetObject):
     '''
 
 
-    def __init__(self, config={}):
-
-        # TODO: figure out the optimal value for this
+    def __init__(self, **kwargs):
         self.temperature = 293.15 # Kelvin
         self.length = 3.7 # m
         self.radius = 0.1016 # m
         self.ox_mass = 70.0 # kg
 
 
-        super().overwrite_defaults(config)
+        super().overwrite_defaults(**kwargs)
 
         self.volume = self.get_volume()
 
@@ -222,7 +220,8 @@ class OxTank(PresetObject):
 
         return self.get_gas_mass() * gaseous_specific_heat + self.get_liquid_mass() * liquid_specific_heat
 
-    def get_pressure(self):
+    @property
+    def pressure(self):
         '''
             Return the pressure of the system in Pa
         '''

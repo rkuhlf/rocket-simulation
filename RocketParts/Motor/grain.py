@@ -2,7 +2,7 @@ import numpy as np
 import sys
 sys.path.append(".")
 
-from preset_object import PresetObject
+from presetObject import PresetObject
 from Helpers.general import cylindrical_volume, interpolate
 
 
@@ -90,7 +90,7 @@ def determine_optimal_starting_diameter(outer_diameter, target_mass, density, ox
 
 
 class Grain(PresetObject):
-    def __init__(self, config={}):
+    def __init__(self, **kwargs):
         self.inner_radius = 0.05 # random
         self.outer_radius = 0.5 # random
         # of the fuel
@@ -100,11 +100,11 @@ class Grain(PresetObject):
         # To get the proper O/F we need a much higher oxidizer mass flow rate
         self.length = 0.4 # m
 
-        self.debug = False
+        self.verbose = False
 
-        super().overwrite_defaults(config)
+        super().overwrite_defaults(**kwargs)
 
-        if self.debug:
+        if self.verbose:
             # Print the total mass of fuel that we have
             print(self.fuel_mass)
 

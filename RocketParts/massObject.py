@@ -4,7 +4,7 @@ import sys
 sys.path.append(".")
 
 from Helpers.data import DataType
-from preset_object import PresetObject
+from presetObject import PresetObject
 
 
 class MassObject(PresetObject):
@@ -15,9 +15,9 @@ class MassObject(PresetObject):
     With moment of inertia, all items are assumed to be flat-headed cylinders with uniformly distributed mass
     """
 
-    def __init__(self, config={}, simulation=None):
+    def __init__(self, **kwargs):
         # This has the nice side effect that everything has access to the simulation now
-        self.simulation = simulation
+        self.simulation = None
 
         # This mass does not include the mass of all of the subobjects located in here
         self.mass = 0
@@ -35,7 +35,7 @@ class MassObject(PresetObject):
         self.CG_data_type = DataType.DEFAULT
         self.moment_data_type = DataType.DEFAULT
 
-        super().overwrite_defaults(config)
+        super().overwrite_defaults(**kwargs)
 
     @property
     def total_mass(self):

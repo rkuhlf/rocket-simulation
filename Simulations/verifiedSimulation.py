@@ -7,14 +7,14 @@
 import sys
 sys.path.append(".")
 
-from simulation import Simulation
+from simulation import RocketSimulation
 from Visualization.FlightOpticalAnalysis import display_optical_analysis
 
 import unittest
 
 
 
-class VerifiedSimulation(Simulation):
+class VerifiedRocketSimulation(RocketSimulation):
     def run_automated_tests(self):
         loader = unittest.TestLoader()
         start_dir = './Tests'

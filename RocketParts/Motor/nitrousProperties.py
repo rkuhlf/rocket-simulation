@@ -17,6 +17,7 @@ def confirm_range(temperature):
 
 # Also important for getting the tank pressure
 def get_nitrous_vapor_pressure(temperature):
+    """Returns the vapor pressure for a saturated solution of nitrous in bar"""
     # bar
     confirm_range(temperature)
     return 72.51 * np.e ** (309.57 / temperature *

@@ -19,9 +19,12 @@ from math import isnan
 from Helpers.general import interpolate, project, combine
 from Helpers.general import angles_from_vector_3d, vector_from_angle, angle_between, magnitude
 from RocketParts.massObject import MassObject
-from environment import Environment
 from Data.Input.models import get_coefficient_of_drag, get_coefficient_of_lift
 
+# Import some stuff for defaults
+from RocketParts.motor import Motor
+from logger import RocketLogger
+from environment import Environment
 
 
 class Rocket(MassObject):
@@ -34,17 +37,15 @@ class Rocket(MassObject):
     """
 
     # Torque is in radians per second-squared * kg
-    def __init__(
-            self, config={},
-            environment:Environment=None , motor=None, parachutes=[], logger=None):
-        super().__init__(config={})
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         # X, Y, Z values, where Z is upwards
         self.position = np.array([0, 0, 0], dtype="float64")
         self.velocity = np.array([0, 0, 0], dtype="float64")
         self.acceleration = np.array([0, 0, 0], dtype="float64")
 
         self.rotation = np.array(
-            [np.pi / 2, 0.05],
+            [np.pi / 2, 0],
             dtype="float64")
         self.angular_velocity = np.array([0, 0], dtype="float64")
         self.angular_acceleration = np.array([0, 0], dtype="float64")
@@ -60,50 +61,29 @@ class Rocket(MassObject):
         self.reference_area = np.pi * self.radius ** 2  # 0.008  # m^2
 
         #region SET REFERENCES
-        self.motor = motor
-        self.environment = environment
-        self.parachutes = parachutes
-        self.logger = logger
+        self.motor = Motor()
+        self.environment = Environment()
+        self.parachutes = []
+        self.logger = RocketLogger(self)
 
         self.mass_objects = [self.motor]
         self.mass_objects.extend(self.parachutes)
         #endregion
 
         #region DEFAULT MASSES
-        nose_cone = MassObject({
-            "center_of_gravity": 0.4,
-            "mass": 10 # kg
-        })
-        ox_tank_shell = MassObject({
-            "center_of_gravity": 3,
-            "mass": 40 # kg
-        })
-        injector = MassObject({
-            "center_of_gravity": 5,
-            "mass": 4 # kg
-        })
-        phenolic = MassObject({
-            "center_of_gravity": 6,
-            "mass": 16 # kg
-        })
-        fins = MassObject({
-            "center_of_gravity": 6.5,
-            "mass": 10
-        })
-        nozzle = MassObject({
-            "center_of_gravity": 7,
-            "mass": 15
-        })
-        avionics_bay = MassObject({
-            "center_of_gravity": 7,
-            "mass": 10
-        })
+        nose_cone = MassObject(center_of_gravity=0.4, mass=10)
+        ox_tank_shell = MassObject(center_of_gravity=3, mass=40)
+        injector = MassObject(center_of_gravity=5, mass=4)
+        phenolic = MassObject(center_of_gravity=6, mass=16)
+        fins = MassObject(center_of_gravity=6.5, mass=10)
+        nozzle = MassObject(center_of_gravity=7, mass=15)
+        avionics_bay = MassObject(center_of_gravity=7, mass=10)
 
         self.mass_objects.extend([nose_cone, ox_tank_shell, injector, phenolic, fins, nozzle, avionics_bay])
         #endregion
 
 
-        super().overwrite_defaults(config)
+        super().overwrite_defaults(**kwargs)
         # Everything before this is saved as a preset including whatever is overridden by config
 
         # This is overriden in the simulation initialization, so it is just here as a reminder
@@ -114,11 +94,15 @@ class Rocket(MassObject):
 
 
         # Indicates whether the rocket has begun to descend
-        self.turned = False
         self.landed = False
 
         self.force = np.array([0., 0., 0.])
         self.torque = np.array([0., 0.])
+
+        self.apogee = 0
+        self.max_mach = 0
+        self.max_velocity = 0
+        self.max_net_force = 0
 
     def simulate_step(self):
         self.calculate_cached()
@@ -139,22 +123,9 @@ class Rocket(MassObject):
             self.apply_angular_velocity()
 
 
-        # Has anything changed since the last frame
-        # TODO: add some kind of has lifted of thing
-        if self.position[2] < 0 and (self.p_position[2] > 0 or self.position[2] < -100):
-            if self.position[2] < -100:
-                if self.logger is not None:
-                    self.logger.save_to_csv()
-                raise Exception("Your rocket fell straight into the ground")
+        self.update_maxes()
 
-            self.landed = True
-
-        if self.position[2] < self.p_position[2] and not self.turned and (self.position[2] > 0 or self.position[2] < -100):
-            self.turned = True
-
-            self.apogee = self.p_position.copy()[2]
-
-            # TODO: Figure out how parachute deployment mechanisms tend to work. Is it always as soon as it turns? How long does it take? Calculate the forces on the parachute chord
+        # TODO: Figure out how parachute deployment mechanisms tend to work. Is it always as soon as it turns? How long does it take? Calculate the forces on the parachute chord
 
         if False: #self.environment.time > self.motor.get_burn_time():
             for parachute in self.parachutes:
@@ -171,6 +142,33 @@ class Rocket(MassObject):
         self.update_previous()
         self.force = np.array([0., 0., 0.])
         self.torque = np.array([0., 0.])
+
+    @property
+    def has_lifted(self):
+        """Return whether the rocket was above ground in the previous or current frame"""
+        self.position[2] > 0 or self.p_position[2] > 0
+
+    @property
+    def ascending(self):
+        return self.position[2] > self.p_position[2]
+
+    @property
+    def descending(self):
+        return self.position[2] < self.p_position[2]
+
+
+    def update_maxes(self):
+        if self.position[2] < -100 and not self.has_lifted:
+            raise Exception("Your rocket fell straight into the ground")
+
+        if self.position[2] < 0 and self.has_lifted:
+            self.landed = True
+
+        self.apogee = max(self.apogee, self.position[2])
+        self.max_mach = max(self.max_mach, self.mach)
+        self.max_velocity = max(self.max_velocity, magnitude(self.velocity))
+        self.max_net_force = max(self.max_net_force, magnitude(self.force))
+
 
 
     # region UPDATING KINEMATICS
@@ -491,7 +489,7 @@ class Rocket(MassObject):
 
     def calculate_center_of_pressure(self):
         # This should give one caliber of stability for the rocket in SimulateRocket.py, but it will probably break DesignedRocket.py
-        self.CP = 5 # meters
+        self.CP = 3.75 # meters
         # cutout = cutout_method()
         # barrowman = barrowman_equation()
 

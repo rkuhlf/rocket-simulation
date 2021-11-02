@@ -10,7 +10,7 @@ import sys
 sys.path.append(".")
 
 from Helpers.general import interpolate, get_next
-from preset_object import PresetObject
+from presetObject import PresetObject
 from Data.Input.models import get_density, get_speed_of_sound
 from Helpers.wind import Wind
 
@@ -24,7 +24,7 @@ class Environment(PresetObject):
         The current model implements the 1976 Standard Atmosphere based on Digital Dutch's data as well as a variable gravity model of a perfectly spherical Earth.
     """
     
-    def __init__(self, config={}):
+    def __init__(self, **kwargs):
         self.time = 0
         self.time_increment = 0.01  # seconds
 
@@ -42,7 +42,7 @@ class Environment(PresetObject):
 
         self.apply_wind = True
 
-        super().overwrite_defaults(config)
+        super().overwrite_defaults(**kwargs)
 
         # https://www.digitaldutch.com/
         self.density_data = pd.read_csv(

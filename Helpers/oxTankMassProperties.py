@@ -11,28 +11,15 @@ from RocketParts.Motor.nitrousProperties import get_gaseous_nitrous_density, get
 from RocketParts.Motor.injector import Injector
 import matplotlib.pyplot as plt
 
-# Alright, actually this depends on the combustion chamber pressure and the injector; I don't even have an approximation for the combustion chamber pressure
-# Right now, I think I will go ahead and assume like 33 bar = 3.3e+6 Pa
-
-# ox_mass = 52.5  # kg
-
 temperature = 273.15 + 22
 
-tank = OxTank({
-    "ox_mass": 52.5,
-    "length": 2.65,
-    "radius": 0.1905 / 2,
-    "temperature": 293.15
-})
-# assumes constant temperature
+tank = OxTank(ox_mass=52.5, length=2.65, radius=0.1905 / 2, temperature=293.15)
 ullage = tank.ullage
 
-print("TNK PRES", tank.get_pressure())
+print("TNK PRES", tank.pressure)
+# Alright, actually this depends on the combustion chamber pressure and the injector; I don't even have an approximation for the combustion chamber pressure
+# Right now, I think I will go ahead and assume like 33 bar = 3.3e+6 Pa
 chamber_pressure = 3.3e+6
-# TODO: reimplement injector here
-# injector_area = find_total_cross_sectional_area(5, 0.005)
-# # This doesn't really matter, it is a tiny effect so long as it is much higher than the orifice total area
-# injector_face_area = np.pi * 0.5 **2
 
 time = 0
 time_increment = 0.1

@@ -10,6 +10,14 @@ sys.path.append(".")
 
 from RocketParts.massObject import MassObject
 from Helpers.general import interpolate
+from environment import Environment
+
+# Imports for defaults
+from RocketParts.Motor.oxTank import OxTank
+from RocketParts.Motor.grain import Grain
+from RocketParts.Motor.injector import Injector
+from RocketParts.Motor.combustionChamber import CombustionChamber
+from RocketParts.Motor.nozzle import Nozzle
 
 
 # TODO: have a base Motor class
@@ -19,9 +27,9 @@ from Helpers.general import interpolate
 class Motor(MassObject):
     # TODO: rewrite so I can have some variable names that actually make sense. Right now, .total_impulse just gives you a value that is literally not the total impulse
 
-    def __init__(self, config={}):
-        # We don't pass in the actual config because we will do the actual overriding later
-        super().__init__(config={})
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)        
+        self.environment = Environment()
 
         # Mass including the propellant
         self.front = 3 # m
@@ -34,10 +42,9 @@ class Motor(MassObject):
         self.time_multiplier = 1
 
 
-        super().overwrite_defaults(config)
+        super().overwrite_defaults(**kwargs)
 
         self.set_thrust_data_path(self.thrust_curve)
-
 
         self.finished_thrusting = False
 
@@ -91,7 +98,7 @@ class Motor(MassObject):
                 next_thrust["thrust"])
 
 
-            new_mass = self.total_mass - self.thrust_to_mass(thrust, self.simulation.environment.time_increment)
+            new_mass = self.total_mass - self.thrust_to_mass(thrust, self.environment.time_increment)
             # This section is slightly more complicated with a more complicated motor
             self.set_mass_constant(new_mass)
 
@@ -132,27 +139,25 @@ class Motor(MassObject):
     #endregion
 
 class CustomMotor(Motor):
-    def __init__(self, config={}, ox_tank=None, injector=None, combustion_chamber=None, nozzle=None, environment=None):
+    def __init__(self, **kwargs):
         # Don't really need to do anything from super in init
         self.thrust_multiplier = 1
         self.time_multiplier = 1
         self.finished_thrusting = False
 
-        self.ox_tank = ox_tank
-        self.injector = injector
-        self.combustion_chamber = combustion_chamber
-        self.nozzle = nozzle
-        self.environment = environment
+        self.ox_tank = OxTank()
+        self.injector = Injector()
+        self.combustion_chamber = CombustionChamber()
+        self.nozzle = Nozzle()
 
         self.data_path = "./Data/Input/CombustionLookup.csv"
         self.data = pd.read_csv(self.data_path)
 
-
-        super().overwrite_defaults(config)
-
-        self.thrust = 0
+        super().__init__(**kwargs)
+        super().overwrite_defaults(**kwargs)
 
         # This is only defined as a cached variable to provide easier graphing
+        self.thrust = 0
         self.OF = 0
 
     def update_values_from_CEA(self, chamber_pressure, OF):
@@ -190,9 +195,8 @@ class CustomMotor(Motor):
                 looking_for_pressure = True
 
 
-
     def simulate_step(self):
-        # upstream_pressure = self.ox_tank.get_pressure()
+        # upstream_pressure = self.ox_tank.pressure
         # downstream_pressure = self.combustion_chamber.pressure
         ox_flow = self.injector.get_mass_flow()
         self.ox_tank.update_drain(ox_flow * self.environment.time_increment)
@@ -218,5 +222,3 @@ class CustomMotor(Motor):
     
 
 # TODO: Figure out the min mass flow rate, if any, for the nozzle to reach mach one at the choke. I don't see how it could instantaneously reach mach speeds; I think CEA has some outputs for this
-if __name__ == "__main__":
-    pass
