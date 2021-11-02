@@ -53,7 +53,11 @@ def get_sim():
 
     logger.splitting_arrays = True
 
+
     sim = RocketSimulation(apply_angular_forces=True, max_frames=-1, environment=env, rocket=rocket, logger=logger)
+
+    print(sim.logger)
+    print(logger)
 
     motor.simulation = sim
 

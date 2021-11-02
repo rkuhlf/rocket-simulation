@@ -93,11 +93,11 @@ class Rocket(MassObject):
         self.update_previous()
 
 
-        # Indicates whether the rocket has begun to descend
-        self.landed = False
-
         self.force = np.array([0., 0., 0.])
         self.torque = np.array([0., 0.])
+
+        # TODO: add a few more conditions
+        self.landed = False
 
         self.apogee = 0
         self.max_mach = 0

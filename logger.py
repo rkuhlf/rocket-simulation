@@ -42,7 +42,7 @@ class Logger(PresetObject):
         """
             Update the current row of data, which should eventually be saved by save_row
         """
-        
+        # print(self.splitting_arrays)
         if self.splitting_arrays:
             k = list(data.keys())[0]
             v = list(data.values())[0]

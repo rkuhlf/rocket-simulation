@@ -13,7 +13,23 @@ class PresetObject:
 
     def overwrite_defaults(self, **kwargs):
         # extract config to self
-        self.__dict__.update(**kwargs)
+        # I think this should work
+        # print(kwargs)
+        for key, value in kwargs.items():
+            print(type(self))
+            print(type(self).__dict__)
+            print(self.__dict__)
+            print(type(self).__dict__[key])
+            
+            try:
+                type(self).__dict__[key].__set__(self, value)
+
+                print("The setter actually worked")
+            except:
+                self.__dict__[key] = value
+        
+        
+        # self.__dict__.update(**kwargs)
 
         self.update_saved_state()
 

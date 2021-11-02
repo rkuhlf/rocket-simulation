@@ -9,6 +9,7 @@ import pandas as pd
 import sys
 sys.path.append(".")
 
+from Helpers.data import inputs_path
 from Helpers.general import interpolate, get_next
 from presetObject import PresetObject
 from Data.Input.models import get_density, get_speed_of_sound
@@ -36,7 +37,7 @@ class Environment(PresetObject):
 
         self.rail_length = 13.1064 # meters based on 43 feet at White Sands
 
-        self.density_location = "airQuantities"
+        self._density_path = "airQuantities.csv"
 
         self.previous_air_density_index = 0
 
@@ -44,16 +45,20 @@ class Environment(PresetObject):
 
         super().overwrite_defaults(**kwargs)
 
-        # https://www.digitaldutch.com/
-        self.density_data = pd.read_csv(
-            "Data/Input/" + self.density_location + ".csv")
-        self.density_data.drop(
-            columns=["Viscosity", "Temperature", "Pressure"])
-        self.altitude_data = np.array(self.density_data["Altitude"])
-
+        
         self.wind = Wind(self.time_increment)
         self.wind.randomize_direction()
 
+    @density_path.setter
+    def density_path(self, p):
+        self._density_path = p
+
+    def load_density_data(self):
+        # https://www.digitaldutch.com/
+        self.density_data = pd.read_csv(inputs_path + self._density_path)
+        self.density_data.drop(
+            columns=["Viscosity", "Temperature", "Pressure"])
+        self.altitude_data = np.array(self.density_data["Altitude"])
 
     def simulate_step(self):
         self.time += self.time_increment
