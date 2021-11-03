@@ -1,3 +1,7 @@
+# TESTS FOR THE GENERAL HELPERS
+# You don't really need to run these over and over again, this is just the file where I was making sure that all of the math I copied down and worked out is correct
+
+
 import unittest
 
 from Helpers.general import *
@@ -7,7 +11,7 @@ import numpy as np
 # TODO: Expand on and implement more unit tests
 
 
-class Testing(unittest.TestCase):
+class TestGeneralHelpers(unittest.TestCase):
     def test_interpolate(self):
         self.assertEqual(interpolate(-1, -2, 0, 0, 100), 50)
 
@@ -44,7 +48,30 @@ class Testing(unittest.TestCase):
         print(vector_from_angle([0, np.pi]))
 
     def test_projection(self):
-        print(project(np.array([10., 2., 0]), np.array([1., 0., 0])))
+        self.assertTrue(np.all(
+            project(np.array([10., 2., 0]), np.array([1., 0., 0])) == \
+                np.array([10, 0, 0])))
+
+        # Hopefully, this corresponds to theta_around = 4.7 and theta_down = 0.2
+        print(project(np.array([0, 0.1, 1]), np.array([0., 0., -1])))
+        # Hopefully, this corresponds to theta_around = 1.5 and theta_down = 0.2
+        print(project(np.array([0, -0.1, 1]), np.array([0., 0., -1])))
+
+        # Then we do the first one minus the result to get the direction of lift
+        # So I think the projection part is correct, since I am getting the correct signs depending on inclinations
+        
+    def test_vector_from_angle(self):
+        # This is 1.5 around and 0.2 down -> should be a positive y and a positive z
+        print(vector_from_angle([np.pi/2, 0.2]))
+
+        # This is 1.5 around and 2.8 down
+        print(vector_from_angle([np.pi/2, 2.8]))
+
+        # This is 4.7 around and 2.8 down
+        print(vector_from_angle([3*np.pi/2, 2.8]))
+
+        # This is 4.7 around and 2.8 down
+        print(vector_from_angle([3*np.pi/2, 0.2]))
 
     def test_angle_from_vector(self):
         self.assertTrue(np.alltrue(

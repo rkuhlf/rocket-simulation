@@ -2,14 +2,14 @@ import numpy as np
 import sys
 sys.path.append('.')
 
-from preset_object import PresetObject
+from presetObject import PresetObject
 
 from RocketParts.Motor.nitrousProperties import get_nitrous_vapor_pressure, get_liquid_nitrous_density, find_specific_enthalpy_of_gaseous_nitrous, find_specific_enthalpy_of_liquid_nitrous
 
 
 #region DESIGN/WEIGHT FUNCTIONS
-
 def determine_required_thickness(pressure_drop, radius, poisson_ratio, failure_stress):
+    """There is no unit for Poisson's Ratio, but your pressure drop and failure stress both must be in Pascals"""
     numerator = 0.375 * pressure_drop * radius**3 * (1 + poisson_ratio)
     return (numerator / failure_stress) ** (1/2)
 
@@ -19,11 +19,30 @@ def determine_injector_volume(thickness, radius):
 def determine_injector_mass(thickness, radius, density):
     return determine_injector_volume(thickness, radius) * density
 
+def determine_orifice_count_SPI(mass_flow_rate, pressure_drop, density, orifice_diameter, coefficient_of_discharge=0.7):
+    individual_orifice_area = np.pi * (orifice_diameter / 2) ** 2
+
+    # m = C_d * (N * a) * sqrt(2 * rho * delta-P)
+    # m / (C_d * a * sqrt(2 * rho * delta-P)) = N
+
+    return mass_flow_rate / (coefficient_of_discharge * individual_orifice_area * (2 * density * pressure_drop) ** (1/2))
+
+def determine_orifice_count_MR(mass_flow_rate, pressure_drop, liquid_density, gas_density, orifice_diameter, coefficient_of_discharge=0.7, mixing_ratio=0.2552):
+    individual_orifice_area = np.pi * (orifice_diameter / 2) ** 2
+
+    # m = C_d * (N * a) * sqrt(2 * rho * delta-P)
+    # m / (C_d * a * sqrt(2 * rho * delta-P)) = N
+
+    density = mixing_ratio * gas_density + (1 - mixing_ratio) * liquid_density
+
+    return mass_flow_rate / (coefficient_of_discharge * individual_orifice_area * (2 * density * pressure_drop) ** (1/2))
+
+def get_cross_sectional_area(count, diameter):
+    return count * np.pi * (diameter / 2) ** 2
+
 #endregion
 
 #region MASS FLOW CHARACTERISTICS
-
-
 def find_mass_flow_single_phase_incompressible(
         liquid_density, pressure_drop, orifice_area,
         upstream_cross_sectional_area):
@@ -34,7 +53,10 @@ def find_mass_flow_single_phase_incompressible(
     return ((2 * liquid_density * pressure_drop) /
             (1 - (orifice_area / upstream_cross_sectional_area) ** 2)) ** (1 / 2)
 
-# TODO: figure out which point this pressure is referring to
+def find_mass_flow_MR(pressure_drop, liquid_density, gas_density, total_area, coefficient_of_discharge=0.7, mixing_ratio=0.2552):
+    density = mixing_ratio * gas_density + (1 - mixing_ratio) * liquid_density
+
+    return total_area * coefficient_of_discharge * (2 * density * pressure_drop) ** (1/2)
 
 
 def find_mass_flow_homogenous_equilibrium(
@@ -102,11 +124,10 @@ def find_mass_flow_dyer_interpolation(
 #endregion
 
 class Injector(PresetObject):
-    def __init__(self, config={}, ox_tank=None, combustion_chamber=None):
+    def __init__(self, **kwargs):
         # Since I don't know which properties I am going to be needing from the ox tank and the combustion chamber, I will just pass them in right here
-
-        self.ox_tank = ox_tank
-        self.combustion_chamber = combustion_chamber
+        self.ox_tank = None
+        self.combustion_chamber = None
         
         self.orifice_count = 3
         # Recall that we do not have total control over this. We have to order some swagelock fittings
@@ -115,11 +136,11 @@ class Injector(PresetObject):
         self.discharge_coefficient = 0.7
 
 
-        super().overwrite_defaults(config)
+        super().overwrite_defaults(**kwargs)
 
-    def get_total_cross_sectional_area(self):
-        # for use with multiple orifices
-        return self.orifice_count * np.pi * (self.orifice_diameter / 2) ** 2
+    @property
+    def total_orifice_area(self):
+        return get_cross_sectional_area(self.orifice_count, self.orifice_diameter)
 
 
     def find_mass_flow_single_phase_incompressible(self, 
@@ -128,11 +149,11 @@ class Injector(PresetObject):
 
         # most models actually discount the denominator for this model, since it is almost exactly equal to unity. I put it in because that is how the model is derived
 
-        area_ratio = self.get_total_cross_sectional_area() / self.combustion_chamber.fuel_grain.get_outer_cross_sectional_area()
+        area_ratio = self.total_orifice_area / self.combustion_chamber.fuel_grain.get_outer_cross_sectional_area()
         return orifice_area * ((2 * liquid_density * pressure_drop) / (1 - area_ratio ** 2)) ** (1 / 2)
 
     def get_mass_flow(self):
-        upstream_pressure = self.ox_tank.get_pressure()
+        upstream_pressure = self.ox_tank.pressure
         downstream_pressure = self.combustion_chamber.pressure
         pressure_drop = upstream_pressure - downstream_pressure
 
@@ -142,16 +163,18 @@ class Injector(PresetObject):
             self.find_mass_flow_single_phase_incompressible(
                 density, 
                 pressure_drop, 
-                self.get_total_cross_sectional_area())
+                self.total_orifice_area)
 
 
 
 if __name__ == "__main__":
-    # These are the numbers from memory for aluminum, they do not include the effects of heat (probably important, considering aluminum melts at 1,221 F and our combustion will probably be around 3300 F)
-    thickness = (determine_required_thickness(450, 4, 0.31, 40000)) # everything in psi
-    mass = determine_injector_mass(thickness, 4, 0.0442451) # density in kg/m^3
+    # These are the numbers for aluminum, they do not include the effects of heat (probably important, considering aluminum melts at 1,221 F and our combustion will probably be around 3300 K)
+    thickness = (determine_required_thickness(33.5775* 10**5, 0.1016, 0.31, 2757.9029*10**5)) # everything in meters
+    print(thickness, "m", thickness * 39.3701, "in")
+    mass = determine_injector_mass(thickness, 0.1016, 2710) # density in kg/m^3
 
     print(mass, "kg")
 
+    print(determine_orifice_count_MR(2.258752177, (39.92607209 - 25) * 10**5, 854.4, 113.9, 0.005, 0.68106))
     
  

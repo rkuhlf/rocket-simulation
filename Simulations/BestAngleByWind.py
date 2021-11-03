@@ -1,10 +1,13 @@
+# OPTIMIZE ANGLE GIVEN WIND
+# TODO: move some of these optimization files into the analysis section
+
 import sys
 sys.path.append(".")
 
 
 from Helpers.general import angles_from_vector_3d
 from numpy import array
-from simulation import Simulation
+from simulation import RocketSimulation
 from logger import Feedback_Logger  # , Logger
 from RocketParts.parachute import Parachute
 from rocket import Rocket
@@ -12,6 +15,7 @@ from RocketParts.motor import Motor
 from environment import Environment
 
 
+# TODO: Test the refactor and see if bestangle by wind still works (mit need a reset() metod)
 
 
 # Find best launch angle based on a constant wind speed
@@ -23,7 +27,7 @@ motor = Motor()
 parachute = Parachute()
 rocket = Rocket(environment=env, motor=motor, parachutes=[parachute])
 
-sim = Simulation({}, env, rocket)
+sim = RocketSimulation({}, env, rocket)
 
 air_direction = angles_from_vector_3d(env.get_air_speed())[0]
 

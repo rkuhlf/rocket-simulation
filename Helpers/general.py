@@ -1,6 +1,28 @@
+# MISCELLANEOUS HELPERS
+# Mostly mathematical, this is where most of the operations for angles are implemented
+
 import re
 import numpy as np
 
+
+def transpose_tuple(iterable):
+    iterable = np.array([*iterable])
+    return iterable.transpose()
+
+
+def cylindrical_volume(length, radius):
+    return length * np.pi * radius ** 2
+
+def cylindrical_length(volume, radius):
+    return volume / (np.pi * radius ** 2)
+
+def get_radius(area):
+    # A = pi * r ^ 2
+    # sqrt(A/pi) = r
+    
+    return (area / np.pi) ** (1/2)
+
+# TODO: find a better naming convention for these: maybe the helpers don't need a keyword and I should assume they return a value
 
 def interpolate(x, x1, x2, y1, y2):
     '''Map one point from one range to another'''
@@ -8,6 +30,18 @@ def interpolate(x, x1, x2, y1, y2):
         return (y1 + y2) / 2
     return (x - x1) / (x2 - x1) * (y2 - y1) + y1
 
+def interpolate_point(value, input_min, input_max, p1, p2):
+    x = interpolate(value, input_min, input_max, p1[0], p2[0])
+    y = interpolate(value, input_min, input_max, p1[1], p2[1])
+
+    return (x, y)
+
+def normalized(array):
+    array = array.copy()
+    range = np.max(array) - np.min(array)
+    array -= np.min(array)
+    array /= range
+    return array
 
 def get_next(index, data, previous_index, direction, target):
     """Get the next closest value in a collection of data starting from a cached index"""
@@ -24,6 +58,20 @@ def get_next(index, data, previous_index, direction, target):
         index += direction
 
         return get_next(index, data, previous_index, direction, target)
+
+
+def linear_intersection(p1, m1, p2, m2):
+    x1, y1 = p1
+    x2, y2 = p2
+    # Solve for x
+    # m1(x - x1) + y1 = m2(x - x2) + y2
+    # m1 * x - m1 * x1 + y1 = m2 * x - m2 * x2 + y2
+    # m1 * x - m2 * x = m1 * x1 - y1 - m2 * x2 + y2
+    # x * (m1 - m2) = m1 * x1 - y1 - m2 * x2 + y2
+    # x = (m1 * x1 - y1 - m2 * x2 + y2) / (m1 - m2)
+    x = (m1 * x1 - y1 - m2 * x2 + y2) / (m1 - m2)
+
+    return (x, m1 * (x - x1) + y1)
 
 
 
@@ -158,12 +206,12 @@ def angle_from_vector_2d(array):
 
 
 def vector_from_angle(np_array):
-    # This has great potential to be incorrect
     # I copied it from https://stackoverflow.com/questions/1568568/how-to-convert-euler-angles-to-directional-vector
     around, down = np_array
+
     x = np.cos(around) * np.sin(down)
     y = np.sin(around) * np.sin(down)
-    # Tis is different - right now 0 degrees (straight up, will return 0 in the z axis).
+    # I altered this line to cosine from sine - now 0 degrees (straight up, will return 1 in the z axis).
     z = np.cos(down)
 
     return np.array([x, y, z])
@@ -176,9 +224,8 @@ def euler_to_vector_2d(angle):
          np.sin(angle)])  # opposite / hypotenuse (1)
 
 
-
 def unit_vector(vector):
-    """ Returns the unit vector of the vector.  """
+    """ Returns the unit vector of the vector.  (Division by magnitude)"""
     return vector / np.linalg.norm(vector)
 
 

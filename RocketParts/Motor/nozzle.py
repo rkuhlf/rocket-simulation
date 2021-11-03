@@ -1,128 +1,130 @@
+# NOZZLE CLASS AND DESIGN
+# Script for the nozzle object and the equations that will let us CAD it
+# This may be too many responsibilities for one file
+
 import numpy as np
 import matplotlib.pyplot as plt
+
 
 import sys
 sys.path.append(".")
 
-from preset_object import PresetObject
+from presetObject import PresetObject
+from Helpers.general import linear_intersection, interpolate, interpolate_point, transpose_tuple, get_radius
 
 
-#region NOZZLE EQUATION
-from scipy.optimize import fsolve
+#region NOZZLE CONSTRUCTION MEHODS
+def calculate_nozzle_coordinates_bezier(initial_point, initial_angle, final_point, final_angle, divisions=100):
+    """
+        Return a series of x, y coordinate pairs that make up a quadratic Bezier.
+        Supposedly, this curve is an approximation for the Method of Characteristics.
+        Angles should be in radians
+    """
 
-
-
-def get_point(t, parameters):
-    x0, x1, x2, y0, y1, y2 = parameters
-
-    return (
-        (1 - t)**2 * x0 + 2 * t * (1 - t) * x1 + t ** 2 * x2,
-        (1 - t)**2 * y0 + 2 * t * (1 - t) * y1 + t ** 2 * y2
-    )
-
-def generate_points(parameters):
-    ti = parameters[-2]
-    tf = parameters[-1]
-    parameters = parameters[:-2]
+    initial_slope = np.tan(initial_angle)
+    final_slope = np.tan(final_angle)
     
+    intersection_point = linear_intersection(initial_point, initial_slope, final_point, final_slope)
+
     points = []
 
-    for t in np.linspace(ti, tf, num=100):
-        points.append(np.asarray(get_point(t, parameters)))
+    for i in range(divisions):
+        start_point = interpolate_point(i, 0, divisions - 1, initial_point, intersection_point)
+        end_point = interpolate_point(i, 0, divisions - 1, intersection_point, final_point)
 
-    return np.asarray(points)
+        points.append(interpolate_point(i, 0, divisions - 1, start_point, end_point))
 
-def display_nozzle(parameters):
-    print(parameters)
+    return points
 
-    points = generate_points(parameters)
 
+def calculate_nozzle_coordinates_truncated_parabola(initial_point, initial_angle, final_point, divisions=100):
+    # Calculate the extrapolated vertex point
+    # Print the length fraction based on the passed final point
+
+    # Assuming x^2 parabola
+
+    initial_slope = np.tan(initial_angle)
+
+    x1, y1 = initial_point
+    x2, y2 = final_point
+
+    numerator = y2 - y1 - initial_slope * x2 + initial_slope * x1
+    denominator = x2 ** 2 - 2 * x1 * x2 - x1 ** 2 + 2 * x1 ** 2
+
+    a = numerator / denominator
+    b = initial_slope - 2 * a * x1
+    c = y1 - a * x1 ** 2 - b * x1
+
+    nozzle_height = lambda x : a * x ** 2 + b * x + c
+    angle = lambda x : 2 * a * x + b
+
+    print(f"The exit angle for the truncated bell is {angle(final_point[0])} radians or {angle(final_point[0]) * 180 / np.pi} degrees")
+
+    inputs = np.linspace(initial_point[0], final_point[0], divisions)
+    outputs = nozzle_height(inputs)
+
+
+    points = [inputs, outputs]
+
+    # Convert tuples to 2d numpy - https://stackoverflow.com/questions/39806259/convert-list-of-list-of-tuples-into-2d-numpy-array
+    points = np.array([*points])
+    points = points.transpose()
+
+    return points
+
+#endregion
+
+#region FUNCTIONS TO BE RUN FOR DISPLAY
+def display_constructed_quadratic():
+    start_point = (0, 0.1)
+    start_angle = 35 / 180 * np.pi
+
+    end_point = (1, 0.5)
+    end_angle = 8 / 180 * np.pi
+
+    points = calculate_nozzle_coordinates_bezier(start_point, start_angle, end_point, end_angle)
+
+    # Convert tuples to 2d numpy - https://stackoverflow.com/questions/39806259/convert-list-of-list-of-tuples-into-2d-numpy-array
+    points = np.array([*points])
     points = points.transpose()
 
     plt.plot(points[0], points[1])
-    # plt.xlim(0, 1)
-    # plt.ylim(0, 1)
-    plt.title("Nozzle Contour")
+    inputs = np.linspace(start_point[0], end_point[0])
+    plt.plot(inputs, np.tan(start_angle) * (inputs - start_point[0]) + start_point[1])
+    plt.plot(inputs, np.tan(end_angle) * (inputs - end_point[0]) + end_point[1])
     plt.show()
 
-def equations(p):
-    x0, x1, x2, y0, y1, y2, ti, tf = p
-    # Each of these equations should be rearranged to equal zero
 
-    x_start = 0
-    x_end = 10
+def compare_truncated_to_quadratic():
+    start_point = (0, 0.1)
+    start_angle = 35 / 180 * np.pi
 
-    y_start = 0
-    y_end = 0
+    end_point = (1, 0.5)
+    end_angle = 5.717686887804168 / 180 * np.pi
 
-    theta_opening = np.radians(20)
-    theta_exit = np.radians(8)
+    quadratic_points_nonzero = transpose_tuple(calculate_nozzle_coordinates_bezier(start_point, start_angle, end_point, end_angle))
+    quadratic_points_zero = transpose_tuple(calculate_nozzle_coordinates_bezier(start_point, start_angle, end_point, 0))
+    truncated_points = transpose_tuple(calculate_nozzle_coordinates_truncated_parabola(start_point, start_angle, end_point))
 
-    slope_opening = np.tan(theta_opening)
-    slope_exit = np.tan(theta_exit)
+    fig, ((ax1, hide_me_1), (ax2, hide_me_2)) = plt.subplots(2, 2)
 
-    return (
-        x0 * (1-ti)**2 + x1 * 2*ti * (1-ti) + x2*ti**2 - x_start,
-        x0 * (1-tf)**2 + x1 * 2*tf * (1-tf) + x2*tf**2 - x_end,
-        2 * (-x0 * (1-ti) + x1 * (1-2*ti) + x2 * ti) - 1,
-        2 * (-x0 * (1-tf) + x1 * (1-2*tf) + x2 * tf) - 1,
+    ax1.plot(quadratic_points_nonzero[0], quadratic_points_nonzero[1])
+    ax1.plot(truncated_points[0], truncated_points[1])
 
-        y0 * (1-ti)**2 + y1 * 2*ti * (1-ti) + y2*ti**2 - y_start,
-        y0 * (1-tf)**2 + y1 * 2*tf * (1-tf) + y2*tf**2 - y_end,
-        2 * (-y0 * (1-ti) + y1 * (1-2*ti) + y2 * ti) - slope_opening,
-        2 * (-y0 * (1-tf) + y1 * (1-2*tf) + y2 * tf) - slope_exit,
-    )
+    ax2.plot(quadratic_points_zero[0], quadratic_points_zero[1])
+    ax2.plot(truncated_points[0], truncated_points[1])
 
-iters = 1
-least_error = 1e10
-best_parameters = []
+    hide_me_1.axis('off')
+    hide_me_2.axis('off')
 
-# TODO: Just write an algorithm to solve it totally randomly, recording the inputs that minimize the 8 equations
-for i in range(iters):
-    if i % 1000 == 0:
-        print(i)
-    inputs = tuple(np.random.randn((8)))
-    # print("INPUTS", inputs)
-    # (0, 0.5, 1, 0, 1, 0.9, 0, 1)
-    parameters = fsolve(equations, inputs)
-    # print(parameters)
+    # TODO: ask Cristian how many inputs he has for this to ensure that his truncated construction matches mine. 
+    # He seems to think that the truncation can match the zero exit angle. Mine definitely can't at the moment
+    hide_me_1.text(-0.1, 0, "When the exit angles are equivalent, the \nnozzles appear to be an exact match. \nThe quadratic bezier adds another degree \nof freedom, allowing you to vary the exit \nangle. I have yet to do research on the \noptimal exit angle, but I would assume \nit to be zero. In that case, there is \nnoticable difference.")
 
-    outputs = equations(parameters)
-    total_error = 0
-    for output in outputs:
-        total_error += abs(output)
-    if total_error < least_error:
-        print("Found better parameters")
-        print(outputs)
-        least_error = total_error
-        best_parameters = parameters
-    
-    # print("OUTPUTS", outputs)
-    # print(error)
-    # print("FAILED")
-    # plt.cla()
+    plt.show()
 
-print(least_error)
-print(best_parameters)
-display_nozzle(best_parameters)
+#endregion
 
-
-parameters = fsolve(equations, (0.15470709552420203, -0.03718261636217335, 0.401636215953701, 0.29084105509625857, -0.11101274275171547, 0.013110433950737174, -0.3689025055437478, -0.10153484052973501))
-
-display_nozzle(parameters)
-
-
-'''
-## -- End pasted text --
-(0.0, 0.0)
-
-In [2]: x
-Out[2]: 3.5000000414181831
-
-In [3]: y
-Out[3]: 1.7500000828363667
-'''
-#endrregion
 
 
 # https://www.grc.nasa.gov/www/k-12/rocket/rktthsum.html
@@ -142,24 +144,6 @@ Out[3]: 1.7500000828363667
     def __init__(self, config={}):        
 
         super().overwrite_defaults(config)
-
-
-    def mass_flow_rate(self, mach=1):
-        # TODO: add mach adjustment into here
-        # I believe this is for the conditions given that mass flow rate is choked at sonic conditions
-        # I suspect this is where a CFD would be much more accurate
-        # tis is were the problems are
-
-        ans = self.throat_area * self.total_pressure / \
-            (self.total_temperature) ** (1 / 2)
-
-        ans *= (self.specific_heat_ratio / self.gas_constant) ** (1 / 2)
-
-        ans *= ((self.specific_heat_ratio + 1) / 2) ** -self.specific_heat_exponent
-
-        return ans
-
-
 
 
     def exit_mach(self):
@@ -232,7 +216,7 @@ Out[3]: 1.7500000828363667
             self.exit_pressure() - self.get_free_stream_pressure())
 '''
 
-
+#region DESIGN EQUATIONS
 def determine_expansion_ratio(combustion_chamber_pressure, atmospheric_pressure, isentropic_exponent):
     """
     Outputs the optimum expansion ratio for a converging-diverging nozzle based on a known atmospheric pressure and a combustion chamber pressure, as well as the isentropic expansion coefficient.
@@ -258,6 +242,27 @@ def determine_expansion_ratio(combustion_chamber_pressure, atmospheric_pressure,
 
     return 1 / throat_to_exit
 
+def find_equilibrium_throat_area(Cstar, combustion_chamber_pressure, mass_flow):
+    # c* = P_c * A_t / m-dot
+    return Cstar * mass_flow / combustion_chamber_pressure
+
+def find_equilibrium_throat_diameter(Cstar, combustion_chamber_pressure, mass_flow):
+    return 2 * get_radius(find_equilibrium_throat_area(Cstar, combustion_chamber_pressure, mass_flow))
+
+def find_nozzle_length(converging_angle, entrance_diameter, throat_diameter, diverging_angle, exit_diameter, conical_proportion=1):
+    """
+    Find the length of the nozzle consisting of two purely conical sections
+    Converging angle is the radians north of west at the throat
+    Diverging angle is the radians north of east at the throat
+    """
+    entrance_displacement = (entrance_diameter - throat_diameter) / 2
+    exit_displacement = (exit_diameter - throat_diameter) / 2
+
+    entrance_distance = entrance_displacement / np.tan(converging_angle)
+    exit_distance = exit_displacement / np.tan(diverging_angle)
+
+    return entrance_distance + exit_distance * conical_proportion
+#endregion
 
 class Nozzle(PresetObject):
     """
@@ -265,9 +270,8 @@ class Nozzle(PresetObject):
     Maybe in the future it will also be the parent class for a simpler nozzle as well.
     """
 
-    def __init__(self, config={}, fuel_grain=None):
-        self.throat_diameter = 0.03048 # meters
-        self.throat_area = self.get_throat_area()
+    def __init__(self, **kwargs):
+        self.throat_diameter = 0.09 # 0.03048 # meters
         self.area_ratio = 4
         self.throat_temperature = 800 # Kelvin
 
@@ -276,19 +280,31 @@ class Nozzle(PresetObject):
 
         self.overexpanded = False
 
-        super().overwrite_defaults(config)
+        super().overwrite_defaults(**kwargs)
+
+        self.throat_area = self.get_throat_area()
+
+    # TODO: I think I need a self._throat_diameter, but that would break the config functionality (probably). First implement **kwargs, then make setters work properly
+    # @throat_diameter.setter
+    # def throat_diameter(self, value):
+    #     self.throat_diameter = value
+    #     self.throat_area = self.get_throat_area()
+
+    def get_exit_mach(self, chamber_pressure, atmospheric_pressure):
+        pass
 
     def get_throat_area(self):
-        return np.pi * self.throat_diameter ** 2
+        return np.pi * (self.throat_diameter / 2) ** 2
 
     def get_nozzle_coefficient(self, chamber_pressure, atmospheric_pressure):
         """
             Calculate the multiplicative effect that the nozzle has on thrust
+            Uses an exit pressure calculated from CEA
 
             Notice that pressure can be in any units so long as they are all the same
         """
         
-        # The isentropic exponent and the exit pressure is determined by CEA software and updated by our motor class
+        # The isentropic exponent and the exit pressure is determined by CEA software and updated by our motor class. TODO: implement exit pressure calculations myself to validate
 
         isentropic_less = self.isentropic_exponent - 1
         isentropic_more = self.isentropic_exponent + 1
@@ -310,14 +326,17 @@ class Nozzle(PresetObject):
 
 
 if __name__ == "__main__":
-    import matplotlib.pyplot as plt
-    import numpy as np
+    # display_constructed_quadratic()
+    # calculate_nozzle_coordinates_truncated_parabola((0, 0.1), 35 * np.pi / 180, (1, 0.5))
+    # compare_truncated_to_quadratic()
 
-    inputs = np.linspace(20, 50)
-    outputs = []
+    # inputs = np.linspace(20, 50)
+    # outputs = []
+
+    print(determine_expansion_ratio(30, 0.8, 1.2))
     
-    for k in inputs:
-        outputs.append(determine_expansion_ratio(k, 1, 1.3))
+    # for k in inputs:
+    #     outputs.append(determine_expansion_ratio(k, 1, 1.3))
 
-    plt.plot(inputs, outputs)
-    plt.show()
+    # plt.plot(inputs, outputs)
+    # plt.show()

@@ -5,7 +5,8 @@ Potential Issues:
     - The gravity-pressure thing is flipped somewhere
     - If it only has a z-axis drag effect, it will seek the center
 
-
+<!-- TODO: implement @property / @<var>.set for places where it is relevant (many) -->
+<!-- TODO: implement an enum for various data types and get pickling working with random functions -->
 
 # Design Notes
 

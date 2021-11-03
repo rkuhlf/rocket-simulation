@@ -1,44 +1,78 @@
+# ENVIRONMENT CLASS
+# Define an object to store the atmospheric conditions at any position in the world based on th 1976 Standard Atmosphere
+# It models the wind (hopefully it will eventually include gusts, but right now it's a DIY thing that's wrong)
+# Also models air density, pressure, and temperature.
+
 import numpy as np
 import pandas as pd
+
+import sys
+sys.path.append(".")
+
+from Helpers.data import inputs_path
 from Helpers.general import interpolate, get_next
-from preset_object import PresetObject
+from presetObject import PresetObject
 from Data.Input.models import get_density, get_speed_of_sound
 from Helpers.wind import Wind
 
 
 class Environment(PresetObject):
-    def __init__(self, config={}):
+    """
+        Define how the environment works for a simulation (both the motor and the rocket).
+        The most important factor is the time_increment - check out some of the timeStudies to see the effect.
+        The base_altitude is also relatively important, as it can seriously cut down on the air density, decreasing drag
+        
+        The current model implements the 1976 Standard Atmosphere based on Digital Dutch's data as well as a variable gravity model of a perfectly spherical Earth.
+    """
+    
+    def __init__(self, **kwargs):
         self.time = 0
         self.time_increment = 0.01  # seconds
 
         self.earth_mass = 5.972 * 10 ** 24  # kg
-        self.gravitational_constant = 6.67 * 10 ** -11
+        self.gravitational_constant = 6.67 * 10 ** -11  # Newtons kg^-2 m^2
         self.earth_radius = 6371071.03  # m
-        self.base_altitude = 4  # m
+        self.base_altitude = 1300  # m
 
-        self.density_location = "airQuantities"
+
+        self.rail_length = 13.1064 # meters based on 43 feet at White Sands
+
+        self._density_path = "airQuantities.csv"
 
         self.previous_air_density_index = 0
 
         self.apply_wind = True
 
-        super().overwrite_defaults(config)
+        super().overwrite_defaults(**kwargs)
 
+        
+        self.wind = Wind(self.time_increment)
+        self.wind.randomize_direction()
+
+    @property
+    def density_path(self):
+        return self._density_path
+
+    @density_path.setter
+    def density_path(self, p):
+        self._density_path = p
+        self.load_density_data()
+
+    def load_density_data(self):
         # https://www.digitaldutch.com/
-        self.density_data = pd.read_csv(
-            "Data/Input/" + self.density_location + ".csv")
+        self.density_data = pd.read_csv(inputs_path + self._density_path)
         self.density_data.drop(
             columns=["Viscosity", "Temperature", "Pressure"])
         self.altitude_data = np.array(self.density_data["Altitude"])
 
-        self.wind = Wind(self.time_increment)
-        self.wind.randomize_direction()
-
-
     def simulate_step(self):
         self.time += self.time_increment
+
         # Update the wind
 
+    @property
+    def gravitational_acceleration(self):
+        return self.get_gravitational_attraction(1, 0)
 
     def get_gravitational_attraction(self, rocket_mass, altitude):
         """Returns the force (in Newtons) of the Earth's pull on the rocket"""
@@ -79,10 +113,12 @@ class Environment(PresetObject):
 
 
     def get_speed_of_sound(self, altitude):
+        """Look up the speed of sound by the altitude (in kilometers)"""
         return get_speed_of_sound(altitude)
 
 
     def get_air_density_from_model(self, altitude):
+        """Look up a the air density in kg/m^3 by the altitude in km using a fitted polynomial model"""
         # From the polynomial models file
         return get_density(altitude)
 

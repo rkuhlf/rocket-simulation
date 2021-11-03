@@ -9,23 +9,23 @@ import numpy as np
 import sys
 sys.path.append(".")
 
-from preset_object import PresetObject
-
+from presetObject import PresetObject
+from RocketParts.Motor.grain import Grain
 
 
 
 class CombustionChamber(PresetObject):
 
-    def __init__(self, config={}, fuel_grain=None):
-        self.fuel_grain = fuel_grain
+    def __init__(self, **kwargs):
+        self.fuel_grain = Grain()
 
         # The inside of the engine starts off at atmospheric conditions
         # Starts at this and we change it manually
         self.pressure = 101300 # Pa
         # Instantly goes to the adiabatic (?) flame temperature
-        # FIXME: For some reason I am not using this temperature value anywhere. I am 40% sure that I should be. The other 60% thinks that we have the system defined in terms of pressure, and the only thing we need the temperature for is to find the density, which CEA already knows
         self.temperature = 273.15 + 23 # Kelvin
         self.p_temperature = self.temperature
+        self.mass_flow_out = 0
         # P / RT = rho
         # Actually it turns out there is a wacko condition in the way MW is calculated and it is easiest just to use the density output by CEA; I think it does it with M but it might be with MW
         # Please do not use the value from CEA here, that will ruin the whole point of the calculations. We have to find our own pressure, because we have to find our own mass
@@ -34,7 +34,7 @@ class CombustionChamber(PresetObject):
         self.density = 4  # kg/m^3
         self.cstar = 1500 # m/s
 
-        super().overwrite_defaults(config)
+        super().overwrite_defaults(**kwargs)
 
         #region CALCULATED
         # TODO: actually calculate it based on P = pRT
@@ -42,8 +42,9 @@ class CombustionChamber(PresetObject):
 
         #endregion
 
-    def get_volume(self):
-        return np.pi * self.fuel_grain.inner_radius ** 2
+    @property
+    def volume(self):
+        return np.pi * self.fuel_grain.port_radius ** 2
 
     def get_change_in_pressure(self, apparent_mass_flow):
         '''
@@ -57,7 +58,8 @@ class CombustionChamber(PresetObject):
         # TODO: R is broken right now. I don't know how to calculate; probably just use the M value from CEA
         # So this gives the change in pressure due to mass flow, but it doesn't account for any change in pressure due to temperature change
         # Look: PV = nRT. We are assuming this to be true; it's pretty safe. We are accounting for the change in n right now. V is not changing and P is the output. However, T is also changing, and we need to deal with that. Probably, the easiest thing is to store the previous frame's temperature and multiply by the ratio. 
-        return apparent_mass_flow * self.ideal_gas_constant * self.temperature / self.get_volume()
+        print(apparent_mass_flow)
+        return apparent_mass_flow * self.ideal_gas_constant * self.temperature / self.volume
 
     def update_combustion(self, ox_mass_flow, nozzle, time_increment):
         # From the grain and the ox mass flow, calculate the mass flow of fuel
@@ -66,21 +68,22 @@ class CombustionChamber(PresetObject):
 
         # Calculates the O/F ratio based on a given ox mass flow and the fuel we just calculated
         OF = ox_mass_flow / fuel_flow
+        # TODO: add a graph of O/F over time (this is the most important thing for balancing stuff)
 
         # Calculate the mass flow out (requires nozzle throat)
-        mass_flow_out = self.pressure * nozzle.throat_area / self.cstar
+        self.mass_flow_out = self.pressure * nozzle.throat_area / self.cstar
+        
 
         volume_regressed = self.fuel_grain.get_volume_flow() * time_increment
 
         # Update the pressure in the system. Uses the previously calculated mass flux out
         # mass flow into the chamber
-        effective_mass_flow_total = ox_mass_flow + (self.fuel_grain.density - self.density) * volume_regressed - mass_flow_out
+        effective_mass_flow_total = ox_mass_flow + (self.fuel_grain.density - self.density) * volume_regressed - self.mass_flow_out
 
         # It's hard to say whether it is more accurate to multiply by temperature first or do the addition first.
         # The difference between approaches should tend to zero as the time increment approaches zero
         self.pressure *= self.temperature / self.p_temperature
-        # print("Ratio", self.temperature / self.p_temperature)
-        # print("Temp", self.temperature)
+
         self.p_temperature = self.temperature
 
         pressure_increase_rate = self.get_change_in_pressure(effective_mass_flow_total)

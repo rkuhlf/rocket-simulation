@@ -1,16 +1,18 @@
+# PARACHUTE CLASS
+
 from numpy import pi
-from preset_object import PresetObject
+from RocketParts.massObject import MassObject
 
 
-# Linear interpolation of radius does not make sense. Any time you change the radius (reference area, you have to recalculate the CD)
-class Parachute(PresetObject):
+class Parachute(MassObject):
     def calculate_area(self, radius=None):
         if radius is not None:
             self.radius = radius
 
         self.area = pi * self.radius ** 2
 
-    def __init__(self, config={}):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.radius = 1  # meters, I'm just making it up
         self.drag_coefficient = 1.0
         self.mass = 0.01  # kg
@@ -20,14 +22,14 @@ class Parachute(PresetObject):
 
         self.deployed = False
 
-        super().overwrite_defaults(config)
+        super().overwrite_defaults(**kwargs)
 
         self.calculate_area()
 
 
     def should_deploy(self, rocket):
         if rocket.turned and rocket.position[2] < self.target_altitude and not self.deployed:
-            print("Should deploy thinks true")
+            # print("Should deploy thinks true")
             return True
 
         return False

@@ -15,22 +15,22 @@ from environment import Environment
 from RocketParts.motor import Motor
 from rocket import Rocket
 from RocketParts.parachute import ApogeeParachute, Parachute
-from logger import Feedback_Logger 
-from simulation import Simulation
+from logger import RocketLogger 
+from simulation import RocketSimulation
 
 env = Environment({"time_increment": 0.1})
 motor = Motor()
 drogue_parachute = ApogeeParachute({"radius": 0.2})
 main_parachute = Parachute()
 rocket = Rocket(environment=env, motor=motor, parachutes=[drogue_parachute, main_parachute])
-logger = Feedback_Logger(
+logger = RocketLogger(
     rocket,
     ['position', 'velocity', 'acceleration', 'rotation', 'angular_velocity',
      'angular_acceleration'])
 
 logger.splitting_arrays = True
 
-sim = Simulation(environment=env, rocket=rocket, logger=logger)
+sim = RocketSimulation(environment=env, rocket=rocket, logger=logger)
 
 sim.run_simulation()
 ```
@@ -41,6 +41,8 @@ I have tried to use object-oriented practices for all of the modelling. Each com
 I have tried to use the *if __name__ == "__main__" idiom wherever a file has code that is meant to be run. In addition, files that should be run begin with a capital letter, as well as all folder names.
 
 There are many ways to program multiple objects so that they take data differently but perform the same calculations on it. At the moment, I am trying to have the main parent object for a class always accept a few different kinds of `set_` function, like `set_constant_mass` or `set_CG_function` or `set_thrust_table`. However, implementing these must always result in a change to the properties of the object, otherwise preset object will not be able to save it properly.
+
+This readme file is really long, so I have more information about the design practices listed under a designNotes.md file.
 
 ## A Note on Preset Object
 The idea is that eventually everything will be saveable. Also it allows the settings to be passed in as a config argument. I know there are other idioms like *kwargs that may be better suited for this, I might swap everything out later.
@@ -54,7 +56,7 @@ Since the program is based on relatively complex mathematical algorithms that ar
 I am using an Euler approximation to solve the differential equations, which may mean that the time increment must be small before it is accurate. The simulation has five degrees of freedom, which means that it calculates motion in the x, y, and z coordinates as well as the yaw and pitch of the rocket (roll is not calculated). Also, the rocket always has one angle of attack because it is assumed to be a rigid body (I still need to add in some bending moment calculations).
 
 ### Thrust
-Right now, I am assuming that thrust always acts directly through the center of gravity (it causes no rotation; thus there is no propulsive restoring moment), and that it doesn't affect drag (no CD - Power On or CD - Power Off). There is no implementation for thrust vectoring / gimballing. However, the base motor class does have a few scaling factors, which should be implemented in all of the subclasses and allow you to arbitrarily scale up the burn time or the thrust output.
+Right now, I am assuming that thrust always acts directly through the center of gravity (it causes no rotation; thus there is no propulsive restoring moment), and that it doesn't affect drag (no CD - Power On or CD - Power Off). There is no implementation for thrust vectoring / gimballing. However, the base motor class does have a few scaling factors, which should be implemented in all of the subclasses and allow you to arbitrarily scale up the burn time or the thrust output. The profile is currently a scaled up version of (this motor)[https://www.thrustcurve.org/simfiles/5f4294d20002e900000004d1/], but I would like to replace it with my own simulation eventually.
 
 ### Gravitational Pull
 I am using the equation for gravitational attraction between two bodies, `weight = G * m * m / distance ^ 2`. The weight always acts in the negative z direction.
@@ -87,22 +89,21 @@ The general idea is that wind speeds follow a Weibull distribution. Using perlin
 I plan to implement some wind simulations based on a table of wind data from White Sands shortly.
 
 ### Notation of Implementation
-I use coordinates x, y, and z in that order, with indicating the vertical axis. Angles are defined in terms of a rotation around the vertical axis, starting from facing the positive x-axis, and a rotation down from the vertical, basically around the perpendicular of the object. It may be easier to think of the two angles as a rotation down around the y-axis followed by a rotation around the z-axis. These angles don't correspond particularly well with yaw and torque because they are not relative to the way the rocket faces initially.
+I use coordinates x, y, and z in that order, with indicating the vertical axis. Angles are defined in radians in terms of a rotation around the vertical axis, starting from facing the positive x-axis, and a rotation down from the vertical, basically around the perpendicular of the object. It may be easier to think of the two angles as a rotation down around the y-axis followed by a rotation around the z-axis. These angles don't correspond particularly well with yaw and torque because they are not relative to the way the rocket faces initially.
 
 ## Motor Simulation
 Everything in the motor is based off of Paraffin and Nitrous without any pressurant (though it should be easy to add). Again, I am using the explicit (https://en.wikipedia.org/wiki/Explicit_and_implicit_methods) Euler approximation to solve each time step.
 
 ### Ox Tank
-The ox tank is simulated using fitted properties from http://edge.rit.edu/edge/P07106/public/Nox.pdf. The calculations assume the tank is adiabatic and there is thermodynamic equilibrium between the gas and liquid. As I understand it, this should give a good lower bound for pressure, thus a lower bound for ox mass flow.
+The ox tank is simulated using fitted properties from http://edge.rit.edu/edge/P07106/public/Nox.pdf. The calculations assume the tank is adiabatic and there is thermodynamic equilibrium between the gas and liquid. As I understand it, this should give a good lower bound for pressure, thus a lower bound for ox mass flow. You can read more about how I implemented it in [this Google doc](https://docs.google.com/document/d/1wdYWqgM0Wl63pFUSrCRhfAZ8hQWpamdUno7EoJ8Q770/edit?usp=sharing).
 
 ### Injector
 Because Nitrous is an extremely volatile liquid, the calculations performed by the injector must model two-phase flow - the equilibrium of liquid and gas through a small orifice. I plan to eventually implement a calculation proposed by Dyer based on experiments on the Peregrine rocket, in which the mass flow rate is determined by an interpolation between single phase flow and complete phase equilibrium (also assuming thermodynamic equilibrium and equal velocity between the gas and liquid phase).
 
 ### Combustion Chamber
-The combustion chamber only calculates the evolution of conditions within the space. It does not account for the effects of pre or post combustion spaces in anything other than volume. It uses the conservation of mass and assumes the ideal gas law in order to model the pressure over time (you can read through the derivation of the equation [http://mathb.in/66333]), storing the relevant information in pressure, volume, and density variables (notice that we do not need to include moles or mass within the chamber, the information is implicit and can be calculated from what we do store). Most of the combustion characteristics are taken from CEA, and the temperature in the combustion chamber is assumed to reach the combustion flame temperature instantly.
+The combustion chamber only calculates the evolution of conditions within the space. It does not account for the effects of pre or post combustion spaces in anything other than volume. It uses the conservation of mass and assumes the ideal gas law in order to model the pressure over time (you can read through the derivation of the equation [here](https://www.overleaf.com/read/fphwwxgjvqbf)), storing the relevant information in pressure, volume, and density variables (notice that we do not need to include moles or mass within the chamber, the information is implicit and can be calculated from what we do store). Most of the combustion characteristics are taken from CEA, and the temperature in the combustion chamber is assumed to reach the combustion flame temperature instantly.
 
 DISCLAIMER: Right now the combustion chamber pressure over time is not correct at all.
-<!-- TODO: write a pastebin from http://mathb.in/ for the derivation of the pressure evolution equation -->
 
 #### Fuel Grain
 Since the fuel grain is housed in the combustion chamber, it is basically a child object of the combustion chamber in the code. At the moment, I have only implemented the highly-empirical, space-averaged equation that has grown out of Marxman's original research (`r-dot = a * G_ox ** n`), with coefficients collected from https://stacks.stanford.edu/file/druid:ng346xh6244/BenjaminWaxmanFinal-augmented.pdf, but you can probably find equally good numbers from other (much shorter) sources.
@@ -123,10 +124,17 @@ I also have a ToBlender.py file which can export your .csv file to Blender 3D. U
 # Unfortunate Eccentricities
 There are a few artifacts in my code due to my programming environment.
 
-I frequently use  `import sys \ sys.path.append(".")`. This is because when Visual Studio Code runs a file in a folder, it doesn't include the project folder for imports (at least it doesn't on my computer). That code adds it.
+I frequently use `import sys \ sys.path.append(".")`. This is because when Visual Studio Code runs a file in a folder, it doesn't include the project folder for imports (at least it doesn't on my computer). That code adds it.
+
+I use `#region` and VS Code (maybe some extension) to create foldable sections of code. Sorry if it gets in the way a little or it doesn't work with your editor
 
 There is a .replit file for when I occasionally need the configuration to edit my code online.
 
 Also, the tests for the code are completely disorganized, but there are a few basic ones that I would like to expand on located in the *Tests* folder. I have never been good at keeping track of tests, and I found it extremely difficult to update them regularly.
 
 My Git commit history is also a mess. I have been using Github mainly as a cloud storage service, since I have to use several different devices during the day, and many of the commits are half-finished edits. I apologize. 
+
+# Sources / Further Reading
+- Notes on Multiple Degrees of Freedom for Goddard 2021-2022](https://docs.google.com/document/d/1VEkxpdZ9q7t6uQZ0db8XvYZEkJN-9KKGfAi_a7vk-ag/edit?usp=sharing)
+- I really think this [Topics in Advanced Model Rocketry](https://www.apogeerockets.com/Rocket_Books_Videos/Books/Topics_In_Advanced_Model_Rocketry) book would have been super helpful, but I could never get my hands on it.
+- The designNotes.md file has most of the imformation about programming-oriented decisions that I made.
