@@ -55,8 +55,30 @@ def display_efficiency(data):
 
 
 def display_overall(data):
-    total_impulse = np.sum(data["thrust"]) * data["time"][1]
+    total_impulse = np.sum(data["thrust"]) * (data["time"][2] - data["time"][1])
     print(f"TOTAL IMPULSE: {total_impulse}")
+    burn_time = data["time"].values[-1]
+    print(f"BURN TIME: {burn_time}")
+    average_thrust = total_impulse / burn_time
+    print(f"BURN TIME: {average_thrust}")
+
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
+
+    ax1.plot(data["time"], data["thrust"])
+    ax1.set(title="Thrust Over Time", xlabel="Time [s]", ylabel="Thrust [N]")
+
+    # ax2.plot(data["time"], np.array(data["combustion_chamber.fuel_grain.port_diameter"]) * 100)
+    # ax2.set(title="Grain Diameter", xlabel="Time [s]", ylabel="Diameter [cm]")
+
+    # ax3.plot(data["time"], data["combustion_chamber.cstar"])
+    # ax3.set(title="Combustion Efficiency", xlabel="Time [s]", ylabel="C* [m/s]")
+
+    # ax4.plot(data["time"], data["specific_impulse"])
+    # ax4.set(title="Combustion Efficiency", xlabel="Time [s]", ylabel="Specific Impulse [s]")
+
+    fig.tight_layout()
+
+    plt.show()
 
 
 
@@ -72,6 +94,9 @@ def display_optical_analysis(target):
     display_pressures(data)
     display_efficiency(data)
     display_flows(data)
+
+
+    display_overall(data)
 
 
 

@@ -188,7 +188,6 @@ class OxTank(PresetObject):
 
     @temperature.setter
     def temperature(self, t):
-        print(f"Setting ox temp to {t}")
         self._temperature = t
         if hasattr(self, 'ullage'):
             self.calculate_ullage(constant_temperature=True)
@@ -323,7 +322,7 @@ if __name__ == '__main__':
     
     # print(find_specific_enthalpy_of_gaseous_nitrous(273 - 0))
     ox_mass = 70  # kg
-    # 3ish cubic feet converted to meters cubed
+    # 4ish cubic feet converted to meters cubed
     volume = 4 / 35.3147
     print(find_ullage(ox_mass, volume, 298, constant_temperature=False))
     print(find_ullage(ox_mass, volume, 298, constant_temperature=True))

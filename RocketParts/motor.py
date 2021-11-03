@@ -203,7 +203,11 @@ class CustomMotor(Motor):
 
         # I have no idea how I have made it this far without considering the O/F. The ox-fuel ratio should determine the C-star.
         # Actually, I guess all that I need is the chamber temperature and the average molar mass
-        self.OF = self.ox_flow / self.fuel_flow
+        if self.fuel_flow == 0:
+            self.OF = 100
+        else:
+            self.OF = self.ox_flow / self.fuel_flow
+        
         self.update_values_from_CEA(self.combustion_chamber.pressure, self.OF)
 
 

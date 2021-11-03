@@ -150,12 +150,14 @@ class Injector(PresetObject):
         return get_cross_sectional_area(self.orifice_count, self.orifice_diameter)
 
 
-
     def mass_flow_function(self):
         # This is just the model for single phase incompressible
         upstream_pressure = self.ox_tank.pressure
         downstream_pressure = self.combustion_chamber.pressure
         pressure_drop = upstream_pressure - downstream_pressure
+
+        if pressure_drop < 0:
+            return 0
 
         density = get_liquid_nitrous_density(self.ox_tank.temperature)
 
@@ -163,7 +165,7 @@ class Injector(PresetObject):
 
         area_ratio = self.total_orifice_area / self.combustion_chamber.fuel_grain.get_outer_cross_sectional_area()
         
-        return discharge_coefficient * self.total_orifice_area * ((2 * density * pressure_drop) / (1 - area_ratio ** 2)) ** (1 / 2)
+        return discharge_coefficient * self.total_orifice_area * ((2 * density * pressure_drop) / (1 - area_ratio) ** 2) ** (1 / 2)
 
 
     def set_mass_flow_function(self, func):

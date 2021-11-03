@@ -271,10 +271,16 @@ class Nozzle(PresetObject):
     """
 
     def __init__(self, **kwargs):
-        self.throat_diameter = 0.09 # 0.03048 # meters
+        """
+        :param double throat_diameter: the diameter of the smallest cross section of the nozzle (in meters)
+        :param double area_ratio: The ratio between the area of the exit and the area of the throat; also called epsilon
+        """
+
+        self.throat_radius = 0.045 # 0.03048 # meters
         self.area_ratio = 4
         self.throat_temperature = 800 # Kelvin
 
+        # Both are  overriden by a CEA lookup in the actual motor simulation
         self.isentropic_exponent = 1.3
         self.exit_pressure = 100000 # Pascals. Assumes the nozzle is optimized for sea level
 
@@ -282,19 +288,22 @@ class Nozzle(PresetObject):
 
         super().overwrite_defaults(**kwargs)
 
-        self.throat_area = self.get_throat_area()
+    @property
+    def throat_diameter(self):
+        return self.throat_radius * 2
 
-    # TODO: I think I need a self._throat_diameter, but that would break the config functionality (probably). First implement **kwargs, then make setters work properly
-    # @throat_diameter.setter
-    # def throat_diameter(self, value):
-    #     self.throat_diameter = value
-    #     self.throat_area = self.get_throat_area()
+    @throat_diameter.setter
+    def throat_diameter(self, value):
+        self.throat_radius = value / 2
+
 
     def get_exit_mach(self, chamber_pressure, atmospheric_pressure):
         pass
 
-    def get_throat_area(self):
-        return np.pi * (self.throat_diameter / 2) ** 2
+    @property
+    def throat_area(self):
+        return np.pi * self.throat_radius ** 2
+        
 
     def get_nozzle_coefficient(self, chamber_pressure, atmospheric_pressure):
         """

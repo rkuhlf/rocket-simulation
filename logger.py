@@ -177,7 +177,7 @@ class MotorLogger(FeedbackLogger):
         # You need to make sure the parent's override doesn't override the self values we have already established
         super().__init__(motor)
 
-        self.to_record = ["combustion_chamber.pressure", "ox_tank.pressure", "combustion_chamber.temperature", "ox_tank.temperature", "combustion_chamber.fuel_grain.port_diameter", "OF", "combustion_chamber.cstar", "specific_impulse", "fuel_flow", "ox_flow", "mass_flow"]
+        self.to_record = ["thrust", "combustion_chamber.pressure", "ox_tank.pressure", "combustion_chamber.temperature", "ox_tank.temperature", "combustion_chamber.fuel_grain.port_diameter", "OF", "combustion_chamber.cstar", "specific_impulse", "fuel_flow", "ox_flow", "mass_flow"]
 
         #     ox_pressures.append(ox.pressure)
         #     thrusts.append(motor.thrust)
