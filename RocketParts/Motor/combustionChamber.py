@@ -44,7 +44,7 @@ class CombustionChamber(PresetObject):
 
     @property
     def volume(self):
-        return np.pi * self.fuel_grain.inner_radius ** 2
+        return np.pi * self.fuel_grain.port_radius ** 2
 
     def get_change_in_pressure(self, apparent_mass_flow):
         '''

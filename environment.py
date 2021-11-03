@@ -70,6 +70,9 @@ class Environment(PresetObject):
 
         # Update the wind
 
+    @property
+    def gravitational_acceleration(self):
+        return self.get_gravitational_attraction(1, 0)
 
     def get_gravitational_attraction(self, rocket_mass, altitude):
         """Returns the force (in Newtons) of the Earth's pull on the rocket"""

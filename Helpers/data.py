@@ -1,7 +1,7 @@
 # DATA CLASSES AND ENUMS
 # Depending on what type of data input we are using, we will want to have an enum entry that is easily serializable to indicate to the object what to do
 
-
+import re
 from enum import Enum, auto
 
 #region CONSTANTS
@@ -19,4 +19,37 @@ class DataType(Enum):
     CONSTANT = auto()
     FUNCTION_TIME = auto()
 
+
+def nested_dictionary_lookup(dictionary, key):
+    if len(key) == 0:
+        raise Exception("Empty key passed in")
+
+    key_array = re.split("\.|/|,", key)
+
+    return nested_dictionary_lookup_array(dictionary, key_array)
+
+
+def nested_dictionary_lookup_array(dictionary, key_array):
+    """Helper for regular nested lookup, uses array of keys"""
+    if len(key_array) == 0:
+        raise Exception("Empty key array passed in")
+
+    current = key_array[0]
+
+    if isinstance(dictionary, object):
+        if len(key_array) == 1:
+            return getattr(dictionary, current)
+    
+        del key_array[0]
+
+        return nested_dictionary_lookup_array(getattr(dictionary, current), key_array)
+
+    else:
+        if len(key_array) == 1:
+            return dictionary[current]
+    
+        del key_array[0]
+
+        return nested_dictionary_lookup_array(dictionary[current], key_array)
+    
 

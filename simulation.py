@@ -161,16 +161,12 @@ class RocketSimulation(Simulation):
     def simulate_step(self):
         self.rocket.simulate_step()
         self.environment.simulate_step()
-        if self.logger is not None:
-            # Also saves the row
-            self.logger.handle_frame()
-        
-        # TODO: check that this rail_gees is good based on the output.csv file. Right now it seems a teeny bit high
+
         if self.environment.rail_length < self.rocket.position[2] and self.rail_gees is None:
             self.rail_gees = self.rocket.gees
             self.rail_velocity = magnitude(self.rocket.velocity)
-
-        self.frames += 1
+        
+        super().simulate_step()
 
     @property
     def should_continue_simulating(self):
@@ -221,6 +217,8 @@ class MotorSimulation(Simulation):
     """
 
     def override_subobjects(self):
+        super().override_subobjects()
+
         if self.motor is not None:
             if self.motor.logger is not self.logger:
                 self.motor.logger = self.logger
@@ -228,7 +226,7 @@ class MotorSimulation(Simulation):
             if self.motor.environment is not self.environment:
                 self.motor.environment = self.environment
 
-            self.grain.stop_on_error = self.stop
+            self.grain.stop_on_error = self.stop_on_error
 
     def __init__(self, **kwargs):
         self._environment = Environment()
@@ -260,11 +258,18 @@ class MotorSimulation(Simulation):
 
 
     def simulate_step(self):
+        self.motor.simulate_step()
+        self.environment.simulate_step()
+
+        # if self.environment.rail_length < self.rocket.position[2] and self.rail_gees is None:
+        #     self.rail_gees = self.rocket.gees
+        #     self.rail_velocity = magnitude(self.rocket.velocity)
+        
         super().simulate_step()
 
     @property
     def should_continue_simulating(self):
-        return self.tank.pressure < self.chamber.pressure or self.tank.ox_mass <= 0 or self.grain.inn
+        return self.tank.pressure > self.chamber.pressure and self.tank.ox_mass > 0 and self.grain.port_diameter < self.grain.outer_diameter
         
     #region Shortcuts for easier access
     @property

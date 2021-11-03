@@ -18,11 +18,9 @@ from RocketParts.Motor.grain import Grain
 from RocketParts.Motor.injector import Injector
 from RocketParts.Motor.combustionChamber import CombustionChamber
 from RocketParts.Motor.nozzle import Nozzle
+from logger import MotorLogger
 
 
-# TODO: have a base Motor class
-# Have a data motor class that inherits from it and has several types of data inputs that work with an enum so as to be serializable
-# That custom motor class also needs to integrate with it
 
 class Motor(MassObject):
     # TODO: rewrite so I can have some variable names that actually make sense. Right now, .total_impulse just gives you a value that is literally not the total impulse
@@ -140,7 +138,6 @@ class Motor(MassObject):
 
 class CustomMotor(Motor):
     def __init__(self, **kwargs):
-        # Don't really need to do anything from super in init
         self.thrust_multiplier = 1
         self.time_multiplier = 1
         self.finished_thrusting = False
@@ -153,8 +150,10 @@ class CustomMotor(Motor):
         self.data_path = "./Data/Input/CombustionLookup.csv"
         self.data = pd.read_csv(self.data_path)
 
-        super().__init__(**kwargs)
-        super().overwrite_defaults(**kwargs)
+        self.logger = MotorLogger(self)
+
+        super().__init__()
+        self.overwrite_defaults(**kwargs)
 
         # This is only defined as a cached variable to provide easier graphing
         self.thrust = 0
@@ -194,19 +193,17 @@ class CustomMotor(Motor):
                 # To make sure that we always get a number, I am going to always pick the row that has an O/F ratio immediately above the current value
                 looking_for_pressure = True
 
+    
 
     def simulate_step(self):
         # upstream_pressure = self.ox_tank.pressure
         # downstream_pressure = self.combustion_chamber.pressure
-        ox_flow = self.injector.get_mass_flow()
-        self.ox_tank.update_drain(ox_flow * self.environment.time_increment)
-        self.combustion_chamber.update_combustion(ox_flow, self.nozzle, self.environment.time_increment)
-
-        fuel_flow = self.combustion_chamber.fuel_grain.mass_flow
+        self.ox_tank.update_drain(self.ox_flow * self.environment.time_increment)
+        self.combustion_chamber.update_combustion(self.ox_flow, self.nozzle, self.environment.time_increment)
 
         # I have no idea how I have made it this far without considering the O/F. The ox-fuel ratio should determine the C-star.
         # Actually, I guess all that I need is the chamber temperature and the average molar mass
-        self.OF = ox_flow / fuel_flow
+        self.OF = self.ox_flow / self.fuel_flow
         self.update_values_from_CEA(self.combustion_chamber.pressure, self.OF)
 
 
@@ -216,6 +213,26 @@ class CustomMotor(Motor):
         # TODO: I want to reimplement this so that the nozzle is giving mass flow and exit velocity values. I think both ways should work, but that way will be easier to compare, and I am not sure that my nozzle coefficient calculation is correct
         self.thrust = nozzle_coefficient * self.nozzle.throat_area * self.combustion_chamber.pressure
 
+
+    # region Helper Properties
+    @property
+    def ox_flow(self):
+        # Actually it is probably bad not to cache this; there is a square root call
+        return self.injector.get_mass_flow()
+
+    @property
+    def fuel_flow(self):
+        return self.combustion_chamber.fuel_grain.mass_flow
+
+    @property
+    def mass_flow(self):
+        return self.ox_flow + self.fuel_flow
+
+    @property
+    def specific_impulse(self):
+        return self.thrust / self.mass_flow / self.environment.gravitational_acceleration
+
+    # endregion
 
 
 

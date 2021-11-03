@@ -4,8 +4,10 @@
 
 import numpy as np
 import pandas as pd
+from copy import deepcopy, copy
+
 from presetObject import PresetObject
-from copy import deepcopy
+from Helpers.data import nested_dictionary_lookup
 
 # TODO: import the magnitude method from helpers instead of np.linalg.norm
 
@@ -45,7 +47,6 @@ class Logger(PresetObject):
         """
             Update the current row of data, which should eventually be saved by save_row
         """
-        # print(self.splitting_arrays)
         if self.splitting_arrays:
             k = list(data.keys())[0]
             v = list(data.values())[0]
@@ -70,8 +71,11 @@ class Logger(PresetObject):
         """
             This is the only thing that needs to be run for the logger to work in the Simulation class (also the save_to_csv)
         """
+        self.add_items({'time': self.simulation.environment.time})
+
         for key in self.to_record:
-            self.add_items({key: self.rocket.__dict__[key].copy()})
+            value = copy(nested_dictionary_lookup(self.logging_object, key))
+            self.add_items({key: value})
 
         self.save_row()
 
@@ -79,7 +83,7 @@ class Logger(PresetObject):
         df = pd.DataFrame(self.rows)
         # Rather than using the index (0, 1, 2, 3, 4...), I will index the rows by the time the row is recorded at
         df.set_index('time', inplace=True)
-
+        
         df.to_csv(self.full_path)
 
         return df
@@ -90,34 +94,45 @@ class Logger(PresetObject):
         """
         self.__init__(self.logging_object, self.to_record)
 
-
-class RocketLogger(Logger):
-    """
-        Logs the progress of the rocket simulation along with some print statements.
-    """
-
+class FeedbackLogger(Logger):
     def print(self, statement):
         if self.verbose:
             print(statement)
 
-    def __init__(self, rocket, **kwargs):
+    def __init__(self, logging_object, **kwargs):
         self.verbose = True
 
-        # We have some slightly different defaults in this child class
+        super().__init__(logging_object)
+
+        self.overwrite_defaults(**kwargs)
+
+        self.print("Logger is prepared to run simulation")
+
+    
+    def save_to_csv(self):
+        self.print(super().save_to_csv())
+
+        self.print(f"Saved the trial to csv at {self.full_path}")
+
+
+class RocketLogger(FeedbackLogger):
+    """
+        Logs the progress of the rocket simulation along with some print statements.
+    """
+
+    def __init__(self, rocket, **kwargs):
         self.to_record = ['position', 'velocity', 'acceleration', 'rotation', 'angular_velocity',
         'angular_acceleration']
         
         # You need to make sure the parent's override doesn't override the self values we have already established
-        super().__init__(rocket, **self.__dict__, **kwargs)
+        super().__init__(rocket)
+        self.overwrite_defaults(**kwargs)
 
         self.printed_rail_stats = False
         self.printed_thrusted = False
         self.turned = False
 
-        self.print("Logger is prepared to launch rocket")
-
     # Make it so that you can access it via either the logging_object or rocket property
-    # TODO: do the same for Motor
     @property
     def rocket(self):
         return self.logging_object
@@ -153,7 +168,62 @@ class RocketLogger(Logger):
                  self.rocket.environment.time))
 
 
-    def save_to_csv(self):
-        self.print(super().save_to_csv())
+class MotorLogger(FeedbackLogger):
+    """
+        Logs the progress of the custom motor simulation along with some print statements.
+    """
 
-        self.print(f"Saved the trial to csv at {self.full_path}")
+    def __init__(self, motor, **kwargs):
+        # You need to make sure the parent's override doesn't override the self values we have already established
+        super().__init__(motor)
+
+        self.to_record = ["combustion_chamber.pressure", "ox_tank.pressure", "combustion_chamber.temperature", "ox_tank.temperature", "combustion_chamber.fuel_grain.port_diameter", "OF", "combustion_chamber.cstar", "specific_impulse", "fuel_flow", "ox_flow", "mass_flow"]
+
+        #     ox_pressures.append(ox.pressure)
+        #     thrusts.append(motor.thrust)
+        #     chamber_temperatures.append(motor.combustion_chamber.temperature)
+        #     ox_temperatures.append(ox.temperature)
+        #     grain_diameters.append(grain.inner_radius * 2)
+        #     OFs.append(motor.OF)
+        #     c_stars.append(motor.combustion_chamber.cstar)
+        #     specific_impulses.append(motor.thrust / (motor.combustion_chamber.mass_flow_out * 9.81))
+
+        self.overwrite_defaults(**kwargs)
+
+        # self.printed_rail_stats = False
+        # self.printed_thrusted = False
+        # self.turned = False
+
+    @property
+    def motor(self):
+        return self.logging_object
+
+    @motor.setter
+    def motor(self, m):
+        self.logging_object = m
+
+    def handle_frame(self):
+        super().handle_frame()
+
+        # if not self.printed_rail_stats and self.rocket.position[2] > self.rocket.environment.rail_length:
+        #     self.printed_rail_stats = True
+
+        #     self.print(f"Off the rail, the rocket has {self.rocket.gees} gees")
+
+        # if self.rocket.descending and not self.turned:
+        #     self.print('Reached the turning point at %.3s seconds with a height of %.5s meters' % (
+        #         self.rocket.environment.time, self.rocket.position[2]))
+        #     self.turned = True
+        #     self.print('The highest velocity during ascent was %.1f m/s, and the highest mach number was %.2f' % (
+        #         self.simulation.max_velocity, self.simulation.max_mach))
+
+
+        # if not self.printed_thrusted and self.rocket.motor.finished_thrusting:
+        #     self.print('Finished thrusting after %.3s seconds' % self.rocket.environment.time)
+        #     self.printed_thrusted = True
+
+        # if self.rocket.landed:
+        #     self.print(
+        #         "Rocket landed with a speed of %.3s m/s after %.4s seconds of flight time" %
+        #         (np.linalg.norm(self.rocket.velocity),
+        #          self.rocket.environment.time))

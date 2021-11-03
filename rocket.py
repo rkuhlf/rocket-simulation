@@ -104,7 +104,6 @@ class Rocket(MassObject):
 
     def simulate_step(self):
         self.calculate_cached()
-        self.log_data('time', self.environment.time)
 
 
         # First, apply all of the forces to the rocket

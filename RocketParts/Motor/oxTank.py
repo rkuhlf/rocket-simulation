@@ -165,7 +165,7 @@ class OxTank(PresetObject):
 
 
     def __init__(self, **kwargs):
-        self.temperature = 293.15 # Kelvin
+        self._temperature = 293.15 # Kelvin
         self.length = 3.7 # m
         self.radius = 0.1016 # m
         self.ox_mass = 70.0 # kg
@@ -177,11 +177,20 @@ class OxTank(PresetObject):
 
         # Initialize the ullage in-place after declaring it
         self.ullage = 0
-        self.calculate_ullage()
+        # When somebody sets the starting, they probably actually want it to be that temperature
+        self.calculate_ullage(constant_temperature=True)
 
-    def set_temperature(self, temperature):
-        self.temperature = temperature
-        self.calculate_ullage()
+
+    @property
+    def temperature(self):
+        return self._temperature
+
+    @temperature.setter
+    def temperature(self, t):
+        print(f"Setting ox temp to {t}")
+        self._temperature = t
+        if hasattr(self, 'ullage'):
+            self.calculate_ullage(constant_temperature=True)
 
     #region Getters
     def get_volume(self):
@@ -232,7 +241,7 @@ class OxTank(PresetObject):
     #endregion
 
     def calculate_ullage(self, constant_temperature=False, iterations=3, iters_so_far=0, warnings=True):
-        # FIXME: Right now, there are a lot of issues in the gas only phase. It spikes up to make the thing match
+        # FIXME: Right now, there are a lot of issues in the gas only phase. I just made it constant because I don't know the math yet
         """
         Calculate indicates that it will not return a value, but there are side effects to the object - it changes the object.
         In this case it returns the ullage fraction and changes the temperature
@@ -261,9 +270,10 @@ class OxTank(PresetObject):
 
             total_heat_capacity = self.get_combined_total_heat_capacity()
             temperature_change = -heat_absorbed / total_heat_capacity
-            self.temperature += temperature_change
+            # Set _temperature rather than calling set_temperature, which calls calculate_ullage again
+            self._temperature += temperature_change
 
-            self.calculate_ullage(iterations=iterations, iters_so_far=iters_so_far + 1)
+            self.calculate_ullage(iterations=iterations, iters_so_far=iters_so_far + 1, constant_temperature=constant_temperature)
         else:
             # I think it is bad to end on a temperature change, it is giving me some serious inaccuracies because it changes the density significantly. Therefore, I will recalculate the distributions with the new temperature
             # TODO: refactor this into a separate private equation
