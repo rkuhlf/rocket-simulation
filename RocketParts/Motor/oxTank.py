@@ -101,6 +101,7 @@ def find_nitrous_volume(mass, temperature, ullage=0):
     return (mass / get_liquid_nitrous_density(temperature)) / (1 - ullage)
 
 def find_volume(radius, length):
+    # TODO: replace with cylindrical volume everywhere
     return np.pi * radius ** 2 * length
 
 def get_length(volume, radius, hemispherical_ends=False):
