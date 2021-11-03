@@ -100,6 +100,8 @@ def find_nitrous_volume(mass, temperature, ullage=0):
     # This ullage adjustment is an approximation, and not a very good one
     return (mass / get_liquid_nitrous_density(temperature)) / (1 - ullage)
 
+def find_volume(radius, length):
+    return np.pi * radius ** 2 * length
 
 def get_length(volume, radius, hemispherical_ends=False):
     if hemispherical_ends:
@@ -258,15 +260,16 @@ class OxTank(PresetObject):
 
 if __name__ == '__main__':
     # print(find_minimum_wall_thickness(5.688*10**6, 0.09525, 1.5, 2.551e+8)) # 6061 T6
-    # print(get_length(70.61538462 / get_liquid_nitrous_density(280), 0.1905 / 2))
-    '''
+    # print(get_length(70.61538462 / get_liquid_nitrous_density(273 + 20) / 0.85, 0.1905 / 2))
+    
     # print(find_specific_enthalpy_of_gaseous_nitrous(273 - 0))
-    ox_mass = 68.5  # kg
+    ox_mass = 70  # kg
     # 3ish cubic feet converted to meters cubed
-    volume = 3 / 35.3147
-    print(find_ullage(ox_mass, volume, 273, constant_temperature=False))
-    print(find_ullage(ox_mass, volume, 273, constant_temperature=True))
-    '''
+    volume = find_volume(0.1905 / 2, 3)
+    # print(find_ullage(ox_mass, volume, 273, constant_temperature=False))
+    # TODO: figure out what gets us to 0.15
+    print(find_ullage(ox_mass, volume, 273 + 30, constant_temperature=True))
+    
 
     '''
     # print(get_gaseous_nitrous_density(273.15 + 40))
