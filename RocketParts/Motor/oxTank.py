@@ -14,9 +14,7 @@ from RocketParts.Motor.nitrousProperties import *
 
 
 #region DESIGN EQUATIONS
-
 # TODO: create equation to maximize the volume and limit the stress given a cylindrical shape, eventually do it for a hemi-spherical shape
-
 def find_safety_factor(pressure, radius, thickness, failure_strength):
     stress = pressure * radius / thickness
     return failure_strength / stress
@@ -26,12 +24,7 @@ def find_minimum_wall_thickness(
         pressure, radius, safety_factor, failure_strength):
     return pressure * radius * safety_factor / failure_strength
 
-def find_nitrous_volume(mass, temperature, ullage=0):
-    # This ullage adjustment is an approximation, and not a very good one
-    return (mass / get_liquid_nitrous_density(temperature)) / (1 - ullage)
-
-
-def get_length(volume, radius, hemispherical_ends=False):
+def get_tank_length(volume, radius, hemispherical_ends=False):
     if hemispherical_ends:
         end_volume = 4 / 3 * np.pi * radius ** 3
         volume -= end_volume
@@ -56,6 +49,7 @@ def find_center_of_mass(ullage, volume, length, temperature):
     liquid_mass = liquid_volume * get_liquid_nitrous_density(temperature)
 
     return (liquid_center_of_mass * liquid_mass + gas_center_of_mass * gas_mass) / (liquid_mass + gas_mass)
+
 #endregion
 
 
@@ -154,54 +148,6 @@ def find_ullage(
 #endregion
 
 
-#region DESIGN EQUATIONS
-
-# TODO: create equation to maximize the volume and limit the stress given a cylindrical shape, eventually do it for a hemi-spherical shape
-def find_safety_factor(pressure, radius, thickness, failure_strength):
-    stress = pressure * radius / thickness
-    return failure_strength / stress
-
-
-def find_minimum_wall_thickness(
-        pressure, radius, safety_factor, failure_strength):
-    return pressure * radius * safety_factor / failure_strength
-
-def find_nitrous_volume(mass, temperature, ullage=0):
-    # This ullage adjustment is an approximation, and not a very good one
-    return (mass / get_liquid_nitrous_density(temperature)) / (1 - ullage)
-
-def find_volume(radius, length):
-    # TODO: replace with cylindrical volume everywhere
-    return np.pi * radius ** 2 * length
-
-def get_length(volume, radius, hemispherical_ends=False):
-    if hemispherical_ends:
-        end_volume = 4 / 3 * np.pi * radius ** 3
-        volume -= end_volume
-        straight_length = volume / (np.pi * radius ** 2)
-
-        # The spheres provide two radiuses of length on either end
-        return straight_length + radius * 2
-    else:  # cylindrical ends
-        return volume / (np.pi * radius ** 2)
-
-def find_center_of_mass(ullage, volume, length, temperature):
-    # All centers of mass are with reference to the top of the ox tank
-    # The current calculations do not account for hemispherical end caps
-    gas_center_of_mass = length * ullage / 2
-    gas_end_distance = length * ullage
-    liquid_center_of_mass = gas_end_distance + length * (1 - ullage) / 2
-
-    gas_volume = ullage * volume
-    liquid_volume = volume - gas_volume
-
-    gas_mass = gas_volume * get_gaseous_nitrous_density(temperature)
-    liquid_mass = liquid_volume * get_liquid_nitrous_density(temperature)
-
-    return (liquid_center_of_mass * liquid_mass + gas_center_of_mass * gas_mass) / (liquid_mass + gas_mass)
-#endregion
-
-
 class OxTank(PresetObject):
     '''
         Ox tank model of the rocket
@@ -228,7 +174,6 @@ class OxTank(PresetObject):
         self.ullage = 0
         # When somebody sets the starting, they probably actually want it to be that temperature
         self.calculate_ullage(constant_temperature=True)
-
 
     @property
     def temperature(self):
@@ -368,49 +313,3 @@ if __name__ == '__main__':
     print(find_ullage(ox_mass, volume, 298, constant_temperature=False))
     print(find_ullage(ox_mass, volume, 298, constant_temperature=True))
     
-
-    '''
-    # print(get_gaseous_nitrous_density(273.15 + 40))
-    ox_mass = 68.5  # kg
-    # 3ish cubic feet converted to meters cubed
-    volume = 3 / 35.3147
-    print(find_ullage(ox_mass, volume, 273))
-
-
-    volumes = np.linspace(2.8, 10) / 35.3147
-    ullages = []
-    for v in volumes:
-        ullages.append(find_ullage(ox_mass, v, 273))
-
-    plt.plot(volumes, ullages)
-    plt.show()
-
-    # Conclusions:
-    # It doesn't take that much of a volume increase to give your nitrous way more breathing room
-    # That means that decreasing the mass by 5% will give us a more than 5% increase in ullage
-    # As you increase the volume though, you get less and less ullage.
-    '''
-
-
-    '''
-    meop = 2000  # psi
-    radius = 5  # in
-    thickness = 0.5  # in
-    failure_strength = 40000  # psi
-
-    print(find_safety_factor(meop, radius, thickness, failure_strength))
-    print(find_minimum_wall_thickness(meop, radius, 2, failure_strength))
-
-    # Structural stuff
-    ox_mass = 68.4  # kg
-    temperature = 273.15  # Kelvin
-
-    print(find_nitrous_volume(ox_mass, temperature, ullage=0)
-          * 35.3147)  # multiplication converts to ft^3
-    print(find_nitrous_volume(ox_mass, temperature, ullage=0.15) * 35.3147)
-    # multiplying the radius converts it to meters, multiplying the output converts m to ft
-    print(
-        get_length(
-            find_nitrous_volume(ox_mass, temperature, ullage=0.15),
-            radius * 0.0254) * 3.28084)
-    '''
