@@ -1,5 +1,6 @@
 import numpy as np
 import sys
+from Helpers.data import DataType
 sys.path.append('.')
 
 from presetObject import PresetObject
@@ -125,6 +126,11 @@ def find_mass_flow_dyer_interpolation(
 
 class Injector(PresetObject):
     def __init__(self, **kwargs):
+        """
+        :param int orifice_count: The number of holes the flow is going through
+        :param double orifice_diameter: the diameter of the circle through which the ox will flow (in meters)
+        """
+
         # Since I don't know which properties I am going to be needing from the ox tank and the combustion chamber, I will just pass them in right here
         self.ox_tank = None
         self.combustion_chamber = None
@@ -133,7 +139,8 @@ class Injector(PresetObject):
         # Recall that we do not have total control over this. We have to order some swagelock fittings
         self.orifice_diameter = 0.005 # m
 
-        self.discharge_coefficient = 0.7
+        self.mass_flow_datatype = DataType.FUNCTION_INJECTOR
+        self.mass_flow = 0
 
 
         super().overwrite_defaults(**kwargs)
@@ -143,27 +150,30 @@ class Injector(PresetObject):
         return get_cross_sectional_area(self.orifice_count, self.orifice_diameter)
 
 
-    def find_mass_flow_single_phase_incompressible(self, 
-        liquid_density, pressure_drop, orifice_area):
-        # Relatively simple model that assumes your flow is entirely liquid. This will work well for most liquid rockets, but very poorly for nitrous (it overestimates it; since it is actually lower density)
 
-        # most models actually discount the denominator for this model, since it is almost exactly equal to unity. I put it in because that is how the model is derived
-
-        area_ratio = self.total_orifice_area / self.combustion_chamber.fuel_grain.get_outer_cross_sectional_area()
-        return orifice_area * ((2 * liquid_density * pressure_drop) / (1 - area_ratio ** 2)) ** (1 / 2)
-
-    def get_mass_flow(self):
+    def mass_flow_function(self):
+        # This is just the model for single phase incompressible
         upstream_pressure = self.ox_tank.pressure
         downstream_pressure = self.combustion_chamber.pressure
         pressure_drop = upstream_pressure - downstream_pressure
 
         density = get_liquid_nitrous_density(self.ox_tank.temperature)
 
-        return self.discharge_coefficient * \
-            self.find_mass_flow_single_phase_incompressible(
-                density, 
-                pressure_drop, 
-                self.total_orifice_area)
+        discharge_coefficient = 0.7
+
+        area_ratio = self.total_orifice_area / self.combustion_chamber.fuel_grain.get_outer_cross_sectional_area()
+        
+        return discharge_coefficient * self.total_orifice_area * ((2 * density * pressure_drop) / (1 - area_ratio ** 2)) ** (1 / 2)
+
+
+    def set_mass_flow_function(self, func):
+        self.mass_flow_datatype = DataType.FUNCTION_INJECTOR
+        self.mass_flow_function = func
+
+    def get_mass_flow(self):
+        if self.mass_flow_datatype is DataType.FUNCTION_INJECTOR:
+            return self.mass_flow_function()
+        
 
 
 

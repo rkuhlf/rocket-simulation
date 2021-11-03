@@ -4,6 +4,7 @@ sys.path.append(".")
 
 from presetObject import PresetObject
 from Helpers.general import cylindrical_volume, interpolate
+from Helpers.data import DataType
 
 
 #region REGRESSION-RATE EQUATIONS
@@ -102,7 +103,11 @@ class Grain(PresetObject):
         # Should usually be overriden in MotorSimulation
         self.stop_on_error = True
 
+        self.regression_data_type = DataType.FUNCTION_FLUX
+        self.regression_rate = 0
+
         super().overwrite_defaults(**kwargs)
+
 
         if self.verbose:
             print(f"Initialized fuel grain with {self.fuel_mass} kg of fuel. It has an {self.port_diameter} m port diameter and a {self.outer_diameter} m outer diameter.")
@@ -137,11 +142,26 @@ class Grain(PresetObject):
     def get_outer_cross_sectional_area(self):
         return np.pi * self.outer_radius ** 2
 
-    def get_regression_rate(self, mass_flux):
-        # This is the famous regression rate equation that is so hard to get right. I think this is an equation for Paraffin-Nitrous
+    def regression_rate_function(self, mass_flux):
+        # Everything in meters and kg; this is an equation for Paraffin-Nitrous
         leading_ballistic_coefficient = 1.550 * 10 ** -4
         exponential_ballistic_coefficient = 0.5
         return leading_ballistic_coefficient * mass_flux ** exponential_ballistic_coefficient
+
+    def get_regression_rate(self, mass_flux):
+        if self.regression_data_type is DataType.CONSTANT:
+            return self.regression_rate
+
+        if self.regression_data_type is DataType.FUNCTION_FLUX:
+            return self.regression_rate_function(mass_flux)
+
+    def set_regression_rate_constant(self, value):
+        self.regression_data_type = DataType.CONSTANT
+        self.regression_rate = value
+
+    def set_regression_rate_function(self, func):
+        self.regression_data_type = DataType.FUNCTION_FLUX
+        self.regression_rate_function = func
 
     def get_volume_flow(self):
         return self.mass_flow / self.density

@@ -160,6 +160,13 @@ class OxTank(PresetObject):
 
 
     def __init__(self, **kwargs):
+        """
+        :param double length: The length of the tank; generally in meters
+        :param double diameter: the inner diameter; generally in meters
+        :param double ox_mass: the total amount of liquid and gaseous nitrous oxide in the tank
+
+        The ullage will be calculated automatically (assuming a constant temperature)
+        """
         self._temperature = 293.15 # Kelvin
         self.length = 3.7 # m
         self.radius = 0.1016 # m
@@ -187,6 +194,14 @@ class OxTank(PresetObject):
             self.calculate_ullage(constant_temperature=True)
 
     #region Getters
+    @property
+    def diameter(self):
+        return self.radius * 2
+
+    @diameter.setter
+    def diameter(self, d):
+        self.radius = d / 2
+
     def get_volume(self):
         '''
             Calculate the volume of a cylinder with flat heads

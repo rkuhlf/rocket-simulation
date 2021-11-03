@@ -18,6 +18,10 @@ class DataType(Enum):
     DEFAULT = auto()
     CONSTANT = auto()
     FUNCTION_TIME = auto()
+    FUNCTION_FLUX = auto()
+    # In the injector, you define the function for flow rate in terms of the injector itself, that way you have access to all of the properties you need
+    # It should expect an injector object to be passed in
+    FUNCTION_INJECTOR = auto()
 
 
 def nested_dictionary_lookup(dictionary, key):

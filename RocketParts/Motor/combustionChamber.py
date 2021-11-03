@@ -5,22 +5,25 @@
 
 
 import numpy as np
-
 import sys
 sys.path.append(".")
 
 from presetObject import PresetObject
 from RocketParts.Motor.grain import Grain
-
+from Helpers.data import DataType
 
 
 class CombustionChamber(PresetObject):
+    """
+    Class for the combustion chamber; contains reference to the fuel grain
+    Mostly simulates the evolution of the chamber pressure (incorrectly)
+    """
 
     def __init__(self, **kwargs):
         self.fuel_grain = Grain()
 
         # The inside of the engine starts off at atmospheric conditions
-        # Starts at this and we change it manually
+        self.pressure_data_type = DataType.DEFAULT
         self.pressure = 101300 # Pa
         # Instantly goes to the adiabatic (?) flame temperature
         self.temperature = 273.15 + 23 # Kelvin
@@ -46,20 +49,25 @@ class CombustionChamber(PresetObject):
     def volume(self):
         return np.pi * self.fuel_grain.port_radius ** 2
 
+
     def get_change_in_pressure(self, apparent_mass_flow):
         '''
         Returns the rate of pressure change with respect to time. 
         Based off of mass continuity in the combustion chamber.
         You have to input the net effective mass flowing into the chamber
         '''
-        # Based off of this monster of an equation
-        # I think there is some way to do this without knowing R. Again, I'm not too sure about what is going on with how density is calculated for the combustion chamber; however, I am going to move forward with using molar mass and adiabatic flame temperature as well as density to find the change in pressure
-        # d(P_c)/d(t) = [m-dot_ox + (rho_f - rho_c)*A_b*a*G_ox^n - P_c*A_t/c*_exp] * R*T_C / V_C
-        # TODO: R is broken right now. I don't know how to calculate; probably just use the M value from CEA
-        # So this gives the change in pressure due to mass flow, but it doesn't account for any change in pressure due to temperature change
-        # Look: PV = nRT. We are assuming this to be true; it's pretty safe. We are accounting for the change in n right now. V is not changing and P is the output. However, T is also changing, and we need to deal with that. Probably, the easiest thing is to store the previous frame's temperature and multiply by the ratio. 
-        print(apparent_mass_flow)
-        return apparent_mass_flow * self.ideal_gas_constant * self.temperature / self.volume
+
+        if self.pressure_data_type == DataType.CONSTANT:
+            return 0
+        
+        if self.pressure_data_type == DataType.DEFAULT:
+            # Based off of this monster of an equation
+            # I think there is some way to do this without knowing R. Again, I'm not too sure about what is going on with how density is calculated for the combustion chamber; however, I am going to move forward with using molar mass and adiabatic flame temperature as well as density to find the change in pressure
+            # d(P_c)/d(t) = [m-dot_ox + (rho_f - rho_c)*A_b*a*G_ox^n - P_c*A_t/c*_exp] * R*T_C / V_C
+            # TODO: R is broken right now. I don't know how to calculate; probably just use the M value from CEA
+            # So this gives the change in pressure due to mass flow, but it doesn't account for any change in pressure due to temperature change
+            # Look: PV = nRT. We are assuming this to be true; it's pretty safe. We are accounting for the change in n right now. V is not changing and P is the output. However, T is also changing, and we need to deal with that. Probably, the easiest thing is to store the previous frame's temperature and multiply by the ratio. 
+            return apparent_mass_flow * self.ideal_gas_constant * self.temperature / self.volume
 
     def update_combustion(self, ox_mass_flow, nozzle, time_increment):
         # From the grain and the ox mass flow, calculate the mass flow of fuel
@@ -89,3 +97,8 @@ class CombustionChamber(PresetObject):
         pressure_increase_rate = self.get_change_in_pressure(effective_mass_flow_total)
         self.pressure += pressure_increase_rate * time_increment
         
+
+
+    def set_pressure_constant(self, pressure):
+        self.pressure_data_type = DataType.CONSTANT
+        self.pressure = pressure
