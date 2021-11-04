@@ -180,7 +180,8 @@ class CustomMotor(Motor):
                 self.combustion_chamber.cstar = row["C-star"] # m/s
                 
                 average_molar_mass = row["Molar Mass [kg/mol]"]
-                self.combustion_chamber.ideal_gas_constant = 8.314 / average_molar_mass # 8.314 J/ mol·K / (kg/mol) = J / kgK, which I believe is what we want. Nevertheless, I need to make sure the values are reasonable
+                # The molar mass is in g/mol by default
+                self.combustion_chamber.ideal_gas_constant = 8.314 / (average_molar_mass * 1000)
                 
                 self.combustion_chamber.OF = self.OF
 
