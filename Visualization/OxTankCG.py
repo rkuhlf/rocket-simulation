@@ -10,21 +10,23 @@ sys.path.append(".")
 from RocketParts.Motor.oxTank import OxTank
 
 # Higher than 36 Celsius is super critical. Please don't do that
-ox = OxTank(ox_mass=52.43, length=2.54, radius=0.1905 / 2, temperature=293.15)
+ox = OxTank(ox_mass=52.43, length=2.54, radius=0.197 / 2, temperature=293.15)
 
 masses = []
+mass_vap = []
 ullages = []
 centers = []
 temperatures = []
 pressures = []
 
-for _ in range(60):
+for _ in range(20):
+    mass_vap.append(ox.get_mass_flow_vap(1))
     masses.append(ox.ox_mass)
     ullages.append(ox.ullage)
     centers.append(ox.get_center_of_mass() / ox.length)
     temperatures.append(ox.temperature)
     pressures.append(ox.pressure)
-    ox.update_drain(1)
+    ox.update_drain(2.5)
 
 important_temperatures = temperatures[:int(len(temperatures) * 0.75)]
 print(f"The average of the first 3/4 of temperatures is {np.average(important_temperatures)} Kelvin")
@@ -62,6 +64,12 @@ ax3.set_title("Pressure over Mass Drain")
 ax3.set_xlabel("Ox Mass [kg]")
 ax3.set_ylabel("Pressure [Pa]")
 ax3.invert_xaxis()
+
+ax4.plot(masses, mass_vap)
+ax4.set_title("Rate of Vaporization over Mass Drain")
+ax4.set_xlabel("Ox Mass [kg]")
+ax4.set_ylabel("Vaporization Rate [kg/s]")
+ax4.invert_xaxis()
 
 fig.tight_layout()
 

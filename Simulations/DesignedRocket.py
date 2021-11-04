@@ -48,6 +48,7 @@ def get_sim():
     mass_objects = [motor]
     mass_objects.extend(get_mass_objects())
     rocket.mass_objects = mass_objects
+    print("CENTER OF GRAVITY: ", rocket.total_CG)
 
     logger = RocketLogger(rocket)
 
