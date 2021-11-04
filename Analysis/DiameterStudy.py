@@ -108,7 +108,7 @@ for d in possible_diameters:
     # I can't remember if fins were mounted on top of any of this, so we are going to add a foot for the fin mount
     fin_mount = 0.3 # meters
     # And we are going to add an additional foot for the payload and avionics and recovery that probably don't all fit in the nose cone
-    miscellaneous_length = 0.3
+    miscellaneous_length = 0.8
 
     total_length = miscellaneous_length + fin_mount + injector_length + precombustion + postcombustion + nozzle_length + nose_cone_length + grain_length + tank_length
     print(f"TOTAL LENGTH: {total_length} meters")

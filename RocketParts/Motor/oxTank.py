@@ -171,7 +171,7 @@ class OxTank(PresetObject):
         self.length = 3.7 # m
         self.radius = 0.1016 # m
         self.ox_mass = 70.0 # kg
-
+        self.p_gas_mass = 0
 
         super().overwrite_defaults(**kwargs)
 
@@ -201,6 +201,9 @@ class OxTank(PresetObject):
     @diameter.setter
     def diameter(self, d):
         self.radius = d / 2
+
+    def get_mass_flow_vap(self, time_increment):
+        return (self.p_gas_mass - self.get_gas_mass()) / time_increment
 
     def get_volume(self):
         '''
@@ -263,6 +266,9 @@ class OxTank(PresetObject):
         # This is slightly inaccurate, but it only really triggers during the gas only phase
         already_gas_mass = min(self.ox_mass, already_gas_mass)
 
+        if iters_so_far == 0:
+            self.p_gas_mass = already_gas_mass
+
         liquid_mass = (self.volume - self.ox_mass / gas_density) / (1 / liquid_density - 1 / gas_density)
         liquid_mass = max(0, liquid_mass)
 
@@ -291,6 +297,7 @@ class OxTank(PresetObject):
 
             liquid_mass = (self.volume - self.ox_mass / gas_density) / (1 / liquid_density - 1 / gas_density)
             gas_mass = self.ox_mass - liquid_mass
+            # Used for the mass flow of vaporization
 
             self.ullage = (gas_mass / gas_density) / self.volume
             self.ullage = max(min(self.ullage, 1), 0)
