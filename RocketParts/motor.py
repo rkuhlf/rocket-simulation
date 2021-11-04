@@ -181,7 +181,7 @@ class CustomMotor(Motor):
                 
                 average_molar_mass = row["Molar Mass [kg/mol]"]
                 # The molar mass is in g/mol by default
-                self.combustion_chamber.ideal_gas_constant = 8.314 / (average_molar_mass * 1000)
+                self.combustion_chamber.ideal_gas_constant = 8.314 / (average_molar_mass / 1000)
                 
                 self.combustion_chamber.OF = self.OF
 
