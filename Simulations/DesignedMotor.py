@@ -3,8 +3,6 @@
 # With that inaccuracy, I am not even going to bother making any monte carlo style optimizers
 
 
-# FIXME: at the moment, the combustion chamber pressure is probably far lower than reasonable, so I am just setting it constant. Unfortunately, this completely messes up the way the simulation works. The thrust is mostly dependent on the chamber pressure, so it just gives a really high value 
-
 import sys
 sys.path.append(".")
 
@@ -29,12 +27,10 @@ def get_sim():
     grain.set_regression_rate_function(regression_rate_HTPB_nitrous)
 
     chamber = CombustionChamber(fuel_grain=grain)
-    chamber.set_pressure_constant(25 * 10**5) # Pa
     
     injector = Injector(ox_tank=ox, combustion_chamber=chamber, orifice_count=4, orifice_diameter=0.005)
-    # Stuttgart optimized at 30 bar, but that gives me a totally funny shape because the pressure never reaches it
-    # 0.08 gives me a reasonable thrust profile for the pressure I am workin at
     nozzle = Nozzle(throat_diameter=0.045, area_ratio=5.72) # meters
+    # At 0.1 the pressure swing is too big
     env = Environment(time_increment=0.01)
 
     motor = CustomMotor(ox_tank=ox, injector=injector, combustion_chamber=chamber, nozzle=nozzle, environment=env)

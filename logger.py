@@ -179,20 +179,11 @@ class MotorLogger(FeedbackLogger):
 
         self.to_record = ["thrust", "combustion_chamber.pressure", "ox_tank.pressure", "combustion_chamber.temperature", "ox_tank.temperature", "combustion_chamber.fuel_grain.port_diameter", "OF", "combustion_chamber.cstar", "specific_impulse", "fuel_flow", "ox_flow", "mass_flow"]
 
-        #     ox_pressures.append(ox.pressure)
-        #     thrusts.append(motor.thrust)
-        #     chamber_temperatures.append(motor.combustion_chamber.temperature)
-        #     ox_temperatures.append(ox.temperature)
-        #     grain_diameters.append(grain.inner_radius * 2)
-        #     OFs.append(motor.OF)
-        #     c_stars.append(motor.combustion_chamber.cstar)
-        #     specific_impulses.append(motor.thrust / (motor.combustion_chamber.mass_flow_out * 9.81))
-
         self.overwrite_defaults(**kwargs)
 
-        # self.printed_rail_stats = False
-        # self.printed_thrusted = False
-        # self.turned = False
+        self.printed_pressurized = False
+        # Print every time it switches
+        self.overexpanded = True
 
     @property
     def motor(self):
@@ -205,11 +196,10 @@ class MotorLogger(FeedbackLogger):
     def handle_frame(self):
         super().handle_frame()
 
-        # if not self.printed_rail_stats and self.rocket.position[2] > self.rocket.environment.rail_length:
-        #     self.printed_rail_stats = True
-
-        #     self.print(f"Off the rail, the rocket has {self.rocket.gees} gees")
-
+        if not self.printed_pressurized and not self.motor.combustion_chamber.pressurizing:
+            print(f"Motor finished pressurizing to {self.motor.combustion_chamber.pressure} Pa at {self.motor.environment.time}")
+            self.printed_pressurized = True
+            
         # if self.rocket.descending and not self.turned:
         #     self.print('Reached the turning point at %.3s seconds with a height of %.5s meters' % (
         #         self.rocket.environment.time, self.rocket.position[2]))
@@ -227,3 +217,13 @@ class MotorLogger(FeedbackLogger):
         #         "Rocket landed with a speed of %.3s m/s after %.4s seconds of flight time" %
         #         (np.linalg.norm(self.rocket.velocity),
         #          self.rocket.environment.time))
+
+
+    def save_to_csv(self):
+        # Give some information about how we are looking a the end of the burn
+
+        print(f"The motor finished with {self.motor.combustion_chamber.fuel_grain.fuel_mass} kg of fuel and {self.motor.combustion_chamber.fuel_grain.outer_radius - self.motor.combustion_chamber.fuel_grain.port_radius} meters left")
+
+        print(f"There is {self.motor.ox_tank.ox_mass} kg of oxidizer left and there is still a pressure difference of {self.motor.ox_tank.pressure - self.motor.combustion_chamber.pressure} Pa")
+
+        return super().save_to_csv()

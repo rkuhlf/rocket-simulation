@@ -39,11 +39,10 @@ class CombustionChamber(PresetObject):
 
         super().overwrite_defaults(**kwargs)
 
-        #region CALCULATED
-        # TODO: actually calculate it based on P = pRT
-        self.ideal_gas_constant = 0
+        # Overriden by CEA in motor.py; current is based off of air
+        self.ideal_gas_constant = 287
 
-        #endregion
+        self.pressurizing = True
 
     @property
     def volume(self):
@@ -58,24 +57,24 @@ class CombustionChamber(PresetObject):
         '''
         
         # Based off of this monster of an equation
-        # I think there is some way to do this without knowing R. Again, I'm not too sure about what is going on with how density is calculated for the combustion chamber; however, I am going to move forward with using molar mass and adiabatic flame temperature as well as density to find the change in pressure
         # d(P_c)/d(t) = [m-dot_ox + (rho_f - rho_c)*A_b*a*G_ox^n - P_c*A_t/c*_exp] * R*T_C / V_C
-        # TODO: R is broken right now. I don't know how to calculate; probably just use the M value from CEA
-        # So this gives the change in pressure due to mass flow, but it doesn't account for any change in pressure due to temperature change
-        # Look: PV = nRT. We are assuming this to be true; it's pretty safe. We are accounting for the change in n right now. V is not changing and P is the output. However, T is also changing, and we need to deal with that. Probably, the easiest thing is to store the previous frame's temperature and multiply by the ratio. 
+        
+        # The change in temperature is accounted for separately
         return apparent_mass_flow * self.ideal_gas_constant * self.temperature / self.volume
 
     def update_pressure(self, effective_mass_flow, time_increment):
         if self.pressure_data_type == DataType.CONSTANT:
-            return
+            pass
 
-        if self.pressure_data_type is DataType.DEFAULT:
+        elif self.pressure_data_type is DataType.DEFAULT:
             self.pressure *= self.temperature / self.p_temperature
 
             self.p_temperature = self.temperature
 
             pressure_increase_rate = self.get_change_in_pressure(effective_mass_flow)
             self.pressure += pressure_increase_rate * time_increment
+            self.pressurizing = pressure_increase_rate > 0
+                
 
     def update_combustion(self, ox_mass_flow, nozzle, time_increment):
         # From the grain and the ox mass flow, calculate the mass flow of fuel
