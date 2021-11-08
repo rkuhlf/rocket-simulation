@@ -8,6 +8,10 @@
 # There is no variable center of pressure. This is much harder to fix. I can get a crappy solution from Rasaero, but I would really like to use CFD data
 # The CL & CD don't work past four degrees. This is just further impetus to get verifiable CFD data. Until that point I can't really move forwards here.
 
+
+# TODO: correct CD and CL
+# TODO: Fix parachute deployment
+
 import numpy as np
 from math import isnan
 
@@ -15,7 +19,7 @@ from Helpers.general import interpolate, project, combine
 from Helpers.general import angles_from_vector_3d, vector_from_angle, angle_between, magnitude
 from RocketParts.massObject import MassObject
 from Helpers.data import DataType
-from Data.Input.models import get_coefficient_of_drag, get_coefficient_of_lift
+from Data.Input.models import get_splined_coefficient_of_drag, get_coefficient_of_lift
 
 # Import some stuff for defaults
 from RocketParts.motor import Motor
@@ -50,8 +54,17 @@ class Rocket(MassObject):
         self.mass = 0  # kg
         # Excluding the motor and other sub mass objects
         self.center_of_gravity = 4 # m
+        # Constant by default, override with set_CP_function
         self.CP_data_type = DataType.CONSTANT
         self.CP = 5
+
+        self.CD_data_type = DataType.CONSTANT
+        self.CD = 0.7
+
+        # This will throw an error because it must be overriden if we are applying angular effects
+        self.CL_data_type = DataType.DEFAULT
+        self.CL = 0 
+
 
         self.radius = 0.11 # meters
         self.length = 7 # meters
@@ -94,7 +107,6 @@ class Rocket(MassObject):
         self.force = np.array([0., 0., 0.])
         self.torque = np.array([0., 0.])
 
-        # TODO: add a few more conditions
         self.landed = False
 
         self.apogee = 0
@@ -115,7 +127,7 @@ class Rocket(MassObject):
         self.apply_acceleration()
         self.apply_velocity()
 
-        if (self.apply_angular_forces):
+        if (self.apply_angular_forces and self.off_rail):
             self.apply_angular_acceleration()
             self.apply_angular_velocity()
 
@@ -139,10 +151,16 @@ class Rocket(MassObject):
         self.force = np.array([0., 0., 0.])
         self.torque = np.array([0., 0.])
 
+    # region PROPERTIES
     @property
     def has_lifted(self):
         """Return whether the rocket was above ground in the previous or current frame"""
         return self.position[2] > 0 or self.p_position[2] > 0
+
+    @property
+    def off_rail(self):
+        """Return whether the rocket is above the launch rail"""
+        return self.position[2] > self.environment.rail_length
 
     @property
     def ascending(self):
@@ -152,6 +170,43 @@ class Rocket(MassObject):
     def descending(self):
         return self.velocity[2] < 0
 
+    @property
+    def thrusting(self):
+        return self.motor.calculate_thrust(self.environment.time) > 0
+
+
+    def log_data(self, name, data):
+        if self.logger is not None:
+            self.logger.add_items({name: data})
+
+    @property
+    def theta_around(self):
+        return self.rotation[0]
+
+    @property
+    def theta_down(self):
+        return self.rotation[1]
+
+    @property
+    def mach(self):
+        # How many speed of sounds am I going
+        v = self.environment.get_speed_of_sound(self.altitude)
+
+        return magnitude(self.velocity) / v
+
+    @property
+    def gees(self):
+        """
+        Return the number of gees the rocket is accelerating at
+        Adjusted for the variation as the rocket leaves the atmosphere (because I can)
+        """
+        grav_acceleration = self.environment.get_gravitational_attraction(self.total_mass, self.altitude) / self.total_mass
+        return magnitude(self.acceleration) / grav_acceleration
+
+    @property
+    def altitude(self):
+        # Using Z as up vector
+        return self.environment.base_altitude + self.position[2]
 
     def update_maxes(self):
         if self.position[2] < -100 and not self.has_lifted:
@@ -166,7 +221,7 @@ class Rocket(MassObject):
         self.max_velocity = max(self.max_velocity, magnitude(self.velocity))
         self.max_net_force = max(self.max_net_force, magnitude(self.force))
 
-
+    # endregion
 
     # region UPDATING KINEMATICS
     def apply_velocity(self):
@@ -327,7 +382,8 @@ class Rocket(MassObject):
             drag_magnitude, drag_direction, lift_magnitude, lift_direction = self.get_translational_drag()
             self.apply_force(drag_magnitude, drag_direction,
                              self.CP, debug=True, name="Drag")
-            self.apply_force(lift_magnitude, lift_direction,
+            if self.apply_angular_forces:
+                self.apply_force(lift_magnitude, lift_direction,
                              self.CP, debug=True, name="Lift")
 
         # FIXME: Angular drag: not currently implemented
@@ -336,13 +392,12 @@ class Rocket(MassObject):
 
     def get_translational_drag(self):
         "Calculate the vector for the translational drag force"
-        # The nomenclature here can be very confusing
 
+        # TODO: go through and debug the drag force. It is too big.
         drag = self.dynamic_pressure * self.reference_area * self.CD
         lift = self.dynamic_pressure * self.reference_area * self.CL
 
-        relative_velocity = self.velocity - \
-            self.environment.get_air_speed(self.altitude)
+        relative_velocity = self.velocity - self.environment.get_air_speed(self.altitude)
 
 
         self.log_data('air speed', self.environment.get_air_speed(
@@ -407,40 +462,7 @@ class Rocket(MassObject):
             debug=True, name="Gravity")
 
     # endregion
-
-    # region GENERAL FUNCTIONS
-    def log_data(self, name, data):
-        if self.logger is not None:
-            self.logger.add_items({name: data})
-
-    @property
-    def theta_around(self):
-        return self.rotation[0]
-
-    @property
-    def theta_down(self):
-        return self.rotation[1]
-
-    @property
-    def mach(self):
-        # How many speed of sounds am I going
-        v = self.environment.get_speed_of_sound(self.altitude)
-
-        return magnitude(self.velocity) / v
-
-    @property
-    def gees(self):
-        """
-        Return the number of gees the rocket is accelerating at
-        Adjusted for the variation as the rocket leaves the atmosphere (because I can)
-        """
-        grav_acceleration = self.environment.get_gravitational_attraction(self.total_mass, self.altitude) / self.total_mass
-        return magnitude(self.acceleration) / grav_acceleration
-
-    @property
-    def altitude(self):
-        # Using Z as up vector
-        return self.environment.base_altitude + self.position[2]
+    
 
     # region Cached Values
 
@@ -459,33 +481,53 @@ class Rocket(MassObject):
         self.angle_of_attack = angle_between(
             relative_velocity, vector_from_angle(self.rotation))
 
-        self.log_data("AOA1", self.angle_of_attack)
+        self.log_data("AOA", self.angle_of_attack)
 
+    def get_coefficient_of_drag(self, mach, alpha):
+        return self.CD
 
     def calculate_coefficient_of_drag(self):
-        for parachute in self.parachutes:
-            if parachute.deployed:
-                return
-        self.log_data("AOA", self.angle_of_attack)
+        if self.CD_data_type is DataType.CONSTANT:
+            pass
         
-        self.CD = get_coefficient_of_drag(
-            self.mach, self.angle_of_attack)
+        if self.CL_data_type is DataType.FUNCTION_MACH_ALPHA:
+            self.CD = self.get_coefficient_of_drag(self.mach, self.angle_of_attack)
+
         self.log_data("CD", self.CD)
 
+
+    def get_coefficient_of_lift(self, mach, alpha):
+        if not self.apply_angular_forces:
+            return
+        
+        raise NotImplementedError("There is no default coefficient of lift lookup, you must provide one yourself")
+
     def calculate_coefficient_of_lift(self):
-        self.CL = get_coefficient_of_lift(
-            self.mach, self.angle_of_attack)
+        if self.CL_data_type is DataType.CONSTANT:
+            pass
+
+        if self.CL_data_type is DataType.FUNCTION_MACH_ALPHA:
+            self.CL = self.get_coefficient_of_lift(self.mach, self.angle_of_attack)
+        
         self.log_data("CL", self.CL)
 
+
+    def get_center_of_pressure(self, mach, alpha):
+        # This is the default, it should probably be overriden by set_CP_function
+        return self.CP
 
     def calculate_center_of_pressure(self):
         if self.CP_data_type is DataType.CONSTANT:
             pass
 
+        if self.CP_data_type is DataType.FUNCTION_MACH_ALPHA:
+            self.CP = self.get_center_of_pressure(self.mach, self.angle_of_attack)
+
 
     def calculate_cp_cg_dist(self):
         # Note that this is only used for dynamic stability calculations, nothing during the simulations
         self.dist_press_grav = self.CP - self.total_CG
+        self.dist_press_grav *= 0.5
         self.log_data("Stability [Calibers]", self.dist_press_grav / (self.radius * 2))
         self.log_data("Stability [Lengths]", self.dist_press_grav / (self.length))
 
@@ -498,13 +540,32 @@ class Rocket(MassObject):
         self.calculate_cp_cg_dist()
 
     # endregion
-    # endregion
 
 
     # region DATA INPUTS
     def set_CP_constant(self, value):
         self.CP_data_type = DataType.CONSTANT
         self.CP = value
+
+    def set_CP_function(self, func):
+        self.CP_data_type = DataType.FUNCTION_MACH_ALPHA
+        self.get_center_of_pressure = func
+
+    def set_CD_constant(self, value):
+        self.CD_data_type = DataType.CONSTANT
+        self.CD = value
+
+    def set_CD_function(self, func):
+        self.CD_data_type = DataType.FUNCTION_MACH_ALPHA
+        self.get_coefficient_of_drag = func
+
+    def set_CL_constant(self, value):
+        self.CL_data_type = DataType.CONSTANT
+        self.CL = value
+
+    def set_CL_function(self, func):
+        self.CL_data_type = DataType.FUNCTION_MACH_ALPHA
+        self.get_coefficient_of_lift = func
 
     # endregion
 

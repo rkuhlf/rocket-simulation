@@ -4,23 +4,25 @@
 
 import matplotlib.pyplot as plt
 import pandas as pd
-import os
-
+import numpy as np
 import sys
 sys.path.append(".")
 
-from Helpers.general import numpy_from_string
+from Data.Input.models import get_splined_coefficient_of_drag
 
 
-# Files are relative to the project folder you are running in, not the file location
 data = pd.read_csv("Data/Input/aerodynamicQualities.csv")
 
-# data["x"] = data['position'].apply(lambda x: numpy_from_string(x)[0])
-# data["y"] = data['CD'].apply(lambda x: numpy_from_string(x)[1])
 
-data.plot.line(x='Mach', y='CD')
-# data.plot.line(x='time', y='g-force')
-# data.plot.line(x='time', y='mock')
+zero_AOA = data[data["Alpha"] == 0]
+zero_AOA.sort_values(["Mach"], inplace=True)
+zero_AOA.plot.line(x='Mach', y='CD')
+
+machs = np.linspace(0, 5, 50)
+zero_AOA_model = get_splined_coefficient_of_drag(machs, 0)
+
+plt.plot(machs, zero_AOA_model)
+
 
 # TODO: show 10-odd isolines for different angles of attack over mach numbers
 

@@ -6,6 +6,19 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d, interp2d, fitpack, bisplrep, bisplev
 from math import isnan
+import sys
+sys.path.append(".")
+
+from Helpers.data import interpolated_lookup, interpolated_lookup_2D
+
+
+# This code should run regardless of how you import this file
+data = pd.read_csv('Data/Input/aerodynamicQualities.csv')
+mach = data['Mach']
+alpha = data['Alpha']
+CD = data['CD']
+CL = data['CL']
+CP = data['CP']
 
 
 def get_density(altitude):
@@ -37,18 +50,12 @@ def get_speed_of_sound(altitude):
 #          3.91568896e-01, 1.60204340e+00],
 #         mach)
 
-
-data = pd.read_csv('Data/Input/aerodynamicQualities.csv')
-mach = data['Mach']
-alpha = data['Alpha']
-CD = data['CD']
-
 # FIXME: For some reason tis has unpredictable and concerning behavior. Try messing with s. I don't see why linearly interpolating 2d inputs is so hard. Half tempted to implement my own solution.
 # Note that CD doesn't change with angle but CA does
 drag_spline = bisplrep(mach, alpha, CD, kx=1, ky=1, s=0.3)
 
 
-def get_coefficient_of_drag(mach, alpha):
+def get_splined_coefficient_of_drag(mach, alpha):
     if isnan(alpha):
         raise Exception("Your angle of attack is NaN")
 
@@ -56,11 +63,15 @@ def get_coefficient_of_drag(mach, alpha):
     return bisplev(mach, alpha, drag_spline)
 
 
+def get_sine_interpolated_coefficient_of_drag(mach, alpha):
+    if isnan(alpha):
+        raise Exception("Your angle of attack is NaN")
+    
 
-data = pd.read_csv('Data/Input/aerodynamicQualities.csv')
-mach = data['Mach']
-alpha = data['Alpha']
-CL = data['CL']
+
+    
+
+
 
 lift_spline = bisplrep(mach, alpha, CL, kx=2, ky=2, s=0.1)
 
@@ -141,18 +152,11 @@ def get_coefficient_of_lift(mach, angle_of_attack=0):
 # endregion
 
 
-if __name__ == '__main__':
-    print(get_coefficient_of_lift(1, 0.01))
-    print(get_coefficient_of_lift(1, np.pi / 2 * 0.3))
-    print(get_coefficient_of_lift(1, np.pi / 2 * 0.5))
-    # print(get_coefficient_of_lift(0.3, angle_of_attack=3))
-    print(get_coefficient_of_drag(0.3, 0))
-    print(get_coefficient_of_drag(0.3, 1))
-    print(get_coefficient_of_drag(0.3, 2))
-    print(get_coefficient_of_drag(0.3, 3))
-    print(get_coefficient_of_drag(0.3, 4))
 
+def display_CD():
     plt.scatter(mach, CD, label="data")
+
+    get_coefficient_of_drag = get_splined_coefficient_of_drag
 
     x_points = np.linspace(0, 25, 100)
 
@@ -180,6 +184,9 @@ if __name__ == '__main__':
     plt.legend()
 
     plt.show()
-    # Calc ow accurate my function is; Averae absolute error
+    # TODO: Calc how accurate my function is; Average absolute error
 
+
+if __name__ == '__main__':
+    # display_CD()
     pass

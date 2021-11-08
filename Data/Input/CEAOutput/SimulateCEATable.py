@@ -20,6 +20,8 @@ from Helpers.data import inputs_path
 # by default, it has the HTPB and N2O at 76-ish F. This is probably fine for the HTPB, we will see what effect it has to change it
 htpb_nitrous = CEA_Obj(oxName="N2O", fuelName="HTPB")
 
+
+
 expansion_ratio = 5.7
 pressure_range = np.linspace(14, 1000, 100)
 OF_range = np.linspace(0.1, 30, 100)

@@ -12,6 +12,8 @@ from rocket import Rocket
 from RocketParts.parachute import ApogeeParachute, Parachute
 from logger import RocketLogger
 from simulation import RocketSimulation
+from Data.Input.goddardModels import get_sine_interpolated_center_of_pressure, linear_approximated_normal_force, assumed_zero_AOA_CD
+
 from Visualization.FlightOpticalAnalysis import display_optical_analysis
 
 
@@ -43,19 +45,20 @@ def get_sim():
     drogue_parachute = ApogeeParachute(radius=0.2)
     main_parachute = Parachute()
     rocket = Rocket(radius = 0.2032/2, length=5.7912, environment=env, motor=motor, parachutes=[drogue_parachute, main_parachute])
-    rocket.set_CP_constant(3.75) # meters
+    rocket.set_CP_function(get_sine_interpolated_center_of_pressure)
+    rocket.set_CL_function(linear_approximated_normal_force)
+    rocket.set_CD_function(assumed_zero_AOA_CD)
 
     mass_objects = [motor]
     mass_objects.extend(get_mass_objects())
     rocket.mass_objects = mass_objects
-    print("CENTER OF GRAVITY: ", rocket.total_CG)
 
     logger = RocketLogger(rocket)
 
     logger.splitting_arrays = True
 
 
-    sim = RocketSimulation(apply_angular_forces=True, max_frames=-1, environment=env, rocket=rocket, logger=logger)
+    sim = RocketSimulation(apply_angular_forces=False, max_frames=-1, environment=env, rocket=rocket, logger=logger)
     motor.simulation = sim
 
     return sim

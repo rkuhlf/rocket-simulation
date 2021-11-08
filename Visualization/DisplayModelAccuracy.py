@@ -34,7 +34,7 @@ data = pd.read_csv("Data/Input/aerodynamicQualities.csv")
 # Rasaero outputs to a max of 21
 inputs = np.arange(0, 25, 0.1)
 
-outputs = list(map(get_coefficient_of_drag, inputs))
+outputs = list(map(get_splined_coefficient_of_drag, inputs))
 # outputs = get_coefficient_of_drag(inputs)
 
 data.plot.scatter(x='Mach', y='CD')

@@ -240,7 +240,3 @@ class CustomMotor(Motor):
     # endregion
 
 
-
-    
-
-# TODO: Figure out the min mass flow rate, if any, for the nozzle to reach mach one at the choke. I don't see how it could instantaneously reach mach speeds; I think CEA has some outputs for this

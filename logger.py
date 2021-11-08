@@ -121,11 +121,12 @@ class RocketLogger(FeedbackLogger):
     """
 
     def __init__(self, rocket, **kwargs):
+        # You need to make sure the parent's override doesn't override the self values we have already established, so we set our defaults after this
+        super().__init__(rocket)
+
         self.to_record = ['position', 'velocity', 'acceleration', 'rotation', 'angular_velocity',
         'angular_acceleration']
-        
-        # You need to make sure the parent's override doesn't override the self values we have already established
-        super().__init__(rocket)
+
         self.overwrite_defaults(**kwargs)
 
         self.printed_rail_stats = False

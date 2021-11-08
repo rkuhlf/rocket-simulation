@@ -26,6 +26,7 @@ def get_radius(area):
 
 def interpolate(x, x1, x2, y1, y2):
     '''Map one point from one range to another'''
+
     if x2 == x1:
         return (y1 + y2) / 2
     return (x - x1) / (x2 - x1) * (y2 - y1) + y1
