@@ -66,10 +66,8 @@ class Rocket(MassObject):
         self.CL = 0 
 
 
-        self.radius = 0.11 # meters
+        self.radius = 0.1016 # meters
         self.length = 7 # meters
-
-        self.reference_area = np.pi * self.radius ** 2  # 0.008  # m^2
 
         #region SET REFERENCES
         self.motor = Motor()
@@ -96,6 +94,8 @@ class Rocket(MassObject):
 
         super().overwrite_defaults(**kwargs)
         # Everything before this is saved as a preset including whatever is overridden by config
+
+        self.reference_area = np.pi * self.radius ** 2
 
         # This is overriden in the simulation initialization, so it is just here as a reminder
         self.apply_angular_forces = True
@@ -152,6 +152,15 @@ class Rocket(MassObject):
         self.torque = np.array([0., 0.])
 
     # region PROPERTIES
+    @property
+    def diameter(self):
+        return self.radius * 2
+
+    @diameter.setter
+    def diameter(self, d):
+        self.radius = d / 2
+        self.reference_area = np.pi * self.radius ** 2
+    
     @property
     def has_lifted(self):
         """Return whether the rocket was above ground in the previous or current frame"""
@@ -217,6 +226,7 @@ class Rocket(MassObject):
             self.landed = True
 
         self.apogee = max(self.apogee, self.position[2])
+        self.log_data("Mach", self.mach)
         self.max_mach = max(self.max_mach, self.mach)
         self.max_velocity = max(self.max_velocity, magnitude(self.velocity))
         self.max_net_force = max(self.max_net_force, magnitude(self.force))
@@ -382,6 +392,7 @@ class Rocket(MassObject):
             drag_magnitude, drag_direction, lift_magnitude, lift_direction = self.get_translational_drag()
             self.apply_force(drag_magnitude, drag_direction,
                              self.CP, debug=True, name="Drag")
+            
             if self.apply_angular_forces:
                 self.apply_force(lift_magnitude, lift_direction,
                              self.CP, debug=True, name="Lift")
@@ -393,12 +404,17 @@ class Rocket(MassObject):
     def get_translational_drag(self):
         "Calculate the vector for the translational drag force"
 
-        # TODO: go through and debug the drag force. It is too big.
         drag = self.dynamic_pressure * self.reference_area * self.CD
         lift = self.dynamic_pressure * self.reference_area * self.CL
 
-        relative_velocity = self.velocity - self.environment.get_air_speed(self.altitude)
+        air_velocity = np.array([0., 0., 0.])
+        if self.apply_angular_forces:
+            air_velocity = self.environment.get_air_speed(self.altitude)
 
+        relative_velocity = self.velocity - air_velocity
+
+        if magnitude(relative_velocity) == 0:
+            return 0, np.array([0., 0., 1.]), 0, np.array([0., 0., 1.])
 
         self.log_data('air speed', self.environment.get_air_speed(
             self.altitude))
@@ -447,6 +463,7 @@ class Rocket(MassObject):
         thrust = self.motor.calculate_thrust(self.environment.time)
 
         self.log_data("Thrust", thrust)
+        self.log_data("Mass", self.total_mass)
 
         # thrust is in direction of the rotation. The larger the angle is, the more to the right the rocket is
         self.apply_force(thrust, vector_from_angle(self.rotation))
@@ -568,6 +585,8 @@ class Rocket(MassObject):
         self.get_coefficient_of_lift = func
 
     # endregion
+
+
 
     # TODO: Add tis back in better
     # def get_drag_torque(self, drag_coefficient):

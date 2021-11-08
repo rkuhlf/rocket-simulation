@@ -1,5 +1,6 @@
 # COMPARE DIFFERENT SIMULATIONS
 # Mostly generates graphs for MMR
+# Also does quite a bit of debugging to figure out why they are different
 
 import pandas as pd
 import numpy as np
@@ -47,7 +48,7 @@ def display_drag(openRocket=None, rasaero=None, no_angles=None):
 
         ax2.plot(no_angles["time"], drag)    
     
-    fig.legend(loc="upper right")
+    ax1.legend(loc="upper right")
     fig.tight_layout()
     plt.show()
 
@@ -59,6 +60,9 @@ def display_mach(openRocket=None, rasaero=None, no_angles=None):
 
     if rasaero is not None:
         ax.plot(rasaero["Time (sec)"], rasaero["Mach Number"] * np.sign(rasaero["Vel-V (ft/sec)"]), label="RASAero")
+
+    if no_angles is not None:
+        ax.plot(no_angles["time"], no_angles["Mach"] * np.sign(no_angles["relative velocity3"]), label="1 DOF")
 
     ax.axhspan(0.8, 1.2, color='red', alpha=0.5)
 
@@ -78,8 +82,49 @@ def display_forces(openRocket=None, rasaero=None, no_angles=None):
 
     if rasaero is not None:
         ax.plot(rasaero["Time (sec)"], (rasaero["Accel (ft/sec^2)"] / 3.28084) * (rasaero["Weight (lb)"] * 0.45359237), label="RASAero")
+
+    if no_angles is not None:
+        net_force = (no_angles["Net Force1"] ** 2 + no_angles["Net Force2"] ** 2 + no_angles["Net Force3"] ** 2) ** (1/2)
+
+        ax.plot(no_angles["time"], net_force * np.sign(no_angles["Net Force3"]), label="1 DOF")
     
     ax.set(title="Net Force over Time", xlabel="Time (sec)", ylabel="Force (N)")
+    ax.legend(loc="upper right")
+
+    plt.show()
+
+def display_thrust(openRocket=None, rasaero=None, no_angles=None):
+    # This one should be identical for all of them
+    fig, ax = plt.subplots()
+
+    if openRocket is not None:
+        ax.plot(openRocket["Time (s)"], openRocket["Thrust (N)"], label="OpenRocket")
+
+    if rasaero is not None:
+        ax.plot(rasaero["Time (sec)"], rasaero["Thrust (lb)"] * 4.44822, label="RASAero")
+
+    if no_angles is not None:
+        ax.plot(no_angles["time"], no_angles["Thrust"], label="1 DOF")
+    
+    ax.set(title="Thrust over Time", xlabel="Time (sec)", ylabel="Force (N)")
+    ax.legend(loc="upper right")
+
+    plt.show()
+
+def display_weight(openRocket=None, rasaero=None, no_angles=None):
+    # This one should be identical for all of them
+    fig, ax = plt.subplots()
+
+    if openRocket is not None:
+        ax.plot(openRocket["Time (s)"], openRocket["Mass (g)"] * 9.81 / 1000, label="OpenRocket")
+
+    if rasaero is not None:
+        ax.plot(rasaero["Time (sec)"], rasaero["Weight (lb)"] * 4.44822, label="RASAero")
+
+    if no_angles is not None:
+        ax.plot(no_angles["time"], -1 * no_angles["Gravity3"], label="1 DOF")
+    
+    ax.set(title="Weight over Time", xlabel="Time (sec)", ylabel="Force (N)")
     ax.legend(loc="upper right")
 
     plt.show()
@@ -88,11 +133,14 @@ def display_forces(openRocket=None, rasaero=None, no_angles=None):
 if __name__ == "__main__":
     openRocket = pd.read_csv("Data/Output/ThirdPartySimulations/OpenRocketData.csv")
     rasaero = pd.read_csv("Data/Output/ThirdPartySimulations/RasaeroAltitudeTime.CSV")
-    no_angles = pd.read_csv("Data/Output/1DOFOutput.csv")
+    no_angles = pd.read_csv("Data/Output/output.csv")
 
-    # display_altitude(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles)
+    display_altitude(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles)
     display_drag(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles)
-    # display_forces(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles)
-    # display_mach(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles)
+    display_forces(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles)
+    display_mach(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles)
+
+    display_thrust(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles)
+    display_weight(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles)
 
     # TODO: add the finished 1 DOF and 5 DOF model simulations to this

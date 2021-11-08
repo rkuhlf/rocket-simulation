@@ -39,7 +39,9 @@ def get_mass_objects():
 
 def get_sim():
     env = Environment(time_increment=0.01, apply_wind=True)
-    motor = Motor(front=2, center_of_gravity=2, mass=60, propellant_mass=60, thrust_curve="Data/Input/thrustCurveSmaller.csv")
+    motor = Motor(front=2, center_of_gravity=2, mass=60, propellant_mass=60, thrust_curve="Data/Input/mmrThrust.csv")
+    motor.scale_thrust(126 / 114)
+    print(motor.total_impulse)
 
 
     drogue_parachute = ApogeeParachute(radius=0.2)
@@ -60,6 +62,8 @@ def get_sim():
 
     sim = RocketSimulation(apply_angular_forces=False, max_frames=-1, environment=env, rocket=rocket, logger=logger)
     motor.simulation = sim
+
+    print(rocket.reference_area)
 
     return sim
 
