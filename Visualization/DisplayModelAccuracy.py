@@ -14,42 +14,46 @@ sys.path.append(".")
 from Data.Input.models import *
 
 
+def display_density():
+    # Files are relative to the project folder you are running in, not the file location
+    data = pd.read_csv("Data/Input/airQuantities.csv")
 
-# Files are relative to the project folder you are running in, not the file location
-data = pd.read_csv("Data/Input/airQuantities.csv")
+    inputs = np.arange(0, 20, 0.1)
+    outputs = get_density(inputs)
 
-inputs = np.arange(0, 13, 0.1)
-# print(get_density(5))
-outputs = get_density(inputs)
+    data.plot.scatter(x='Altitude', y='Density')
+    plt.plot(inputs, outputs, 'r')
 
-# data.plot.scatter(x='Altitude', y='Density')
-# plt.plot(inputs, outputs, 'r')
-
-# plt.show()
-
+    plt.show()
 
 
-data = pd.read_csv("Data/Input/aerodynamicQualities.csv")
+def display_aero():
+    data = pd.read_csv("Data/Input/aerodynamicQualities.csv")
 
-# Rasaero outputs to a max of 21
-inputs = np.arange(0, 25, 0.1)
+    # Rasaero outputs to a max of 21
+    inputs = np.arange(0, 25, 0.1)
 
-outputs = list(map(get_splined_coefficient_of_drag, inputs))
-# outputs = get_coefficient_of_drag(inputs)
+    outputs = list(map(get_splined_coefficient_of_drag, inputs))
+    # outputs = get_coefficient_of_drag(inputs)
 
-data.plot.scatter(x='Mach', y='CD')
-plt.plot(inputs, outputs, 'r')
+    data.plot.scatter(x='Mach', y='CD')
+    plt.plot(inputs, outputs, 'r')
 
-plt.show()
+    plt.show()
 
 
-data = pd.read_csv("Data/Input/airQuantities.csv")
+def display_mach():
+    data = pd.read_csv("Data/Input/airQuantities.csv")
 
-inputs = np.arange(0, 13, 0.1)
+    inputs = np.arange(0, 40, 0.1)
 
-outputs = list(map(get_speed_of_sound, inputs))
+    outputs = list(map(get_speed_of_sound, inputs))
 
-# data.plot.scatter(x='Altitude', y='Speed of sound')
-# plt.plot(inputs, outputs, 'r')
+    data.plot.scatter(x='Altitude', y='Speed of sound')
+    plt.plot(inputs, outputs, 'r')
 
-# plt.show()
+    plt.show()
+
+
+if __name__ == "__main__":
+    display_density()

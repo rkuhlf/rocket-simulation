@@ -5,6 +5,8 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.offsetbox import AnchoredText
+
 
 def display_altitude(openRocket=None, rasaero=None, no_angles=None):
     fig, ax = plt.subplots()
@@ -64,7 +66,10 @@ def display_mach(openRocket=None, rasaero=None, no_angles=None):
     if no_angles is not None:
         ax.plot(no_angles["time"], no_angles["Mach"] * np.sign(no_angles["relative velocity3"]), label="1 DOF")
 
-    ax.axhspan(0.8, 1.2, color='red', alpha=0.5)
+    # Transonic box
+    ax.axhspan(0.8, 1.2, color='red', alpha=0.3)
+    # TODO: add a text label that matches when you zoom
+
 
     
     ax.set(title="Mach Number over Time", xlabel="Time (sec)", ylabel="Mach")
@@ -135,12 +140,12 @@ if __name__ == "__main__":
     rasaero = pd.read_csv("Data/Output/ThirdPartySimulations/RasaeroAltitudeTime.CSV")
     no_angles = pd.read_csv("Data/Output/output.csv")
 
-    display_altitude(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles)
-    display_drag(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles)
-    display_forces(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles)
+    # display_altitude(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles)
+    # display_drag(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles)
+    # display_forces(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles)
     display_mach(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles)
 
-    display_thrust(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles)
-    display_weight(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles)
+    # display_thrust(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles)
+    # display_weight(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles)
 
     # TODO: add the finished 1 DOF and 5 DOF model simulations to this

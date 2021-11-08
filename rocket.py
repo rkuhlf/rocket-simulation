@@ -108,7 +108,10 @@ class Rocket(MassObject):
         self.torque = np.array([0., 0.])
 
         self.landed = False
+        # Once any parachute is deployed, we go directly into 3 degrees of freedom, with x, y, and z
+        self.parachute_deployed = False
 
+        self.relative_velocity = np.array([0., 0., 0.])
         self.apogee = 0
         self.max_mach = 0
         self.max_velocity = 0
@@ -134,8 +137,8 @@ class Rocket(MassObject):
 
         self.update_maxes()
 
-        # TODO: Figure out how parachute deployment mechanisms tend to work. Is it always as soon as it turns? How long does it take? Calculate the forces on the parachute chord
-        if False: #self.environment.time > self.motor.get_burn_time():
+        # I am going to pretend that we have some kind of safety mechanism to make sure they don't deploy while we are under thrust
+        if self.environment.time > self.motor.get_burn_time():
             for parachute in self.parachutes:
                 if parachute.should_deploy(self):
                     parachute.deploy(self)
@@ -318,7 +321,12 @@ class Rocket(MassObject):
     def apply_force(
             self, value, direction, distance_from_nose=None, debug=False,
             name="Force"):
-        # Where direction is a unit vector
+        """
+        Apply an arbitrary force in an arbitrary unit vector direction
+        Distance from nose defaults to CG
+        If you debug, you can supply a name
+        """
+
         if distance_from_nose is None:
             distance_from_nose = self.total_CG
 
@@ -390,15 +398,24 @@ class Rocket(MassObject):
         # Translational drag
         if not np.isclose(self.dynamic_pressure, 0):
             drag_magnitude, drag_direction, lift_magnitude, lift_direction = self.get_translational_drag()
-            self.apply_force(drag_magnitude, drag_direction,
-                             self.CP, debug=True, name="Drag")
+
             
-            if self.apply_angular_forces:
-                self.apply_force(lift_magnitude, lift_direction,
-                             self.CP, debug=True, name="Lift")
+            if self.parachute_deployed:
+                # We need to add in the drag of all of the parachutes, and we need to start applying force at CG. Also, lift doesn't matter anymore
+                total_drag = drag_magnitude
+                for parachute in self.parachutes:
+                    total_drag += parachute.get_drag(self)
+
+                self.apply_force(total_drag, drag_direction, debug=True, name="Drag")
+            else:
+                self.apply_force(drag_magnitude, drag_direction, self.CP, debug=True, name="Drag")
+
+                if self.apply_angular_forces:
+                    self.apply_force(lift_magnitude, lift_direction,
+                                self.CP, debug=True, name="Lift")
 
         # FIXME: Angular drag: not currently implemented
-        if not np.all(np.isclose(self.angular_velocity, 0)):
+        if not (np.all(np.isclose(self.angular_velocity, 0)) or self.parachute_deployed):
             pass
 
     def get_translational_drag(self):
@@ -411,17 +428,17 @@ class Rocket(MassObject):
         if self.apply_angular_forces:
             air_velocity = self.environment.get_air_speed(self.altitude)
 
-        relative_velocity = self.velocity - air_velocity
+        self.relative_velocity = self.velocity - air_velocity
 
-        if magnitude(relative_velocity) == 0:
+        if magnitude(self.relative_velocity) == 0:
             return 0, np.array([0., 0., 1.]), 0, np.array([0., 0., 1.])
 
         self.log_data('air speed', self.environment.get_air_speed(
             self.altitude))
-        self.log_data('relative velocity', relative_velocity)
+        self.log_data('relative velocity', self.relative_velocity)
 
         # Drag force is applied in the same direction as freestream velocity
-        drag_direction = - relative_velocity / magnitude(relative_velocity)
+        drag_direction = - self.relative_velocity / magnitude(self.relative_velocity)
 
         # Lift force is applied perpendicular to the freestream velocity
         # This is the part that is stupid because I should just use normal and axial forces
@@ -470,9 +487,7 @@ class Rocket(MassObject):
 
 
     def apply_gravity(self):
-
-        gravity = self.environment.get_gravitational_attraction(
-            self.total_mass, self.altitude)
+        gravity = self.environment.get_gravitational_attraction(self.total_mass, self.altitude)
 
         self.apply_force(
             gravity, np.array([0, 0, -1]),
@@ -588,7 +603,7 @@ class Rocket(MassObject):
 
 
 
-    # TODO: Add tis back in better
+    # TODO: Add this back in better
     # def get_drag_torque(self, drag_coefficient):
     #     "Calculate the magnitude of the force opposed to the direction of rotation"
     #     # Angular drag is a completely different calculation from translational drag

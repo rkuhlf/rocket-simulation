@@ -9,7 +9,7 @@ from environment import Environment
 from RocketParts.motor import Motor
 from RocketParts.massObject import MassObject
 from rocket import Rocket
-from RocketParts.parachute import ApogeeParachute, Parachute
+from RocketParts.parachute import ApogeeParachute
 from logger import RocketLogger
 from simulation import RocketSimulation
 from Data.Input.goddardModels import get_sine_interpolated_center_of_pressure, linear_approximated_normal_force, assumed_zero_AOA_CD
@@ -40,12 +40,13 @@ def get_mass_objects():
 def get_sim():
     env = Environment(time_increment=0.01, apply_wind=True)
     motor = Motor(front=2, center_of_gravity=2, mass=60, propellant_mass=60, thrust_curve="Data/Input/mmrThrust.csv")
-    motor.scale_thrust(126 / 114)
+    # For some reason, the RASAero sim has the wrong thrust curve. This scales it up to match more closely
+    # motor.scale_thrust(126 / 114)
     print(motor.total_impulse)
 
 
     drogue_parachute = ApogeeParachute(radius=0.2)
-    main_parachute = Parachute()
+    main_parachute = ApogeeParachute()
     rocket = Rocket(radius = 0.2032/2, length=5.7912, environment=env, motor=motor, parachutes=[drogue_parachute, main_parachute])
     rocket.set_CP_function(get_sine_interpolated_center_of_pressure)
     rocket.set_CL_function(linear_approximated_normal_force)
