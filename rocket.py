@@ -9,7 +9,6 @@
 # The CL & CD don't work past four degrees. This is just further impetus to get verifiable CFD data. Until that point I can't really move forwards here.
 
 
-# TODO: correct CD and CL
 # TODO: Fix parachute deployment
 
 import numpy as np
@@ -91,6 +90,9 @@ class Rocket(MassObject):
         self.mass_objects.extend([nose_cone, ox_tank_shell, injector, phenolic, fins, nozzle, avionics_bay])
         #endregion
 
+        self.landed = False
+        # Once any parachute is deployed, we go directly into 3 degrees of freedom, with x, y, and z
+        self.parachute_deployed = False
 
         super().overwrite_defaults(**kwargs)
         # Everything before this is saved as a preset including whatever is overridden by config
@@ -106,10 +108,6 @@ class Rocket(MassObject):
 
         self.force = np.array([0., 0., 0.])
         self.torque = np.array([0., 0.])
-
-        self.landed = False
-        # Once any parachute is deployed, we go directly into 3 degrees of freedom, with x, y, and z
-        self.parachute_deployed = False
 
         self.relative_velocity = np.array([0., 0., 0.])
         self.apogee = 0
@@ -130,7 +128,7 @@ class Rocket(MassObject):
         self.apply_acceleration()
         self.apply_velocity()
 
-        if (self.apply_angular_forces and self.off_rail):
+        if (self.apply_angular_forces and self.off_rail and not self.parachute_deployed):
             self.apply_angular_acceleration()
             self.apply_angular_velocity()
 
@@ -497,7 +495,6 @@ class Rocket(MassObject):
     
 
     # region Cached Values
-
     def calculate_dynamic_pressure(self):
         relative_velocity = self.velocity - \
             self.environment.get_air_speed(self.altitude)
@@ -507,11 +504,15 @@ class Rocket(MassObject):
             relative_velocity) ** 2
 
     def calculate_angle_of_attack(self):
-        relative_velocity = self.velocity - \
-            self.environment.get_air_speed(self.altitude)
+        if self.parachute_deployed:
+            # We will assume that it is falling straight down
+            self.angle_of_attack = 0
+        else:
+            relative_velocity = self.velocity - \
+                self.environment.get_air_speed(self.altitude)
 
-        self.angle_of_attack = angle_between(
-            relative_velocity, vector_from_angle(self.rotation))
+            self.angle_of_attack = angle_between(
+                relative_velocity, vector_from_angle(self.rotation))
 
         self.log_data("AOA", self.angle_of_attack)
 

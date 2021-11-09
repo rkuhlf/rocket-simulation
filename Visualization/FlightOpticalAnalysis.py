@@ -89,7 +89,6 @@ def display_aerodynamics(data):
 
     plt.show()
 
-
 def display_diverging(data):
     # I think that a perfectly balanced system will have a constant restoring coefficient / displacement coefficient
     # In this case I would call that the angular acceleration / angle of attack
@@ -168,4 +167,4 @@ def display_optical_analysis(target):
 
 
 if __name__ == "__main__":
-    display_optical_analysis("Data/Output/output.csv")
+    display_optical_analysis("Data/Output/output5DOFMMR.csv")
