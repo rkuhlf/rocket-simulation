@@ -10,6 +10,7 @@ sys.path.append(".")
 
 from RocketParts.massObject import MassObject
 from Helpers.general import interpolate
+from Helpers.data import interpolated_lookup
 from environment import Environment
 
 # Imports for defaults
@@ -56,7 +57,7 @@ class Motor(MassObject):
         self.thrust_data = dataframe
 
         total_thrust = 0
-        # this is close but not exactly correct (actually it's exactly what the data indicates, but not the experimental value) - I changed the first point of the base data to better match the experimental
+        
         for index, row in self.thrust_data.iterrows():
             if index == 0:
                 continue
@@ -71,7 +72,6 @@ class Motor(MassObject):
         self.burn_time = self.thrust_data.iloc[-1]["time"]
 
         self.mass_per_thrust = self.propellant_mass / total_thrust
-        # print(self.mass_per_thrust)
 
 
     def calculate_thrust(self, current_time):
@@ -97,7 +97,7 @@ class Motor(MassObject):
 
 
             new_mass = self.total_mass - self.thrust_to_mass(thrust, self.environment.time_increment)
-            # This section is slightly more complicated with a more complicated motor
+
             self.set_mass_constant(new_mass)
 
             return thrust

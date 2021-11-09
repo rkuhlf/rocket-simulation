@@ -38,16 +38,15 @@ def get_mass_objects():
 
 
 def get_sim():
-    env = Environment(time_increment=0.01, apply_wind=True)
-    motor = Motor(front=2, center_of_gravity=2, mass=60, propellant_mass=60, thrust_curve="Data/Input/mmrThrust.csv")
-    # For some reason, the RASAero sim has the wrong thrust curve. This scales it up to match more closely
-    # motor.scale_thrust(126 / 114)
-    print(motor.total_impulse)
+    env = Environment(time_increment=0.01, apply_wind=False)
+    motor = Motor(front=2, center_of_gravity=2, mass=60, propellant_mass=60, thrust_curve="Data/Input/mmrThrust.csv", environment=env)
+    # Rasaero adds in the decreasing air pressure. This scales it up to match more closely
+    motor.scale_thrust(126 / 114)
+    print(motor.get_total_impulse())
 
 
-    drogue_parachute = ApogeeParachute(radius=0.2)
-    main_parachute = ApogeeParachute()
-    rocket = Rocket(radius = 0.2032/2, length=5.7912, environment=env, motor=motor, parachutes=[drogue_parachute, main_parachute])
+    main_parachute = ApogeeParachute(diameter=4.8768)
+    rocket = Rocket(radius=0.1016, length=5.7912, environment=env, motor=motor, parachutes=[main_parachute])
     rocket.set_CP_function(get_sine_interpolated_center_of_pressure)
     rocket.set_CL_function(linear_approximated_normal_force)
     rocket.set_CD_function(assumed_zero_AOA_CD)

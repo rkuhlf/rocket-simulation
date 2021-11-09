@@ -134,6 +134,23 @@ def display_weight(openRocket=None, rasaero=None, no_angles=None):
 
     plt.show()
 
+def display_velocity(openRocket=None, rasaero=None, no_angles=None):
+    fig, ax = plt.subplots()
+
+    if openRocket is not None:
+        ax.plot(openRocket["Time (s)"], openRocket["Vertical velocity (m/s)"], label="OpenRocket")
+
+    if rasaero is not None:
+        ax.plot(rasaero["Time (sec)"], rasaero["Vel-V (ft/sec)"] / 3.28084, label="RASAero")
+
+    if no_angles is not None:
+        ax.plot(no_angles["time"], no_angles["velocity3"], label="1 DOF")
+    
+    ax.set(title="Vertical Velocity over Time", xlabel="Time (sec)", ylabel="Velocity (m/s)")
+    ax.legend(loc="upper right")
+
+    plt.show()
+
 
 if __name__ == "__main__":
     openRocket = pd.read_csv("Data/Output/ThirdPartySimulations/OpenRocketData.csv")
@@ -143,7 +160,8 @@ if __name__ == "__main__":
     # display_altitude(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles)
     # display_drag(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles)
     # display_forces(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles)
-    display_mach(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles)
+    # display_mach(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles)
+    display_velocity(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles)
 
     # display_thrust(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles)
     # display_weight(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles)

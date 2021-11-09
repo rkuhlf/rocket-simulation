@@ -5,8 +5,8 @@ from RocketParts.massObject import MassObject
 import sys
 sys.path.append(".")
 
-from Helpers.general import magnitude
-# TODO: the descent rate is too slow
+from Helpers.general import magnitude, interpolate
+
 
 class Parachute(MassObject):
     def calculate_area(self, radius=None):
@@ -17,16 +17,18 @@ class Parachute(MassObject):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.radius = 1.2192 # meters
+        self.radius = 2.4384 # meters
         self.mass = 0.01  # kg
         self.target_altitude = 1000  # m AGL (idk how actual sensors work)
 
-        # Should recalculate center of pressure, don't bother too much until Barrowman equations are implemented. Also will be difficult because the parachute rotates separately from the rocket
-
         self.deployed = False
+        self.time_of_deployment = 0
+
+        self.required_deployment_time = 15 # seconds; idk
 
         # Should probably have a drag object class to deal with the parachute and the rocket
         self.CD = 0.97
+
 
         super().overwrite_defaults(**kwargs)
 
@@ -46,13 +48,15 @@ class Parachute(MassObject):
 
 
     def deploy(self, rocket):
-        # TODO: Rewrite this to use a gradual deployment function
         self.deployed = True
+        self.time_of_deployment = rocket.environment.time
         rocket.parachute_deployed = True
 
     def get_drag(self, rocket):
         if self.deployed:
-            return 1/2 * self.CD * self.area * rocket.dynamic_pressure * magnitude(rocket.relative_velocity) ** 2
+            interpolated_area = interpolate(rocket.environment.time, self.time_of_deployment, self.time_of_deployment + self.required_deployment_time, 0, self.area)
+            interpolated_area = min(interpolated_area, self.area)
+            return 1/2 * self.CD * interpolated_area * rocket.dynamic_pressure
 
         return 0
 

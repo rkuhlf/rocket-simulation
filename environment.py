@@ -13,6 +13,7 @@ from Helpers.data import inputs_path
 from Helpers.general import interpolate, get_next
 from presetObject import PresetObject
 from Data.Input.models import get_density, get_speed_of_sound
+from Helpers.data import interpolated_lookup
 from Helpers.wind import Wind
 
 
@@ -37,7 +38,7 @@ class Environment(PresetObject):
 
         self.rail_length = 13.1064 # meters based on 43 feet at White Sands
 
-        self._density_path = "airQuantities.csv"
+        self._atmospheric_path = "airQuantities.csv"
 
         self.previous_air_density_index = 0
 
@@ -45,25 +46,25 @@ class Environment(PresetObject):
 
         super().overwrite_defaults(**kwargs)
 
+        self.load_atmospheric_data()
+
         
         self.wind = Wind(self.time_increment)
         self.wind.randomize_direction()
 
     @property
-    def density_path(self):
-        return self._density_path
+    def atmospheric_path(self):
+        return self._atmospheric_path
 
-    @density_path.setter
-    def density_path(self, p):
-        self._density_path = p
-        self.load_density_data()
+    @atmospheric_path.setter
+    def atmospheric_path(self, p):
+        self._atmospheric_path = p
+        self.load_atmospheric_data()
 
-    def load_density_data(self):
-        # https://www.digitaldutch.com/
-        self.density_data = pd.read_csv(inputs_path + self._density_path)
-        self.density_data.drop(
-            columns=["Viscosity", "Temperature", "Pressure"])
-        self.altitude_data = np.array(self.density_data["Altitude"])
+    def load_atmospheric_data(self):
+        self.atmospheric_data = pd.read_csv(inputs_path + self._atmospheric_path)
+        self.atmospheric_data.drop(
+            columns=["Viscosity", "Temperature"])
 
     def simulate_step(self):
         self.time += self.time_increment
@@ -80,8 +81,7 @@ class Environment(PresetObject):
             self.earth_radius + altitude + self.base_altitude) ** 2
 
     def get_air_pressure(self, altitude):
-        # FIXME: TODO: This has to be fixed; assumes atmospheric atm
-        return 101300 # Pa
+        return interpolated_lookup(self.atmospheric_data, "Altitude", altitude / 1000, "Pressure")
 
     def get_air_speed(self, altitude):
         if not self.apply_wind:
@@ -125,28 +125,7 @@ class Environment(PresetObject):
 
     def get_air_density_from_lookup(self, altitude):
         # This is mostly just here to double check that the model is wokring
-        index = self.previous_air_density_index
-        if self.altitude_data[index] > altitude:
-            index, self.previous_air_density_index = get_next(
-                index, self.altitude_data, self.previous_air_density_index, -1, altitude)
-        elif self.altitude_data[index] < altitude:
-            index, self.previous_air_density_index = get_next(
-                index, self.altitude_data, self.previous_air_density_index, 1, altitude)
-
-
-
-        previous_density = self.density_data.iloc[self.previous_air_density_index]
-
-        next_density = self.density_data.iloc[index]
-
-        # previous_density = previous_density.iloc[-1]
-        # next_density = next_density.iloc[0]
-
-        return interpolate(
-            altitude, previous_density["Altitude"],
-            next_density["Altitude"],
-            previous_density["Density"],
-            next_density["Density"])
+        return interpolated_lookup(self.atmospheric_data, "Altitude", altitude, "Density")
 
 
     def get_air_density(self, altitude):
@@ -154,4 +133,5 @@ class Environment(PresetObject):
 
         altitude /= 1000  # convert to kilometers
 
-        return self.get_air_density_from_model(altitude)
+        # return self.get_air_density_from_model(altitude)
+        return self.get_air_density_from_lookup(altitude)
