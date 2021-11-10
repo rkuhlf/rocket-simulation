@@ -391,6 +391,10 @@ class Rocket(MassObject):
         # x and y can't cause yaw in the same direction
         self.torque[0] -= y_component * yaw_multiplier * distance_from_CG
 
+    def apply_angular_torque(self, moment_around, moment_down):
+        self.torque[0] += moment_around
+        self.torque[1] += moment_down
+
 
     def apply_air_resistance(self):
         # Translational drag
@@ -412,9 +416,10 @@ class Rocket(MassObject):
                     self.apply_force(lift_magnitude, lift_direction,
                                 self.CP, debug=True, name="Lift")
 
-        # FIXME: Angular drag: not currently implemented
+
         if not (np.all(np.isclose(self.angular_velocity, 0)) or self.parachute_deployed):
-            pass
+            drag_around, drag_down = self.get_angular_drag()
+            self.apply_angular_torque(drag_around, drag_down)
 
     def get_translational_drag(self):
         "Calculate the vector for the translational drag force"
@@ -470,7 +475,20 @@ class Rocket(MassObject):
     def get_angular_drag(self):
         # This affects a very small component of the overall flight
 
-        pass
+        density = self.environment.get_air_density(self.altitude)
+
+        multiplier = 0.275 * density * self.radius * self.length ** 4 * 2
+
+        moment_around = multiplier * self.angular_velocity[0] ** 2
+        moment_around = min(self.angular_velocity[0] / self.environment.time_increment, moment_around)
+        moment_around *= -np.sign(self.angular_velocity[0])
+        
+        moment_down = multiplier * self.angular_velocity[1] ** 2
+        moment_down = min(self.angular_velocity[1] / self.environment.time_increment, moment_down)
+        moment_down *= -np.sign(self.angular_velocity[1])
+
+
+        return moment_around, moment_down
 
 
     def apply_thrust(self):

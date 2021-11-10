@@ -26,6 +26,24 @@ def display_forces(data):
     print("All of these lines should be relatively smooth. You should be able to identify all spikes: thrust curve burning out and the deployment of parachutes. In addition, the peak of the resistive forces should come immediately after the net force begins to turn negative, maybe even sooner because of the decreasing air density. Note that small osciallations may occur as the rocket wobbles in the air.")
     plt.show()
 
+def display_lift_drag(data):
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(ncols=2, nrows=2)
+
+    ax1.set_title("Lift Magnitude")
+    lift = (data["Lift1"] ** 2 + data["Lift2"] ** 2 + data["Lift3"] ** 2) ** (1/2)
+    ax1.plot(data["time"], lift)
+    ax1.set_xlabel("Time [s]")
+    ax1.set_ylabel("Stability [Calibers]")
+
+    ax2.set_title("Drag Magnitude")
+    lift = (data["Drag1"] ** 2 + data["Drag2"] ** 2 + data["Drag3"] ** 2) ** (1/2)
+    ax2.plot(data["time"], lift)
+    ax2.set_xlabel("Time [s]")
+    ax2.set_ylabel("Force (N)")
+
+    plt.show()
+
+
 def display_stability(data):
     # Subplot layout from https://matplotlib.org/3.1.1/gallery/subplots_axes_and_figures/gridspec_and_subplots.html#sphx-glr-gallery-subplots-axes-and-figures-gridspec-and-subplots-py
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(ncols=2, nrows=2)
@@ -158,6 +176,7 @@ def display_optical_analysis(target):
     display_stability(data)
     display_aerodynamics(data)
     display_diverging(data)
+    # display_lift_drag(data)
 
     # If everything else is working, it is worth taking a look at the actual flight simulation
     display_overall_flight(data)
@@ -167,4 +186,4 @@ def display_optical_analysis(target):
 
 
 if __name__ == "__main__":
-    display_optical_analysis("Data/Output/output5DOFMMR.csv")
+    display_optical_analysis("Data/Output/output.csv")
