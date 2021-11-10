@@ -17,25 +17,33 @@ def display_altitude(openRocket=None, rasaero=None, no_angles=None, DIY_angles=N
         altitudes = openRocket["Altitude (m)"] * 3.28084
         ax.plot(openRocket["Time (s)"], altitudes, label="OpenRocket")
 
-        apogees.append(max(altitudes))
+        apogee = max(altitudes)
+        print(f"OpenRocket predicts apogee of {apogee}")
+        apogees.append(apogee)
 
     if rasaero is not None:
         altitudes = rasaero["Altitude (ft)"]
         ax.plot(rasaero["Time (sec)"], altitudes, label="RASAero")
 
-        apogees.append(max(altitudes))
+        apogee = max(altitudes)
+        print(f"RASAero predicts apogee of {apogee}")
+        apogees.append(apogee)
 
     if no_angles is not None:
         altitudes = no_angles["position3"] * 3.28084
         ax.plot(no_angles["time"], altitudes, label="1 DOF")
 
-        apogees.append(max(altitudes))
+        apogee = max(altitudes)
+        print(f"1 DOF predicts apogee of {apogee}")
+        apogees.append(apogee)
 
     if DIY_angles is not None:
         altitudes = DIY_angles["position3"] * 3.28084
         ax.plot(DIY_angles["time"], altitudes, label="5 DOF")
 
-        apogees.append(max(altitudes))
+        apogee = max(altitudes)
+        print(f"5 DOF predicts apogee of {apogee}")
+        apogees.append(apogee)
     
     print(f"APOGEE: {np.average(apogees)}")
 
@@ -77,7 +85,7 @@ def display_drag(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None)
         drag_forces = (no_angles["Drag1"] ** 2 + no_angles["Drag2"] ** 2 + no_angles["Drag3"] ** 2) ** (1/2)
         ax2.plot(no_angles["time"], drag_forces)  
 
-        max_drags.append(max(drag_forces))
+        max_drags.append(np.max(drag_forces))
 
     if DIY_angles is not None:
         ax1.plot(DIY_angles["time"], DIY_angles["CD"], label="5 DOF")
@@ -87,6 +95,8 @@ def display_drag(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None)
 
         max_drags.append(max(drag_forces))
     
+    print(max_drags)
+
     print(f"MAX DRAG: {np.average(max_drags)} N")
 
 
@@ -97,23 +107,36 @@ def display_drag(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None)
 def display_mach(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None):
     fig, ax = plt.subplots()
 
+    max_machs = []
+
     if openRocket is not None:
+        
         ax.plot(openRocket["Time (s)"], openRocket["Mach number (​)"] * np.sign(openRocket["Vertical velocity (m/s)"]), label="OpenRocket")
+
+        max_machs.append(np.max(openRocket["Mach number (​)"]))
 
     if rasaero is not None:
         ax.plot(rasaero["Time (sec)"], rasaero["Mach Number"] * np.sign(rasaero["Vel-V (ft/sec)"]), label="RASAero")
 
+        max_machs.append(np.max(rasaero["Mach Number"]))
+
     if no_angles is not None:
         ax.plot(no_angles["time"], no_angles["Mach"] * np.sign(no_angles["relative velocity3"]), label="1 DOF")
 
+        max_machs.append(np.max(no_angles["Mach"]))
+
     if DIY_angles is not None:
         ax.plot(DIY_angles["time"], DIY_angles["Mach"] * np.sign(DIY_angles["relative velocity3"]), label="5 DOF")
+
+        max_machs.append(np.max(DIY_angles["Mach"]))
 
 
 
     ax.axhspan(0.8, 1.2, color='red', alpha=0.3)
     # TODO: add a text label that matches when you zoom
 
+
+    print(np.average(max_machs))
 
     
     ax.set(title="Mach Number over Time", xlabel="Time (sec)", ylabel="Mach")
@@ -192,17 +215,35 @@ def display_weight(openRocket=None, rasaero=None, no_angles=None, DIY_angles=Non
 def display_velocity(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None):
     fig, ax = plt.subplots()
 
+    max_velocities = []
+
     if openRocket is not None:
-        ax.plot(openRocket["Time (s)"], openRocket["Vertical velocity (m/s)"], label="OpenRocket")
+        velocities = openRocket["Vertical velocity (m/s)"]
+        ax.plot(openRocket["Time (s)"], velocities, label="OpenRocket")
+
+        max_velocities.append(np.max(velocities))
 
     if rasaero is not None:
-        ax.plot(rasaero["Time (sec)"], rasaero["Vel-V (ft/sec)"] / 3.28084, label="RASAero")
+        velocities = rasaero["Vel-V (ft/sec)"] / 3.28084
+        ax.plot(rasaero["Time (sec)"], velocities, label="RASAero")
+
+        max_velocities.append(np.max(velocities))
+
 
     if no_angles is not None:
-        ax.plot(no_angles["time"], no_angles["velocity3"], label="1 DOF")
+        velocities = no_angles["velocity3"]
+        ax.plot(no_angles["time"], velocities, label="1 DOF")
+
+        max_velocities.append(np.max(velocities))
 
     if DIY_angles is not None:
-        ax.plot(DIY_angles["time"], DIY_angles["velocity3"], label="5 DOF")
+        velocities = DIY_angles["velocity3"]
+        ax.plot(DIY_angles["time"], velocities, label="5 DOF")
+
+        max_velocities.append(np.max(velocities))
+
+    print(f"AVERAGE MAX VELOCITY: {np.average(max_velocities)}")
+
     
     ax.set(title="Vertical Velocity over Time", xlabel="Time (sec)", ylabel="Velocity (m/s)")
     ax.legend(loc="upper right")
@@ -219,9 +260,9 @@ if __name__ == "__main__":
 
     # display_altitude(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)
     # display_drag(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)
-    display_forces(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)
+    # display_forces(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)
     # display_mach(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)
-    # display_velocity(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)
+    display_velocity(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)
 
     # display_thrust(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)
     # display_weight(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)
