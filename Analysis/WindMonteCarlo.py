@@ -11,7 +11,7 @@ from Data.Input.ThrustProfile import scale_saved_curve
 # from SimulateRocket import get_simulation as get_sim
 from Simulations.DesignedRocket import get_sim
 
-iters = 150
+iters = 1
 
 apogees = []
 distances = []
