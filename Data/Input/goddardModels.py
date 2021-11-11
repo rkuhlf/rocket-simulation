@@ -52,7 +52,10 @@ def get_sine_interpolated_center_of_pressure(mach, alpha):
 
 
 def linear_approximated_normal_force(mach, alpha):
-    return alpha * interpolated_lookup(data, "Mach", mach, "CNalpha (0 to 4 deg) (per rad)")
+    # This is giving values way higher than Open Rocket seems to be using
+    # This is literally the only issue in the entire model. For some inexplicable reason the lift force coefficient works if it is a factor of 1000 smaller
+    # I am getting values around a max of five outputted from OpenRocket
+    return np.sin(alpha) * interpolated_lookup(data, "Mach", mach, "CNalpha (0 to 4 deg) (per rad)")
 
 
 def assumed_zero_AOA_CD(mach, alpha):

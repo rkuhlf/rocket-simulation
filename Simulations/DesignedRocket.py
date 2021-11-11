@@ -40,20 +40,22 @@ def get_mass_objects():
 
 
 def get_sim():
-    env = Environment(time_increment=0.04, apply_wind=True)
+    env = Environment(time_increment=0.05, apply_wind=False)
     motor = Motor(front=2, center_of_gravity=2, mass=60, propellant_mass=60, thrust_curve="Data/Input/mmrThrust.csv", environment=env)
     # Rasaero adds in the decreasing air pressure. This scales it up to match more closely
     # We can also scale by 0.75 to make it match Cristian's scaled down model
-    motor.scale_thrust(126 / 114) # This scaling factor adds about 3000 meters
+    # motor.scale_thrust(126 / 114) # This scaling factor adds about 3000 meters
     print(motor.get_total_impulse())
 
 
     main_parachute = ApogeeParachute(diameter=4.8768)
-    rocket = Rocket(radius=0.1016, length=5.7912, rotation=np.array([np.pi / 2, 0.0872665], dtype="float64"),
+    # angle is 0.0872665
+    rocket = Rocket(radius=0.1016, length=5.7912, rotation=np.array([np.pi / 2, 0], dtype="float64"),
         environment=env, motor=motor, parachutes=[])
     rocket.set_CP_function(get_sine_interpolated_center_of_pressure)
     rocket.set_CL_function(linear_approximated_normal_force)
     rocket.set_CD_function(assumed_zero_AOA_CD)
+    rocket.set_moment_constant(250)
 
     mass_objects = [motor]
     mass_objects.extend(get_mass_objects())
@@ -63,7 +65,7 @@ def get_sim():
 
     logger.splitting_arrays = True
 
-    sim = RocketSimulation(apply_angular_forces=True, max_frames=-1, environment=env, rocket=rocket, logger=logger)
+    sim = RocketSimulation(apply_angular_forces=False, max_frames=-1, environment=env, rocket=rocket, logger=logger)
     motor.simulation = sim
 
 

@@ -4,7 +4,7 @@
 
 import pandas as pd
 
-def compress_csv(file_path, nth_rows=50):
+def compress_csv(file_path, nth_rows=10):
 
     df = pd.read_csv(file_path)
 
@@ -15,4 +15,7 @@ def compress_csv(file_path, nth_rows=50):
 
 
 if __name__ == "__main__":
-    compress_csv("Data/Output/output5DOFMMR.csv")
+    files_to_compress = ["output5DOFNoWind", "output5DOFWind"]
+
+    for f in files_to_compress:
+        compress_csv(f"Data/Output/{f}.csv")

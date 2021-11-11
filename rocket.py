@@ -417,7 +417,7 @@ class Rocket(MassObject):
                                 self.CP, debug=True, name="Lift")
 
 
-        if not (np.all(np.isclose(self.angular_velocity, 0)) or self.parachute_deployed):
+        if False: # not (np.all(np.isclose(self.angular_velocity, 0)) or self.parachute_deployed):
             drag_around, drag_down = self.get_angular_drag()
             self.apply_angular_torque(drag_around, drag_down)
 
@@ -473,7 +473,9 @@ class Rocket(MassObject):
 
 
     def get_angular_drag(self):
-        # This affects a very small component of the overall flight
+        # This should affect only a very small component of the overall flight
+        # However, I think it will fix the issue with the rocket going through major oscillations after the thrust finishes
+        # If you think about an oscillating system, the restoring force is always increasing as the rocket progresses through the burn. However, when it begins to decelerate and the density of the air decreases, the restoring forces diminish and the oscillations of the rocket will become more violent
 
         density = self.environment.get_air_density(self.altitude)
 
@@ -541,7 +543,7 @@ class Rocket(MassObject):
         if self.CD_data_type is DataType.CONSTANT:
             pass
         
-        if self.CL_data_type is DataType.FUNCTION_MACH_ALPHA:
+        if self.CD_data_type is DataType.FUNCTION_MACH_ALPHA:
             self.CD = self.get_coefficient_of_drag(self.mach, self.angle_of_attack)
 
         self.log_data("CD", self.CD)
@@ -578,8 +580,8 @@ class Rocket(MassObject):
     def calculate_cp_cg_dist(self):
         # Note that this is only used for dynamic stability calculations, nothing during the simulations
         self.dist_press_grav = self.CP - self.total_CG
-        self.dist_press_grav *= 0.5
-        self.log_data("Stability [Calibers]", self.dist_press_grav / (self.radius * 2))
+
+        self.log_data("Stability [Calibers]", self.dist_press_grav / (self.diameter))
         self.log_data("Stability [Lengths]", self.dist_press_grav / (self.length))
 
     def calculate_cached(self):

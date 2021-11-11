@@ -163,7 +163,7 @@ class MassObject(PresetObject):
 
     def set_moment_constant(self, value):
         self.moment_data_type = DataType.CONSTANT
-        self.moment = value
+        self.moment_of_inertia = value
 
 
     def get_flattened_mass_objects(self, distance_from_original_front=0, exclude_objects=[]):
