@@ -186,4 +186,4 @@ def display_optical_analysis(target):
 
 
 if __name__ == "__main__":
-    display_optical_analysis("Data/Output/output.csv")
+    display_optical_analysis("Data/Output/output5DOFWind.csv")

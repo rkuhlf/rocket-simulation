@@ -4,6 +4,7 @@
 
 import pandas as pd
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.offsetbox import AnchoredText
 
@@ -49,7 +50,7 @@ def display_altitude(openRocket=None, rasaero=None, no_angles=None, DIY_angles=N
 
 
     ax.set(title="Altitude AGL over Time", xlabel="Time (sec)", ylabel="Altitude (ft)")
-    ax.legend(loc="upper right")
+    ax.legend(loc="upper left")
 
     plt.show()
 
@@ -166,6 +167,8 @@ def display_forces(openRocket=None, rasaero=None, no_angles=None, DIY_angles=Non
         ax.plot(DIY_angles["time"], net_force * np.sign(DIY_angles["Net Force3"]), label="5 DOF")
     
     ax.set(title="Net Force over Time", xlabel="Time (sec)", ylabel="Force (N)")
+    ax.axhline(y=0, color='gray', linestyle='-')
+
     ax.legend(loc="upper right")
 
     plt.show()
@@ -251,19 +254,51 @@ def display_velocity(openRocket=None, rasaero=None, no_angles=None, DIY_angles=N
     plt.show()
 
 
+def display_angles(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None):
+    # This one should be identical for all of them
+    fig, ax = plt.subplots()
+
+    if openRocket is not None:
+        ax.plot(openRocket["Time (s)"], openRocket["Angle of attack (°)"], label="OpenRocket")
+
+    if rasaero is not None:
+        ax.plot(rasaero["Time (sec)"], np.abs(rasaero["Angle of Attack (deg)"]), label="RASAero")
+
+    if no_angles is not None:
+        ax.plot(no_angles["time"], np.zeros(len(no_angles["time"])), label="1 DOF")
+
+    if DIY_angles is not None:
+        ax.plot(DIY_angles["time"], DIY_angles["AOA"] * 180 / np.pi, label="5 DOF")
+    
+    ax.set(title="AOA over Time", xlabel="Time (sec)", ylabel="Angle of Attack (deg)")
+    ax.legend(loc="upper right")
+
+    plt.show()
+
 if __name__ == "__main__":
     openRocket = pd.read_csv("Data/Output/ThirdPartySimulations/OpenRocketData.csv")
     rasaero = pd.read_csv("Data/Output/ThirdPartySimulations/RasaeroAltitudeTime.CSV")
     no_angles = pd.read_csv("Data/Output/output1DOFMMR.csv")
-    # TODO: run some more 5 DOFs to see if I can't get one where the angle of attack doesn't go nearly so crazy
-    DIY_angles = pd.read_csv("Data/Output/output5DOFMMR.csv")
+    DIY_angles = pd.read_csv("Data/Output/output5DOFWind.csv")
+    
+    
+    font = {'family' : 'normal',
+        # 'weight' : 'bold',
+        'size'   : 22}
 
-    # display_altitude(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)
+    matplotlib.rc('font', **font)
+
+    matplotlib.rc('legend', fontsize=15) 
+
+
+
+    display_altitude(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)
     # display_drag(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)
-    # display_forces(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)
+    display_forces(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)
     # display_mach(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)
-    display_velocity(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)
+    # display_velocity(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)
 
     # display_thrust(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)
     # display_weight(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)
+    # display_angles(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)
 
