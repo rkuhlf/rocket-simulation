@@ -15,9 +15,9 @@ from Simulations.DesignedRocket import get_sim
 
 
 
-min_change = -50
-max_change = 10
-iterations = 100
+min_change = -20
+max_change = 20
+iterations = 20
 mass_changes = np.linspace(min_change, max_change, iterations)
 
 apogees = []
@@ -27,7 +27,7 @@ velocities_off_rail = []
 for mass_change in mass_changes:
     sim = get_sim()
 
-    sim.set_logger(None)
+    sim.logger = None
 
     sim.rocket.change_mass(mass_change, exclude_objects=[sim.rocket.motor])
 
