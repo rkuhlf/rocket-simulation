@@ -1,0 +1,3 @@
+Simulation,Results,Engines loaded,Optimal delay,Max. altitude Feet,Max. velocity Miles / Hour,Max. acceleration Gees,Velocity at deployment Miles / Hour,Velocity at launch guide departure Miles / Hour,WeatherCocking,
+0,,[FinleyThrustCurve-0] ,   17.71,31212.07, 1281.91,   46.44,n/a,   22.33,Safe,
+1,,[FinleyThrustCurve-0] ,   31.17,40516.08, 1187.72,    7.08,n/a,   19.87,Safe,
