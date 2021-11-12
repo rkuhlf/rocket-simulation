@@ -2,7 +2,7 @@
 # All of the math is located within different files, and the motor file brings them all together
 # This script simply instantiates them, runs the simulation, then makes a ton of graphs
 # Right now, all of the inputs are based off of the Heros 3 rocket, developed at Stuttgart, because I am trying to confirm that my simulated output vaguely matches theirs
-# FIXME: at the moment, the combustion chamber pressure is at ~10 bar when it should be 30-35 bar
+# TODO: Make this file run
 
 
 import matplotlib.pyplot as plt

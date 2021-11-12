@@ -67,8 +67,6 @@ class CombustionChamber(PresetObject):
             pass
 
         elif self.pressure_data_type is DataType.DEFAULT:
-            self.pressure *= self.temperature / self.p_temperature
-
             self.p_temperature = self.temperature
 
             pressure_increase_rate = self.get_change_in_pressure(effective_mass_flow)

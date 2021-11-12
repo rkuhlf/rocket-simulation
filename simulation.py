@@ -7,7 +7,6 @@ from presetObject import PresetObject
 from Helpers.general import magnitude
 from logger import Logger
 
-# For defaults
 from environment import Environment
 
 class Simulation(PresetObject):
@@ -98,8 +97,6 @@ class Simulation(PresetObject):
                 
         finally:
             self.end()
-
-
 
 
 class RocketSimulation(Simulation):
@@ -271,6 +268,11 @@ class MotorSimulation(Simulation):
     def should_continue_simulating(self):
         return self.tank.pressure > self.chamber.pressure and self.tank.ox_mass > 0 and self.grain.port_diameter < self.grain.outer_diameter
         
+    def end(self):
+        self.motor.end()
+
+        return super().end()
+    
     #region Shortcuts for easier access
     @property
     def tank(self):
@@ -295,5 +297,17 @@ class MotorSimulation(Simulation):
     #endregion
 
     #region Helpers to evaluate the burn
+
+    @property
+    def total_impulse(self):
+        return self.motor.total_impulse
+
+    @property
+    def specific_impulse(self):
+        """
+        Return the overall specific impulse for the whole of the designed motor
+        """
+
+        return self.motor.total_specific_impulse
 
     # endregion

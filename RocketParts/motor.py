@@ -27,8 +27,9 @@ class Motor(MassObject):
     # TODO: rewrite so I can have some variable names that actually make sense. Right now, .total_impulse just gives you a value that is literally not the total impulse
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)        
         self.environment = Environment()
+
+        super().__init__(**kwargs)        
 
         # Mass including the propellant
         self.front = 3 # m
@@ -142,7 +143,7 @@ class CustomMotor(Motor):
         self.time_multiplier = 1
         self.finished_thrusting = False
 
-        self.ox_tank = OxTank()
+        self._ox_tank = OxTank()
         self.injector = Injector()
         self.combustion_chamber = CombustionChamber()
         self.nozzle = Nozzle()
@@ -158,6 +159,10 @@ class CustomMotor(Motor):
         # This is only defined as a cached variable to provide easier graphing
         self.thrust = 0
         self.OF = 0
+        self.initial_mass = self.ox_tank.ox_mass + self.combustion_chamber.fuel_grain.fuel_mass
+        self.total_impulse = 0
+
+        self.finished_simulating = False
 
     def update_values_from_CEA(self, chamber_pressure, OF):
         """
@@ -193,9 +198,7 @@ class CustomMotor(Motor):
             if OF < row["O/F Ratio"]:
                 # To make sure that we always get a number, I am going to always pick the row that has an O/F ratio immediately above the current value
                 looking_for_pressure = True
-
     
-
     def simulate_step(self):
         # upstream_pressure = self.ox_tank.pressure
         # downstream_pressure = self.combustion_chamber.pressure
@@ -218,6 +221,28 @@ class CustomMotor(Motor):
         # TODO: I want to reimplement this so that the nozzle is giving mass flow and exit velocity values. I think both ways should work, but that way will be easier to compare, and I am not sure that my nozzle coefficient calculation is correct
         self.thrust = nozzle_coefficient * self.nozzle.throat_area * self.combustion_chamber.pressure
 
+        self.total_impulse += self.thrust * self.environment.time_increment
+
+    # region Setters
+    @property
+    def ox_tank(self):
+        return self._ox_tank
+
+    @ox_tank.setter
+    def ox_tank(self, tank):
+        self._ox_tank = tank
+        self.initial_mass = self.ox_tank.ox_mass + self.combustion_chamber.fuel_grain.fuel_mass
+
+    @property
+    def fuel_grain(self):
+        return self.combustion_chamber.fuel_grain
+
+    @fuel_grain.setter
+    def fuel_grain(self, grain):
+        self.combustion_chamber.fuel_grain = grain
+        self.initial_mass = self.ox_tank.ox_mass + self.combustion_chamber.fuel_grain.fuel_mass
+
+    # endregion
 
     # region Helper Properties
     @property
@@ -236,6 +261,30 @@ class CustomMotor(Motor):
     @property
     def specific_impulse(self):
         return self.thrust / self.mass_flow / self.environment.gravitational_acceleration
+
+    def check_finished(self):
+        if not self.finished_simulating:
+            raise Exception("Motor has not finished simulating")
+
+    def get_total_impulse(self):
+        self.check_finished()
+
+        return self.total_impulse
+
+    def get_burn_time(self):
+        self.check_finished()
+
+        return self.burn_time
+
+    @property
+    def total_specific_impulse(self):
+        self.check_finished()
+
+        return self.get_total_impulse() / (self.initial_mass * 9.81)
+
+    def end(self):
+        self.finished_simulating = True
+        self.burn_time = self.environment.time
 
     # endregion
 

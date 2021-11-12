@@ -104,9 +104,25 @@ class FeedbackLogger(Logger):
 
         super().__init__(logging_object)
 
+        self.partial_debugging = True
+        self.debug_every = 10 # seconds
+        self.last_debugged = 0
+
         self.overwrite_defaults(**kwargs)
 
         self.print("Logger is prepared to run simulation")
+
+    def display_partial_data(self):
+        print(f"We are {self.simulation.environment.time} seconds through the simulation")
+        self.last_debugged += self.debug_every
+
+    def handle_frame(self):
+
+        if self.simulation.environment.time > self.last_debugged + self.debug_every:
+            self.display_partial_data()
+
+
+        return super().handle_frame()
 
     
     def save_to_csv(self):
@@ -186,6 +202,8 @@ class MotorLogger(FeedbackLogger):
         # Print every time it switches
         self.overexpanded = True
 
+        self.initial_pressure = self.motor.ox_tank.pressure
+
     @property
     def motor(self):
         return self.logging_object
@@ -194,6 +212,12 @@ class MotorLogger(FeedbackLogger):
     def motor(self, m):
         self.logging_object = m
 
+    def display_partial_data(self):
+        print(f"Ox Tank pressure {self.motor.ox_tank.pressure} Pascals")
+        print(f"Chamber pressure {self.motor.combustion_chamber.pressure} Pascals")
+
+        return super().display_partial_data()
+        
     def handle_frame(self):
         super().handle_frame()
 

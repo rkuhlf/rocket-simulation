@@ -21,6 +21,7 @@ from Visualization.MotorOpticalAnalysis import display_optical_analysis
 
 
 def get_sim():
+    # Usually we use 293.15
     ox = OxTank(temperature=293.15, length=2.54, diameter=0.1905, ox_mass=52.43)
 
     grain = Grain(verbose=True, length=0.78, port_diameter=0.15, outer_diameter=0.1905)
@@ -30,12 +31,13 @@ def get_sim():
     
     injector = Injector(ox_tank=ox, combustion_chamber=chamber, orifice_count=4, orifice_diameter=0.005)
     nozzle = Nozzle(throat_diameter=0.045, area_ratio=5.72) # meters
-    # At 0.1 the pressure swing is too big
-    env = Environment(time_increment=0.01)
+    # At 0.05 the pressure swing is too big at the start, and the stuff starts flowing the wrong direction
+    # Other than that, it isn't too sensitive to large time increments
+    env = Environment(time_increment=0.025)
 
     motor = CustomMotor(ox_tank=ox, injector=injector, combustion_chamber=chamber, nozzle=nozzle, environment=env)
 
-    logger = MotorLogger(motor, target="motorOutput.csv")
+    logger = MotorLogger(motor, target="motorOutput.csv", debug_every=0.5)
 
     sim = MotorSimulation(motor=motor, max_frames=-1, logger=logger, environment=env)
 
@@ -47,5 +49,7 @@ if __name__ == "__main__":
     sim = get_sim()
     sim.run_simulation()
 
-    display_optical_analysis(sim.logger.full_path)
+    print(sim.specific_impulse)
+
+    # display_optical_analysis(sim.logger.full_path)
 
