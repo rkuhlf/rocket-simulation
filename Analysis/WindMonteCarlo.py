@@ -13,7 +13,7 @@ from Data.Input.ThrustProfile import scale_saved_curve
 from Simulations.DesignedRocket import get_sim
 
 
-def simulate_monte_carlo(iters=10):
+def simulate_monte_carlo(iters=10, debug=True):
     apogees = []
     distances = []
 
@@ -27,6 +27,9 @@ def simulate_monte_carlo(iters=10):
 
             apogees.append(sim.apogee)
             distances.append(sim.dist_from_start)
+
+            if debug:
+                print(f"Finished iteration {i}")
     finally:
         return apogees, distances
 
