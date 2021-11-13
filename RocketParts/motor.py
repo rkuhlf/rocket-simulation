@@ -100,7 +100,7 @@ class Motor(MassObject):
 
 
             new_mass = self.total_mass - self.thrust_to_mass(thrust, self.environment.time_increment)
-
+            # This may not be working
             self.set_mass_constant(new_mass)
 
             return thrust

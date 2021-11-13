@@ -6,11 +6,6 @@
 # I am going for a dry mass of 60 kg based off of a preliminary DiameterStudy
 
 
-# TODO: figure out how to scrape CEA data from HTPB without showing it on the Github page but still maintaining access to it on all of my devices
-# TODO: scrape HTPB CEA data
-# TODO: separate HTPB CEA from Paraffin CEA
-# TODO: figure out optimum O/F ratio from HTPB CEA
-
 import numpy as np
 import sys
 sys.path.append(".")

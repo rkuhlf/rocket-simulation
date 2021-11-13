@@ -91,7 +91,9 @@ class Wind():
 
     def get_average_speed_altitude(
             self, roughness, base_altitude, average_wind_speed, altitude):
-
+        if altitude == 0:
+            print("I can't remember where I got this equation from, but it does not work at altitude=0. Returning zero for wind speed")
+            return 0
         # Roughness is z_0, or roughness length
         # For lake jackson, z_0 = 1
         # Relatively good explanation: https://wind-data.ch/tools/profile.php?lng=en
@@ -101,6 +103,7 @@ class Wind():
     def get_air_speed(self, roughness, base_altitude, average_wind_speed,
                       altitude, time):
         "Gets the air speed in all three dimensions at a point in time"
+
         wind_unit_vector = vector_from_angle(self.wind_direction)
 
         value = self.get_normal_perlin(time * self.interpolation_speed)
@@ -115,5 +118,4 @@ class Wind():
 
         # TODO: Add some variability to the wind direction, particularly as altitude changes
         # In meters per second
-        # return [0, 0, 0]
         return wind_unit_vector * speed

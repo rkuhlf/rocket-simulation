@@ -82,8 +82,12 @@ class Logger(PresetObject):
 
     def save_to_csv(self):
         df = pd.DataFrame(self.rows)
-        # Rather than using the index (0, 1, 2, 3, 4...), I will index the rows by the time the row is recorded at
-        df.set_index('time', inplace=True)
+
+        try:
+            # Rather than using the index (0, 1, 2, 3, 4...), I will index the rows by the time the row is recorded at
+            df.set_index('time', inplace=True)
+        except:
+            print("Attempted to save to csv, but there was no time index. Likely, the simulation did not make it past one frame, and no time was ever logged.")
         
         df.to_csv(self.full_path)
 
@@ -176,7 +180,7 @@ class RocketLogger(FeedbackLogger):
             else:
                 print()
 
-        print(f"It is currently {self.rocket.altitude} meters in the air")
+        print(f"It is currently {self.rocket.position[2]} meters in the air")
 
 
     def handle_frame(self):

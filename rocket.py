@@ -56,7 +56,7 @@ class Rocket(MassObject):
         self.CD = 0.7
 
         # This will throw an error because it must be overriden if we are applying angular effects
-        self.CL_data_type = DataType.DEFAULT
+        self.CL_data_type = DataType.CONSTANT
         self.CL = 0 
 
 
@@ -69,8 +69,7 @@ class Rocket(MassObject):
         self.parachutes = []
         self.logger = RocketLogger(self)
 
-        self.mass_objects = [self.motor]
-        self.mass_objects.extend(self.parachutes)
+        self.mass_objects = []
         #endregion
 
         #region DEFAULT MASSES
@@ -91,6 +90,9 @@ class Rocket(MassObject):
 
         super().overwrite_defaults(**kwargs)
         # Everything before this is saved as a preset including whatever is overridden by config
+
+        self.mass_objects.extend(self.parachutes)
+        self.mass_objects.extend([self.motor])
 
         self.reference_area = np.pi * self.radius ** 2
 

@@ -1,68 +1,56 @@
 # OPTIMIZE ANGLE GIVEN WIND
-# TODO: move some of these optimization files into the analysis section
+# We may be given the choice of a range of launch angles; it is important to select the correct one.
+# I believe that a positive rotation down is pointing away from the wind in this simulation
 
+# Conclusions:
+# It looks like we lose about 100 meters (300 feet) for every degree off of optimal until you reach 5 degrees off, when it starts to increase rapidly.
+# With the wind simulation what it is right now, I think that the best angle is 4 degrees away from the wind
+
+import numpy as np
+import matplotlib.pyplot as plt
 import sys
 sys.path.append(".")
 
 
 from Helpers.general import angles_from_vector_3d
-from numpy import array
-from simulation import RocketSimulation
-from RocketParts.parachute import Parachute
-from rocket import Rocket
-from RocketParts.motor import Motor
-from environment import Environment
+from Simulations.DesignedRocket import get_sim
 
 
-# TODO: Test the refactor and see if bestangle by wind still works (might need a reset() metod)
+min_angle = -20 * np.pi / 180
+max_angle = -min_angle
+iters = 40
+angles = np.linspace(min_angle, max_angle, iters)
 
+apogees = []
+drifts = []
 
-# Find best launch angle based on a constant wind speed
+for start_angle in angles:
+    sim = get_sim()
+    env = sim.environment
 
-# It is trivial to determine that you should be launching either directly into or directly away from the wind
-# Uses mostly class defaults
-env = Environment({"time_increment": 0.01})
-motor = Motor()
-parachute = Parachute()
-rocket = Rocket(environment=env, motor=motor, parachutes=[parachute])
+    # It is trivial to determine that you should be launching either directly into or directly away from the wind
+    air_direction = angles_from_vector_3d(env.get_air_speed(sim.rocket.altitude))[0]
 
-sim = RocketSimulation({}, env, rocket)
-
-air_direction = angles_from_vector_3d(env.get_air_speed())[0]
-
-# Very basic optimization program, it will get stuck in local minimums
-# If you want to optimize it the other direction, you will have to make this negative
-# 54 -> 0.37
-learning_rate = 0.001
-start_angle = -0.4
-
-rocket.rotation = array([air_direction, start_angle], dtype="float64")
-
-p_distance_from_start = -1
-distance_from_start = -1
-i = 0
-print("Initialized simulation")
-while distance_from_start <= p_distance_from_start or p_distance_from_start == -1:
-    print(rocket.rotation)
-    p_distance_from_start = distance_from_start
+    sim.rocket.rotation = np.array([air_direction, start_angle])
 
     sim.run_simulation()
 
-    distance_from_start = (
-        rocket.position[0] ** 2 + rocket.position[1] ** 2) ** (1 / 2)
-    sim.reset()
+    apogee = sim.apogee
+    drift = sim.dist_from_start
 
-    rocket = sim.rocket
+    apogees.append(apogee)
+    drifts.append(drift)
 
-    print(
-        str(start_angle + i * learning_rate) + " angle completed: ",
-        distance_from_start)
+    print(f"Starting from {start_angle * 180 / np.pi} degrees down, the rocket flew {apogee} meters into the air and landed {drift} meters away from where it started.")
 
 
-    i += 1
-    rocket.rotation = array(
-        [air_direction, start_angle + i * learning_rate],
-        dtype="float64")
+fig, (ax1, ax2) = plt.subplots(2)
 
-print(str(air_direction) + ", " + str(start_angle + (i - 2)
-                                      * learning_rate) + " is the best angle")
+ax1.plot(angles, apogees)
+ax1.set(title="Apogee versus Angle", xlabel="Angle [rad]", ylabel="Apogee [m]")
+ax2.plot(angles, drifts)
+ax2.set(title="Drift versus Angle", xlabel="Angle [rad]", ylabel="Drift [m]")
+
+fig.tight_layout()
+
+plt.show()
