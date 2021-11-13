@@ -111,7 +111,6 @@ def mutate(rocket):
 
     # No return statement is required because no copies are made; all modification is in place
 
-# TODO: the easiest thing is probably just to write a function of the preset object that creates a copy
 def mutated_simulation(sim):
     print("Original rocket motor for mutation", sim.rocket.motor.thrust_data)
     new_sim = sim.copy()

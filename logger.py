@@ -171,7 +171,7 @@ class RocketLogger(FeedbackLogger):
             print(f"Rocket is ascending at {self.rocket.velocity[2]} m/s")
         else:
             print(f"Rocket is descending at {abs(self.rocket.velocity[2])} m/s", end="")
-            if self.rocket.deployed_parachute:
+            if self.rocket.parachute_deployed:
                 print(" under parachutes")
             else:
                 print()

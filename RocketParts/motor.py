@@ -1,10 +1,9 @@
 # MOTOR CLASS
 # Started off as just a place to store the code to get a thrust curve up and running for a rocket class
-# Eventually, I need to integrate all of the inherited functions from the base motor class so that they actually work in the custom motor
-# That is a secondary priority however, since the evolution of chamber pressure is just incorrect at the moment
+# Now there is a custom motor that can simulate a hybrid's combustion process
+
 
 import pandas as pd
-
 import sys
 sys.path.append(".")
 
@@ -15,12 +14,13 @@ from environment import Environment
 
 # Imports for defaults
 from RocketParts.Motor.oxTank import OxTank
-from RocketParts.Motor.grain import Grain
 from RocketParts.Motor.injector import Injector
 from RocketParts.Motor.combustionChamber import CombustionChamber
 from RocketParts.Motor.nozzle import Nozzle
 from logger import MotorLogger
 
+
+# TODO: add a simulation for the gas phase
 
 
 class Motor(MassObject):
@@ -43,6 +43,8 @@ class Motor(MassObject):
 
 
         super().overwrite_defaults(**kwargs)
+
+        self.initial_mass = self.mass
 
         self.set_thrust_data_path(self.thrust_curve)
 
@@ -120,7 +122,7 @@ class Motor(MassObject):
         return self.time_multiplier * self.burn_time
 
     def specific_impulse(self):
-        return 1 / (self.mass_per_thrust * 9.81)
+        return self.get_total_impulse() / (self.initial_mass * 9.81)
 
     #region SCALING
     def scale_thrust(self, multiplier):
@@ -137,7 +139,10 @@ class Motor(MassObject):
 
     #endregion
 
+
 class CustomMotor(Motor):
+    # FIXME: scaling the burn time does not work for custom motors
+
     def __init__(self, **kwargs):
         self.thrust_multiplier = 1
         self.time_multiplier = 1
@@ -215,7 +220,7 @@ class CustomMotor(Motor):
 
         # TODO: Account for nozzle loss from the port diameter ratio to the nozzle throat. I still need to read about this some more
         # TODO: I want to reimplement this so that the nozzle is giving mass flow and exit velocity values. I think both ways should work, but that way will be easier to compare, and I am not sure that my nozzle coefficient calculation is correct
-        self.thrust = nozzle_coefficient * self.nozzle.throat_area * self.combustion_chamber.pressure
+        self.thrust = nozzle_coefficient * self.nozzle.throat_area * self.combustion_chamber.pressure * self.thrust_multiplier
 
         self.total_impulse += self.thrust * self.environment.time_increment
 

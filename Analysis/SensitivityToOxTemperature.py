@@ -1,5 +1,9 @@
 # LOOP OVER DIFFERENT INITIAL TANK TEMPERATURES FOR OVERALL THRUSTS
+# Though we do not have much control over the temperature our rocket will launch at, it is important to know what the effects would be
+# Lowest temperature ever recorded involved a leaky valve, but was 50 F, highest was 80 F (supercritical at 97 F) 
 
+
+# Increasing temperature looks like it increases the total impulse but decreases burn time, affecting the burn time more strongly
 
 import numpy as np
 import matplotlib.pyplot as plt

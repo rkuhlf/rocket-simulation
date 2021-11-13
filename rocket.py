@@ -1,15 +1,10 @@
 # ROCKET OBJECT
-# Simulates the flight of a rocket as a rigidbody in five degrees of freedom - three positional coordinates, two rotational coordinates
+# Simulates the flight of a rocket as a rigidbody in five degrees of freedom - three positional coordinates, two rotational coordinates; no roll
 # Uses a separate motor class for thrust, and an array of parachutes
 # Uses RASAero for looking up various aerodynamic qualities
 
-# There are a few main areas that need improvement
-# There is no variable center of gravity. This is relatively easy to fix and will play a large role in stability
-# There is no variable center of pressure. This is much harder to fix. I can get a crappy solution from Rasaero, but I would really like to use CFD data
-# The CL & CD don't work past four degrees. This is just further impetus to get verifiable CFD data. Until that point I can't really move forwards here.
-
-
-# TODO: Fix parachute deployment
+# TODO: Right now, the wind simulation is the main thing that needs improvement
+# TODO: Fix parachute deployment - right now it does not match 3rd party
 
 import numpy as np
 from math import isnan

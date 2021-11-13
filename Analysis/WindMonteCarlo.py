@@ -1,6 +1,6 @@
 # RUN MULTIPLE SIMULATIONS; VARY WIND
 # This should give us a good idea of the varying kinds of drift we will get (once I get parachutes working)
-# It should also give us a good range for the kinds of Mach and velocity we will be going, as well as the variability in apogee
+# It should also give us a range for the kinds of Mach and velocity we will be going, as well as the variability in apogee; basically summarizing what happens because of our stability
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -8,18 +8,17 @@ import pandas as pd
 import sys
 sys.path.append(".")
 
-from Data.Input.ThrustProfile import scale_saved_curve
-# from SimulateRocket import get_simulation as get_sim
 from Simulations.DesignedRocket import get_sim
 
 
-def simulate_monte_carlo(iters=10, debug=True):
+def simulate_monte_carlo(sim_function, iters=10, debug=True):
+    """Run multiple of the same simulations and return all of their results"""
     apogees = []
     distances = []
 
     try:
         for i in range(iters):
-            sim = get_sim()
+            sim = sim_function()
 
             sim.logger = None
 
@@ -53,7 +52,7 @@ def save_monte_carlo(apogees, distances):
 
 
 if __name__ == "__main__":
-    distances, apogees = simulate_monte_carlo(50)
+    distances, apogees = simulate_monte_carlo(get_sim, 50)
     graph_monte_carlo(distances, apogees)
 
     save_monte_carlo(distances, apogees)

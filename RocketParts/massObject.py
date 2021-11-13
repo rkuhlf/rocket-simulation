@@ -1,4 +1,6 @@
-# MASS OBJECT CLASS
+# MASS OBJECT
+# Everything on the rocket that has mass should inherit from this class
+# Stores some basic physics equations that need to be evaluated in all kinds of places
 
 import sys
 sys.path.append(".")
@@ -7,13 +9,16 @@ from Helpers.data import DataType
 from presetObject import PresetObject
 
 
+# We inherit from preset object because we should be able to save the configuration of mass objects
 class MassObject(PresetObject):
     """
     Everything that has mass on the rocket should inherit from this class
     Aside from storing the mass, this class also deals with the moment of inertia and the center of gravity. 
 
-    With moment of inertia, all items are assumed to be flat-headed cylinders with uniformly distributed mass
+    With moment of inertia, all items are assumed to be point masses
     """
+
+    # TODO: make items flat-headed cylinders with uniformly distributed mass instead of points
 
     def __init__(self, **kwargs):
         # This has the nice side effect that everything has access to the simulation now
@@ -37,6 +42,7 @@ class MassObject(PresetObject):
 
         super().overwrite_defaults(**kwargs)
 
+    # region Total Mass
     @property
     def total_mass(self):
         return self.get_total_mass()       
@@ -96,7 +102,10 @@ class MassObject(PresetObject):
         else:
             self.mass += amount
 
+    # endregion
 
+
+    # region Total Center of Gravity
     @property
     def total_CG(self, local=False):
         if self.CG_data_type == DataType.DEFAULT:
@@ -130,7 +139,10 @@ class MassObject(PresetObject):
         self.CG_data_type = DataType.CONSTANT
         self.center_of_gravity = value
 
+    # endregion
 
+
+    # region Total Moment of Inertia
     @property
     def total_moment_of_inertia(self):
         if self.moment_data_type == DataType.DEFAULT:
@@ -164,6 +176,8 @@ class MassObject(PresetObject):
     def set_moment_constant(self, value):
         self.moment_data_type = DataType.CONSTANT
         self.moment_of_inertia = value
+
+    # endregion
 
 
     def get_flattened_mass_objects(self, distance_from_original_front=0, exclude_objects=[]):

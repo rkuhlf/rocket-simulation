@@ -8,14 +8,13 @@ sys.path.append(".")
 from Helpers.general import angles_from_vector_3d
 from numpy import array
 from simulation import RocketSimulation
-from logger import Feedback_Logger  # , Logger
 from RocketParts.parachute import Parachute
 from rocket import Rocket
 from RocketParts.motor import Motor
 from environment import Environment
 
 
-# TODO: Test the refactor and see if bestangle by wind still works (mit need a reset() metod)
+# TODO: Test the refactor and see if bestangle by wind still works (might need a reset() metod)
 
 
 # Find best launch angle based on a constant wind speed

@@ -1,3 +1,7 @@
+# FUEL GRAIN
+# Simulate the properties of the fuel grain
+# Mostly covers regression calculations
+
 import numpy as np
 import sys
 sys.path.append(".")

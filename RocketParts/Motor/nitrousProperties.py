@@ -1,3 +1,8 @@
+# NITROUS PROPERTIES
+# This is a selection of functions to calculate the properties of saturated nitrous at a given temperature
+# All equations come from http://edge.rit.edu/edge/P07106/public/Nox.pdf
+# Note that equations of state for Nitrous, particularly non-saturated equations of state, are not all equally accurate
+
 import numpy as np
 
 # This is Nitrous's boiling point. Below this, the solution is no longer saturated, and you need to use a different model
@@ -5,7 +10,6 @@ minimum_temperature = 273.15 - 90 # Kelvin
 critical_temperature = 273.15 + 36 # Kelvin
 
 def confirm_range(temperature):
-    return True
     # Errors if temperature is outside the acceptable range
     if temperature > critical_temperature:
         raise ValueError(
@@ -39,8 +43,8 @@ def get_liquid_nitrous_density(temperature):
 minimum_liquid_density = get_liquid_nitrous_density(critical_temperature)
 
 def get_gaseous_nitrous_density(temperature):
-    # kg / m**3
-    # could definitely have done this with a loop and like one array
+    """Returns vapor density in kg / m^3"""
+
     confirm_range(temperature)
 
     b1 = -1.00900
@@ -57,7 +61,8 @@ def get_gaseous_nitrous_density(temperature):
 
 
 def find_specific_enthalpy_of_liquid_nitrous(temperature):
-    # kJ / kg
+    """Returns number of kilojoules in one kilogram of nitrous"""
+
     coefficients = [-200, 116.043, -917.225, 794.779, -589.587]
     total = 0
     for i in range(0, 5):

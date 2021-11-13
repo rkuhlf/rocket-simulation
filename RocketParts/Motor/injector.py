@@ -1,10 +1,15 @@
+# INJECTOR
+# Class to be integrated with motor
+# Also includes a few design methods for stress calculations
+# Mostly has formulas for a few different two-phase flow calculations
+
+
 import numpy as np
 import sys
 from Helpers.data import DataType
 sys.path.append('.')
 
-from presetObject import PresetObject
-
+from RocketParts.massObject import MassObject
 from RocketParts.Motor.nitrousProperties import get_nitrous_vapor_pressure, get_liquid_nitrous_density, find_specific_enthalpy_of_gaseous_nitrous, find_specific_enthalpy_of_liquid_nitrous
 
 
@@ -124,7 +129,7 @@ def find_mass_flow_dyer_interpolation(
 
 #endregion
 
-class Injector(PresetObject):
+class Injector(MassObject):
     def __init__(self, **kwargs):
         """
         :param int orifice_count: The number of holes the flow is going through
