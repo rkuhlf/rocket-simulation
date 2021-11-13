@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 from matplotlib.offsetbox import AnchoredText
 
 
+# TODO: This should use some kind of data structure to avoid all of the repetition
+
 def display_altitude(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None):
     fig, ax = plt.subplots()
 

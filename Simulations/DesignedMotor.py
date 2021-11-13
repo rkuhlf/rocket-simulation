@@ -33,7 +33,7 @@ def get_sim():
     nozzle = Nozzle(throat_diameter=0.045, area_ratio=5.72) # meters
     # At 0.05 the pressure swing is too big at the start, and the stuff starts flowing the wrong direction
     # Other than that, it isn't too sensitive to large time increments
-    env = Environment(time_increment=0.025)
+    env = Environment(time_increment=0.01)
 
     motor = CustomMotor(ox_tank=ox, injector=injector, combustion_chamber=chamber, nozzle=nozzle, environment=env)
 

@@ -167,9 +167,9 @@ class CustomMotor(Motor):
     def update_values_from_CEA(self, chamber_pressure, OF):
         """
         This is doing a look up for the chamber pressure in Pascals.
-        It will always round up
+        It will always round the O/F and pressure up
         """
-        # I don't really know what to do if we are getting condensed values in the nose cone. I guess we can just use the next one up
+
         looking_for_pressure = False
 
         for index, row in self.data.iterrows():
@@ -200,13 +200,9 @@ class CustomMotor(Motor):
                 looking_for_pressure = True
     
     def simulate_step(self):
-        # upstream_pressure = self.ox_tank.pressure
-        # downstream_pressure = self.combustion_chamber.pressure
         self.ox_tank.update_drain(self.ox_flow * self.environment.time_increment)
         self.combustion_chamber.update_combustion(self.ox_flow, self.nozzle, self.environment.time_increment)
 
-        # I have no idea how I have made it this far without considering the O/F. The ox-fuel ratio should determine the C-star.
-        # Actually, I guess all that I need is the chamber temperature and the average molar mass
         if self.fuel_flow == 0:
             self.OF = 100
         else:
