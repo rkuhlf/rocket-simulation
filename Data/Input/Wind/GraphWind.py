@@ -28,11 +28,16 @@ import matplotlib.pyplot as plt
 
 
 
-df = pd.read_csv('Data/Input/Wind/windSample.csv')
+df = pd.read_csv('Data/Input/Wind/MoreData.csv')
 
-fig = plt.figure()
+fig, (ax1, ax2) = plt.subplots(2)
 
-plt.plot(df["index"], df["speed"])
-fig.suptitle('Actual Wind')
+ax1.plot(df["index"], df["Magnitude"])
+ax1.set(title='Actual Speeds')
+
+ax2.scatter(df["index"], df["Direction"], s=1)
+ax2.set(title='Actual Directions')
+
+fig.tight_layout()
 
 plt.show()

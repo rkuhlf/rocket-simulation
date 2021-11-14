@@ -13,8 +13,9 @@ from Helpers.data import inputs_path
 from Helpers.general import interpolate, get_next
 from presetObject import PresetObject
 from Data.Input.models import get_density, get_speed_of_sound
+from Data.Input.Wind.whiteSandsModels import speed_at_altitude
 from Helpers.data import interpolated_lookup
-from Helpers.wind import Wind
+from Data.Input.wind import Wind
 
 
 class Environment(PresetObject):
@@ -39,7 +40,6 @@ class Environment(PresetObject):
         self.rail_length = 13.1064 # meters based on 43 feet at White Sands
 
         self._atmospheric_path = "airQuantities.csv"
-
         self.previous_air_density_index = 0
 
         self.apply_wind = True
@@ -49,8 +49,9 @@ class Environment(PresetObject):
         self.load_atmospheric_data()
 
         
-        self.wind = Wind(self.time_increment)
-        self.wind.randomize_direction()
+        self.wind = Wind()
+        # It is a little weird to override a default by default, but whatever
+        self.wind.get_average_speed_altitude = speed_at_altitude
 
     @property
     def atmospheric_path(self):
@@ -109,7 +110,7 @@ class Environment(PresetObject):
 
         # I believe that Lake Jackson averae windspeed is about 2.1 m/s
         # https://globalwindatlas.info/ also has some direction data
-        return self.wind.get_air_speed(1, 10, 2.71, altitude, self.time)
+        return self.wind.get_air_velocity(self.time, altitude)
 
 
     def get_speed_of_sound(self, altitude):
