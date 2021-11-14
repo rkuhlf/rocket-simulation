@@ -1,14 +1,18 @@
 # PROOF OF CONCEPT FOR THE WIND SIMULATION
 # This file isn't really used anywhere else, but I am leaving it because it shows how I figured out the wind simulation that I am rolling with at the moment
-# MAJOR DISCLAIMER: This isn't a simulation based on real research. I found out that wind follows a weibull distribution, so I wrote a rolling perlin noise generation that maps to a weibull
-# The time-scale is probably totally off, so it shouldn't be used in place of an actual wind table, and I would like to replace it
+# To be honest, I am pretty happy with the way the wind works at the moment
+# I scaled the time increment and the weibull parameter and the octaves and base to match some second by second data from a calm day in Utah, but I think that it should scale pretty well just by adjusting the average wind speed
 
 
 # Ranges from -1 to 1 I think
 from noise import pnoise1
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
+sys.path.append(".")
 
+from Helpers.general import magnitude
+from Data.Input.wind import Wind
 
 
 def show_normal_perlin_disparity():
@@ -74,7 +78,23 @@ def show_CLT_of_perlin():
     plt.show()
 
 
+def show_wind_speed_over_time():
+    w = Wind()
+
+    inputs = np.linspace(0, 100, 100)
+    outputs = []
+
+    for i in inputs:
+        outputs.append(magnitude(w.get_air_speed(i, average_wind_speed=5)))
+
+    plt.plot(inputs, outputs)
+
+    plt.show()
+
+
 
 if __name__ == "__main__":
     # show_normal_perlin_disparity()
-    show_CLT_of_perlin()
+    # show_CLT_of_perlin()
+
+    show_wind_speed_over_time()
