@@ -106,11 +106,13 @@ class Rocket(MassObject):
         self.force = np.array([0., 0., 0.])
         self.torque = np.array([0., 0.])
 
+        # region Evaluators
         self.relative_velocity = np.array([0., 0., 0.])
-        self.apogee = 0
+        self.apogee = None
         self.max_mach = 0
         self.max_velocity = 0
         self.max_net_force = 0
+        # endregion
 
     def simulate_step(self):
         self.calculate_cached()
@@ -223,7 +225,12 @@ class Rocket(MassObject):
         if self.position[2] < 0 and self.has_lifted:
             self.landed = True
 
-        self.apogee = max(self.apogee, self.position[2])
+        if self.descending and self.apogee == None and self.has_lifted:
+            print("Setting Apogee to", self.p_position[2], "at t=",self.environment.time)
+            self.apogee = self.p_position[2]
+            self.apogee_lateral_velocity = magnitude(self.relative_velocity)
+    
+
         self.log_data("Mach", self.mach)
         self.max_mach = max(self.max_mach, self.mach)
         self.max_velocity = max(self.max_velocity, magnitude(self.velocity))

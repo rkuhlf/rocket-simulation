@@ -195,6 +195,10 @@ class RocketSimulation(Simulation):
         return self.rocket.apogee
 
     @property
+    def apogee_lateral_velocity(self):
+        return self.rocket.apogee_lateral_velocity
+    
+    @property
     def max_velocity(self):
         return self.rocket.max_velocity
     
