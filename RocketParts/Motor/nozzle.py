@@ -303,6 +303,10 @@ class Nozzle(PresetObject):
     @property
     def throat_area(self):
         return np.pi * self.throat_radius ** 2
+
+    @property
+    def exit_area(self):
+        return self.throat_area * self.area_ratio
         
 
     def get_nozzle_coefficient(self, chamber_pressure, atmospheric_pressure):

@@ -255,12 +255,8 @@ class MotorSimulation(Simulation):
 
 
     def simulate_step(self):
-        self.motor.simulate_step()
+        thrust = self.motor.calculate_thrust()
         self.environment.simulate_step()
-
-        # if self.environment.rail_length < self.rocket.position[2] and self.rail_gees is None:
-        #     self.rail_gees = self.rocket.gees
-        #     self.rail_velocity = magnitude(self.rocket.velocity)
         
         super().simulate_step()
 
