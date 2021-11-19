@@ -45,6 +45,8 @@ class Motor(MassObject):
         self.adjust_for_atmospheric = False
         # If you want to adjust for the atmospheric pressure difference, you have to override the nozzle area
         self.nozzle_area = None
+        # This doesn't get overriden exactly correctly (If you change the environment calculations, it will be wrong without updating automatically), but I don't think it really matters in any practical applications
+        self.assumed_exit_pressure = self.environment.get_air_pressure(0)
 
 
         super().overwrite_defaults(**kwargs)
@@ -86,25 +88,15 @@ class Motor(MassObject):
         if self.finished_thrusting:
             return 0
 
+
         # The longer we want the burn time, the more we want to shrink the lookup time
         self.environment.time /= self.time_multiplier
+
+        
         try:
-            previous_thrust = self.thrust_data[self.thrust_data["time"] <= self.environment.time]
-
-            next_thrust = self.thrust_data[self.thrust_data["time"] >= self.environment.time]
-
-            previous_thrust = previous_thrust.iloc[-1]
-            next_thrust = next_thrust.iloc[0]
-
-            self.thrust = self.thrust_multiplier * interpolate(
-                self.environment.time, previous_thrust["time"],
-                next_thrust["time"],
-                previous_thrust["thrust"],
-                next_thrust["thrust"])
-
+            self.thrust = self.thrust_multiplier * interpolated_lookup(self.thrust_data, "time", self.environment.time, "thrust")
 
             new_mass = self.total_mass - self.thrust_to_mass(self.thrust, self.environment.time_increment)
-
             self.set_mass_constant(new_mass)
 
             self.thrust += self.get_nozzle_force_difference(altitude)
@@ -119,17 +111,21 @@ class Motor(MassObject):
         if not self.adjust_for_atmospheric:
             return 0
 
-        # We assume that the inputted nozzle is giving us an exit pressure of atmospheric air pressure
-        assumed_exit_pressure = self.environment.get_air_pressure(0)
+        # We assume that the inputted nozzle was simulated at sea level
+        # so the thrust curve data is based on a rocket that had too much exit pressure compared to what it currently has
         environmental_pressure = self.environment.get_air_pressure(altitude)
 
-        return self.nozzle_area * (assumed_exit_pressure - environmental_pressure)
+        # The higher the external pressure you tested at, the more of an increase we will get when the pressure is actually lower
+        return self.nozzle_area * (self.assumed_exit_pressure - environmental_pressure)
 
     def thrust_to_mass(self, thrust, time):
         return thrust * self.mass_per_thrust * time / (self.thrust_multiplier * self.time_multiplier)
 
     def get_total_impulse(self):
-        # This has got to be the most confusing way possible to do this. There is a total impulse that is te total impulse of the data without multipliers
+        if self.adjust_for_atmospheric:
+            print("WARNING: The total impulse that this returns is not adjusted for the varying atmospheric pressure, but your motor is currently set to adjust for that in an actual simulation")
+
+        # This has got to be the most confusing way possible to do this. There is a total impulse that is the total impulse of the data without multipliers
         return self.time_multiplier * self.thrust_multiplier * self.total_impulse
 
     def get_average_thrust(self):

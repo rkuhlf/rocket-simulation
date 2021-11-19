@@ -138,3 +138,7 @@ My Git commit history is also a mess. I have been using Github mainly as a cloud
 - Notes on Multiple Degrees of Freedom for Goddard 2021-2022](https://docs.google.com/document/d/1VEkxpdZ9q7t6uQZ0db8XvYZEkJN-9KKGfAi_a7vk-ag/edit?usp=sharing)
 - I really think this [Topics in Advanced Model Rocketry](https://www.apogeerockets.com/Rocket_Books_Videos/Books/Topics_In_Advanced_Model_Rocketry) book would have been super helpful, but I could never get my hands on it.
 - The designNotes.md file has most of the imformation about programming-oriented decisions that I made.
+
+
+
+<!-- TODO: I need a refactor of how the variable names work for the logger. I think I will eventually end up passing logger objects around in lots of places, and you can use that logger object to read a data file that it created. The user will have to match the file to the logger. That way I can also make some objects for the Rasaero and openrocket loggers -->

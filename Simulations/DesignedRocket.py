@@ -42,10 +42,10 @@ def get_mass_objects():
 def get_sim():
     env = Environment(time_increment=0.01, apply_wind=True)
     motor = Motor(front=2, center_of_gravity=2, mass=60, propellant_mass=60, thrust_curve="Data/Input/mmrThrust.csv", environment=env)
-    # Rasaero adds in the decreasing air pressure. This scales it up to match more closely
-    # We can also scale by 0.75 to make it match Cristian's scaled down model
-    # motor.scale_thrust(126 / 114) # This scaling factor adds about 3000 meters
-    # print(motor.get_total_impulse())
+    motor.adjust_for_atmospheric = True
+    motor.nozzle_area = np.pi * 0.06985 ** 2 # This will probably underestimate the effects
+    
+    print(motor.get_total_impulse())
 
 
     main_parachute = ApogeeParachute(diameter=4.8768)
