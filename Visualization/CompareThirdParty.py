@@ -6,7 +6,6 @@ import pandas as pd
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib.offsetbox import AnchoredText
 
 
 # TODO: This should use some kind of data structure to avoid all of the repetition
@@ -255,7 +254,6 @@ def display_velocity(openRocket=None, rasaero=None, no_angles=None, DIY_angles=N
 
     plt.show()
 
-
 def display_angles(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None):
     # This one should be identical for all of them
     fig, ax = plt.subplots()
@@ -277,14 +275,16 @@ def display_angles(openRocket=None, rasaero=None, no_angles=None, DIY_angles=Non
 
     plt.show()
 
+
 if __name__ == "__main__":
     openRocket = pd.read_csv("Data/Output/ThirdPartySimulations/OpenRocketData.csv")
     rasaero = pd.read_csv("Data/Output/ThirdPartySimulations/RasaeroAltitudeTime.CSV")
     no_angles = pd.read_csv("Data/Output/output1DOFMMR.csv")
     DIY_angles = pd.read_csv("Data/Output/output5DOFWind.csv")
+    current = pd.read_csv("Data/Output/output.csv")
     
     
-    font = {'family' : 'normal',
+    font = {'family' : 'DejaVu Sans',
         # 'weight' : 'bold',
         'size'   : 22}
 
@@ -294,13 +294,13 @@ if __name__ == "__main__":
 
 
 
-    display_altitude(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)
-    display_drag(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)
-    display_forces(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)
-    display_mach(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)
-    display_velocity(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)
+    # display_altitude(openRocket=openRocket, rasaero=rasaero, no_angles=current, DIY_angles=DIY_angles)
+    # display_drag(openRocket=openRocket, rasaero=rasaero, no_angles=current, DIY_angles=DIY_angles)
+    # display_forces(openRocket=openRocket, rasaero=rasaero, no_angles=current, DIY_angles=DIY_angles)
+    display_mach(openRocket=openRocket, rasaero=rasaero, no_angles=current, DIY_angles=DIY_angles)
+    # display_velocity(openRocket=openRocket, rasaero=rasaero, no_angles=current, DIY_angles=DIY_angles)
 
-    display_thrust(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)
-    display_weight(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)
-    display_angles(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)
+    # display_thrust(openRocket=openRocket, rasaero=rasaero, no_angles=current, DIY_angles=DIY_angles)
+    # display_weight(openRocket=openRocket, rasaero=rasaero, no_angles=current, DIY_angles=DIY_angles)
+    # display_angles(openRocket=openRocket, rasaero=rasaero, no_angles=current, DIY_angles=DIY_angles)
 

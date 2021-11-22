@@ -500,7 +500,7 @@ class Rocket(MassObject):
 
     def apply_thrust(self):
         # Calculate indicates there are side effects, namely, the mass decreases
-        thrust = self.motor.calculate_thrust(self.environment.time)
+        thrust = self.motor.calculate_thrust(self.altitude)
 
         self.log_data("Thrust", thrust)
         self.log_data("Mass", self.total_mass)

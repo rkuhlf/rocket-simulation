@@ -252,7 +252,7 @@ class MotorSimulation(Simulation):
 
 
     def simulate_step(self):
-        self.motor.simulate_step()
+        thrust = self.motor.calculate_thrust()
         self.environment.simulate_step()
         
         super().simulate_step()

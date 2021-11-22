@@ -2,6 +2,8 @@
 # Based on instantaneous conditions at every time frame, the script will calculate optimal coefficients/values and measure the distance away from them that we are
 
 
+import pandas as pd
+import numpy as np
 
 # Easier safety factors
 
@@ -19,4 +21,16 @@
 
 
 # I guess I could import the Goddard problem solver and determine how close our thrust curve is to the best thrust curve for a flight of otherwise identical dimensions.
-# It will be hard to make this work for variable mass motor. I guess I could just assume O/F based mass drain matched to the thrust profile
+# It will be hard to make this work for variable mass ox tank. I guess I could just assume O/F based mass drain matched to the thrust profile
+
+
+def find_total_impulse(data):
+    # Just use a rectangular approximation instead of the trapezoid
+    return np.sum(data["Thrust"]) * (data.iloc[1]["time"] - data.iloc[0]["time"])
+
+
+if __name__ == "__main__":
+    script_path = "Data/Output/output.csv"
+    data = pd.read_csv(script_path)
+
+    print(f"The total impulse used in the simulation was {find_total_impulse(data)} Ns")

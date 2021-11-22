@@ -4,6 +4,7 @@
 # More than likely, less mass will be better. I just want to confirm it so we don't waste a ton of time on mass reduction studies
 # It is pretty clear that more mass is better. It is also pretty clear that something is going wrong, either in the simulation or in the rocket, when dry mass is less than 20. However, the best dry mass looks like it is about 30 kg
 
+# About a 112 meter decrease in apogee for every kilogram increase in mass
 
 import numpy as np
 import matplotlib.pyplot as plt

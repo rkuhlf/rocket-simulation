@@ -42,6 +42,10 @@ def get_mass_objects():
 def get_sim():
     env = Environment(time_increment=0.01, apply_wind=True)
     motor = Motor(front=2, center_of_gravity=2, mass=60, propellant_mass=60, thrust_curve="Data/Input/mmrThrust.csv", environment=env)
+    motor.adjust_for_atmospheric = True
+    motor.nozzle_area = np.pi * 0.06985 ** 2 # This will probably underestimate the effects
+    
+    print(motor.get_total_impulse())
 
 
     main_parachute = ApogeeParachute(diameter=4.8768)
