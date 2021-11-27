@@ -1,6 +1,6 @@
-# LOOP OVER OFs, DETERMINE THE BEST
+# LOOP OVER OFs CONSIDERING DIFFERENT INPUTS
 # At the moment, we don't have a lot of information about our combustion chamber pressure, so the amount of stuff we can actually implement is limited
-# Assuming 25 bar and figuring out the area ratio
+# TODO: in the future, I should consider outputt temperature. The temperature of the propellant should partially determine what chamber pressure we equalize at, which has had a significant effect on the specific impulse (higher is better).
 
 # CONCLUSIONS
 # Changing the propellant temperature does literally nothing. That is slightly concerning
@@ -9,27 +9,31 @@
 # If you have a ton of contamination with sulfur dioxide, that will cause the optimal O/F to increase by a ton (10% gives a 0.8 increase)
 # Similarly, for every percent contamination you have, the Isp decreases by one
 # However, both of these effects are minimal below 2%
+# Contamination by nitrogen also has a limited effect. It does even less than the sulfur, but it looks like it moves the O/F higher faster. If you have 20% contamination, as suggested by a Whitemore paper, that will lower C* by 50-ish m/s 
 # The percent of curative has a small effect, shifting the best point down 1 second and over by 0.2 O/F for every 20%
 # 5% carbon black drops specific impulse by 1; little effect on O/F. Presumably carbon black is designed to increase regression. It does increase the temperature a teeny bit
-# Max Isp for this brand of HTPB is right around 270 seconds; based on the lack of effect composition had, I would guess that the formula does not affect all that much
+# Max Isp for this brand of HTPB in space (eps=40) is right around 270 seconds; based on the lack of effect composition had, I would guess that the formula does not affect all that much
 # Overall, pressure and area ratio have a more significant effect on O/F and max Isp than any compositional differences; we want to keep HTPB and nitrous as pure as possible
 
+# Also, ground-level Isp versus space-level Isp makes a huge difference
 
 import numpy as np
 import matplotlib.pyplot as plt
 from rocketcea.cea_obj import CEA_Obj, add_new_fuel, add_new_oxidizer
 from rocketcea import cea_obj
 
-def define_inputs(percent_contamination=0, percent_curative=17, percent_carbon_black=3, oxidizer_temperature = 298.15, fuel_temperature=298.15):
+def define_inputs(percent_sulfur_contamination=0, percent_nitrogen_contamination=0, percent_curative=17, percent_carbon_black=3, oxidizer_temperature = 298.15, fuel_temperature=298.15):
     global htpb_nitrous
 
     # Notice that all of these custom cards require the enthalpy in cal/mol
     # Sulfur Dioxide can apparently contaminate the nitrous up to 2% mass, so we should take a look at the differences
     card_str = f"""
-    oxid NitrousOxide  N 2.0 O 1.0  wt%={100 - percent_contamination}
+    oxid NitrousOxide  N 2.0 O 1.0  wt%={100 - percent_sulfur_contamination - percent_nitrogen_contamination}
     h,cal=19497.759 t(k)={oxidizer_temperature}
-    oxid SulfurDioxide S 1.0 O 2.0 wt%={percent_contamination}
+    oxid SulfurDioxide S 1.0 O 2.0 wt%={percent_sulfur_contamination}
     h,cal=-70946 t(k)={oxidizer_temperature}
+    oxid Nitrogen N 2.0 wt%={percent_nitrogen_contamination}
+    h,cal=0 t(k)={oxidizer_temperature}
     """
     add_new_oxidizer('ContaminatedNitrous', card_str)
 
@@ -78,9 +82,7 @@ def find_efficiencies(chamber_pressure=360, area_ratio=4, OFs=np.linspace(2, 18,
         cstar = htpb_nitrous.get_Cstar(chamber_pressure, OF) * 0.3048
         cstars.append(cstar)
 
-        specific_impulses.append(htpb_nitrous.get_Isp(chamber_pressure, OF, eps=area_ratio))
-
-        # save_full_output(str(random.uniform()))
+        specific_impulses.append(htpb_nitrous.estimate_Ambient_Isp(chamber_pressure, OF, eps=area_ratio)[0])
 
     return cstars, specific_impulses, OFs
 
@@ -110,15 +112,28 @@ def display_OF_graph(chamber_pressure=360, area_ratio=4):
 
 
 def display_effect_of_contamination():
-    fig, ax1 = plt.subplots()
+    fig, (ax1, ax2) = plt.subplots(1, 2)
 
     for contamination in np.linspace(0, 15, 16):
-        define_inputs(percent_contamination=contamination)
+        define_inputs(percent_sulfur_contamination=contamination)
         _, impulses, OFs = find_efficiencies()
         
         ax1.plot(OFs, impulses, label=f"{contamination}")
 
-    fig.legend()
+    ax1.set(title="Effect of Sulfur Dioxide Contamination")
+    ax1.legend()
+
+
+    for contamination in np.linspace(0, 15, 16):
+        define_inputs(percent_nitrogen_contamination=contamination)
+        _, impulses, OFs = find_efficiencies()
+        
+        ax2.plot(OFs, impulses, label=f"{contamination}")
+
+    ax2.set(title="Effect of Nitrogen Contamination")
+    ax2.legend()
+
+    fig.tight_layout()
     plt.show()
 
 def display_effect_of_curative():
@@ -170,11 +185,10 @@ def display_effect_of_pressure(pressures=np.linspace(100, 1000, 10), best_possib
 
 if __name__ == "__main__":
     # display_effect_of_contamination()
-    # display_effect_of_curative()
+    display_effect_of_curative()
     # display_effect_of_carbon_black()
 
     # display_effect_of_pressure(pressures=np.linspace(100, 10000, 50), best_possible=True)
-
     pass
 
 
