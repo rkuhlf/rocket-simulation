@@ -10,14 +10,17 @@ from rocket import Rocket
 from RocketParts.parachute import ApogeeParachute, Parachute
 from logger import RocketLogger
 from simulation import RocketSimulation
+from Visualization.FlightOpticalAnalysis import display_optical_analysis
+
 
 
 def get_simulation():
     env = Environment(time_increment=0.01,apply_wind=True)
     motor = Motor()
 
-    drogue_parachute = ApogeeParachute(radius=0.2)
+    drogue_parachute = ApogeeParachute(radius=0.3)
     main_parachute = Parachute()
+    # By default, this rocket has no lift forces, and the only rotation is caused by drag
     rocket = Rocket(environment=env, motor=motor, parachutes=[drogue_parachute, main_parachute])
     rocket.set_CP_constant(5) # meters
     
@@ -25,7 +28,7 @@ def get_simulation():
 
     logger.splitting_arrays = True
 
-    sim = RocketSimulation(apply_angular_forces=True, max_frames=-1, stopping_errors=False, environment=env, rocket=rocket, logger=logger)
+    sim = RocketSimulation(apply_angular_forces=True, environment=env, rocket=rocket, logger=logger)
 
     motor.simulation = sim
     
@@ -42,5 +45,4 @@ def simulate_rocket():
 if __name__ == "__main__":
     sim = simulate_rocket()
 
-    from Visualization.FlightOpticalAnalysis import display_optical_analysis
     display_optical_analysis(sim.logger.full_path)

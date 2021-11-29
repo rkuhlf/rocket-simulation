@@ -43,7 +43,6 @@ def display_lift_drag(data):
 
     plt.show()
 
-
 def display_stability(data):
     # Subplot layout from https://matplotlib.org/3.1.1/gallery/subplots_axes_and_figures/gridspec_and_subplots.html#sphx-glr-gallery-subplots-axes-and-figures-gridspec-and-subplots-py
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(ncols=2, nrows=2)
@@ -162,7 +161,6 @@ def display_overall_flight(data):
 
     plt.show()
 
-# TODO: add lots of try statements so that the user gets notified if the logger is not logging something, but it doesn't error
 def display_optical_analysis(target):
     """
         Shows several graphs (using matplotlib and pandas) of the angles of the rocket flight
@@ -172,14 +170,13 @@ def display_optical_analysis(target):
 
     data = pd.read_csv(target)
 
-    display_forces(data)
-    display_stability(data)
-    display_aerodynamics(data)
-    display_diverging(data)
-    # display_lift_drag(data)
+    funcs = [display_forces, display_stability, display_aerodynamics, display_diverging, display_lift_drag, display_overall_flight]
 
-    # If everything else is working, it is worth taking a look at the actual flight simulation
-    display_overall_flight(data)
+    for func in funcs:
+        try:
+            func(data)
+        except:
+            print(f"{func} threw an error, probably because your logger is not recording the data")
 
 
 

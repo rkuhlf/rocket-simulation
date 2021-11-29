@@ -1,15 +1,10 @@
 # ROCKET OBJECT
-# Simulates the flight of a rocket as a rigidbody in five degrees of freedom - three positional coordinates, two rotational coordinates
+# Simulates the flight of a rocket as a rigidbody in five degrees of freedom - three positional coordinates, two rotational coordinates; no roll
 # Uses a separate motor class for thrust, and an array of parachutes
 # Uses RASAero for looking up various aerodynamic qualities
 
-# There are a few main areas that need improvement
-# There is no variable center of gravity. This is relatively easy to fix and will play a large role in stability
-# There is no variable center of pressure. This is much harder to fix. I can get a crappy solution from Rasaero, but I would really like to use CFD data
-# The CL & CD don't work past four degrees. This is just further impetus to get verifiable CFD data. Until that point I can't really move forwards here.
-
-
-# TODO: Fix parachute deployment
+# TODO: Right now, the wind simulation is the main thing that needs improvement
+# TODO: Fix parachute deployment - right now it does not match 3rd party
 
 import numpy as np
 from math import isnan
@@ -61,7 +56,7 @@ class Rocket(MassObject):
         self.CD = 0.7
 
         # This will throw an error because it must be overriden if we are applying angular effects
-        self.CL_data_type = DataType.DEFAULT
+        self.CL_data_type = DataType.CONSTANT
         self.CL = 0 
 
 
@@ -74,8 +69,7 @@ class Rocket(MassObject):
         self.parachutes = []
         self.logger = RocketLogger(self)
 
-        self.mass_objects = [self.motor]
-        self.mass_objects.extend(self.parachutes)
+        self.mass_objects = []
         #endregion
 
         #region DEFAULT MASSES
@@ -97,6 +91,9 @@ class Rocket(MassObject):
         super().overwrite_defaults(**kwargs)
         # Everything before this is saved as a preset including whatever is overridden by config
 
+        self.mass_objects.extend(self.parachutes)
+        self.mass_objects.extend([self.motor])
+
         self.reference_area = np.pi * self.radius ** 2
 
         # This is overriden in the simulation initialization, so it is just here as a reminder
@@ -109,11 +106,13 @@ class Rocket(MassObject):
         self.force = np.array([0., 0., 0.])
         self.torque = np.array([0., 0.])
 
+        # region Evaluators
         self.relative_velocity = np.array([0., 0., 0.])
-        self.apogee = 0
+        self.apogee = None
         self.max_mach = 0
         self.max_velocity = 0
         self.max_net_force = 0
+        # endregion
 
     def simulate_step(self):
         self.calculate_cached()
@@ -226,7 +225,12 @@ class Rocket(MassObject):
         if self.position[2] < 0 and self.has_lifted:
             self.landed = True
 
-        self.apogee = max(self.apogee, self.position[2])
+        if self.descending and self.apogee == None and self.has_lifted:
+            print("Setting Apogee to", self.p_position[2], "at t=",self.environment.time)
+            self.apogee = self.p_position[2]
+            self.apogee_lateral_velocity = magnitude(self.relative_velocity)
+    
+
         self.log_data("Mach", self.mach)
         self.max_mach = max(self.max_mach, self.mach)
         self.max_velocity = max(self.max_velocity, magnitude(self.velocity))
@@ -496,7 +500,7 @@ class Rocket(MassObject):
 
     def apply_thrust(self):
         # Calculate indicates there are side effects, namely, the mass decreases
-        thrust = self.motor.calculate_thrust(self.environment.time)
+        thrust = self.motor.calculate_thrust(self.altitude)
 
         self.log_data("Thrust", thrust)
         self.log_data("Mass", self.total_mass)

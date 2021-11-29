@@ -5,7 +5,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from rocketcea.cea_obj import CEA_Obj, add_new_fuel, add_new_oxidizer, add_new_propellant
+from rocketcea.cea_obj import CEA_Obj
 
 # by default, it has the HTPB and N2O at 76-ish F. This is probably fine for the HTPB, we will see what effecti it has to change it
 paraffin_nitrous = CEA_Obj(oxName="N2O", fuelName="HTPB")
@@ -15,8 +15,8 @@ paraffin_nitrous = CEA_Obj(oxName="N2O", fuelName="HTPB")
 chamber_pressure = 360 # psi
 
 # It is actually pretty fast
-# OFs = np.linspace(0.1, 30, 500)
-OFs = [6.93]
+OFs = np.linspace(0.1, 30, 500)
+# OFs = [6.93]
 cstars = []
 specific_impulses = []
 
@@ -26,9 +26,8 @@ for OF in OFs:
     cstars.append(cstar)
 
     specific_impulses.append(paraffin_nitrous.get_Isp(chamber_pressure, OF, eps=5.7))
-    print(paraffin_nitrous.get_Throat_MolWt_gamma(chamber_pressure, OF, eps=5.7))
-    print(paraffin_nitrous.get_full_cea_output(chamber_pressure, OF, eps=5.7))
-    # print(cstar)
+    # print(paraffin_nitrous.get_Throat_MolWt_gamma(chamber_pressure, OF, eps=5.7))
+    # print(paraffin_nitrous.get_full_cea_output(chamber_pressure, OF, eps=5.7))
 
 
 def optimal_input(inputs, outputs):

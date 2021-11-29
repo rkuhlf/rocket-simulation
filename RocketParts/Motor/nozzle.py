@@ -13,7 +13,7 @@ from presetObject import PresetObject
 from Helpers.general import linear_intersection, interpolate, interpolate_point, transpose_tuple, get_radius
 
 
-#region NOZZLE CONSTRUCTION MEHODS
+#region NOZZLE CONSTRUCTION METHODS
 def calculate_nozzle_coordinates_bezier(initial_point, initial_angle, final_point, final_angle, divisions=100):
     """
         Return a series of x, y coordinate pairs that make up a quadratic Bezier.
@@ -117,14 +117,14 @@ def compare_truncated_to_quadratic():
     hide_me_1.axis('off')
     hide_me_2.axis('off')
 
-    # TODO: ask Cristian how many inputs he has for this to ensure that his truncated construction matches mine. 
-    # He seems to think that the truncation can match the zero exit angle. Mine definitely can't at the moment
+    # So, my implementation of the parabolic nozzle construction is slightly different from Cristian's. In his model, the component that is allowed to vary is the length, rather than the exit angle
+    # I believe that the first one matched up simply by chance, but I am pretty sure that the quadratic bezier solution is slightly more general.
+    # However, the parabolic construction may be the method that 80%-bell is referring to.
     hide_me_1.text(-0.1, 0, "When the exit angles are equivalent, the \nnozzles appear to be an exact match. \nThe quadratic bezier adds another degree \nof freedom, allowing you to vary the exit \nangle. I have yet to do research on the \noptimal exit angle, but I would assume \nit to be zero. In that case, there is \nnoticable difference.")
 
     plt.show()
 
 #endregion
-
 
 
 # https://www.grc.nasa.gov/www/k-12/rocket/rktthsum.html
@@ -303,6 +303,10 @@ class Nozzle(PresetObject):
     @property
     def throat_area(self):
         return np.pi * self.throat_radius ** 2
+
+    @property
+    def exit_area(self):
+        return self.throat_area * self.area_ratio
         
 
     def get_nozzle_coefficient(self, chamber_pressure, atmospheric_pressure):
@@ -337,12 +341,12 @@ class Nozzle(PresetObject):
 if __name__ == "__main__":
     # display_constructed_quadratic()
     # calculate_nozzle_coordinates_truncated_parabola((0, 0.1), 35 * np.pi / 180, (1, 0.5))
-    # compare_truncated_to_quadratic()
+    compare_truncated_to_quadratic()
 
     # inputs = np.linspace(20, 50)
     # outputs = []
 
-    print(determine_expansion_ratio(30, 0.8, 1.2))
+    # print(determine_expansion_ratio(30, 0.8, 1.2))
     
     # for k in inputs:
     #     outputs.append(determine_expansion_ratio(k, 1, 1.3))

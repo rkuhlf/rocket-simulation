@@ -6,9 +6,8 @@ import pandas as pd
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib.offsetbox import AnchoredText
 
-
+# TODO: This should use some kind of data structure to avoid all of the repetition
 def display_altitude(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None, rockSim=None):
     fig, ax = plt.subplots()
 
@@ -282,6 +281,7 @@ def display_angles(openRocket=None, rasaero=None, no_angles=None, DIY_angles=Non
 
     plt.show()
 
+
 if __name__ == "__main__":
     openRocket = pd.read_csv("Data/Output/ThirdPartySimulations/OpenRocketData.csv")
     rasaero = pd.read_csv("Data/Output/ThirdPartySimulations/RasaeroAltitudeTime.CSV")
@@ -290,7 +290,7 @@ if __name__ == "__main__":
     rockSim = pd.read_csv("Data/Output/ThirdPartySimulations/RockSim.csv")
     
     
-    font = {'family' : 'normal',
+    font = {'family' : 'DejaVu Sans',
         # 'weight' : 'bold',
         'size'   : 22}
 
