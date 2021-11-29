@@ -60,7 +60,7 @@ def display_overall(data):
     burn_time = data["time"].values[-1]
     print(f"BURN TIME: {burn_time}")
     average_thrust = total_impulse / burn_time
-    print(f"BURN TIME: {average_thrust}")
+    print(f"AVERAGE THRUST: {average_thrust}")
 
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
 

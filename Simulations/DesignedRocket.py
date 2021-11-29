@@ -1,7 +1,7 @@
 # SIMULATION OF DESIGNED ROCKET
 # For our first math model review, we need a design for our rocket
 # I simulate it here
-# FIXME: The net forces on the 5 DOF go completely crazy, into the range of 20kN when it starts spinning out
+
 
 import numpy as np
 import sys
@@ -40,20 +40,22 @@ def get_mass_objects():
 
 
 def get_sim():
-    env = Environment(time_increment=0.04, apply_wind=True)
+    env = Environment(time_increment=0.01, apply_wind=True)
     motor = Motor(front=2, center_of_gravity=2, mass=60, propellant_mass=60, thrust_curve="Data/Input/mmrThrust.csv", environment=env)
-    # Rasaero adds in the decreasing air pressure. This scales it up to match more closely
-    # We can also scale by 0.75 to make it match Cristian's scaled down model
-    motor.scale_thrust(126 / 114) # This scaling factor adds about 3000 meters
+    motor.adjust_for_atmospheric = True
+    motor.nozzle_area = np.pi * 0.06985 ** 2 # This will probably underestimate the effects
+    
     print(motor.get_total_impulse())
 
 
     main_parachute = ApogeeParachute(diameter=4.8768)
+    # angle is 0.0872665
     rocket = Rocket(radius=0.1016, length=5.7912, rotation=np.array([np.pi / 2, 0.0872665], dtype="float64"),
         environment=env, motor=motor, parachutes=[])
     rocket.set_CP_function(get_sine_interpolated_center_of_pressure)
     rocket.set_CL_function(linear_approximated_normal_force)
     rocket.set_CD_function(assumed_zero_AOA_CD)
+    rocket.set_moment_constant(250)
 
     mass_objects = [motor]
     mass_objects.extend(get_mass_objects())

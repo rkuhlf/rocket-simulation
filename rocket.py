@@ -1,15 +1,10 @@
 # ROCKET OBJECT
-# Simulates the flight of a rocket as a rigidbody in five degrees of freedom - three positional coordinates, two rotational coordinates
+# Simulates the flight of a rocket as a rigidbody in five degrees of freedom - three positional coordinates, two rotational coordinates; no roll
 # Uses a separate motor class for thrust, and an array of parachutes
 # Uses RASAero for looking up various aerodynamic qualities
 
-# There are a few main areas that need improvement
-# There is no variable center of gravity. This is relatively easy to fix and will play a large role in stability
-# There is no variable center of pressure. This is much harder to fix. I can get a crappy solution from Rasaero, but I would really like to use CFD data
-# The CL & CD don't work past four degrees. This is just further impetus to get verifiable CFD data. Until that point I can't really move forwards here.
-
-
-# TODO: Fix parachute deployment
+# TODO: Right now, the wind simulation is the main thing that needs improvement
+# TODO: Fix parachute deployment - right now it does not match 3rd party
 
 import numpy as np
 from math import isnan
@@ -61,7 +56,7 @@ class Rocket(MassObject):
         self.CD = 0.7
 
         # This will throw an error because it must be overriden if we are applying angular effects
-        self.CL_data_type = DataType.DEFAULT
+        self.CL_data_type = DataType.CONSTANT
         self.CL = 0 
 
 
@@ -74,8 +69,7 @@ class Rocket(MassObject):
         self.parachutes = []
         self.logger = RocketLogger(self)
 
-        self.mass_objects = [self.motor]
-        self.mass_objects.extend(self.parachutes)
+        self.mass_objects = []
         #endregion
 
         #region DEFAULT MASSES
@@ -97,6 +91,9 @@ class Rocket(MassObject):
         super().overwrite_defaults(**kwargs)
         # Everything before this is saved as a preset including whatever is overridden by config
 
+        self.mass_objects.extend(self.parachutes)
+        self.mass_objects.extend([self.motor])
+
         self.reference_area = np.pi * self.radius ** 2
 
         # This is overriden in the simulation initialization, so it is just here as a reminder
@@ -109,11 +106,13 @@ class Rocket(MassObject):
         self.force = np.array([0., 0., 0.])
         self.torque = np.array([0., 0.])
 
+        # region Evaluators
         self.relative_velocity = np.array([0., 0., 0.])
-        self.apogee = 0
+        self.apogee = None
         self.max_mach = 0
         self.max_velocity = 0
         self.max_net_force = 0
+        # endregion
 
     def simulate_step(self):
         self.calculate_cached()
@@ -226,7 +225,12 @@ class Rocket(MassObject):
         if self.position[2] < 0 and self.has_lifted:
             self.landed = True
 
-        self.apogee = max(self.apogee, self.position[2])
+        if self.descending and self.apogee == None and self.has_lifted:
+            print("Setting Apogee to", self.p_position[2], "at t=",self.environment.time)
+            self.apogee = self.p_position[2]
+            self.apogee_lateral_velocity = magnitude(self.relative_velocity)
+    
+
         self.log_data("Mach", self.mach)
         self.max_mach = max(self.max_mach, self.mach)
         self.max_velocity = max(self.max_velocity, magnitude(self.velocity))
@@ -391,6 +395,10 @@ class Rocket(MassObject):
         # x and y can't cause yaw in the same direction
         self.torque[0] -= y_component * yaw_multiplier * distance_from_CG
 
+    def apply_angular_torque(self, moment_around, moment_down):
+        self.torque[0] += moment_around
+        self.torque[1] += moment_down
+
 
     def apply_air_resistance(self):
         # Translational drag
@@ -412,9 +420,10 @@ class Rocket(MassObject):
                     self.apply_force(lift_magnitude, lift_direction,
                                 self.CP, debug=True, name="Lift")
 
-        # FIXME: Angular drag: not currently implemented
-        if not (np.all(np.isclose(self.angular_velocity, 0)) or self.parachute_deployed):
-            pass
+
+        if False: # not (np.all(np.isclose(self.angular_velocity, 0)) or self.parachute_deployed):
+            drag_around, drag_down = self.get_angular_drag()
+            self.apply_angular_torque(drag_around, drag_down)
 
     def get_translational_drag(self):
         "Calculate the vector for the translational drag force"
@@ -440,7 +449,8 @@ class Rocket(MassObject):
 
         # Lift force is applied perpendicular to the freestream velocity
         # This is the part that is stupid because I should just use normal and axial forces
-        # Assuming lift forces are in te same plane as drag forces and the rocket (if it was defined as a line)
+        # Assuming lift forces are in te same plane as drag forces and the rocket 
+        # (if it was defined as a line)
         heading = vector_from_angle(self.rotation)
         component_in_drag_direction = project(heading, drag_direction)
 
@@ -468,14 +478,29 @@ class Rocket(MassObject):
 
 
     def get_angular_drag(self):
-        # This affects a very small component of the overall flight
+        # This should affect only a very small component of the overall flight
+        # However, I think it will fix the issue with the rocket going through major oscillations after the thrust finishes
+        # If you think about an oscillating system, the restoring force is always increasing as the rocket progresses through the burn. However, when it begins to decelerate and the density of the air decreases, the restoring forces diminish and the oscillations of the rocket will become more violent
 
-        pass
+        density = self.environment.get_air_density(self.altitude)
+
+        multiplier = 0.275 * density * self.radius * self.length ** 4 * 2
+
+        moment_around = multiplier * self.angular_velocity[0] ** 2
+        moment_around = min(self.angular_velocity[0] / self.environment.time_increment, moment_around)
+        moment_around *= -np.sign(self.angular_velocity[0])
+        
+        moment_down = multiplier * self.angular_velocity[1] ** 2
+        moment_down = min(self.angular_velocity[1] / self.environment.time_increment, moment_down)
+        moment_down *= -np.sign(self.angular_velocity[1])
+
+
+        return moment_around, moment_down
 
 
     def apply_thrust(self):
         # Calculate indicates there are side effects, namely, the mass decreases
-        thrust = self.motor.calculate_thrust(self.environment.time)
+        thrust = self.motor.calculate_thrust(self.altitude)
 
         self.log_data("Thrust", thrust)
         self.log_data("Mass", self.total_mass)
@@ -523,7 +548,7 @@ class Rocket(MassObject):
         if self.CD_data_type is DataType.CONSTANT:
             pass
         
-        if self.CL_data_type is DataType.FUNCTION_MACH_ALPHA:
+        if self.CD_data_type is DataType.FUNCTION_MACH_ALPHA:
             self.CD = self.get_coefficient_of_drag(self.mach, self.angle_of_attack)
 
         self.log_data("CD", self.CD)
@@ -560,8 +585,8 @@ class Rocket(MassObject):
     def calculate_cp_cg_dist(self):
         # Note that this is only used for dynamic stability calculations, nothing during the simulations
         self.dist_press_grav = self.CP - self.total_CG
-        self.dist_press_grav *= 0.5
-        self.log_data("Stability [Calibers]", self.dist_press_grav / (self.radius * 2))
+
+        self.log_data("Stability [Calibers]", self.dist_press_grav / (self.diameter))
         self.log_data("Stability [Lengths]", self.dist_press_grav / (self.length))
 
     def calculate_cached(self):

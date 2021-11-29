@@ -4,6 +4,7 @@
 # More than likely, less mass will be better. I just want to confirm it so we don't waste a ton of time on mass reduction studies
 # It is pretty clear that more mass is better. It is also pretty clear that something is going wrong, either in the simulation or in the rocket, when dry mass is less than 20. However, the best dry mass looks like it is about 30 kg
 
+# About a 112 meter decrease in apogee for every kilogram increase in mass
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -15,9 +16,9 @@ from Simulations.DesignedRocket import get_sim
 
 
 
-min_change = -50
-max_change = 10
-iterations = 100
+min_change = -20
+max_change = 20
+iterations = 20
 mass_changes = np.linspace(min_change, max_change, iterations)
 
 apogees = []
@@ -27,7 +28,7 @@ velocities_off_rail = []
 for mass_change in mass_changes:
     sim = get_sim()
 
-    sim.set_logger(None)
+    sim.logger = None
 
     sim.rocket.change_mass(mass_change, exclude_objects=[sim.rocket.motor])
 

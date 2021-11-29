@@ -2,15 +2,19 @@
 # Repeating simulations multiple times, determine which thrust profile optimizes apogee with a given total impulse and no limits on thrust shape.
 # The file uses an evolution-based implementation of a Monte Carlo algorithm, in which many rockets are generated, simulated, and then either saved, mutated, or randomized
 # By the end, the best shape for thrust should be clear.
-# Side note: the solution to this problem is not very important for hybrid rockets (a short explanation that I wrote is available at TODO: write this; should be same as variable O/F). Nevertheless, I think it is an interesting application of a python sim.
+# Side note: the solution to this problem is not very important for hybrid rockets (a short explanation that I wrote is available at https://www.overleaf.com/read/gccgffsnzwhh). Nevertheless, I think it is an interesting application of a python sim.
 # There is a slightly more relevant simulation under OptimizeBurnTime.py, which just scales the thrust profile linearly
+
+# apply the fitnesses so that the bottom 50 are deleted, the top 10 are kept, and 5 are randomly generated
+# The remaining 85 are created by a weighted random selection of the top 50, each of them with random mutations
+
+# TODO: run this again for the redesigned simulation
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from random import random, normalvariate
 from copy import deepcopy
-import time
 
 import sys
 sys.path.append(".")
@@ -19,8 +23,6 @@ from environment import Environment
 from simulation import RocketSimulation
 from rocket import Rocket
 from RocketParts.motor import Motor
-from RocketParts.parachute import ApogeeParachute, Parachute
-from logger import RocketLogger
 
 
 def create_random_motor(target_total_impulse, point_count=10):
@@ -50,8 +52,8 @@ def create_random_motor(target_total_impulse, point_count=10):
     return motor
 
 
-def create_random_rocket():
-    motor = create_random_motor(3092.55)
+def create_random_rocket(target_total_impulse):
+    motor = create_random_motor(target_total_impulse)
 
     return Rocket(environment=deepcopy(base_env), motor=motor)
 
@@ -111,7 +113,6 @@ def mutate(rocket):
 
     # No return statement is required because no copies are made; all modification is in place
 
-# TODO: the easiest thing is probably just to write a function of the preset object that creates a copy
 def mutated_simulation(sim):
     print("Original rocket motor for mutation", sim.rocket.motor.thrust_data)
     new_sim = sim.copy()
@@ -125,8 +126,8 @@ def mutated_simulation(sim):
 
 
 if __name__ == "__main__":
-
     base_env = Environment(time_increment=0.1, apply_wind=False)
+    total_impulse = 100000
 
     num_rockets = 2
 
@@ -137,7 +138,7 @@ if __name__ == "__main__":
     collective_fits = []
 
     for i in range(num_rockets):
-        new_rocket = create_random_rocket()
+        new_rocket = create_random_rocket(total_impulse)
         sims.append(RocketSimulation(environment=deepcopy(base_env), rocket=new_rocket))
 
 
@@ -153,16 +154,12 @@ if __name__ == "__main__":
             except Exception as e:
                 fit = 0
 
-            # I dont understand why it doesn't work without this            
-
             print("Simming ", sim.rocket.motor.thrust_data)
             print("It has ", sim.rocket.motor.get_total_impulse())
             print(f"Sim index {i} has fitness", str(fit))
 
             fits.append(fit)
 
-        # apply the fitnesses so that the bottom 50 are deleted, the top 10 are kept, and 5 are randomly generated
-        # The remaining 85 are created by a weighted random selection of the top 50, each of them with random mutations
 
         # First thing is to normalize the fits
         # I am just going to use a very simple normalization algorithm to start, settin everytin between 0 and 1. Actually this doesn't work very well when one of the rockets is a total failure. Switching to traditional z-score normalization
@@ -197,9 +194,6 @@ if __name__ == "__main__":
         sim_fit_pairs = sorted(zip(sims, fits), key=lambda pair: pair[1])
 
 
-        # FIXME: For some reason, the highest one does not fly the same height every time
-        # Probably because the rocket is being mutated, changing this one as well as the other one
-        # Actually my best guess now is that it is an issue with the environment. I can't figure out why the 'same' rocket is flying different heights. Maybe I should make a simpler test case of this
         print(f"there are only {len(sim_fit_pairs)} rockets left")
 
         target_reserved_rockets = num_rockets * 0.2
@@ -232,11 +226,11 @@ if __name__ == "__main__":
                     break
             if not appended:
                 new_sims.append(mutated_simulation(sims[-1]))
-            print("mutated appendae", new_sims[-1].rocket.motor.thrust_data)
+            print("mutated appendage", new_sims[-1].rocket.motor.thrust_data)
 
         for _ in range(num_rockets - len(new_sims)):
             print("Randomly generating")
-            new_rocket = create_random_rocket()
+            new_rocket = create_random_rocket(total_impulse)
 
             new_sims.append(
                 RocketSimulation(
@@ -272,7 +266,6 @@ if __name__ == "__main__":
     sim_fit_pairs = sorted(zip(sims, fits), key=lambda pair: pair[1])
     
     print("FINAL SIMULATIONS")
-    # TODO: probably just do top 50%
     for sim, fit in sim_fit_pairs[-round(0.2 * num_rockets):]:
         data = sim.rocket.motor.thrust_data
         thrust_scale = sim.rocket.motor.thrust_multiplier

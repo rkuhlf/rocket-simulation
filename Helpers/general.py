@@ -1,5 +1,6 @@
 # MISCELLANEOUS HELPERS
 # Mostly mathematical, this is where most of the operations for angles are implemented
+# Also has some interpolation helpers
 
 import re
 import numpy as np
@@ -36,6 +37,59 @@ def interpolate_point(value, input_min, input_max, p1, p2):
     y = interpolate(value, input_min, input_max, p1[1], p2[1])
 
     return (x, y)
+
+
+def interpolate_looped(x, x1, x2, y1, y2, loop_min=-np.pi, loop_max=np.pi):
+    # Check if it is shorter to go through the loop hole
+
+    dist_looped1 = (y1 - loop_min) + (loop_max - y2)
+    dist_looped2 = (y2 - loop_min) + (loop_max - y1)
+    alternative_distance = abs(y2 - y1)
+
+    if dist_looped1 < alternative_distance:
+        new_value = interpolate(x, x1, x2, y1, y1 - dist_looped1)
+
+        if new_value < loop_min:
+            dist = loop_min - new_value
+            new_value = loop_max - dist
+        elif new_value > loop_max:
+            dist = loop_max - new_value
+            new_value = loop_min - dist
+
+        return new_value
+
+    if dist_looped2 < alternative_distance:
+        new_value = interpolate(x, x1, x2, y1, y1 + dist_looped2)
+
+        if new_value < loop_min:
+            dist = loop_min - new_value
+            new_value = loop_max - dist
+        elif new_value > loop_max:
+            dist = loop_max - new_value
+            new_value = loop_min - dist
+
+        return new_value
+
+
+    return interpolate(x, x1, x2, y1, y2)
+
+
+if __name__ == "__main__":
+    # Test the interpolate looped because I cannot visualize it atm
+    import matplotlib.pyplot as plt
+
+    points = []
+
+    max_time = 10
+    times = np.linspace(0, max_time, 50)
+
+    for t in times:
+        points.append(interpolate_looped(t, 0, max_time, 3.1, -2))
+
+    plt.scatter(times, points)
+    plt.show()
+
+
 
 def normalized(array):
     array = array.copy()

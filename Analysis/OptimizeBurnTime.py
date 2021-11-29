@@ -23,18 +23,18 @@ from Data.Input.ThrustProfile import scale_saved_curve
 # from SimulateRocket import get_simulation as get_sim
 from Simulations.DesignedRocket import get_sim
 
-base_curve = "Data/Input/thrustCurveO6300.csv"
+base_curve = "Data/Input/finleyThrust.csv"
 
 # With only 60 kg of propellant, it is more like 200 * 60 * 9.81 = 117720
 # Right now, the original simulation uses 220000
-total_impulse = 129492 # Ns
+total_impulse = 114000 # Ns
 
 # Iterating from the limits of theoretically possible to the probably completely unstable in terms of burn time
-min_time = 3
-max_time = 50
+min_time = 8
+max_time = 30
 
 # This is really slow, even without logging anything
-iterations = 100
+iterations = 30
 burn_times = np.linspace(min_time, max_time, iterations)
 apogees = []
 gees_off_rail = []
@@ -49,7 +49,7 @@ for burn_time in burn_times:
     sim = get_sim()
 
     sim.rocket.motor.set_thrust_data_path(target_path)
-    sim.set_logger(None)
+    sim.logger = None
 
 
     sim.run_simulation()

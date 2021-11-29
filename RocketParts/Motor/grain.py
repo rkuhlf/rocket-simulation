@@ -1,3 +1,7 @@
+# FUEL GRAIN
+# Simulate the properties of the fuel grain
+# Mostly covers regression calculations
+
 import numpy as np
 import sys
 sys.path.append(".")
@@ -47,7 +51,7 @@ def determine_optimal_starting_diameter(outer_diameter, target_mass, density, ox
         Iteratively determine the starting port diameter to match a target initial O/F ratio and the correct total O/F ratio.
         Note that you must input in base SI units - your diameters must be in meters, and your flow must be in kilograms per second
         This will not give you a perfectly balanced engine - it will give you perfect combustion at the beginning, but it will probably be fuel-lean as it continues to regress.
-        Read more about O/F over time at # TODO: add a link to a google doc that I still need to write.
+        Read more about O/F over time at https://www.overleaf.com/read/gccgffsnzwhh
 
         Optimize for uses the start O/F if you choose 0, the midpoint if you choose 0.5, and the end if you choose 1
     """

@@ -1,6 +1,9 @@
 # FIN CLASSES
 # Fins are basically just a mass object with a few additional evaluation methods.
-# Since all of the drag data on the rocket is determined by a CD lookup, it is not necessary to include a fin object
+# Since all of the drag data on the rocket is determined by a CD lookup, it is not necessary to include a fin object, but I want one anyways just for some fin flutter stuff
+
+
+# TODO: finish implementing this class
 
 
 import sys

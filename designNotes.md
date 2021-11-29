@@ -1,15 +1,10 @@
-Potential Issues:
-- Translational drag isn't opposed to rotation correctly
-- The calculation for angular drag is wrong
-- Something, somewhere is seeking the vertical axis instead of the direction of motion
-    - The gravity-pressure thing is flipped somewhere
-    - If it only has a z-axis drag effect, it will seek the center
-
-<!-- TODO: implement @property / @<var>.set for places where it is relevant (many) -->
-<!-- TODO: implement an enum for various data types and get pickling working with random functions -->
+<!-- TODO: This stuff is really out of date and most of it needs to be re-written -->
+<!-- Mention repeated use of get_sim -->
+<!-- Mention getters and setters -->
+<!-- Mention saving functionality -->
+<!-- Mention the verbose = True thing -->
 
 # Design Notes
-
 Since the project is sort of sprawling and might be a little confusing, particularly coming from an excel based math model, I thought I would provide some reasoning behind some of the design decisions.
 
 The rocket model system makes fairly consistent use of object oriented design throughout. By separating each main component of the simulation into its own class, files can be made smaller and it is easier to figure out where things belong. The rocket is in a section all by itself, where it basically performs all of the necessary aerodynamics calculations. Because there are way more factors affecting aerodynamics than anything else, it takes up way more space than anything else. The parachute and motor classes are separate, but it simplifies where data is stored a little bit. Object-oriented structure also lends itself to a component based rocket simulation. You can change which motor you want to use, but keep the same rocket frame. In case I ever want to rewrite the aerodynamics stuff, I kept the simulation and logging apart from the rocket itself.
@@ -43,7 +38,7 @@ The only issue is that perlin noise isn't actually normally distributed. I don't
 
 The noise value goes from 0 to 1 and it tells you what percentile it is in. The weibull value should also go from 0 to 1. From that perlin noise generation, you get the percentile you want. Then you look it up in the weibull lookup chart.
 
-Generate 4D noise. Nope. You can't just have each of the three axes generated individually. You have to generate the strength and the angle, otherwise all three will add up to a different magnitude than you expect
+<!-- Maybe worth making a note of, but this is just rude; it really belongs in a different file besides. Generate 4D noise. Nope. You can't just have each of the three axes generated individually. You have to generate the strength and the angle, otherwise all three will add up to a different magnitude than you expect -->
 
 #### Altitude
 There is a function that gives the average wind speed at any altitude based on the wind speed at a certain point and the terrain roughness there. That should be enough to make a continuous thing.
@@ -61,7 +56,7 @@ lmfit is built entirely for this kind of thing - fitting a user-inputted functio
 
 
 ## Inaccuracies in Inputs
-Most rocket simulation software only allows you to input one possible value for each input. However, aerodynamics is a particularly inaccurate science, with difficulties determining coefficients of force to even one significant figure. Therefore, I thought it would be useful to allow inputs that covered a range of data. To do so, I think it makes the most since to extend the simulation class. <!-- TODO: do this. It might take quite a bit of finagling, and multiple rocket objects might have to be created -->
+Most rocket simulation software only allows you to input one possible value for each input. However, aerodynamics is a particularly inaccurate science, with difficulties determining coefficients of force to even one significant figure. Therefore, I thought it would be useful to allow inputs that covered a range of data. To do so, I think it makes the most since to have custom override functions for each class.
 
 Simply allow the user to input an array of two items, worst-case first followed by best-case. The program would then run two simulations and output the range of possible outcomes. 
 
@@ -74,7 +69,6 @@ I tried to capitalize python files that are intended to be run. For the most par
 
 
 ## Rotation
-TODO: Implement a sort of framework class
 It holds all of the information about the rocket's shape. Then I can put some of the barrowman stuff in there
 It also throws you a message if the engine wouldn't fit
 
