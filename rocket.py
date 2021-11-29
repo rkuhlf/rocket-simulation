@@ -444,9 +444,9 @@ class Rocket(MassObject):
         drag_direction = - self.relative_velocity / magnitude(self.relative_velocity)
 
         # Lift force is applied perpendicular to the freestream velocity
-        # This is the part that is stupid because I should just use normal and axial forces
-        # Assuming lift forces are in te same plane as drag forces and the rocket 
-        # (if it was defined as a line)
+        # This part requires a conversiion given because I am not using normal and axial forces
+        # Assuming lift forces are in the same plane as drag forces and the rocket
+        # (if it was defined as a line); This is reasonable if the rocket is axially symmetric
         heading = vector_from_angle(self.rotation)
         component_in_drag_direction = project(heading, drag_direction)
 

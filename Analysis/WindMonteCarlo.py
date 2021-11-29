@@ -29,12 +29,12 @@ def simulate_monte_carlo(iters=10, debug=True):
             distances.append(sim.dist_from_start)
 
             if debug:
-                print(f"Finished iteration {i}")
+                print(f"Finished iteration {i}, flew {sim.apogee} meters into the air.")
     finally:
         return apogees, distances
 
 
-def graph_monte_carlo(distances, apogees):
+def graph_monte_carlo(apogees, distances):
     fig, ax = plt.subplots()
 
     ax.scatter(distances, apogees)
@@ -45,15 +45,24 @@ def graph_monte_carlo(distances, apogees):
 
 def save_monte_carlo(apogees, distances):
     data = pd.DataFrame({
-        'Apogee': apogees,
+            'Apogee': apogees,
             'Drift': distances,
         })
 
     data.to_csv("Data/Input/windMonteCarlo.csv")
 
 
-if __name__ == "__main__":
-    distances, apogees = simulate_monte_carlo(50)
-    graph_monte_carlo(distances, apogees)
+def load_monte_carlo():
+    data = pd.read_csv("Data/Input/windMonteCarlo.csv")
 
-    save_monte_carlo(distances, apogees)
+    return data["Apogee"], data["Drift"]
+
+if __name__ == "__main__":
+    # apogees, distances = simulate_monte_carlo(50)
+    # graph_monte_carlo(apogees, distances)
+
+    # save_monte_carlo(apogees, distances)
+
+    apogees, distances = load_monte_carlo()
+
+    graph_monte_carlo(apogees, distances)
