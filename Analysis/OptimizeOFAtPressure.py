@@ -1,6 +1,6 @@
 # LOOP OVER OFs CONSIDERING DIFFERENT INPUTS
 # At the moment, we don't have a lot of information about our combustion chamber pressure, so the amount of stuff we can actually implement is limited
-# TODO: in the future, I should consider outputt temperature. The temperature of the propellant should partially determine what chamber pressure we equalize at, which has had a significant effect on the specific impulse (higher is better).
+# TODO: in the future, I should consider output temperature. The temperature of the propellant should partially determine what chamber pressure we equalize at, which has had a significant effect on the specific impulse (higher is better).
 
 # CONCLUSIONS
 # Changing the propellant temperature does literally nothing. That is slightly concerning
@@ -72,8 +72,6 @@ def save_full_output(name="test.txt"):
 
 
 def find_efficiencies(chamber_pressure=360, area_ratio=4, OFs=np.linspace(2, 18, 200)):
-    # It is actually pretty fast
-    # OFs = [6.93]
     cstars = []
     specific_impulses = []
 

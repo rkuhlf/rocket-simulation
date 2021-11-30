@@ -19,14 +19,14 @@ centers = []
 temperatures = []
 pressures = []
 
-for _ in range(20):
+for _ in range(50):
     mass_vap.append(ox.get_mass_flow_vap(1))
     masses.append(ox.ox_mass)
     ullages.append(ox.ullage)
     centers.append(ox.get_center_of_mass() / ox.length)
     temperatures.append(ox.temperature)
     pressures.append(ox.pressure)
-    ox.update_drain(2.5)
+    ox.update_drain(1)
 
 important_temperatures = temperatures[:int(len(temperatures) * 0.75)]
 print(f"The average of the first 3/4 of temperatures is {np.average(important_temperatures)} Kelvin")

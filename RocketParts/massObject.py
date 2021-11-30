@@ -113,10 +113,14 @@ class MassObject(PresetObject):
             current_CG_mass_weight = self.mass
 
             for mass_object in self.mass_objects:
-                current_CG = (current_CG * current_CG_mass_weight + mass_object.total_mass * mass_object.total_CG) / (mass_object.total_mass + current_CG_mass_weight)
-                current_CG_mass_weight += mass_object.total_mass
+                additional_mass = mass_object.total_mass
+                # Centers of gravity weighted by the mass of the objects
+                total_mass_distance = current_CG * current_CG_mass_weight + additional_mass * mass_object.total_CG
+                current_CG = (total_mass_distance) / (additional_mass + current_CG_mass_weight)
+                current_CG_mass_weight += additional_mass
 
-            # If we are wanting the CG of this relative to a parent object, we need to add the distance from the front of the parent object that we are at
+            # If we are wanting the CG of this relative to a parent object, 
+            # we need to add the distance from the front of the parent object that we are at
             if not local:
                 current_CG += self.front
 
