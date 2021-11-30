@@ -85,8 +85,6 @@ def determine_optimal_starting_diameter(outer_diameter, target_mass, density, ox
     
     raise Exception("The optimal starting diameter is too small for the grain. I don't really think this is physically realistic, but it is definitely mathematically possible. You can try increasing the outer diameter (I think; not well tested).")
 
-
-
 #endregion
 
 
@@ -187,7 +185,8 @@ class Grain(PresetObject):
 
 
 if __name__ == "__main__":
-    best_ID = determine_optimal_starting_diameter(0.2032, 15, 920, 4.8, regression_rate_HTPB_nitrous, 6) 
-    print(best_ID)
+    # best_ID = determine_optimal_starting_diameter(0.2032, 15, 920, 4.8, regression_rate_HTPB_nitrous, 6) 
+    # print(best_ID)
 
-    print(find_required_length(0.0552 * 2, 0.1016 * 2, 9.8, 920))
+    # Using an ID of 5 cm, an OD of 5.75 inches - 1 inches (0.5 inches on both sides in case we have extra regression)
+    print(find_required_length(0.025, 0.146, 9.8, 1000))
