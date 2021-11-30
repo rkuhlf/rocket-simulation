@@ -58,7 +58,8 @@ def calculate_nozzle_coordinates_truncated_parabola(initial_point, initial_angle
     nozzle_height = lambda x : a * x ** 2 + b * x + c
     angle = lambda x : 2 * a * x + b
 
-    print(f"The exit angle for the truncated bell is {angle(final_point[0])} radians or {angle(final_point[0]) * 180 / np.pi} degrees")
+    print(f"The exit angle for the truncated bell is {angle(final_point[0])} radians \
+            or {angle(final_point[0]) * 180 / np.pi} degrees")
 
     inputs = np.linspace(initial_point[0], final_point[0], divisions)
     outputs = nozzle_height(inputs)
@@ -66,7 +67,8 @@ def calculate_nozzle_coordinates_truncated_parabola(initial_point, initial_angle
 
     points = [inputs, outputs]
 
-    # Convert tuples to 2d numpy - https://stackoverflow.com/questions/39806259/convert-list-of-list-of-tuples-into-2d-numpy-array
+    # Convert tuples to 2d numpy
+    # https://stackoverflow.com/questions/39806259/convert-list-of-list-of-tuples-into-2d-numpy-array
     points = np.array([*points])
     points = points.transpose()
 
@@ -110,9 +112,11 @@ def compare_truncated_to_quadratic():
 
     ax1.plot(quadratic_points_nonzero[0], quadratic_points_nonzero[1])
     ax1.plot(truncated_points[0], truncated_points[1])
+    ax1.set(title="Same Angle", xlabel="Horizontal Distance", ylabel="Horizontal Distance")
 
     ax2.plot(quadratic_points_zero[0], quadratic_points_zero[1])
     ax2.plot(truncated_points[0], truncated_points[1])
+    ax2.set(title="Different Angle", xlabel="Horizontal Distance", ylabel="Horizontal Distance")
 
     hide_me_1.axis('off')
     hide_me_2.axis('off')
@@ -120,7 +124,7 @@ def compare_truncated_to_quadratic():
     # So, my implementation of the parabolic nozzle construction is slightly different from Cristian's. In his model, the component that is allowed to vary is the length, rather than the exit angle
     # I believe that the first one matched up simply by chance, but I am pretty sure that the quadratic bezier solution is slightly more general.
     # However, the parabolic construction may be the method that 80%-bell is referring to.
-    hide_me_1.text(-0.1, 0, "When the exit angles are equivalent, the \nnozzles appear to be an exact match. \nThe quadratic bezier adds another degree \nof freedom, allowing you to vary the exit \nangle. I have yet to do research on the \noptimal exit angle, but I would assume \nit to be zero. In that case, there is \nnoticable difference.")
+    hide_me_1.text(-0.1, 0, "When the exit angles are equivalent, the \nnozzles appear to be an exact match. \nThe quadratic bezier adds another degree \nof freedom, allowing you to vary the exit \nangle. From Rao's original publications, \nthe exit angle is an important factor \nin properly approximating the shape.")
 
     plt.show()
 
