@@ -135,9 +135,34 @@ Also, the tests for the code are completely disorganized, but there are a few ba
 My Git commit history is also a mess. I have been using Github mainly as a cloud storage service, since I have to use several different devices during the day, and many of the commits are half-finished edits. I apologize. 
 
 # Sources / Further Reading
-- Notes on Multiple Degrees of Freedom for Goddard 2021-2022](https://docs.google.com/document/d/1VEkxpdZ9q7t6uQZ0db8XvYZEkJN-9KKGfAi_a7vk-ag/edit?usp=sharing)
+- [Notes on Multiple Degrees of Freedom for Goddard 2021-2022](https://docs.google.com/document/d/1VEkxpdZ9q7t6uQZ0db8XvYZEkJN-9KKGfAi_a7vk-ag/edit?usp=sharing)
 - I really think this [Topics in Advanced Model Rocketry](https://www.apogeerockets.com/Rocket_Books_Videos/Books/Topics_In_Advanced_Model_Rocketry) book would have been super helpful, but I could never get my hands on it.
 - The designNotes.md file has most of the imformation about programming-oriented decisions that I made.
+- [OpenRocket Technical Manual](http://openrocket.sourceforge.net/techdoc.pdf)
+<!-- TODO: add in that pdf that TJ recommended -->
+
+
+
+
+<!-- 
+Some general todos for this project
+
+Merge this random git branch with a ton of changes (and actually start making sure that the main banch can run everythin)
+Go back through every single file that has been written and is designed to be run, and make sure they work
+Add repr methods for all of the classes
+
+Redesign naming conventions for the motor file
+Read back through this Readme and make sure that everything is correct; update the necessary stuff
+move designNotes into a Documentation folder
+Add a bunch more documentation
+Add a Test to just run all of the main entry points for the thing and make sure they work okay
+
+Create a simulation where the motor is actually hooked into the rocket
+
+Move the motor simulation into its own folder
+
+Go through and prioritize all of the other todos everywhere
+-->
 
 
 

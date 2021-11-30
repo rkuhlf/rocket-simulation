@@ -5,9 +5,9 @@
 from presetObject import PresetObject
 
 from Helpers.general import magnitude
-from logger import Logger
-
+from logger import Logger, RocketLogger
 from environment import Environment
+
 
 class Simulation(PresetObject):
     """
@@ -123,6 +123,9 @@ class RocketSimulation(Simulation):
 
         self.apply_angular_forces = True
 
+        if "logger" not in kwargs.keys():
+            self.logger = RocketLogger(self.rocket)
+
         # This should already override the defaults in here, but I have an additional one because it wasn't working
         super().__init__(**kwargs)
         # super().overwrite_defaults(**kwargs)
@@ -192,6 +195,10 @@ class RocketSimulation(Simulation):
         return self.rocket.apogee
 
     @property
+    def apogee_lateral_velocity(self):
+        return self.rocket.apogee_lateral_velocity
+    
+    @property
     def max_velocity(self):
         return self.rocket.max_velocity
     
@@ -208,8 +215,8 @@ class RocketSimulation(Simulation):
 
 class MotorSimulation(Simulation):
     """
-    A class designed to piece together the components of a frame-by-frame custom motor simulation.
-    It will not work with a pre-designed thrust curve, but I don't know why you would bother simulating that
+    Designed to piece together the components of a frame-by-frame custom motor simulation.
+    It will not work with a pre-designed thrust curve
     Only the motor argument is required, but it should already contain references to the other objects (ox tank, injector, chamber, and nozzle)
     """
 
@@ -230,16 +237,6 @@ class MotorSimulation(Simulation):
         self.motor = None
 
         super().__init__(**kwargs)
-
-    @property
-    def environment(self):
-        return self._environment
-
-    @environment.setter
-    def environment(self, e):
-        self._environment = e
-
-        self.override_subobjects()
 
     def copy(self):
         new_environment = self.environment.copy()
@@ -269,7 +266,18 @@ class MotorSimulation(Simulation):
 
         return super().end()
     
-    #region Shortcuts for easier access
+    #region Shortcuts objects
+    @property
+    def environment(self):
+        return self._environment
+
+    @environment.setter
+    def environment(self, e):
+        self._environment = e
+
+        self.override_subobjects()
+
+
     @property
     def tank(self):
         return self.motor.ox_tank
@@ -299,10 +307,16 @@ class MotorSimulation(Simulation):
         return self.motor.total_impulse
 
     @property
+    def burn_time(self):
+        return self.motor.burn_time
+
+    @property
+    def average_thrust(self):
+        return self.total_impulse / self.burn_time
+
+    @property
     def specific_impulse(self):
-        """
-        Return the overall specific impulse for the whole of the designed motor
-        """
+        """Return the overall specific impulse for the whole of the designed motor"""
 
         return self.motor.total_specific_impulse
 

@@ -8,9 +8,10 @@ from copy import deepcopy, copy
 
 from presetObject import PresetObject
 from Helpers.data import nested_dictionary_lookup
+from Helpers.general import magnitude
 
-# TODO: import the magnitude method from helpers instead of np.linalg.norm
-
+# TODO: I need to refactor the to_record feature to allow a different name for the columns
+# I can probably just use a separate array
 
 class Logger(PresetObject):
     """
@@ -23,7 +24,7 @@ class Logger(PresetObject):
     def __init__(self, logging_object, **kwargs):
         # Use the actual rocket object to determine the data
         self.logging_object = logging_object
-        self.splitting_arrays = False
+        self.splitting_arrays = True
         self.to_record = []
         self.target = "output.csv"
 
@@ -81,8 +82,12 @@ class Logger(PresetObject):
 
     def save_to_csv(self):
         df = pd.DataFrame(self.rows)
-        # Rather than using the index (0, 1, 2, 3, 4...), I will index the rows by the time the row is recorded at
-        df.set_index('time', inplace=True)
+
+        try:
+            # Rather than using the index (0, 1, 2, 3, 4...), I will index the rows by the time the row is recorded at
+            df.set_index('time', inplace=True)
+        except:
+            print("Attempted to save to csv, but there was no time index. Likely, the simulation did not make it past one frame, and no time was ever logged.")
         
         df.to_csv(self.full_path)
 
@@ -143,11 +148,16 @@ class RocketLogger(FeedbackLogger):
         self.to_record = ['position', 'velocity', 'acceleration', 'rotation', 'angular_velocity',
         'angular_acceleration']
 
+
+        self.debug_every = 20 # seconds
+
         self.overwrite_defaults(**kwargs)
 
         self.printed_rail_stats = False
         self.printed_thrusted = False
         self.turned = False
+
+
 
     # Make it so that you can access it via either the logging_object or rocket property
     @property
@@ -157,6 +167,21 @@ class RocketLogger(FeedbackLogger):
     @rocket.setter
     def rocket(self, r):
         self.logging_object = r
+
+    def display_partial_data(self):
+        super().display_partial_data()
+
+        if self.rocket.ascending:
+            print(f"Rocket is ascending at {self.rocket.velocity[2]} m/s")
+        else:
+            print(f"Rocket is descending at {abs(self.rocket.velocity[2])} m/s", end="")
+            if self.rocket.parachute_deployed:
+                print(" under parachutes")
+            else:
+                print()
+
+        print(f"It is currently {self.rocket.position[2]} meters in the air")
+
 
     def handle_frame(self):
         super().handle_frame()
@@ -181,7 +206,7 @@ class RocketLogger(FeedbackLogger):
         if self.rocket.landed:
             self.print(
                 "Rocket landed with a speed of %.3s m/s after %.4s seconds of flight time" %
-                (np.linalg.norm(self.rocket.velocity),
+                (magnitude(self.rocket.velocity),
                  self.rocket.environment.time))
 
 
@@ -195,6 +220,8 @@ class MotorLogger(FeedbackLogger):
         super().__init__(motor)
 
         self.to_record = ["thrust", "combustion_chamber.pressure", "ox_tank.pressure", "combustion_chamber.temperature", "ox_tank.temperature", "combustion_chamber.fuel_grain.port_diameter", "OF", "combustion_chamber.cstar", "specific_impulse", "fuel_flow", "ox_flow", "mass_flow"]
+
+        self.debug_every = 2 # seconds
 
         self.overwrite_defaults(**kwargs)
 
@@ -224,24 +251,6 @@ class MotorLogger(FeedbackLogger):
         if not self.printed_pressurized and not self.motor.combustion_chamber.pressurizing:
             print(f"Motor finished pressurizing to {self.motor.combustion_chamber.pressure} Pa at {self.motor.environment.time}")
             self.printed_pressurized = True
-            
-        # if self.rocket.descending and not self.turned:
-        #     self.print('Reached the turning point at %.3s seconds with a height of %.5s meters' % (
-        #         self.rocket.environment.time, self.rocket.position[2]))
-        #     self.turned = True
-        #     self.print('The highest velocity during ascent was %.1f m/s, and the highest mach number was %.2f' % (
-        #         self.simulation.max_velocity, self.simulation.max_mach))
-
-
-        # if not self.printed_thrusted and self.rocket.motor.finished_thrusting:
-        #     self.print('Finished thrusting after %.3s seconds' % self.rocket.environment.time)
-        #     self.printed_thrusted = True
-
-        # if self.rocket.landed:
-        #     self.print(
-        #         "Rocket landed with a speed of %.3s m/s after %.4s seconds of flight time" %
-        #         (np.linalg.norm(self.rocket.velocity),
-        #          self.rocket.environment.time))
 
 
     def save_to_csv(self):

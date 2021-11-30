@@ -1,7 +1,7 @@
 # SIMULATION OF DESIGNED ROCKET
 # For our first math model review, we need a design for our rocket
 # I simulate it here
-# FIXME: The net forces on the 5 DOF go completely crazy, into the range of 20kN when it starts spinning out
+
 
 import numpy as np
 import sys

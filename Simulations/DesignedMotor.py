@@ -1,6 +1,6 @@
 # SIMULATE THE MOTOR I DESIGNED FOR MMR
-# Unfortunately, I am going to have to just specify chamber pressure as constant
-# With that inaccuracy, I am not even going to bother making any monte carlo style optimizers
+# Uses HTPB-Nitrous
+# Designed for a 120 kg wet mass rocket with 7.75 inch ID (I forgot to include paraffin thickness for the fuel grain) 
 
 
 import sys
@@ -31,9 +31,8 @@ def get_sim():
     
     injector = Injector(ox_tank=ox, combustion_chamber=chamber, orifice_count=4, orifice_diameter=0.005)
     nozzle = Nozzle(throat_diameter=0.045, area_ratio=5.72) # meters
-    # At 0.05 the pressure swing is too big at the start, and the stuff starts flowing the wrong direction
-    # Other than that, it isn't too sensitive to large time increments
-    env = Environment(time_increment=0.025)
+    # Pressure swings are big enought to cause problems until you get down to 0.02
+    env = Environment(time_increment=0.02)
 
     motor = CustomMotor(ox_tank=ox, injector=injector, combustion_chamber=chamber, nozzle=nozzle, environment=env)
 
@@ -49,7 +48,5 @@ if __name__ == "__main__":
     sim = get_sim()
     sim.run_simulation()
 
-    print(sim.specific_impulse)
-
-    # display_optical_analysis(sim.logger.full_path)
+    display_optical_analysis(sim.logger.full_path)
 

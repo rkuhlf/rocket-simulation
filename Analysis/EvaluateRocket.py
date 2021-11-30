@@ -17,11 +17,19 @@ import numpy as np
 # I think there is some way to do this with ballistic coefficient. I just want an indicator of how close we are to the best possible mass for a time
 
 
-# I want to have something in here for stability. Maybe I will ask that the CP is as close to the CG as possible divided by moment of inertia
+# I want to have something in here for stability. Maybe I will optimize so that the CP is as close to the CG as possible divided by moment of inertia
 
 
 # I guess I could import the Goddard problem solver and determine how close our thrust curve is to the best thrust curve for a flight of otherwise identical dimensions.
 # It will be hard to make this work for variable mass ox tank. I guess I could just assume O/F based mass drain matched to the thrust profile
+
+def find_max_compressive_force(data):
+    # Assume that thrust and drag are acting in the exact same directions
+    # This is not true, but it should be very close, and it is a worst case for compression
+    data["Drag Magnitude"] = np.sqrt(data["Drag1"] ** 2 + data["Drag2"] ** 2 + data["Drag3"] ** 2)
+    data["Compressive"] = data["Thrust"] + data["Drag Magnitude"]
+
+    return np.max(data["Compressive"])
 
 
 def find_total_impulse(data):
@@ -34,3 +42,4 @@ if __name__ == "__main__":
     data = pd.read_csv(script_path)
 
     print(f"The total impulse used in the simulation was {find_total_impulse(data)} Ns")
+    print(f"The maximum compressive force experienced in the simulation was {find_max_compressive_force(data)} N")

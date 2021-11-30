@@ -37,6 +37,10 @@ class CombustionChamber(PresetObject):
         self.density = 4  # kg/m^3
         self.cstar = 1500 # m/s
 
+        # These values are currently designed around a 30 bar chamber with time increment 0.1, but there is no substitute for time increment 0.02
+        self.relative_pressure_increase_limit = 0.5
+        self.relative_pressure_decrease_limit = 0.4
+
         super().overwrite_defaults(**kwargs)
 
         # Overriden by CEA in motor.py; current is based off of air
@@ -46,6 +50,7 @@ class CombustionChamber(PresetObject):
 
     @property
     def volume(self):
+        # TODO: add a precombustion and postcombustion chamber
         return np.pi * self.fuel_grain.port_radius ** 2
 
 
@@ -59,7 +64,8 @@ class CombustionChamber(PresetObject):
         # Based off of this monster of an equation
         # d(P_c)/d(t) = [m-dot_ox + (rho_f - rho_c)*A_b*a*G_ox^n - P_c*A_t/c*_exp] * R*T_C / V_C
         
-        # The change in temperature is accounted for separately
+        # This equation is assuming that the gas flowing into the combustion chamber is immediately at the adiabatic flame temperature, and it doesn't have any heat transfer with the stuff already in the chamber.
+        # To be honest, this only affects the charge-up time, and I am pretty sure the way we ignite is going to play a much larger role
         return apparent_mass_flow * self.ideal_gas_constant * self.temperature / self.volume
 
     def update_pressure(self, effective_mass_flow, time_increment):
@@ -70,8 +76,20 @@ class CombustionChamber(PresetObject):
             self.p_temperature = self.temperature
 
             pressure_increase_rate = self.get_change_in_pressure(effective_mass_flow)
-            self.pressure += pressure_increase_rate * time_increment
-            self.pressurizing = pressure_increase_rate > 0
+            planned_increment = pressure_increase_rate * time_increment
+            # I am arbitrarily limiting this to not have pressure swings bigger than five times the current
+            # Should allow us to run a shorter time increment
+            if planned_increment > 0:
+                if planned_increment > self.pressure * self.relative_pressure_increase_limit:
+                    print(f"Arbitrarily limiting the positive pressure change down from {planned_increment} to {self.pressure * self.relative_pressure_increase_limit}")
+                    planned_increment = self.pressure * self.relative_pressure_increase_limit
+            else:
+                if abs(planned_increment) > self.pressure * self.relative_pressure_decrease_limit:
+                    print(f"Arbitrarily limiting the negative pressure change down from {planned_increment} to {-self.pressure * self.relative_pressure_decrease_limit}")
+                    planned_increment = - self.pressure * self.relative_pressure_decrease_limit
+
+            self.pressure += planned_increment
+            self.pressurizing = planned_increment > 0
                 
 
     def update_combustion(self, ox_mass_flow, nozzle, time_increment):
