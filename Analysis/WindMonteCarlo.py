@@ -35,7 +35,7 @@ def simulate_monte_carlo(sim_function, iters=10, debug=True):
             lateral_velocities.append(sim.apogee_lateral_velocity)
 
             if debug:
-                print(f"Finished iteration {i}")
+                print(f"Finished iteration {i}, flew {sim.apogee} meters into the air.")
     finally:
         return distances, apogees, lateral_velocities
 
@@ -65,6 +65,11 @@ def save_monte_carlo(apogees, distances, lateral_velocities, path="Data/Output/w
 
     data.to_csv(path)
 
+
+def load_monte_carlo():
+    data = pd.read_csv("Data/Input/windMonteCarlo.csv")
+
+    return data["Apogee"], data["Drift"]
 
 if __name__ == "__main__":
     distances, apogees, lateral_velocities = simulate_monte_carlo(get_sim, 50)

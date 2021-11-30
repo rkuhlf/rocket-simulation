@@ -6,14 +6,13 @@
 import numpy as np
 import pandas as pd
 from rocketcea.cea_obj import CEA_Obj, add_new_fuel, add_new_oxidizer, add_new_propellant
+# TODO: make a separate file for all of the fuels I define and the methods that define them
+
 
 import sys
 sys.path.append(".")
 
 from Helpers.data import inputs_path
-
-
-# TODO: Account for non-choking effects. Even when the combustion chamber is at atmospheric pressure, it says the fluid in the throat is moving at mach 1. That isn't true. I think there are other equations for throat velocity, probably based on bernoulli (though this is compressible flow). I think the critical pressure ratio is about 1/2 for all fluids, so it shouldn't really matter too much
 
 
 
