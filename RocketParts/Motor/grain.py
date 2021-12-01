@@ -27,6 +27,11 @@ def regression_rate_HTPB_nitrous(mass_flux):
     return leading_ballistic_coefficient * mass_flux ** exponential_ballistic_coefficient
 
 
+def regression_rate_ABS_nitrous_constant(mass_flux):
+    # https://classroom.google.com/u/2/c/MzgwNjcyNDIwMDg3/m/Mzg1OTk5OTY1Njc5/details (table 4.1)
+    return 0.0007
+
+
 
 #endregion
 
@@ -265,6 +270,7 @@ if __name__ == "__main__":
     # Using an ID of 5 cm, an OD of 5.75 inches - 1 inches (0.5 inches on both sides in case we have extra regression)
     # print(find_required_length(0.025, 0.146, 8.48381877, 1000))
 
-    print(determine_optimal_starting_diameter_minimizing_weight(9, 0.146, 2, regression_rate_HTPB_nitrous, 1000, 7, optimize_for=0))
+    print(determine_optimal_starting_diameter_minimizing_weight(8.48, 0.146, 2.7, regression_rate_ABS_nitrous_constant, 975, 6.18, optimize_for=0.5))
+    # Found new best fuel grain, has 0.146 m OD, 0.1213269691560687 m ID (initially), and a length of 1.6794435545384543 meters, giving a mass of 8.482525721614701, only 0.002525721614700771 kg heavier than specified
 
     pass
