@@ -19,48 +19,14 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from rocketcea.cea_obj import CEA_Obj, add_new_fuel, add_new_oxidizer
-from rocketcea import cea_obj
+import sys
+sys.path.append(".")
 
-def define_inputs(percent_sulfur_contamination=0, percent_nitrogen_contamination=0, percent_curative=17, percent_carbon_black=3, oxidizer_temperature = 298.15, fuel_temperature=298.15):
-    global htpb_nitrous
+from Data.Input.CEAPropellants import define_HTPB_nitrous
+from Analysis.AnalyzeOFAtPressure import find_efficiencies, display_OF_graph
 
-    # Notice that all of these custom cards require the enthalpy in cal/mol
-    # Sulfur Dioxide can apparently contaminate the nitrous up to 2% mass, so we should take a look at the differences
-    card_str = f"""
-    oxid NitrousOxide  N 2.0 O 1.0  wt%={100 - percent_sulfur_contamination - percent_nitrogen_contamination}
-    h,cal=19497.759 t(k)={oxidizer_temperature}
-    oxid SulfurDioxide S 1.0 O 2.0 wt%={percent_sulfur_contamination}
-    h,cal=-70946 t(k)={oxidizer_temperature}
-    oxid Nitrogen N 2.0 wt%={percent_nitrogen_contamination}
-    h,cal=0 t(k)={oxidizer_temperature}
-    """
-    add_new_oxidizer('ContaminatedNitrous', card_str)
+htpb_nitrous = None
 
-    card_str = f"""
-    fuel HTPB   C 0.662 H 1.0 O 0.00662    wt%={(100 - percent_curative) * (100 - percent_carbon_black) / 100}
-    h,cal=-271.96 t(k)={fuel_temperature}
-    fuel Curative  C 224 H 155 O 27 N 27  wt%={percent_curative * (100 - percent_carbon_black) / 100}
-    h,cal=-738686.932 t(k)={fuel_temperature}
-    fuel CarbonBlack C 1 wt%={percent_carbon_black}
-    h,cal=0 t(k)={fuel_temperature}
-    """
-
-    add_new_fuel('MixedHTPB', card_str)
-
-    cea_obj._CacheObjDict = {}
-
-    htpb_nitrous = CEA_Obj(oxName="ContaminatedNitrous", fuelName="MixedHTPB")
-
-
-def get_cal_per_mole(calories_per_gram, molar_mass):
-    "Accepts a specific enthalpy in calories per gram along with a molar mass and converts it into calories per mole"
-    # Propep DAF file is in cal/gram
-
-    return calories_per_gram * molar_mass
-
-def get_hydrocarbon_molar_mass(carbons, hydrogens, oxygens):
-    return carbons * 12.011 + hydrogens * 1.008 + oxygens * 15.999
 
 def save_full_output(name="test.txt"):
     output = htpb_nitrous.get_full_cea_output(360, 7, 4)
@@ -71,49 +37,13 @@ def save_full_output(name="test.txt"):
     print(output)
 
 
-def find_efficiencies(chamber_pressure=360, area_ratio=4, OFs=np.linspace(2, 18, 200)):
-    cstars = []
-    specific_impulses = []
-
-    for OF in OFs:
-        # convert from ft/s to m/s
-        cstar = htpb_nitrous.get_Cstar(chamber_pressure, OF) * 0.3048
-        cstars.append(cstar)
-
-        specific_impulses.append(htpb_nitrous.estimate_Ambient_Isp(chamber_pressure, OF, eps=area_ratio)[0])
-
-    return cstars, specific_impulses, OFs
-
-def display_OF_graph(chamber_pressure=360, area_ratio=4):
-    cstars, specific_impulses, OFs = find_efficiencies(chamber_pressure, area_ratio)
-    
-    def optimal_input(inputs, outputs):
-        return inputs[outputs.index(max(outputs))]
-
-    best_cstar = optimal_input(OFs, cstars)
-    best_impulse = optimal_input(OFs, specific_impulses)
-
-    print(f"The optimal OF ratio according to c* is {best_cstar}")
-    print(f"The optimal OF ratio according to specific impulse is {best_impulse}, giving {max(specific_impulses)} seconds")
-
-    fig, ax1 = plt.subplots()
-
-    ax1.plot(OFs, cstars, label="C*")
-
-    ax2 = ax1.twinx()
-
-    ax2.plot(OFs, specific_impulses, color="red", label="I_sp")
-
-    fig.legend()
-
-    plt.show()
-
-
 def display_effect_of_contamination():
+    global htpb_nitrous
+
     fig, (ax1, ax2) = plt.subplots(1, 2)
 
     for contamination in np.linspace(0, 15, 16):
-        define_inputs(percent_sulfur_contamination=contamination)
+        htpb_nitrous = define_HTPB_nitrous(percent_sulfur_contamination=contamination)
         _, impulses, OFs = find_efficiencies()
         
         ax1.plot(OFs, impulses, label=f"{contamination}")
@@ -123,7 +53,7 @@ def display_effect_of_contamination():
 
 
     for contamination in np.linspace(0, 15, 16):
-        define_inputs(percent_nitrogen_contamination=contamination)
+        htpb_nitrous = define_HTPB_nitrous(percent_nitrogen_contamination=contamination)
         _, impulses, OFs = find_efficiencies()
         
         ax2.plot(OFs, impulses, label=f"{contamination}")
@@ -135,10 +65,12 @@ def display_effect_of_contamination():
     plt.show()
 
 def display_effect_of_curative():
+    global htpb_nitrous
+
     fig, ax1 = plt.subplots()
 
     for curative in np.linspace(0, 60, 10):
-        define_inputs(percent_curative=curative)
+        htpb_nitrous = define_HTPB_nitrous(percent_curative=curative)
         _, impulses, OFs = find_efficiencies()
         
         ax1.plot(OFs, impulses, label=f"{curative}")
@@ -149,10 +81,12 @@ def display_effect_of_curative():
     plt.show()
 
 def display_effect_of_carbon_black():
+    global htpb_nitrous
+
     fig, ax1 = plt.subplots()
 
     for carbon_black in np.linspace(0, 30, 10):
-        define_inputs(percent_carbon_black=carbon_black)
+        htpb_nitrous = define_HTPB_nitrous(percent_carbon_black=carbon_black)
         _, impulses, OFs = find_efficiencies()
         
         ax1.plot(OFs, impulses, label=f"{carbon_black}")
@@ -163,10 +97,12 @@ def display_effect_of_carbon_black():
     plt.show()
 
 def display_effect_of_pressure(pressures=np.linspace(100, 1000, 10), best_possible=False):
+    global htpb_nitrous
+
     if best_possible:
-        define_inputs(percent_carbon_black=0, percent_contamination=0, percent_curative=0)
+        htpb_nitrous = define_HTPB_nitrous(percent_carbon_black=0, percent_contamination=0, percent_curative=0)
     else:
-        define_inputs()
+        htpb_nitrous = define_HTPB_nitrous()
 
     fig, ax1 = plt.subplots()
 
@@ -183,8 +119,11 @@ def display_effect_of_pressure(pressures=np.linspace(100, 1000, 10), best_possib
 
 if __name__ == "__main__":
     # display_effect_of_contamination()
-    display_effect_of_curative()
+    # display_effect_of_curative()
     # display_effect_of_carbon_black()
+
+    k = define_HTPB_nitrous()
+    display_OF_graph(k)
 
     # display_effect_of_pressure(pressures=np.linspace(100, 10000, 50), best_possible=True)
     pass

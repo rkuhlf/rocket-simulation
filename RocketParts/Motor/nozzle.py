@@ -341,15 +341,20 @@ class Nozzle(PresetObject):
 if __name__ == "__main__":
     # display_constructed_quadratic()
     # calculate_nozzle_coordinates_truncated_parabola((0, 0.1), 35 * np.pi / 180, (1, 0.5))
-    compare_truncated_to_quadratic()
+    # compare_truncated_to_quadratic()
 
     # inputs = np.linspace(20, 50)
     # outputs = []
 
     # print(determine_expansion_ratio(30, 0.8, 1.2))
+    a = find_equilibrium_throat_area(1619, 25*10**5, 2.7)
+    from Helpers.general import get_radius
+    print(get_radius(a))
     
     # for k in inputs:
     #     outputs.append(determine_expansion_ratio(k, 1, 1.3))
 
     # plt.plot(inputs, outputs)
     # plt.show()
+
+    pass
