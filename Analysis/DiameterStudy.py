@@ -28,7 +28,7 @@ from Helpers.general import get_radius, normalized
 
 # Inner diameters in inches
 # possible_diameters = np.linspace(7, 10, 50)
-possible_diameters = np.array([7.5])
+possible_diameters = np.array([6.75])
 # inches to meters is 0.0254
 possible_diameters *= 0.0254
 lengths = []
@@ -48,7 +48,7 @@ print(f"We are looking at a fuel mass of {fuel_mass} kg")
 # Probably around SF = 0.1 / 0.75 = 1.3ish
 liquid_expansion = calculate_maximum_liquid_expansion(oxidizer_temperature, max_temperature=299.817)
 print(f"The volume of the liquid will increase by at most a factor of {liquid_expansion}.")
-print(f"In theory, that means you should have an ullage of at minimum {1-1/liquid_expansion}.")
+print(f"In theory, that means you should have an ullage of at minimum {(1-1/liquid_expansion) * 100}.")
 
 
 aspect_ratios = []
@@ -56,9 +56,11 @@ aspect_ratios = []
 print()
 for d in possible_diameters:
     print(f"TESTING ROCKET OF BODY DIAMETER {d / 0.0254}")
-    tank_length = find_required_length_oxidizer(oxidizer_mass, d, oxidizer_temperature, ullage=0.1)
+    ullage = 0.1
+    tank_length = find_required_length_oxidizer(oxidizer_mass, d, oxidizer_temperature, ullage=ullage, debug=True)
 
     print("OX TANK LENGTHS")
+    print(f"With an ullage of {ullage}")
     print(f"{tank_length} meters")
     print(f"{tank_length * 3.281} feet")
 

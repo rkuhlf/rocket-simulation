@@ -71,7 +71,7 @@ def find_combined_total_heat_capacity(gaseous_mass, liquid_mass,
     '''
     return gaseous_mass * gaseous_specific_heat + liquid_mass * liquid_specific_heat
 
-def find_required_length(ox_mass, diameter, temperature=293.15, ullage=0.15):
+def find_required_length(ox_mass, diameter, temperature=293.15, ullage=0.15, debug=False):
     """Calculate the required length for an ox tank given a constant temperature (in kelvin) and a desired ullage (as a proportion)"""
     liquid_density = get_liquid_nitrous_density(temperature)
     gas_density = get_gaseous_nitrous_density(temperature)
@@ -83,6 +83,8 @@ def find_required_length(ox_mass, diameter, temperature=293.15, ullage=0.15):
     # m_tot = V_tot * (ullage * p_gas + (1 - ullage) * p_liquid)
     # m_tot / (ullage * p_gas + (1 - ullage) * p_liquid) = V_tot
     required_volume = ox_mass / (ullage * gas_density + (1 - ullage) * liquid_density)
+    print(f"The required volume of the oxidizer is {required_volume} meters cubed")
+
     # Assumes flat circular heads
     return cylindrical_length(required_volume, diameter / 2)
 
