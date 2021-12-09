@@ -37,6 +37,7 @@ class Frame(MassObject):
 
     @property
     def buckling_critical_force(self):
+        print(self.area_moment_of_inertia)
         return np.pi ** 2 * self.youngs_modulus * self.area_moment_of_inertia / self.length ** 2
 
     @property
@@ -46,8 +47,13 @@ class Frame(MassObject):
 
 if __name__ == "__main__":
     f = Frame()
-    max_expected_compressive = 10000 # Newtons; sum of the max drag and the max thrust
+    f.length = 5.6388 # meters; 222 inches that Jase told me
+    f.thickness = 0.003175 # meters; Using the 0.125 inch thickness of the ox tank because I think anything more complex would be better served by a full FEA
+    f.youngs_modulus = 69 * 10**9 # 69 gigapascal young's modulus for aluminum; I think that Fiberglass
+    f.radius = 0.0889
+    max_expected_compressive = 10200 # Newtons; sum of the max drag, max thrust, and max weight
+
 
     print(f"The buckling critical force is {f.buckling_critical_force} N, and we probably will not get compressive forces greater then {max_expected_compressive}, giving us a safety factor of {f.buckling_critical_force/max_expected_compressive:.2f}")
 
-    print(f"The critical force is {f.compressive_critical_force} N, and we probably will not get compressive forces greater then {max_expected_compressive}, giving us a safety factor of {f.compressive_critical_force/max_expected_compressive:.2f}")
+    print(f"The compressive critical force is {f.compressive_critical_force} N, and we probably will not get compressive forces greater then {max_expected_compressive}, giving us a safety factor of {f.compressive_critical_force/max_expected_compressive:.2f}")
