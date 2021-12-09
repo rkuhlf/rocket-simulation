@@ -28,7 +28,7 @@ from Analysis.AnalyzeOFAtPressure import find_efficiencies, display_OF_graph
 htpb_nitrous = None
 
 
-def save_full_output(name="test.txt"):
+def save_full_output(name="htpbNitrous.txt"):
     output = htpb_nitrous.get_full_cea_output(360, 7, 4)
 
     with open(f"Data/Input/CEAOutput/{name}", "w") as f:
@@ -118,12 +118,14 @@ def display_effect_of_pressure(pressures=np.linspace(100, 1000, 10), best_possib
 
 
 if __name__ == "__main__":
+    htpb_nitrous = define_HTPB_nitrous(percent_sulfur_contamination=5)
+    save_full_output()
     # display_effect_of_contamination()
     # display_effect_of_curative()
     # display_effect_of_carbon_black()
 
-    k = define_HTPB_nitrous()
-    display_OF_graph(k)
+    # k = define_HTPB_nitrous()
+    # display_OF_graph(k)
 
     # display_effect_of_pressure(pressures=np.linspace(100, 10000, 50), best_possible=True)
     pass

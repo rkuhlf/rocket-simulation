@@ -9,6 +9,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
+from numpy.lib.npyio import save
 
 from rocketcea.cea_obj import CEA_Obj
 sys.path.append(".")
@@ -20,7 +21,7 @@ abs_nitrous: CEA_Obj = None
 
 
 def save_full_output(name="absNitrous.txt"):
-    output = abs_nitrous.get_full_cea_output(360, 7, 4)
+    output = abs_nitrous.get_full_cea_output(362.6, 6.18, 5.09)
 
     with open(f"Data/Input/CEAOutput/{name}", "w") as f:
         f.write(output)
@@ -96,13 +97,16 @@ def display_effect_of_pressure(pressures=np.linspace(100, 1000, 10)):
 if __name__ == "__main__":
     # display_effect_of_styrene()
 
-    chamber_pressure = 362.6
-    environmental_pressure = 11.965613
-    k = define_ABS_nitrous()
-    display_OF_graph(k, chamber_pressure=chamber_pressure, area_ratio=5.09)
+    # chamber_pressure = 362.6
+    # environmental_pressure = 11.965613
+    # k = define_ABS_nitrous()
+    # display_OF_graph(k, chamber_pressure=chamber_pressure, area_ratio=5.09)
     # print(k.get_eps_at_PcOvPe(chamber_pressure, 6.18, chamber_pressure/environmental_pressure))
 
     # display_effect_of_pressure(pressures=np.linspace(100, 10000, 50), best_possible=True)
+
+    abs_nitrous = define_ABS_nitrous()
+    save_full_output()
     pass
 
 
