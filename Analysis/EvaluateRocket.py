@@ -1,5 +1,6 @@
 # PROVIDE A DATA-BASED EVALUATION OF A SIMULATED ROCKET
 # Based on instantaneous conditions at every time frame, the script will calculate optimal coefficients/values and measure the distance away from them that we are
+# TODO: this is where I need to implement the logger that can take a csv file and return it in a standardized format
 
 
 import pandas as pd
@@ -26,11 +27,11 @@ import numpy as np
 def find_max_compressive_force(data):
     # Assume that thrust and drag are acting in the exact same directions
     # This is not true, but it should be very close, and it is a worst case for compression
+    # TODO: also add weight
     data["Drag Magnitude"] = np.sqrt(data["Drag1"] ** 2 + data["Drag2"] ** 2 + data["Drag3"] ** 2)
     data["Compressive"] = data["Thrust"] + data["Drag Magnitude"]
 
     return np.max(data["Compressive"])
-
 
 def find_total_impulse(data):
     # Just use a rectangular approximation instead of the trapezoid

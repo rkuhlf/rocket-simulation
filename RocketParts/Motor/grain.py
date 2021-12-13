@@ -31,6 +31,12 @@ def regression_rate_ABS_nitrous_constant(mass_flux):
     # https://classroom.google.com/u/2/c/MzgwNjcyNDIwMDg3/m/Mzg1OTk5OTY1Njc5/details (table 4.1)
     return 0.0007
 
+def bath_correction_for_helical_regression(regression, reynolds_number, port_diameter, helix_diameter):
+    """The correction uses a ratio of diameters, so the units must match"""
+    gniel_friction = 0.0791 * reynolds_number ** -0.25 + 0.0075 * (port_diameter / helix_diameter) ** 0.5
+    blasius_friction = 0.3164 / (4 * reynolds_number ** 0.25)
+
+    return gniel_friction / blasius_friction * regression
 
 
 #endregion
