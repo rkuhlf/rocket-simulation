@@ -63,6 +63,8 @@ def determine_optimal_starting_diameter_minimizing_weight(min_mass, outer_diamet
         Especially for the very low regression rate fuels (which need to be very long, even with the small inner diameter)
     """
 
+    # Does not need to know how far the motor will regress in total, that number will take effect based on the minimum mass
+
     grain = Grain()
     grain.density = density
     grain.outer_diameter = outer_diameter
@@ -279,10 +281,18 @@ if __name__ == "__main__":
     # print(find_required_length(0.025, 0.146, 8.48381877, 1000))
 
     # print(determine_optimal_starting_diameter_minimizing_weight(8.48, 0.146, 2.7, regression_rate_ABS_nitrous_constant, 975, 6.18, optimize_for=0.5))
-    # Give an extra galf incg on each side
+    # Give an extra half inch on each side
     # print(determine_optimal_starting_diameter_minimizing_weight(8.48, 0.120, 2.7, regression_rate_ABS_nitrous_constant, 975, 6.18, optimize_for=0.5, max_flux=1000)) # will be more than 650 kg/m2s; there just is not enough space to have the proper O/F through the whole burn
     # Give an extra 10 centimeters on either side (1.5 SF of r-dot)
-    print(determine_optimal_starting_diameter_minimizing_weight(8.48, 0.126, 2.7, regression_rate_ABS_nitrous_constant, 1000, 6.18, optimize_for=0.5, max_flux=1000)) # will be more than 650 kg/m2s; there just is not enough space to have the proper O/F through the whole burn
+    # print(determine_optimal_starting_diameter_minimizing_weight(8.48, 0.126, 2.7, regression_rate_ABS_nitrous_constant, 1000, 6.18, optimize_for=0.5, max_flux=1000)) # will be more than 650 kg/m2s; there just is not enough space to have the proper O/F through the whole burn
     # Found new best fuel grain, has 0.146 m OD, 0.1213269691560687 m ID (initially), and a length of 1.6794435545384543 meters, giving a mass of 8.482525721614701, only 0.002525721614700771 kg heavier than specified
+
+
+    print(determine_optimal_starting_diameter_minimizing_weight(12.48, 0.08255 * 2, 2.1, regression_rate_ABS_nitrous_constant, 1060, 6.18, optimize_for=0.5, max_flux=1000))
+
+
+    test_grain = Grain(density=1060, length=1.147, port_diameter=0.127, outer_radius=0.08255)
+    print(test_grain.fuel_volume)
+    print(test_grain.fuel_mass)
 
     pass

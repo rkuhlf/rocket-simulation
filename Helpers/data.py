@@ -3,6 +3,7 @@
 
 import re
 from enum import Enum, auto
+import numpy as np
 import sys
 sys.path.append(".")
 
@@ -62,11 +63,23 @@ def nested_dictionary_lookup_array(dictionary, key_array):
         return nested_dictionary_lookup_array(dictionary[current], key_array)
     
 
+# FIXME: rename from safe
+def interpolated_lookup(dataframe, key, value, lookup_key, safe=True):
+    before_keys = dataframe[dataframe[key] <= value]
+    if safe and len(before_keys) == 0:
+        # There is nothing to look up in the table that is lower than that value
+        return dataframe[dataframe[key] == dataframe[key].min()][lookup_key].values[0]
 
-def interpolated_lookup(dataframe, key, value, lookup_key):
-    before_key = dataframe[dataframe[key] <= value].iloc[-1]
 
-    after_key = dataframe[dataframe[key] >= value].iloc[0]
+    before_key = before_keys.iloc[-1]
+
+
+    after_keys = dataframe[dataframe[key] >= value]
+    if safe and len(after_keys) == 0:
+        # There is nothing to look up in the table that is bigger than that value
+        return dataframe[dataframe[key] == dataframe[key].max()][lookup_key].values[0]
+
+    after_key = after_keys.iloc[0]
 
     return interpolate(value, before_key[key], after_key[key], before_key[lookup_key], after_key[lookup_key])
 
