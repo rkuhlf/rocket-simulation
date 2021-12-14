@@ -95,7 +95,9 @@ def show_wind_speed_over_time():
 
 def show_wind_speed_at_altitude_versus_WSMR():
     """
-    Compare two models of wind speed at altitude
+    Compare two models of wind speed at altitude.
+    The logarithm one is for a lower part of the atmosphere based on the roughness of the ground
+    The thing it is comparing to is what the WSMR wind table says that was given to us
     """
 
     w = Wind(average_wind_speed=3.08)
@@ -161,5 +163,5 @@ if __name__ == "__main__":
 
     # show_wind_speed_over_time()
 
-    # show_wind_speed_at_altitude_versus_WSMR()
-    show_wind_direction()
+    show_wind_speed_at_altitude_versus_WSMR()
+    # show_wind_direction()

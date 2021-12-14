@@ -1,0 +1,161 @@
+Date : 2021-12-14 10:55:18
+Directory : c:\Users\rkuhlman813\Documents\rocket-simulation
+Total : 119 files,  136951 codes, 1766 comments, 3172 blanks, all 141889 lines
+
+Languages
++----------+------------+------------+------------+------------+------------+
+| language | files      | code       | comment    | blank      | total      |
++----------+------------+------------+------------+------------+------------+
+| CSV      |         34 |    131,644 |          0 |         28 |    131,672 |
+| Python   |         82 |      5,015 |      1,739 |      3,045 |      9,799 |
+| toml     |          1 |        155 |          0 |         11 |        166 |
+| Markdown |          2 |        137 |         27 |         88 |        252 |
++----------+------------+------------+------------+------------+------------+
+
+Directories
++-----------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                      | files      | code       | comment    | blank      | total      |
++-----------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                         |        119 |    136,951 |      1,766 |      3,172 |    141,889 |
+| Analysis                                                                                                  |         11 |        384 |        136 |        265 |        785 |
+| Data                                                                                                      |         48 |    132,452 |        352 |        599 |    133,403 |
+| Data\Input                                                                                                |         29 |     63,346 |        350 |        571 |     64,267 |
+| Data\Input\CEAOutput                                                                                      |          3 |        227 |         55 |        161 |        443 |
+| Data\Input\Presets                                                                                        |          1 |         29 |          4 |          9 |         42 |
+| Data\Input\Wind                                                                                           |          6 |     34,195 |         22 |         62 |     34,279 |
+| Data\Output                                                                                               |         19 |     69,106 |          2 |         28 |     69,136 |
+| Data\Output\ThirdPartySimulations                                                                         |          3 |      9,909 |          0 |          3 |      9,912 |
+| Data\Output\ThirdPartySimulations\MMR                                                                     |          2 |      5,228 |          0 |          2 |      5,230 |
+| Helpers                                                                                                   |          8 |        401 |        136 |        254 |        791 |
+| RocketParts                                                                                               |         12 |      1,067 |        380 |        605 |      2,052 |
+| RocketParts\Motor                                                                                         |          6 |        679 |        277 |        394 |      1,350 |
+| Simulations                                                                                               |          8 |        518 |        164 |        264 |        946 |
+| Tests                                                                                                     |          8 |        232 |         93 |        125 |        450 |
+| Visualization                                                                                             |         13 |        738 |        155 |        482 |      1,375 |
++-----------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++-----------------------------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| filename                                                                                                  | language | code       | comment    | blank      | total      |
++-----------------------------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Analysis\BestAngleByWind.py                              | Python   |         30 |          7 |         19 |         56 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Analysis\CalibersEffect.py                               | Python   |         23 |         11 |         16 |         50 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Analysis\DesignRocket.py                                 | Python   |         52 |         24 |         34 |        110 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Analysis\DiameterStudy.py                                | Python   |         84 |         27 |         40 |        151 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Analysis\EvaluateRocket.py                               | Python   |         13 |         13 |         20 |         46 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Analysis\MotorTimeIncrement.py                           | Python   |         18 |          5 |         19 |         42 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Analysis\OptimizeBurnTime.py                             | Python   |         37 |         18 |         26 |         81 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Analysis\OptimizeDryMass.py                              | Python   |         32 |          7 |         23 |         62 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Analysis\OptimizeOFAtPressure.py                         | Python   |         24 |         10 |         20 |         54 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Analysis\SensitivityToOxTemperature.py                   | Python   |         26 |          6 |         22 |         54 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Analysis\WindMonteCarlo.py                               | Python   |         45 |          8 |         26 |         79 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Input\CEAOutput\ProcessScrapedCEA.py                | Python   |         81 |         20 |         65 |        166 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Input\CEAOutput\ScrapeCEAOnline.py                  | Python   |        107 |         27 |         74 |        208 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Input\CEAOutput\SimulateCEATable.py                 | Python   |         39 |          8 |         22 |         69 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Input\CombustionLookup.csv                          | CSV      |      8,284 |          0 |          1 |      8,285 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Input\CombustionLookupHTPB.csv                      | CSV      |     10,001 |          0 |          1 |     10,002 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Input\FitPolynomialModels.py                        | Python   |        105 |         37 |         69 |        211 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Input\Presets\TannerModel.py                        | Python   |         29 |          4 |          9 |         42 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Input\SimulateGrainSurface.py                       | Python   |        163 |         80 |        105 |        348 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Input\ThrustProfile.py                              | Python   |         26 |          7 |         22 |         55 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Input\Wind\FitWind.py                               | Python   |         29 |          6 |         28 |         63 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Input\Wind\GraphWind.py                             | Python   |         15 |         14 |         19 |         48 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Input\Wind\MoreData.csv                             | CSV      |     17,018 |          0 |          1 |     17,019 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Input\Wind\WSMRSpeedAltitude.csv                    | CSV      |        103 |          0 |          0 |        103 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Input\Wind\whiteSandsModels.py                      | Python   |         12 |          2 |         13 |         27 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Input\Wind\windSample.csv                           | CSV      |     17,018 |          0 |          1 |     17,019 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Input\aerodynamicQualities.csv                      | CSV      |      7,503 |          0 |          0 |      7,503 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Input\airQuantities.csv                             | CSV      |        501 |          0 |          0 |        501 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Input\currentGoddard.csv                            | CSV      |         12 |          0 |          1 |         13 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Input\finleyThrust.csv                              | CSV      |      2,024 |          0 |          0 |      2,024 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Input\goddardModels.py                              | Python   |         43 |         16 |         29 |         88 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Input\mmrThrust.csv                                 | CSV      |         12 |          0 |          0 |         12 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Input\models.py                                     | Python   |         57 |         91 |         45 |        193 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Input\newWind.csv                                   | CSV      |          2 |          0 |          1 |          3 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Input\thrustCurve.csv                               | CSV      |          5 |          0 |          1 |          6 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Input\thrustCurveO6300.csv                          | CSV      |         12 |          0 |          1 |         13 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Input\thrustCurveSmaller.csv                        | CSV      |         12 |          0 |          1 |         13 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Input\thrustCurveToModify.csv                       | CSV      |         12 |          0 |          0 |         12 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Input\thrustCurveUsual.csv                          | CSV      |         28 |          0 |          1 |         29 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Input\wind.py                                       | Python   |         93 |         38 |         61 |        192 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Output\CompressCSVFiles.py                          | Python   |          9 |          2 |         10 |         21 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Output\ThirdPartySimulations\MMR\OpenRocketData.csv | CSV      |      3,233 |          0 |          1 |      3,234 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Output\ThirdPartySimulations\MMR\RockSim.csv        | CSV      |      1,995 |          0 |          1 |      1,996 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Output\ThirdPartySimulations\OpenRocketData.csv     | CSV      |      4,681 |          0 |          1 |      4,682 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Output\basicOutput.csv                              | CSV      |      2,987 |          0 |          1 |      2,988 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Output\conversions.csv                              | CSV      |     12,934 |          0 |          1 |     12,935 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Output\motorOutput.csv                              | CSV      |      3,008 |          0 |          1 |      3,009 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Output\newWind.csv                                  | CSV      |         51 |          0 |          1 |         52 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Output\noWind.csv                                   | CSV      |      3,850 |          0 |          1 |      3,851 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Output\ouputRot1.csv                                | CSV      |      4,689 |          0 |          1 |      4,690 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Output\ouputRot2.csv                                | CSV      |      4,576 |          0 |          1 |      4,577 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Output\ouputRot3.csv                                | CSV      |      4,566 |          0 |          1 |      4,567 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Output\ouputRot4.csv                                | CSV      |      4,671 |          0 |          1 |      4,672 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Output\output.csv                                   | CSV      |     10,370 |          0 |          1 |     10,371 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Output\output1DOFMMR.csv                            | CSV      |      2,667 |          0 |          1 |      2,668 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Output\output5DOFMMR.csv                            | CSV      |      2,146 |          0 |          1 |      2,147 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Output\output5DOFNoWind.csv                         | CSV      |      1,311 |          0 |          1 |      1,312 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Output\output5DOFWind.csv                           | CSV      |      1,311 |          0 |          1 |      1,312 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Data\Output\windMonteCarlo.csv                           | CSV      |         51 |          0 |          1 |         52 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Helpers\data.py                                          | Python   |         47 |         17 |         36 |        100 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Helpers\design.py                                        | Python   |          6 |          0 |          4 |         10 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Helpers\fluidSimulation.py                               | Python   |         69 |         54 |         53 |        176 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Helpers\general.py                                       | Python   |        158 |         44 |         90 |        292 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Helpers\massProperties.py                                | Python   |         15 |          7 |         13 |         35 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Helpers\oxTankMassProperties.py                          | Python   |         34 |          4 |         17 |         55 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Helpers\presets.py                                       | Python   |         39 |          1 |         26 |         66 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Helpers\timing.py                                        | Python   |         33 |          9 |         15 |         57 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\README.md                                                | Markdown |         92 |         21 |         57 |        170 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\RocketParts\Motor\combustionChamber.py                   | Python   |         62 |         32 |         32 |        126 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\RocketParts\Motor\grain.py                               | Python   |        104 |         33 |         61 |        198 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\RocketParts\Motor\injector.py                            | Python   |         94 |         39 |         64 |        197 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\RocketParts\Motor\nitrousProperties.py                   | Python   |         80 |         17 |         40 |        137 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\RocketParts\Motor\nozzle.py                              | Python   |        151 |         92 |        112 |        355 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\RocketParts\Motor\oxTank.py                              | Python   |        188 |         64 |         85 |        337 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\RocketParts\fins.py                                      | Python   |         13 |         11 |          9 |         33 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\RocketParts\frame.py                                     | Python   |         34 |          3 |         16 |         53 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\RocketParts\massObject.py                                | Python   |        109 |         39 |         59 |        207 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\RocketParts\motor.py                                     | Python   |        189 |         38 |        100 |        327 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\RocketParts\nose.py                                      | Python   |          0 |          5 |          1 |          6 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\RocketParts\parachute.py                                 | Python   |         43 |          7 |         26 |         76 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\SimulateMotor.py                                         | Python   |         27 |          7 |         17 |         51 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\SimulateRocket.py                                        | Python   |         27 |          4 |         18 |         49 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Simulations\DesignedMotor.py                             | Python   |         28 |          5 |         20 |         53 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Simulations\DesignedRocket.py                            | Python   |         50 |          7 |         22 |         79 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Simulations\GeneticSelectionForGoddardProblem.py         | Python   |        209 |         41 |         91 |        341 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Simulations\GeneticSelectionForParachutes.py             | Python   |        132 |         23 |         73 |        228 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Simulations\OneDOF.py                                    | Python   |         45 |          5 |         17 |         67 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Simulations\Samples.py                                   | Python   |          0 |         57 |          7 |         64 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Simulations\TimeDeltaStudy.py                            | Python   |         35 |         17 |         23 |         75 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Simulations\verifiedSimulation.py                        | Python   |         19 |          9 |         11 |         39 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Tests\flight_simulation_test.py                          | Python   |         86 |         38 |         56 |        180 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Tests\general_test.py                                    | Python   |         65 |         16 |         27 |        108 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Tests\mass_object_test.py                                | Python   |         33 |          3 |          7 |         43 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Tests\models_test.py                                     | Python   |         11 |          1 |          4 |         16 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Tests\physics_test.py                                    | Python   |          1 |         14 |          3 |         18 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Tests\preset_test.py                                     | Python   |         10 |          0 |          8 |         18 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Tests\propulsion_test.py                                 | Python   |         26 |         21 |         19 |         66 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Tests\rocket_test.py                                     | Python   |          0 |          0 |          1 |          1 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\TimeFunctions.py                                         | Python   |         43 |         21 |         20 |         84 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Visualization\CalculateConversions.py                    | Python   |         49 |         15 |         30 |         94 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Visualization\CompareThirdParty.py                       | Python   |        186 |         15 |        118 |        319 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Visualization\Display2DAnimation.py                      | Python   |         26 |          5 |         19 |         50 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Visualization\DisplayAerodynamicQualities.py             | Python   |         14 |          4 |         12 |         30 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Visualization\DisplayModelAccuracy.py                    | Python   |         30 |          7 |         22 |         59 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Visualization\FlightOpticalAnalysis.py                   | Python   |        109 |         24 |         54 |        187 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Visualization\GraphOverview.py                           | Python   |         34 |         11 |         33 |         78 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Visualization\MotorOpticalAnalysis.py                    | Python   |         55 |         13 |         38 |        106 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Visualization\OxTankCG.py                                | Python   |         52 |          2 |         22 |         76 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Visualization\SimplifiedRotationSimulation.py            | Python   |         62 |         28 |         48 |        138 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Visualization\StaticStability.py                         | Python   |         10 |          0 |          9 |         19 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Visualization\ToBlender.py                               | Python   |         25 |         11 |         17 |         53 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\Visualization\WindGenerationDemonstration.py             | Python   |         86 |         20 |         60 |        166 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\designNotes.md                                           | Markdown |         45 |          6 |         31 |         82 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\environment.py                                           | Python   |         61 |         40 |         38 |        139 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\logger.py                                                | Python   |        148 |         35 |         80 |        263 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\poetry.lock                                              | toml     |        155 |          0 |         11 |        166 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\presetObject.py                                          | Python   |         26 |         11 |         21 |         58 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\rocket.py                                                | Python   |        351 |        158 |        192 |        701 |
+| c:\Users\rkuhlman813\Documents\rocket-simulation\simulation.py                                            | Python   |        184 |         47 |         93 |        324 |
+| Total                                                                                                     |          |    136,951 |      1,766 |      3,172 |    141,889 |
++-----------------------------------------------------------------------------------------------------------+----------+------------+------------+------------+------------+

@@ -28,7 +28,7 @@ from Helpers.general import get_radius, normalized
 
 # Inner diameters in inches
 # possible_diameters = np.linspace(7, 10, 50)
-possible_diameters = np.array([7.5])
+possible_diameters = np.array([7 - 0.125 * 2])
 # inches to meters is 0.0254
 possible_diameters *= 0.0254
 lengths = []

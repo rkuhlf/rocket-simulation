@@ -1,0 +1,134 @@
+# Details
+
+Date : 2021-12-14 10:55:18
+
+Directory c:\Users\rkuhlman813\Documents\rocket-simulation
+
+Total : 119 files,  136951 codes, 1766 comments, 3172 blanks, all 141889 lines
+
+[summary](results.md)
+
+## Files
+| filename | language | code | comment | blank | total |
+| :--- | :--- | ---: | ---: | ---: | ---: |
+| [Analysis/BestAngleByWind.py](/Analysis/BestAngleByWind.py) | Python | 30 | 7 | 19 | 56 |
+| [Analysis/CalibersEffect.py](/Analysis/CalibersEffect.py) | Python | 23 | 11 | 16 | 50 |
+| [Analysis/DesignRocket.py](/Analysis/DesignRocket.py) | Python | 52 | 24 | 34 | 110 |
+| [Analysis/DiameterStudy.py](/Analysis/DiameterStudy.py) | Python | 84 | 27 | 40 | 151 |
+| [Analysis/EvaluateRocket.py](/Analysis/EvaluateRocket.py) | Python | 13 | 13 | 20 | 46 |
+| [Analysis/MotorTimeIncrement.py](/Analysis/MotorTimeIncrement.py) | Python | 18 | 5 | 19 | 42 |
+| [Analysis/OptimizeBurnTime.py](/Analysis/OptimizeBurnTime.py) | Python | 37 | 18 | 26 | 81 |
+| [Analysis/OptimizeDryMass.py](/Analysis/OptimizeDryMass.py) | Python | 32 | 7 | 23 | 62 |
+| [Analysis/OptimizeOFAtPressure.py](/Analysis/OptimizeOFAtPressure.py) | Python | 24 | 10 | 20 | 54 |
+| [Analysis/SensitivityToOxTemperature.py](/Analysis/SensitivityToOxTemperature.py) | Python | 26 | 6 | 22 | 54 |
+| [Analysis/WindMonteCarlo.py](/Analysis/WindMonteCarlo.py) | Python | 45 | 8 | 26 | 79 |
+| [Data/Input/CEAOutput/ProcessScrapedCEA.py](/Data/Input/CEAOutput/ProcessScrapedCEA.py) | Python | 81 | 20 | 65 | 166 |
+| [Data/Input/CEAOutput/ScrapeCEAOnline.py](/Data/Input/CEAOutput/ScrapeCEAOnline.py) | Python | 107 | 27 | 74 | 208 |
+| [Data/Input/CEAOutput/SimulateCEATable.py](/Data/Input/CEAOutput/SimulateCEATable.py) | Python | 39 | 8 | 22 | 69 |
+| [Data/Input/CombustionLookup.csv](/Data/Input/CombustionLookup.csv) | CSV | 8,284 | 0 | 1 | 8,285 |
+| [Data/Input/CombustionLookupHTPB.csv](/Data/Input/CombustionLookupHTPB.csv) | CSV | 10,001 | 0 | 1 | 10,002 |
+| [Data/Input/FitPolynomialModels.py](/Data/Input/FitPolynomialModels.py) | Python | 105 | 37 | 69 | 211 |
+| [Data/Input/Presets/TannerModel.py](/Data/Input/Presets/TannerModel.py) | Python | 29 | 4 | 9 | 42 |
+| [Data/Input/SimulateGrainSurface.py](/Data/Input/SimulateGrainSurface.py) | Python | 163 | 80 | 105 | 348 |
+| [Data/Input/ThrustProfile.py](/Data/Input/ThrustProfile.py) | Python | 26 | 7 | 22 | 55 |
+| [Data/Input/Wind/FitWind.py](/Data/Input/Wind/FitWind.py) | Python | 29 | 6 | 28 | 63 |
+| [Data/Input/Wind/GraphWind.py](/Data/Input/Wind/GraphWind.py) | Python | 15 | 14 | 19 | 48 |
+| [Data/Input/Wind/MoreData.csv](/Data/Input/Wind/MoreData.csv) | CSV | 17,018 | 0 | 1 | 17,019 |
+| [Data/Input/Wind/WSMRSpeedAltitude.csv](/Data/Input/Wind/WSMRSpeedAltitude.csv) | CSV | 103 | 0 | 0 | 103 |
+| [Data/Input/Wind/whiteSandsModels.py](/Data/Input/Wind/whiteSandsModels.py) | Python | 12 | 2 | 13 | 27 |
+| [Data/Input/Wind/windSample.csv](/Data/Input/Wind/windSample.csv) | CSV | 17,018 | 0 | 1 | 17,019 |
+| [Data/Input/aerodynamicQualities.csv](/Data/Input/aerodynamicQualities.csv) | CSV | 7,503 | 0 | 0 | 7,503 |
+| [Data/Input/airQuantities.csv](/Data/Input/airQuantities.csv) | CSV | 501 | 0 | 0 | 501 |
+| [Data/Input/currentGoddard.csv](/Data/Input/currentGoddard.csv) | CSV | 12 | 0 | 1 | 13 |
+| [Data/Input/finleyThrust.csv](/Data/Input/finleyThrust.csv) | CSV | 2,024 | 0 | 0 | 2,024 |
+| [Data/Input/goddardModels.py](/Data/Input/goddardModels.py) | Python | 43 | 16 | 29 | 88 |
+| [Data/Input/mmrThrust.csv](/Data/Input/mmrThrust.csv) | CSV | 12 | 0 | 0 | 12 |
+| [Data/Input/models.py](/Data/Input/models.py) | Python | 57 | 91 | 45 | 193 |
+| [Data/Input/newWind.csv](/Data/Input/newWind.csv) | CSV | 2 | 0 | 1 | 3 |
+| [Data/Input/thrustCurve.csv](/Data/Input/thrustCurve.csv) | CSV | 5 | 0 | 1 | 6 |
+| [Data/Input/thrustCurveO6300.csv](/Data/Input/thrustCurveO6300.csv) | CSV | 12 | 0 | 1 | 13 |
+| [Data/Input/thrustCurveSmaller.csv](/Data/Input/thrustCurveSmaller.csv) | CSV | 12 | 0 | 1 | 13 |
+| [Data/Input/thrustCurveToModify.csv](/Data/Input/thrustCurveToModify.csv) | CSV | 12 | 0 | 0 | 12 |
+| [Data/Input/thrustCurveUsual.csv](/Data/Input/thrustCurveUsual.csv) | CSV | 28 | 0 | 1 | 29 |
+| [Data/Input/wind.py](/Data/Input/wind.py) | Python | 93 | 38 | 61 | 192 |
+| [Data/Output/CompressCSVFiles.py](/Data/Output/CompressCSVFiles.py) | Python | 9 | 2 | 10 | 21 |
+| [Data/Output/ThirdPartySimulations/MMR/OpenRocketData.csv](/Data/Output/ThirdPartySimulations/MMR/OpenRocketData.csv) | CSV | 3,233 | 0 | 1 | 3,234 |
+| [Data/Output/ThirdPartySimulations/MMR/RockSim.csv](/Data/Output/ThirdPartySimulations/MMR/RockSim.csv) | CSV | 1,995 | 0 | 1 | 1,996 |
+| [Data/Output/ThirdPartySimulations/OpenRocketData.csv](/Data/Output/ThirdPartySimulations/OpenRocketData.csv) | CSV | 4,681 | 0 | 1 | 4,682 |
+| [Data/Output/basicOutput.csv](/Data/Output/basicOutput.csv) | CSV | 2,987 | 0 | 1 | 2,988 |
+| [Data/Output/conversions.csv](/Data/Output/conversions.csv) | CSV | 12,934 | 0 | 1 | 12,935 |
+| [Data/Output/motorOutput.csv](/Data/Output/motorOutput.csv) | CSV | 3,008 | 0 | 1 | 3,009 |
+| [Data/Output/newWind.csv](/Data/Output/newWind.csv) | CSV | 51 | 0 | 1 | 52 |
+| [Data/Output/noWind.csv](/Data/Output/noWind.csv) | CSV | 3,850 | 0 | 1 | 3,851 |
+| [Data/Output/ouputRot1.csv](/Data/Output/ouputRot1.csv) | CSV | 4,689 | 0 | 1 | 4,690 |
+| [Data/Output/ouputRot2.csv](/Data/Output/ouputRot2.csv) | CSV | 4,576 | 0 | 1 | 4,577 |
+| [Data/Output/ouputRot3.csv](/Data/Output/ouputRot3.csv) | CSV | 4,566 | 0 | 1 | 4,567 |
+| [Data/Output/ouputRot4.csv](/Data/Output/ouputRot4.csv) | CSV | 4,671 | 0 | 1 | 4,672 |
+| [Data/Output/output.csv](/Data/Output/output.csv) | CSV | 10,370 | 0 | 1 | 10,371 |
+| [Data/Output/output1DOFMMR.csv](/Data/Output/output1DOFMMR.csv) | CSV | 2,667 | 0 | 1 | 2,668 |
+| [Data/Output/output5DOFMMR.csv](/Data/Output/output5DOFMMR.csv) | CSV | 2,146 | 0 | 1 | 2,147 |
+| [Data/Output/output5DOFNoWind.csv](/Data/Output/output5DOFNoWind.csv) | CSV | 1,311 | 0 | 1 | 1,312 |
+| [Data/Output/output5DOFWind.csv](/Data/Output/output5DOFWind.csv) | CSV | 1,311 | 0 | 1 | 1,312 |
+| [Data/Output/windMonteCarlo.csv](/Data/Output/windMonteCarlo.csv) | CSV | 51 | 0 | 1 | 52 |
+| [Helpers/data.py](/Helpers/data.py) | Python | 47 | 17 | 36 | 100 |
+| [Helpers/design.py](/Helpers/design.py) | Python | 6 | 0 | 4 | 10 |
+| [Helpers/fluidSimulation.py](/Helpers/fluidSimulation.py) | Python | 69 | 54 | 53 | 176 |
+| [Helpers/general.py](/Helpers/general.py) | Python | 158 | 44 | 90 | 292 |
+| [Helpers/massProperties.py](/Helpers/massProperties.py) | Python | 15 | 7 | 13 | 35 |
+| [Helpers/oxTankMassProperties.py](/Helpers/oxTankMassProperties.py) | Python | 34 | 4 | 17 | 55 |
+| [Helpers/presets.py](/Helpers/presets.py) | Python | 39 | 1 | 26 | 66 |
+| [Helpers/timing.py](/Helpers/timing.py) | Python | 33 | 9 | 15 | 57 |
+| [README.md](/README.md) | Markdown | 92 | 21 | 57 | 170 |
+| [RocketParts/Motor/combustionChamber.py](/RocketParts/Motor/combustionChamber.py) | Python | 62 | 32 | 32 | 126 |
+| [RocketParts/Motor/grain.py](/RocketParts/Motor/grain.py) | Python | 104 | 33 | 61 | 198 |
+| [RocketParts/Motor/injector.py](/RocketParts/Motor/injector.py) | Python | 94 | 39 | 64 | 197 |
+| [RocketParts/Motor/nitrousProperties.py](/RocketParts/Motor/nitrousProperties.py) | Python | 80 | 17 | 40 | 137 |
+| [RocketParts/Motor/nozzle.py](/RocketParts/Motor/nozzle.py) | Python | 151 | 92 | 112 | 355 |
+| [RocketParts/Motor/oxTank.py](/RocketParts/Motor/oxTank.py) | Python | 188 | 64 | 85 | 337 |
+| [RocketParts/fins.py](/RocketParts/fins.py) | Python | 13 | 11 | 9 | 33 |
+| [RocketParts/frame.py](/RocketParts/frame.py) | Python | 34 | 3 | 16 | 53 |
+| [RocketParts/massObject.py](/RocketParts/massObject.py) | Python | 109 | 39 | 59 | 207 |
+| [RocketParts/motor.py](/RocketParts/motor.py) | Python | 189 | 38 | 100 | 327 |
+| [RocketParts/nose.py](/RocketParts/nose.py) | Python | 0 | 5 | 1 | 6 |
+| [RocketParts/parachute.py](/RocketParts/parachute.py) | Python | 43 | 7 | 26 | 76 |
+| [SimulateMotor.py](/SimulateMotor.py) | Python | 27 | 7 | 17 | 51 |
+| [SimulateRocket.py](/SimulateRocket.py) | Python | 27 | 4 | 18 | 49 |
+| [Simulations/DesignedMotor.py](/Simulations/DesignedMotor.py) | Python | 28 | 5 | 20 | 53 |
+| [Simulations/DesignedRocket.py](/Simulations/DesignedRocket.py) | Python | 50 | 7 | 22 | 79 |
+| [Simulations/GeneticSelectionForGoddardProblem.py](/Simulations/GeneticSelectionForGoddardProblem.py) | Python | 209 | 41 | 91 | 341 |
+| [Simulations/GeneticSelectionForParachutes.py](/Simulations/GeneticSelectionForParachutes.py) | Python | 132 | 23 | 73 | 228 |
+| [Simulations/OneDOF.py](/Simulations/OneDOF.py) | Python | 45 | 5 | 17 | 67 |
+| [Simulations/Samples.py](/Simulations/Samples.py) | Python | 0 | 57 | 7 | 64 |
+| [Simulations/TimeDeltaStudy.py](/Simulations/TimeDeltaStudy.py) | Python | 35 | 17 | 23 | 75 |
+| [Simulations/verifiedSimulation.py](/Simulations/verifiedSimulation.py) | Python | 19 | 9 | 11 | 39 |
+| [Tests/flight_simulation_test.py](/Tests/flight_simulation_test.py) | Python | 86 | 38 | 56 | 180 |
+| [Tests/general_test.py](/Tests/general_test.py) | Python | 65 | 16 | 27 | 108 |
+| [Tests/mass_object_test.py](/Tests/mass_object_test.py) | Python | 33 | 3 | 7 | 43 |
+| [Tests/models_test.py](/Tests/models_test.py) | Python | 11 | 1 | 4 | 16 |
+| [Tests/physics_test.py](/Tests/physics_test.py) | Python | 1 | 14 | 3 | 18 |
+| [Tests/preset_test.py](/Tests/preset_test.py) | Python | 10 | 0 | 8 | 18 |
+| [Tests/propulsion_test.py](/Tests/propulsion_test.py) | Python | 26 | 21 | 19 | 66 |
+| [Tests/rocket_test.py](/Tests/rocket_test.py) | Python | 0 | 0 | 1 | 1 |
+| [TimeFunctions.py](/TimeFunctions.py) | Python | 43 | 21 | 20 | 84 |
+| [Visualization/CalculateConversions.py](/Visualization/CalculateConversions.py) | Python | 49 | 15 | 30 | 94 |
+| [Visualization/CompareThirdParty.py](/Visualization/CompareThirdParty.py) | Python | 186 | 15 | 118 | 319 |
+| [Visualization/Display2DAnimation.py](/Visualization/Display2DAnimation.py) | Python | 26 | 5 | 19 | 50 |
+| [Visualization/DisplayAerodynamicQualities.py](/Visualization/DisplayAerodynamicQualities.py) | Python | 14 | 4 | 12 | 30 |
+| [Visualization/DisplayModelAccuracy.py](/Visualization/DisplayModelAccuracy.py) | Python | 30 | 7 | 22 | 59 |
+| [Visualization/FlightOpticalAnalysis.py](/Visualization/FlightOpticalAnalysis.py) | Python | 109 | 24 | 54 | 187 |
+| [Visualization/GraphOverview.py](/Visualization/GraphOverview.py) | Python | 34 | 11 | 33 | 78 |
+| [Visualization/MotorOpticalAnalysis.py](/Visualization/MotorOpticalAnalysis.py) | Python | 55 | 13 | 38 | 106 |
+| [Visualization/OxTankCG.py](/Visualization/OxTankCG.py) | Python | 52 | 2 | 22 | 76 |
+| [Visualization/SimplifiedRotationSimulation.py](/Visualization/SimplifiedRotationSimulation.py) | Python | 62 | 28 | 48 | 138 |
+| [Visualization/StaticStability.py](/Visualization/StaticStability.py) | Python | 10 | 0 | 9 | 19 |
+| [Visualization/ToBlender.py](/Visualization/ToBlender.py) | Python | 25 | 11 | 17 | 53 |
+| [Visualization/WindGenerationDemonstration.py](/Visualization/WindGenerationDemonstration.py) | Python | 86 | 20 | 60 | 166 |
+| [designNotes.md](/designNotes.md) | Markdown | 45 | 6 | 31 | 82 |
+| [environment.py](/environment.py) | Python | 61 | 40 | 38 | 139 |
+| [logger.py](/logger.py) | Python | 148 | 35 | 80 | 263 |
+| [poetry.lock](/poetry.lock) | toml | 155 | 0 | 11 | 166 |
+| [presetObject.py](/presetObject.py) | Python | 26 | 11 | 21 | 58 |
+| [rocket.py](/rocket.py) | Python | 351 | 158 | 192 | 701 |
+| [simulation.py](/simulation.py) | Python | 184 | 47 | 93 | 324 |
+
+[summary](results.md)
