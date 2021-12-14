@@ -267,7 +267,7 @@ def find_nozzle_length(converging_angle, entrance_diameter, throat_diameter, div
 
     return entrance_distance + exit_distance * conical_proportion
 
-def find_nozzle_retention_shear(inner_weight, base_drag, pressure_force, bolt_shear_strength, bolt_diameter=0.003, safety_factor=1.5):
+def find_required_retention_bolts(inner_weight, base_drag, pressure_force, bolt_shear_strength, bolt_diameter=0.003, safety_factor=1.5):
     # https://workflowy.com/s/nozzle-retention/R3QmGFlhHrfeqdaw
     # shear load = abs(inner weight + base drag + internal pressure force - thrust - external weight - external drag)
     
@@ -372,7 +372,7 @@ if __name__ == "__main__":
     # inputs = np.linspace(20, 50)
     # outputs = []
 
-    print(determine_expansion_ratio(25, 0.9, 1.2))
+    # print(determine_expansion_ratio(25, 0.9, 1.2))
     # a = find_equilibrium_throat_area(1619, 25*10**5, 2.7)
     # from Helpers.general import get_radius
     # print(get_radius(a))
@@ -390,7 +390,8 @@ if __name__ == "__main__":
     # Tensile strength of aluminum is much worse than steel
     # I am going to look at a few diameters, but I think we are in the range of 3/8 inch
     # Highly sensitive to bolt diameter: 8 mm gives 30, 10 mm gives 20, 12 mm gives 14
-    # print(find_nozzle_retention_shear(120 * 9.81, 600, 53520, 9 * 10 ** 7 * 0.6, 0.012))
+    # Tanner said 620528156 Pa (90000 psi) was what he had been using for his bolts
+    print(4 / find_required_retention_bolts(120 * 9.81, 600, 53520, 620528156, 0.00635, safety_factor=1))
     # only giving two for some reason
 
     pass

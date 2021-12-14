@@ -95,7 +95,7 @@ def determine_optimal_starting_diameter_minimizing_weight(min_mass, outer_diamet
         raise Exception("There is no fuel grain that has the correct O/F at the specified point and at least the minimum mass requested. Your only option is to make the fuel grain OD larger, or to make the inner diameter smaller to the point that your initial flux is more than 500. Alternatively, you could use a fuel that has a lower regression rate, since that would give a more optimized O/F at a larger length, bringing it closer to the requested mass. If you believe your combustion will remain stable at a higher flux, you could raise the max_flux parameter.")
 
     return grain
-    
+
 
 def determine_optimal_starting_diameter(outer_diameter, target_mass, density, ox_flow, regression_func, target_OF, optimize_for=0.5, iterations=100):
     """
