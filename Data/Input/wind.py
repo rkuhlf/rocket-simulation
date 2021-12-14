@@ -1,6 +1,8 @@
 # Ranges from -1 to 1 I think
 # Installing this requires C++ compilation. If you don't want to install that capability on your computer, you can install it by downloading the wheel from https://www.lfd.uci.edu/~gohlke/pythonlibs/#noise
 # Then running pip install <wheel-location>
+from Helpers.general import interpolate_looped, vector_from_angle
+from presetObject import PresetObject
 from noise import pnoise1
 import matplotlib.pyplot as plt
 import numpy as np
@@ -8,8 +10,7 @@ import scipy.stats as st
 import sys
 sys.path.append(".")
 
-from presetObject import PresetObject
-from Helpers.general import interpolate_looped, vector_from_angle
+
 
 class Wind(PresetObject):
     """
@@ -37,16 +38,17 @@ class Wind(PresetObject):
         self.octaves = 50
 
 
-        self.base_altitude=10
-        self.average_wind_speed=5
-        self.roughness=1
-        
+        self.base_altitude = 10
+        self.average_wind_speed = 5
+        self.roughness = 1
+
 
         self.overwrite_defaults(**kwargs)
 
         self.altitude_randomized = 0
         # This value is the number of meters of altitude change that that is equivalent to one second passing
-        self.time_from_altitude = 1000 / 10 # idk; this value has virtually no effect on our time scale
+        # idk; this value has virtually no effect on our time scale
+        self.time_from_altitude = 1000 / 10
         self.time_last_randomized = 0
         self.time_to_interpolate = self.get_random_interpolation_time()
         self.start_direction = 0
@@ -59,6 +61,8 @@ class Wind(PresetObject):
 
 
     # region Statistics Stuff
+
+
     def get_normal_perlin(self, time):
         total = 0
         for i in range(self.count):
@@ -79,7 +83,7 @@ class Wind(PresetObject):
         # Based on https://www.itl.nist.gov/div898/handbook/eda/section3/eda3668.htm, I found the output given a percentile (after flipping x and y around)
 
         return (-np.log(1 - p)) ** (1 / self.weibull_shape) * average
-    
+
     def determine_std(self):
         size = 10000
 
@@ -103,7 +107,7 @@ class Wind(PresetObject):
 
 
         return np.std(average_ys)
-    
+
     # endregion
 
 
@@ -123,10 +127,11 @@ class Wind(PresetObject):
     def get_air_velocity(self, time, altitude=10):
         """
         Gets the air speed in all three dimensions at a point in time
-        :param float base_altitude: The altitude AGL in meters that the average wind speed was recorded at
+        :param float base_altitude: The altitude AGL in meters where the average wind speed was recorded
         """
 
-        wind_unit_vector = vector_from_angle(self.get_air_direction(time, altitude))
+        wind_unit_vector = vector_from_angle(
+            self.get_air_direction(time, altitude))
 
         value = self.get_normal_perlin(time * self.interpolation_speed)
         z_score = self.get_z_score(0, self.std, value)
@@ -142,6 +147,7 @@ class Wind(PresetObject):
         return wind_unit_vector * speed
 
 
+
     def get_random_interpolation_time(self):
         return np.random.normal(1800, 300)
 
@@ -149,10 +155,12 @@ class Wind(PresetObject):
         return np.random.uniform() * 2 * np.pi
 
     def calculate_average_direction(self, time, altitude):
-        adjusted_time = time + (altitude - self.altitude_randomized) / self.time_from_altitude
+        adjusted_time = time + (
+            altitude - self.altitude_randomized) / self.time_from_altitude
 
         if adjusted_time > self.time_last_randomized + self.time_to_interpolate:
-            self.target_direction = (self.wind_direction + (self.get_random_direction() - np.pi) * 0.5) % (2 * np.pi)
+            self.target_direction = (
+                self.wind_direction + (self.get_random_direction() - np.pi) * 0.5) % (2 * np.pi)
             if self.target_direction > 2 * np.pi:
                 self.target_direction -= np.pi
 
@@ -162,8 +170,11 @@ class Wind(PresetObject):
             self.time_to_interpolate = self.get_random_interpolation_time()
 
         # This isn't exactly a linear interpolation since I am setting the start point each time. I think it is more of an ease-out interpolation; we will see how it looks
-        self.wind_direction = interpolate_looped(adjusted_time, self.time_last_randomized, self.time_last_randomized + self.time_to_interpolate, self.start_direction, self.target_direction)
-    
+        self.wind_direction = interpolate_looped(
+            adjusted_time, self.time_last_randomized, self.
+            time_last_randomized + self.time_to_interpolate, self.
+            start_direction, self.target_direction)
+
 
     def get_air_direction(self, time, altitude=10):
         # I am including altitude as an input, because as your altitude changes the wind direction will also change
@@ -178,7 +189,8 @@ class Wind(PresetObject):
 
         self.calculate_average_direction(time, altitude)
 
-        return np.array([(self.wind_direction + noise_component) % (2 * np.pi) - np.pi, np.pi / 2])
+        return np.array([(self.wind_direction + noise_component) %
+                         (2 * np.pi) - np.pi, np.pi / 2])
 
 
 

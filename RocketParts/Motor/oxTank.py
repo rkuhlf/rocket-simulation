@@ -172,6 +172,7 @@ class OxTank(PresetObject):
         self.radius = 0.1016 # m
         self.ox_mass = 70.0 # kg
         self.p_gas_mass = 0
+        self.gas_only_phase = False
 
         super().overwrite_defaults(**kwargs)
 
@@ -251,31 +252,41 @@ class OxTank(PresetObject):
 
     #endregion
 
-    def calculate_ullage(self, constant_temperature=False, iterations=3, iters_so_far=0, warnings=True):
-        # FIXME: Right now, there are a lot of issues in the gas only phase. I just made it constant because I don't know the math yet
-        """
-        Calculate indicates that it will not return a value, but there are side effects to the object - it changes the object.
-        In this case it returns the ullage fraction and changes the temperature
-        """
+    def calculate_phase_distribution(self):
+        """Does algebra needed to calculate ullage; does not account for temperature change"""
 
         liquid_density = get_liquid_nitrous_density(self.temperature)
         gas_density = get_gaseous_nitrous_density(self.temperature)
 
-        already_gas_mass = self.get_gas_mass()
-        # This is slightly inaccurate, but it only really triggers during the gas only phase
-        already_gas_mass = min(self.ox_mass, already_gas_mass)
-
-        if iters_so_far == 0:
-            self.p_gas_mass = already_gas_mass
-
         liquid_mass = (self.volume - self.ox_mass / gas_density) / (1 / liquid_density - 1 / gas_density)
-        liquid_mass = max(0, liquid_mass)
+        if liquid_mass < 0:
+            self.gas_only_phase = True
+            liquid_mass = 0
+        else:
+            self.gas_only_phase = False
 
         gas_mass = self.ox_mass - liquid_mass
 
-
         self.ullage = (gas_mass / gas_density) / self.volume
         self.ullage = max(min(self.ullage, 1), 0)
+
+        return gas_mass
+
+    def calculate_ullage(self, constant_temperature=False, iterations=3, iters_so_far=0, warnings=True):
+        # FIXME: Right now, I just made gas-only constant because I don't know the math yet
+        """
+        Calculate indicates that it will not return a value, but there are side effects to the object - it changes the object.
+        In this case it returns the ullage fraction and changes the temperature
+        """
+        if self.gas_only_phase:
+            self.ullage = 1
+            return
+
+        already_gas_mass = self.get_gas_mass()
+        if iters_so_far == 0:
+            self.p_gas_mass = already_gas_mass
+
+        gas_mass = self.calculate_phase_distribution()
 
         if not constant_temperature and iters_so_far < iterations:
             newly_evaporated_gas = gas_mass - already_gas_mass
@@ -287,26 +298,22 @@ class OxTank(PresetObject):
             # Set _temperature rather than calling set_temperature, which calls calculate_ullage again
             self._temperature += temperature_change
 
-            self.calculate_ullage(iterations=iterations, iters_so_far=iters_so_far + 1, constant_temperature=constant_temperature)
+            self.calculate_ullage(iterations=iterations, 
+                                  iters_so_far=iters_so_far + 1,
+                                  constant_temperature=constant_temperature)
         else:
-            # I think it is bad to end on a temperature change, it is giving me some serious inaccuracies because it changes the density significantly. Therefore, I will recalculate the distributions with the new temperature
-            # TODO: refactor this into a separate private equation
-            liquid_density = get_liquid_nitrous_density(self.temperature)
-            gas_density = get_gaseous_nitrous_density(self.temperature)
-
-            liquid_mass = (self.volume - self.ox_mass / gas_density) / (1 / liquid_density - 1 / gas_density)
-            gas_mass = self.ox_mass - liquid_mass
-            # Used for the mass flow of vaporization
-
-            self.ullage = (gas_mass / gas_density) / self.volume
-            self.ullage = max(min(self.ullage, 1), 0)
+            # I think it is bad to end on a temperature change
+            # it is giving me some serious inaccuracies because it changes the density significantly.
+            # Therefore, I will recalculate the distributions with the new temperature,
+            # ensuring we end with the correct total mass
+            self.calculate_phase_distribution()
+            
 
 
         if warnings:
             if self.ullage > 1:
                 raise Warning(
                     "Your ox tank is filled completely with gas. Be sure to use your own calculations for density rather than the saturated model.")
-                return 1
             elif self.ullage < 0:
                 raise ValueError(
                     "Your ox tank is overfull with liquid. I don't know what happens when you put more volume of liquid than can fit into a container, but there are likely going to be some extra stresses here.")

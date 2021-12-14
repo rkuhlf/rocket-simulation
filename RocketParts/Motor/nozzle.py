@@ -58,7 +58,8 @@ def calculate_nozzle_coordinates_truncated_parabola(initial_point, initial_angle
     nozzle_height = lambda x : a * x ** 2 + b * x + c
     angle = lambda x : 2 * a * x + b
 
-    print(f"The exit angle for the truncated bell is {angle(final_point[0])} radians or {angle(final_point[0]) * 180 / np.pi} degrees")
+    print(f"The exit angle for the truncated bell is {angle(final_point[0])} radians \
+            or {angle(final_point[0]) * 180 / np.pi} degrees")
 
     inputs = np.linspace(initial_point[0], final_point[0], divisions)
     outputs = nozzle_height(inputs)
@@ -66,7 +67,8 @@ def calculate_nozzle_coordinates_truncated_parabola(initial_point, initial_angle
 
     points = [inputs, outputs]
 
-    # Convert tuples to 2d numpy - https://stackoverflow.com/questions/39806259/convert-list-of-list-of-tuples-into-2d-numpy-array
+    # Convert tuples to 2d numpy
+    # https://stackoverflow.com/questions/39806259/convert-list-of-list-of-tuples-into-2d-numpy-array
     points = np.array([*points])
     points = points.transpose()
 
@@ -110,9 +112,11 @@ def compare_truncated_to_quadratic():
 
     ax1.plot(quadratic_points_nonzero[0], quadratic_points_nonzero[1])
     ax1.plot(truncated_points[0], truncated_points[1])
+    ax1.set(title="Same Angle", xlabel="Horizontal Distance", ylabel="Horizontal Distance")
 
     ax2.plot(quadratic_points_zero[0], quadratic_points_zero[1])
     ax2.plot(truncated_points[0], truncated_points[1])
+    ax2.set(title="Different Angle", xlabel="Horizontal Distance", ylabel="Horizontal Distance")
 
     hide_me_1.axis('off')
     hide_me_2.axis('off')
@@ -120,7 +124,7 @@ def compare_truncated_to_quadratic():
     # So, my implementation of the parabolic nozzle construction is slightly different from Cristian's. In his model, the component that is allowed to vary is the length, rather than the exit angle
     # I believe that the first one matched up simply by chance, but I am pretty sure that the quadratic bezier solution is slightly more general.
     # However, the parabolic construction may be the method that 80%-bell is referring to.
-    hide_me_1.text(-0.1, 0, "When the exit angles are equivalent, the \nnozzles appear to be an exact match. \nThe quadratic bezier adds another degree \nof freedom, allowing you to vary the exit \nangle. I have yet to do research on the \noptimal exit angle, but I would assume \nit to be zero. In that case, there is \nnoticable difference.")
+    hide_me_1.text(-0.1, 0, "When the exit angles are equivalent, the \nnozzles appear to be an exact match. \nThe quadratic bezier adds another degree \nof freedom, allowing you to vary the exit \nangle. From Rao's original publications, \nthe exit angle is an important factor \nin properly approximating the shape.")
 
     plt.show()
 
@@ -262,7 +266,29 @@ def find_nozzle_length(converging_angle, entrance_diameter, throat_diameter, div
     exit_distance = exit_displacement / np.tan(diverging_angle)
 
     return entrance_distance + exit_distance * conical_proportion
-#endregion
+
+def find_nozzle_retention_shear(inner_weight, base_drag, pressure_force, bolt_shear_strength, bolt_diameter=0.003, safety_factor=1.5):
+    # https://workflowy.com/s/nozzle-retention/R3QmGFlhHrfeqdaw
+    # shear load = abs(inner weight + base drag + internal pressure force - thrust - external weight - external drag)
+    
+
+    total_load = inner_weight + base_drag + pressure_force
+
+    # Stress = load / (area * n)
+    # Strength / stress = safety_factor
+    # n = safety_factor * load / (area * strength)
+
+
+    individual_area = (np.pi * (bolt_diameter / 2) ** 2)
+
+    required_bolts = total_load / (individual_area * bolt_shear_strength)
+
+    return safety_factor * required_bolts
+
+
+
+
+# endregion
 
 class Nozzle(PresetObject):
     """
@@ -341,15 +367,30 @@ class Nozzle(PresetObject):
 if __name__ == "__main__":
     # display_constructed_quadratic()
     # calculate_nozzle_coordinates_truncated_parabola((0, 0.1), 35 * np.pi / 180, (1, 0.5))
-    compare_truncated_to_quadratic()
+    # compare_truncated_to_quadratic()
 
     # inputs = np.linspace(20, 50)
     # outputs = []
 
-    # print(determine_expansion_ratio(30, 0.8, 1.2))
+    print(determine_expansion_ratio(25, 0.9, 1.2))
+    # a = find_equilibrium_throat_area(1619, 25*10**5, 2.7)
+    # from Helpers.general import get_radius
+    # print(get_radius(a))
     
     # for k in inputs:
     #     outputs.append(determine_expansion_ratio(k, 1, 1.3))
 
     # plt.plot(inputs, outputs)
     # plt.show()
+
+    # Total weight is based on the wet mass. It will actually be less. For a more complex calculation, it would have to be frame-by-frame # TODO: write code that does this in the Analysis folder
+    # nozzle base drag is based on CD for base=0.25 out of CD total = 0.85, which is about 30%, then I multiplied it by the 2000 at max
+    # The pressure is pi*(0.1651/2)^2 * 2500000
+    # Tensile strength of steel alloy screw is 900000000 Pa (according to McMasterCarr), but I will use 60% for shear strength. 900_000_000 * 0.6
+    # Tensile strength of aluminum is much worse than steel
+    # I am going to look at a few diameters, but I think we are in the range of 3/8 inch
+    # Highly sensitive to bolt diameter: 8 mm gives 30, 10 mm gives 20, 12 mm gives 14
+    # print(find_nozzle_retention_shear(120 * 9.81, 600, 53520, 9 * 10 ** 7 * 0.6, 0.012))
+    # only giving two for some reason
+
+    pass

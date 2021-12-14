@@ -3,7 +3,6 @@
 # Uses a separate motor class for thrust, and an array of parachutes
 # Uses RASAero for looking up various aerodynamic qualities
 
-# TODO: Right now, the wind simulation is the main thing that needs improvement
 # TODO: Fix parachute deployment - right now it does not match 3rd party
 
 import numpy as np
@@ -47,7 +46,7 @@ class Rocket(MassObject):
         # This is just the mass of the frame, the motor and propellant will be added in a second
         self.mass = 0  # kg
         # Excluding the motor and other sub mass objects
-        self.center_of_gravity = 4 # m
+        self.center_of_gravity = 4  # m
         # Constant by default, override with set_CP_function
         self.CP_data_type = DataType.CONSTANT
         self.CP = 5
@@ -57,22 +56,22 @@ class Rocket(MassObject):
 
         # This will throw an error because it must be overriden if we are applying angular effects
         self.CL_data_type = DataType.CONSTANT
-        self.CL = 0 
+        self.CL = 0
 
 
-        self.radius = 0.1016 # meters
-        self.length = 7 # meters
+        self.radius = 0.1016  # meters
+        self.length = 7  # meters
 
-        #region SET REFERENCES
+        # region SET REFERENCES
         self.motor = Motor()
         self.environment = Environment()
         self.parachutes = []
         self.logger = RocketLogger(self)
 
         self.mass_objects = []
-        #endregion
+        # endregion
 
-        #region DEFAULT MASSES
+        # region DEFAULT MASSES
         nose_cone = MassObject(center_of_gravity=0.4, mass=10)
         ox_tank_shell = MassObject(center_of_gravity=3, mass=40)
         injector = MassObject(center_of_gravity=5, mass=4)
@@ -81,8 +80,9 @@ class Rocket(MassObject):
         nozzle = MassObject(center_of_gravity=7, mass=15)
         avionics_bay = MassObject(center_of_gravity=7, mass=10)
 
-        self.mass_objects.extend([nose_cone, ox_tank_shell, injector, phenolic, fins, nozzle, avionics_bay])
-        #endregion
+        self.mass_objects.extend(
+            [nose_cone, ox_tank_shell, injector, phenolic, fins, nozzle, avionics_bay])
+        # endregion
 
         self.landed = False
         # Once any parachute is deployed, we go directly into 3 degrees of freedom, with x, y, and z
@@ -160,7 +160,7 @@ class Rocket(MassObject):
     def diameter(self, d):
         self.radius = d / 2
         self.reference_area = np.pi * self.radius ** 2
-    
+
     @property
     def has_lifted(self):
         """Return whether the rocket was above ground in the previous or current frame"""
@@ -209,7 +209,8 @@ class Rocket(MassObject):
         Return the number of gees the rocket is accelerating at
         Adjusted for the variation as the rocket leaves the atmosphere (because I can)
         """
-        grav_acceleration = self.environment.get_gravitational_attraction(self.total_mass, self.altitude) / self.total_mass
+        grav_acceleration = self.environment.get_gravitational_attraction(
+            self.total_mass, self.altitude) / self.total_mass
         return magnitude(self.acceleration) / grav_acceleration
 
     @property
@@ -226,10 +227,12 @@ class Rocket(MassObject):
             self.landed = True
 
         if self.descending and self.apogee == None and self.has_lifted:
-            print("Setting Apogee to", self.p_position[2], "at t=",self.environment.time)
+            print(
+                "Setting Apogee to", self.p_position[2],
+                "at t=", self.environment.time)
             self.apogee = self.p_position[2]
             self.apogee_lateral_velocity = magnitude(self.relative_velocity)
-    
+
 
         self.log_data("Mach", self.mach)
         self.max_mach = max(self.max_mach, self.mach)
@@ -348,8 +351,8 @@ class Rocket(MassObject):
         """
 
         # Perpendicular is slightly more complicated in 3D
-        # We need the component of force perpendicular to the current rotation 
-        # To me, it seems like the easiest thing is to break the force down 
+        # We need the component of force perpendicular to the current rotation
+        # To me, it seems like the easiest thing is to break the force down
         # into each component calculated individually
 
 
@@ -383,7 +386,7 @@ class Rocket(MassObject):
 
 
         y_component = direction[1] * value
-        # The pitch multiplier shows force around y axis 
+        # The pitch multiplier shows force around y axis
         pitch_multiplier = np.sin(self.theta_around)
         angle_of_incidence_multiplier = np.cos(self.theta_down)
 
@@ -405,23 +408,26 @@ class Rocket(MassObject):
         if not np.isclose(self.dynamic_pressure, 0):
             drag_magnitude, drag_direction, lift_magnitude, lift_direction = self.get_translational_drag()
 
-            
+
             if self.parachute_deployed:
                 # We need to add in the drag of all of the parachutes, and we need to start applying force at CG. Also, lift doesn't matter anymore
                 total_drag = drag_magnitude
                 for parachute in self.parachutes:
                     total_drag += parachute.get_drag(self)
 
-                self.apply_force(total_drag, drag_direction, debug=True, name="Drag")
+                self.apply_force(total_drag, drag_direction,
+                                 debug=True, name="Drag")
             else:
-                self.apply_force(drag_magnitude, drag_direction, self.CP, debug=True, name="Drag")
+                self.apply_force(drag_magnitude, drag_direction,
+                                 self.CP, debug=True, name="Drag")
 
                 if self.apply_angular_forces:
                     self.apply_force(lift_magnitude, lift_direction,
-                                self.CP, debug=True, name="Lift")
+                                     self.CP, debug=True, name="Lift")
 
 
-        if False: # not (np.all(np.isclose(self.angular_velocity, 0)) or self.parachute_deployed):
+        # not (np.all(np.isclose(self.angular_velocity, 0)) or self.parachute_deployed):
+        if False:
             drag_around, drag_down = self.get_angular_drag()
             self.apply_angular_torque(drag_around, drag_down)
 
@@ -445,7 +451,8 @@ class Rocket(MassObject):
         self.log_data('relative velocity', self.relative_velocity)
 
         # Drag force is applied in the same direction as freestream velocity
-        drag_direction = - self.relative_velocity / magnitude(self.relative_velocity)
+        drag_direction = - self.relative_velocity / \
+            magnitude(self.relative_velocity)
 
         # Lift force is applied perpendicular to the freestream velocity
         # This part requires a conversiion given because I am not using normal and axial forces
@@ -487,11 +494,15 @@ class Rocket(MassObject):
         multiplier = 0.275 * density * self.radius * self.length ** 4 * 2
 
         moment_around = multiplier * self.angular_velocity[0] ** 2
-        moment_around = min(self.angular_velocity[0] / self.environment.time_increment, moment_around)
+        moment_around = min(
+            self.angular_velocity[0] / self.environment.time_increment,
+            moment_around)
         moment_around *= -np.sign(self.angular_velocity[0])
-        
+
         moment_down = multiplier * self.angular_velocity[1] ** 2
-        moment_down = min(self.angular_velocity[1] / self.environment.time_increment, moment_down)
+        moment_down = min(
+            self.angular_velocity[1] / self.environment.time_increment,
+            moment_down)
         moment_down *= -np.sign(self.angular_velocity[1])
 
 
@@ -510,16 +521,19 @@ class Rocket(MassObject):
 
 
     def apply_gravity(self):
-        gravity = self.environment.get_gravitational_attraction(self.total_mass, self.altitude)
+        gravity = self.environment.get_gravitational_attraction(
+            self.total_mass, self.altitude)
 
         self.apply_force(
             gravity, np.array([0, 0, -1]),
             debug=True, name="Gravity")
 
     # endregion
-    
+
 
     # region Cached Values
+
+
     def calculate_dynamic_pressure(self):
         relative_velocity = self.velocity - \
             self.environment.get_air_speed(self.altitude)
@@ -547,9 +561,10 @@ class Rocket(MassObject):
     def calculate_coefficient_of_drag(self):
         if self.CD_data_type is DataType.CONSTANT:
             pass
-        
+
         if self.CD_data_type is DataType.FUNCTION_MACH_ALPHA:
-            self.CD = self.get_coefficient_of_drag(self.mach, self.angle_of_attack)
+            self.CD = self.get_coefficient_of_drag(
+                self.mach, self.angle_of_attack)
 
         self.log_data("CD", self.CD)
 
@@ -557,16 +572,18 @@ class Rocket(MassObject):
     def get_coefficient_of_lift(self, mach, alpha):
         if not self.apply_angular_forces:
             return
-        
-        raise NotImplementedError("There is no default coefficient of lift lookup, you must provide one yourself")
+
+        raise NotImplementedError(
+            "There is no default coefficient of lift lookup, you must provide one yourself")
 
     def calculate_coefficient_of_lift(self):
         if self.CL_data_type is DataType.CONSTANT:
             pass
 
         if self.CL_data_type is DataType.FUNCTION_MACH_ALPHA:
-            self.CL = self.get_coefficient_of_lift(self.mach, self.angle_of_attack)
-        
+            self.CL = self.get_coefficient_of_lift(
+                self.mach, self.angle_of_attack)
+
         self.log_data("CL", self.CL)
 
 
@@ -579,15 +596,18 @@ class Rocket(MassObject):
             pass
 
         if self.CP_data_type is DataType.FUNCTION_MACH_ALPHA:
-            self.CP = self.get_center_of_pressure(self.mach, self.angle_of_attack)
+            self.CP = self.get_center_of_pressure(
+                self.mach, self.angle_of_attack)
 
 
     def calculate_cp_cg_dist(self):
         # Note that this is only used for dynamic stability calculations, nothing during the simulations
         self.dist_press_grav = self.CP - self.total_CG
 
-        self.log_data("Stability [Calibers]", self.dist_press_grav / (self.diameter))
-        self.log_data("Stability [Lengths]", self.dist_press_grav / (self.length))
+        self.log_data("Stability [Calibers]",
+                      self.dist_press_grav / (self.diameter))
+        self.log_data("Stability [Lengths]",
+                      self.dist_press_grav / (self.length))
 
     def calculate_cached(self):
         self.calculate_dynamic_pressure()
@@ -601,6 +621,8 @@ class Rocket(MassObject):
 
 
     # region DATA INPUTS
+
+
     def set_CP_constant(self, value):
         self.CP_data_type = DataType.CONSTANT
         self.CP = value
