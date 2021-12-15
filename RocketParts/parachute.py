@@ -56,8 +56,7 @@ class Parachute(MassObject):
         if self.deployed:
             interpolated_area = interpolate(rocket.environment.time, self.time_of_deployment, self.time_of_deployment + self.required_deployment_time, 0, self.area)
             interpolated_area = min(interpolated_area, self.area)
-            print(interpolated_area)
-            print(self.CD)
+
             return rocket.dynamic_pressure * self.CD * interpolated_area
 
         return 0
