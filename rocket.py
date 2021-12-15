@@ -220,7 +220,7 @@ class Rocket(MassObject):
 
     def update_maxes(self):
         if self.position[2] < -100 and not self.has_lifted:
-            raise Exception("Your rocket fell straight into the ground")
+            raise Exception("Your rocket fell straight into the ground. It might be because there is no 0,0 point in the thrust curve")
 
         # If the current position is less than zero and the previous position was greater than zero, then the rocket has landed
         if self.position[2] < 0 and self.has_lifted:
@@ -381,8 +381,7 @@ class Rocket(MassObject):
         yaw_multiplier = np.sin(self.theta_around)
         # When the rocket is horizontal, the yaw will still be fully applied
         # so no angle of incidence component is necessary.
-        self.torque[0] += x_component * \
-            yaw_multiplier * distance_from_CG
+        self.torque[0] += x_component * yaw_multiplier * distance_from_CG
 
 
         y_component = direction[1] * value
@@ -426,6 +425,7 @@ class Rocket(MassObject):
                                      self.CP, debug=True, name="Lift")
 
 
+        # FIXME: Not currently applying angular air resistance
         # not (np.all(np.isclose(self.angular_velocity, 0)) or self.parachute_deployed):
         if False:
             drag_around, drag_down = self.get_angular_drag()

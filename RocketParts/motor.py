@@ -106,6 +106,7 @@ class Motor(MassObject):
             return self.thrust
 
         except IndexError as e:
+            print("Finished thrusting")
             self.finished_thrusting = True
             return 0
 

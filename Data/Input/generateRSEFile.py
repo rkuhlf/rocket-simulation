@@ -60,7 +60,7 @@ for i, row in thrust_profile.iterrows():
     mass = interpolate(current_total, 0, total_impulse, max_mass, min_mass)
     eng_data.setAttribute("m", str(mass))
     # Convert to mm
-    eng_data.setAttribute("cg", str(1000 * interpolated_lookup(mass_CG_lookup, "mass", mass, "CG")))
+    eng_data.setAttribute("cg", str(1000 * interpolated_lookup(mass_CG_lookup, "mass", mass, "CG", safe=True)))
 
     data.appendChild(eng_data)
 

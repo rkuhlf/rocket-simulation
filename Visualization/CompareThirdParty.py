@@ -290,7 +290,7 @@ def display_angles(openRocket=None, rasaero=None, no_angles=None, DIY_angles=Non
         plt.show()
 
 def display_all_forces(rasaero=None):
-    # Use scaling to make them line up
+    # Use scaling to make them line up by matching the burnouts, apogees, and landings
     fig, ax = plt.subplots()
 
     if rasaero is not None:
@@ -308,7 +308,7 @@ def display_all_forces(rasaero=None):
 if __name__ == "__main__":
     openRocket = pd.read_csv("Data/Output/ThirdPartySimulations/OpenRocketData.csv")
     rasaero = pd.read_csv("Data/Output/ThirdPartySimulations/RasaeroAltitudeTime.CSV")
-    no_angles = pd.read_csv("Data/Output/output1DOFMMR.csv")
+    no_angles = pd.read_csv("Data/Output/output.csv")
     DIY_angles = pd.read_csv("Data/Output/output5DOFWind.csv")
     # rockSim = pd.read_csv("Data/Output/ThirdPartySimulations/RockSim.csv")
     
@@ -329,14 +329,14 @@ if __name__ == "__main__":
 
 
 
-    # display_altitude(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)#, rockSim=rockSim)
-    # display_drag(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)#, rockSim=rockSim)
+    display_altitude(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)#, rockSim=rockSim)
+    display_drag(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)#, rockSim=rockSim)
     # display_forces(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)#, rockSim=rockSim)
     # display_mach(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)#, rockSim=rockSim)
-    # display_velocity(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)#, rockSim=rockSim)
+    display_velocity(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)#, rockSim=rockSim)
 
-    # display_thrust(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)#, rockSim=rockSim)
-    # display_weight(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)#, rockSim=rockSim)
+    display_thrust(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)#, rockSim=rockSim)
+    display_weight(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)#, rockSim=rockSim)
     # display_angles(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)#, rockSim=rockSim)
 
-    display_all_forces(rasaero=rasaero)
+    # display_all_forces(rasaero=rasaero)

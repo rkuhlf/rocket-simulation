@@ -37,21 +37,23 @@ def get_mass_objects():
 
     # Should come out to about 60 kg
     return [nose_cone_tip, nose_cone, fiberglass_avionics_tube, ox_tank_shell, injector, phenolic, carbon_fiber_overwrap, fins, nozzle_overwrap, nozzle, avionics_bay]
-
+# COnfirmin tat apoees matc perfeclty; maybe acc rocket dra will fix descent rate
+# Debug completely wack stoppage of parachute in the middle of descent
 
 def get_sim():
     env = Environment(time_increment=0.01, apply_wind=True)
-    motor = Motor(front=2, center_of_gravity=2, mass=60, propellant_mass=60, thrust_curve="Data/Input/mmrThrust.csv", environment=env)
+    motor = Motor(front=2, center_of_gravity=2, mass=61, propellant_mass=60, thrust_curve="Data/Input/finleyThrust.csv", environment=env)
     motor.adjust_for_atmospheric = True
-    motor.nozzle_area = np.pi * 0.06985 ** 2 # This will probably underestimate the effects
+    motor.nozzle_area = np.pi * (0.10399776 / 2) ** 2 # This will probably underestimate the effects
     
     print(motor.get_total_impulse())
 
 
-    main_parachute = ApogeeParachute(diameter=4.8768)
+    main_parachute = ApogeeParachute(diameter=3.04800, CD=2.2)
+
     # angle is 0.0872665
-    rocket = Rocket(radius=0.1016, length=5.7912, rotation=np.array([np.pi / 2, 0.0872665], dtype="float64"),
-        environment=env, motor=motor, parachutes=[])
+    rocket = Rocket(radius=0.0889, length=5.7912, rotation=np.array([np.pi / 2, 0.0872665], dtype="float64"),
+        environment=env, motor=motor, parachutes=[main_parachute])
     rocket.set_CP_function(get_sine_interpolated_center_of_pressure)
     rocket.set_CL_function(linear_approximated_normal_force)
     rocket.set_CD_function(assumed_zero_AOA_CD)
@@ -65,7 +67,7 @@ def get_sim():
 
     logger.splitting_arrays = True
 
-    sim = RocketSimulation(apply_angular_forces=True, max_frames=-1, environment=env, rocket=rocket, logger=logger)
+    sim = RocketSimulation(apply_angular_forces=False, max_frames=-1, environment=env, rocket=rocket, logger=logger)
     motor.simulation = sim
 
 
@@ -75,5 +77,5 @@ def get_sim():
 if __name__ == "__main__":
     sim = get_sim()
     sim.run_simulation()
-    display_optical_analysis(sim.logger.full_path)
+    # display_optical_analysis(sim.logger.full_path)
     

@@ -206,8 +206,13 @@ def angles_from_vector_3d(np_array):
     normalized = np_array / magnitude(np_array)
     x, y, z = normalized
 
+    den = (x ** 2 + y ** 2) ** (1/2)
+    # If abs(y) < den then the values are so small that python has an inaccurate sqrt
+    if den == 0 or abs(y) > den:
+        # I do not like this extremely annoying warning that the x and y change is extremely close to zero
+        theta_around = 0 # zero is arbitrary, could be anything
     # For some reason the axes lines are poorly defined, so I just encode them manually
-    if x == 0:
+    elif x == 0:
         if y < 0:
             theta_around = np.pi * 3 / 2
         else:
@@ -217,9 +222,9 @@ def angles_from_vector_3d(np_array):
             theta_around = np.pi
         else:
             theta_around = 0
+
     else:
-        theta_around = np.arcsin(
-            abs(y) / (x ** 2 + y ** 2) ** (1 / 2))
+        theta_around = np.arcsin(abs(y) / den)
 
         if x < 0 and y > 0 or x > 0 and y < 0:
             theta_around = (np.pi / 2) - theta_around
