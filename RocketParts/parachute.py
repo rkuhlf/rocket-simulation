@@ -53,10 +53,13 @@ class Parachute(MassObject):
 
     def get_drag(self, rocket):
         # TODO: use a more accurate interpolation for opening
+        # FIXME: THIS IS THE PARACHUTE ERROR (PROBABLY. THE MAGNITUDE IS NOT BIG ENOUGH)
         if self.deployed:
             interpolated_area = interpolate(rocket.environment.time, self.time_of_deployment, self.time_of_deployment + self.required_deployment_time, 0, self.area)
             interpolated_area = min(interpolated_area, self.area)
-            return 1/2 * self.CD * interpolated_area * rocket.dynamic_pressure
+            print(interpolated_area)
+            print(self.CD)
+            return 1/2 * rocket.dynamic_pressure * self.CD * interpolated_area
 
         return 0
 

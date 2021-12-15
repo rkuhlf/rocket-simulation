@@ -4,6 +4,8 @@
 
 import numpy as np
 import pandas as pd
+import string
+import random
 from copy import deepcopy, copy
 
 from presetObject import PresetObject
@@ -86,10 +88,17 @@ class Logger(PresetObject):
         try:
             # Rather than using the index (0, 1, 2, 3, 4...), I will index the rows by the time the row is recorded at
             df.set_index('time', inplace=True)
-        except:
+        except KeyError as e:
             print("Attempted to save to csv, but there was no time index. Likely, the simulation did not make it past one frame, and no time was ever logged.")
         
-        df.to_csv(self.full_path)
+        try:
+            df.to_csv(self.full_path)
+        except PermissionError as e:
+            # Hopefully ten random characters is enough that it does not try to save over an already generated one
+            new_path = self.full_path + "Redirected" + ''.join(random.choice(string.ascii_uppercase) for _ in range(10))
+
+            print("Could not save to {self.full_path}, instead saving to {new_path}. You likely have the target file open in another program.")
+            df.to_csv(new_path)
 
         return df
 

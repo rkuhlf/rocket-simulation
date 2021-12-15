@@ -41,7 +41,7 @@ def get_mass_objects():
 # Debug completely wack stoppage of parachute in the middle of descent
 
 def get_sim():
-    env = Environment(time_increment=0.01, apply_wind=True)
+    env = Environment(time_increment=0.1, apply_wind=False)
     motor = Motor(front=2, center_of_gravity=2, mass=61, propellant_mass=60, thrust_curve="Data/Input/finleyThrust.csv", environment=env)
     motor.adjust_for_atmospheric = True
     motor.nozzle_area = np.pi * (0.10399776 / 2) ** 2 # This will probably underestimate the effects
@@ -51,10 +51,13 @@ def get_sim():
 
     main_parachute = ApogeeParachute(diameter=3.04800, CD=2.2)
 
-    # angle is 0.0872665
-    rocket = Rocket(radius=0.0889, length=5.7912, rotation=np.array([np.pi / 2, 0.0872665], dtype="float64"),
+    # angle is 0.0872665 radians = 5 degrees
+    rocket = Rocket(radius=0.0889, length=5.7912, rotation=np.array([np.pi / 2, 0], dtype="float64"),
         environment=env, motor=motor, parachutes=[main_parachute])
-    rocket.set_CP_function(get_sine_interpolated_center_of_pressure)
+    # rocket.set_CP_function(get_sine_interpolated_center_of_pressure)
+    rocket.set_CP_constant(2) # meters
+    # This one is only because I did not have the time to rewrite all of the mass object positions
+    rocket.set_CG_constant(1.8)
     rocket.set_CL_function(linear_approximated_normal_force)
     rocket.set_CD_function(assumed_zero_AOA_CD)
     rocket.set_moment_constant(250)
@@ -77,5 +80,5 @@ def get_sim():
 if __name__ == "__main__":
     sim = get_sim()
     sim.run_simulation()
-    # display_optical_analysis(sim.logger.full_path)
+    display_optical_analysis(sim.logger.full_path)
     

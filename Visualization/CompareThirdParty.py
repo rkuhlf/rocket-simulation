@@ -289,7 +289,7 @@ def display_angles(openRocket=None, rasaero=None, no_angles=None, DIY_angles=Non
     if show:
         plt.show()
 
-def display_all_forces(rasaero=None):
+def display_all_forces(rasaero=None, no_angles=None):
     # Use scaling to make them line up by matching the burnouts, apogees, and landings
     fig, ax = plt.subplots()
 
@@ -297,6 +297,11 @@ def display_all_forces(rasaero=None):
         ax.plot(rasaero["Time (sec)"], rasaero["Weight (lb)"] * 4.44822, label="Weight")
         ax.plot(rasaero["Time (sec)"], rasaero["Drag (lb)"] * 4.44822, label="Drag")
         ax.plot(rasaero["Time (sec)"], rasaero["Thrust (lb)"] * 4.44822, label="Thrust")
+
+    if no_angles is not None:
+        ax.plot(no_angles["time"], no_angles["Gravity3"], label="Weight")
+        ax.plot(no_angles["time"], no_angles["Drag3"] * 4.44822, label="Drag")
+        ax.plot(no_angles["time"], no_angles["Thrust"] * 4.44822, label="Thrust")
 
     ax.set(title="Rocket Forces", xlabel="Time (s)", ylabel="Magnitude (N)")
     
@@ -308,7 +313,7 @@ def display_all_forces(rasaero=None):
 if __name__ == "__main__":
     openRocket = pd.read_csv("Data/Output/ThirdPartySimulations/OpenRocketData.csv")
     rasaero = pd.read_csv("Data/Output/ThirdPartySimulations/RasaeroAltitudeTime.CSV")
-    no_angles = pd.read_csv("Data/Output/output.csv")
+    no_angles = pd.read_csv("Data/Output/parachuteDebugging.csv")
     DIY_angles = pd.read_csv("Data/Output/output5DOFWind.csv")
     # rockSim = pd.read_csv("Data/Output/ThirdPartySimulations/RockSim.csv")
     
@@ -339,4 +344,4 @@ if __name__ == "__main__":
     display_weight(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)#, rockSim=rockSim)
     # display_angles(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)#, rockSim=rockSim)
 
-    # display_all_forces(rasaero=rasaero)
+    display_all_forces(rasaero=rasaero, no_angles=no_angles)
