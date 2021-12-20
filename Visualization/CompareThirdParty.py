@@ -4,8 +4,11 @@
 
 import pandas as pd
 import numpy as np
-import matplotlib
 import matplotlib.pyplot as plt
+import sys
+sys.path.append(".")
+
+from Helpers.visualization import make_matplotlib_big
 
 # TODO: This should use some kind of data structure to avoid all of the repetition
 def display_altitude(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None, rockSim=None, show=True):
@@ -317,15 +320,7 @@ if __name__ == "__main__":
     DIY_angles = pd.read_csv("Data/Output/output5DOFWind.csv")
     # rockSim = pd.read_csv("Data/Output/ThirdPartySimulations/RockSim.csv")
     
-    
-    font = {'family' : 'DejaVu Sans',
-        # 'weight' : 'bold',
-        'size'   : 22}
-
-    matplotlib.rc('font', **font)
-
-    matplotlib.rc('legend', fontsize=15) 
-
+    make_matplotlib_big()
 
     # rasaero["Real Drag"] = rasaero["CD"] * 0.0023769 * rasaero["Velocity (ft/sec)"] ** 2
 

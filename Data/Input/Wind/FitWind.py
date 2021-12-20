@@ -6,6 +6,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import curve_fit
+import sys
+sys.path.append(".")
+
+from Helpers.visualization import make_matplotlib_big
 
 
 # Data from 1992 to 2011
@@ -48,6 +52,8 @@ def fit_altitude_speed():
 
 
 def display_fit(func, popt):
+    make_matplotlib_big()
+    
     fig, ax = plt.subplots()
 
     ax.plot(data["Altitude"], data["Speed"], 'b-', label='data')
