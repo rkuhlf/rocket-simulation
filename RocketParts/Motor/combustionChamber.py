@@ -27,7 +27,6 @@ class CombustionChamber(PresetObject):
         self.pressure = 101300 # Pa
         # Instantly goes to the adiabatic (?) flame temperature
         self.temperature = 273.15 + 23 # Kelvin
-        self.p_temperature = self.temperature
         self.mass_flow_out = 0
         # P / RT = rho
         # Actually it turns out there is a wacko condition in the way MW is calculated and it is easiest just to use the density output by CEA; I think it does it with M but it might be with MW
@@ -37,6 +36,7 @@ class CombustionChamber(PresetObject):
         self.density = 4  # kg/m^3
         self.cstar = 1500 # m/s
 
+        self.limit_pressure_change = True
         # These values are currently designed around a 30 bar chamber with time increment 0.1, but there is no substitute for time increment 0.02
         self.relative_pressure_increase_limit = 0.5
         self.relative_pressure_decrease_limit = 0.4
@@ -64,8 +64,8 @@ class CombustionChamber(PresetObject):
         # Based off of this monster of an equation
         # d(P_c)/d(t) = [m-dot_ox + (rho_f - rho_c)*A_b*a*G_ox^n - P_c*A_t/c*_exp] * R*T_C / V_C
         
-        # This equation is assuming that the gas flowing into the combustion chamber is immediately at the adiabatic flame temperature, and it doesn't have any heat transfer with the stuff already in the chamber.
-        # To be honest, this only affects the charge-up time, and I am pretty sure the way we ignite is going to play a much larger role
+        # The apparent mass flow already accounts for the effect of the regression of the grain
+        # To be honest, assumptions in this equation affect mostly the charge-up time, and I am pretty sure the way we ignite is going to play a much larger role
         return apparent_mass_flow * self.ideal_gas_constant * self.temperature / self.volume
 
     def update_pressure(self, effective_mass_flow, time_increment):
@@ -73,20 +73,20 @@ class CombustionChamber(PresetObject):
             pass
 
         elif self.pressure_data_type is DataType.DEFAULT:
-            self.p_temperature = self.temperature
-
             pressure_increase_rate = self.get_change_in_pressure(effective_mass_flow)
             planned_increment = pressure_increase_rate * time_increment
             # I am arbitrarily limiting this to not have pressure swings bigger than five times the current
             # Should allow us to run a shorter time increment
-            if planned_increment > 0:
-                if planned_increment > self.pressure * self.relative_pressure_increase_limit:
-                    print(f"Arbitrarily limiting the positive pressure change down from {planned_increment} to {self.pressure * self.relative_pressure_increase_limit}")
-                    planned_increment = self.pressure * self.relative_pressure_increase_limit
-            else:
-                if abs(planned_increment) > self.pressure * self.relative_pressure_decrease_limit:
-                    print(f"Arbitrarily limiting the negative pressure change down from {planned_increment} to {-self.pressure * self.relative_pressure_decrease_limit}")
-                    planned_increment = - self.pressure * self.relative_pressure_decrease_limit
+            # It will also make the charge-up time totally incorrect. FIXME: I need a better solution - I can probably just change the time increment by a factor of five after charge up is complete. I also just need a variable tgat turns this off
+            if self.limit_pressure_change:
+                if planned_increment > 0:
+                    if planned_increment > self.pressure * self.relative_pressure_increase_limit:
+                        print(f"Arbitrarily limiting the positive pressure change down from {planned_increment} to {self.pressure * self.relative_pressure_increase_limit}")
+                        planned_increment = self.pressure * self.relative_pressure_increase_limit
+                else:
+                    if abs(planned_increment) > self.pressure * self.relative_pressure_decrease_limit:
+                        print(f"Arbitrarily limiting the negative pressure change down from {planned_increment} to {-self.pressure * self.relative_pressure_decrease_limit}")
+                        planned_increment = - self.pressure * self.relative_pressure_decrease_limit
 
             self.pressure += planned_increment
             self.pressurizing = planned_increment > 0
@@ -95,14 +95,6 @@ class CombustionChamber(PresetObject):
     def update_combustion(self, ox_mass_flow, nozzle, time_increment):
         # From the grain and the ox mass flow, calculate the mass flow of fuel
         self.fuel_grain.update_regression(ox_mass_flow, time_increment)
-        fuel_flow = self.fuel_grain.mass_flow
-
-        # Calculates the O/F ratio based on a given ox mass flow and the fuel we just calculated
-        if fuel_flow == 0:
-            # Basically the same as infinite, the graph will still look relatively normal
-            OF = 100
-        else:
-            OF = ox_mass_flow / fuel_flow
 
         # Calculate the mass flow out (requires nozzle throat)
         self.mass_flow_out = self.pressure * nozzle.throat_area / self.cstar
@@ -113,9 +105,6 @@ class CombustionChamber(PresetObject):
         # Update the pressure in the system. Uses the previously calculated mass flux out
         # mass flow into the chamber
         effective_mass_flow_total = ox_mass_flow + (self.fuel_grain.density - self.density) * volume_regressed - self.mass_flow_out
-
-        # It's hard to say whether it is more accurate to multiply by temperature first or do the addition first.
-        # The difference between approaches should tend to zero as the time increment approaches zero
         
         self.update_pressure(effective_mass_flow_total, time_increment)
         

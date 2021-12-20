@@ -1,7 +1,10 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
+sys.path.append(".")
 
+from Helpers.visualization import make_matplotlib_big
 
 def display_pressures(data):
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
@@ -18,22 +21,8 @@ def display_pressures(data):
     fig.tight_layout()
     plt.show()
 
-def display_flows(data):
-    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
-    ax1.plot(data["time"], np.asarray(data["ox_flow"]))
-    ax1.plot(data["time"], np.asarray(data["fuel_flow"]))
-    ax1.set(title="Ox Flow and Fuel Flow", xlabel="Time [s]", ylabel="Pressure [bar]")
 
-    ax2.plot(data["time"], data["OF"])
-    ax2.set(title="O/F over Time")
-
-    # ax4.plot(data["time"], data["ox_tank.temperature"])
-    # ax4.set(title="Ox Temperatures over Time", xlabel="Time [s]", ylabel="Temperature [K]")
-
-    fig.tight_layout()
-    plt.show()
-
-
+# FULL
 def display_efficiency(data):
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
 
@@ -64,20 +53,26 @@ def display_overall(data):
 
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
 
+    fig.tight_layout()
+
+    plt.show()
+
+def display_flows(data):
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
     ax1.plot(data["time"], data["thrust"])
     ax1.set(title="Thrust Over Time", xlabel="Time [s]", ylabel="Thrust [N]")
 
-    # ax2.plot(data["time"], np.array(data["combustion_chamber.fuel_grain.port_diameter"]) * 100)
-    # ax2.set(title="Grain Diameter", xlabel="Time [s]", ylabel="Diameter [cm]")
+    ax2.plot(data["time"], data["mass_flow"])
+    ax2.set(title="Mass Flow Over Time", xlabel="Time [s]", ylabel="Mass Flow in [kg/s]")
 
-    # ax3.plot(data["time"], data["combustion_chamber.cstar"])
-    # ax3.set(title="Combustion Efficiency", xlabel="Time [s]", ylabel="C* [m/s]")
+    ax3.plot(data["time"], np.asarray(data["ox_flow"]))
+    ax3.plot(data["time"], np.asarray(data["fuel_flow"]))
+    ax3.set(title="Ox Flow and Fuel Flow", xlabel="Time [s]", ylabel="Pressure [bar]")
 
-    # ax4.plot(data["time"], data["specific_impulse"])
-    # ax4.set(title="Combustion Efficiency", xlabel="Time [s]", ylabel="Specific Impulse [s]")
+    ax4.plot(data["time"], data["OF"])
+    ax4.set(title="O/F over Time", xlabel="Time [s]")
 
     fig.tight_layout()
-
     plt.show()
 
 
@@ -96,11 +91,11 @@ def display_optical_analysis(target):
     display_flows(data)
 
 
-    display_overall(data)
+    # display_overall(data)
 
 
 
 
 if __name__ == "__main__":
-
+    # make_matplotlib_big()
     display_optical_analysis("Data/Output/motorOutput.csv")

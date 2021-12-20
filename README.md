@@ -167,3 +167,4 @@ Go through and prioritize all of the other todos everywhere
 
 
 <!-- TODO: I need a refactor of how the variable names work for the logger. I think I will eventually end up passing logger objects around in lots of places, and you can use that logger object to read a data file that it created. The user will have to match the file to the logger. That way I can also make some objects for the Rasaero and openrocket loggers -->
+<!-- TODO: I really need to implement testing before anything can be pushed to the main branch -->

@@ -208,20 +208,21 @@ class CustomMotor(Motor):
 
         looking_for_pressure = False
 
+        # TODO: replace with look up interpolated 2D
         for index, row in self.data.iterrows():
-            if looking_for_pressure and chamber_pressure < row["Chamber Pressure [psia]"] * 6894.76: # convert to Pa
+            if looking_for_pressure and chamber_pressure < row["Chamber Pressure [bar]"] * 10**5: # convert to Pa
                 # We have found the row we want
                 # Eventually, I should probably add an output for the nozzle throat temperature over time. We want to be certain that our graphite won't be damaged by the extreme heat
                 # Actually we don't even need the velocity at the throat because we can calculate it from the c-star and the internal pressure
                 self.nozzle.throat_velocity = row["Throat Velocity [m/s]"]
-                self.nozzle.exit_pressure = row["Exit Pressure [psia]"] * 6894.76
+                self.nozzle.exit_pressure = row["Exit Pressure [bar]"] * 10**5 # Convert from bar to Pa
                 self.nozzle.isentropic_exponent = row["gamma"]
                 self.combustion_chamber.density = row["Chamber Density [kg/m^3]"]
                 self.combustion_chamber.temperature = row["Chamber Temperature [K]"]
-                self.combustion_chamber.cstar = row["C-star"] # m/s
+                self.combustion_chamber.cstar = row["C-star [m/s]"]
                 
-                average_molar_mass = row["Molar Mass [kg/mol]"]
-                # The molar mass is in g/mol by default
+                average_molar_mass = row["Molar Mass [g/mol]"]
+                # The molar mass is in g/mol by default, so we convert it to kg/mol
                 self.combustion_chamber.ideal_gas_constant = 8.314 / (average_molar_mass / 1000)
                 
                 self.combustion_chamber.OF = self.OF

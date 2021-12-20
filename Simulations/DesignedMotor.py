@@ -27,12 +27,12 @@ def get_sim():
     grain = Grain(verbose=True, length=0.78, port_diameter=0.15, outer_diameter=0.1905)
     grain.set_regression_rate_function(regression_rate_HTPB_nitrous)
 
-    chamber = CombustionChamber(fuel_grain=grain)
+    chamber = CombustionChamber(fuel_grain=grain, limit_pressure_change=False)
     
     injector = Injector(ox_tank=ox, combustion_chamber=chamber, orifice_count=4, orifice_diameter=0.005)
     nozzle = Nozzle(throat_diameter=0.045, area_ratio=5.72) # meters
     # Pressure swings are big enought to cause problems until you get down to 0.02
-    env = Environment(time_increment=0.02)
+    env = Environment(time_increment=0.01)
 
     motor = CustomMotor(ox_tank=ox, injector=injector, combustion_chamber=chamber, nozzle=nozzle, environment=env)
 

@@ -12,22 +12,24 @@ import sys
 sys.path.append(".")
 
 from Helpers.data import inputs_path
-from Data.Input.CEAPropellants import define_ABS_nitrous
+from Data.Input.CEAPropellants import define_ABS_nitrous, define_HTPB_nitrous
 
 
 # by default, it has the HTPB and N2O at 76-ish F. This is probably fine for the HTPB, we will see what effect it has to change it
 # combo_to_sim = CEA_Obj(oxName="N2O", fuelName="HTPB")
-combo_to_sim = define_ABS_nitrous(overrides_units=True)
+# combo_to_sim = define_ABS_nitrous(overrides_units=True)
+combo_to_sim = define_HTPB_nitrous(overrides_units=True)
 
 
 # expansion ratio is from 25 bar to 90,000 Pa based on OpenRocket with correct external atmosphere
 expansion_ratio = 4.78
+# The input is also taken in bar now
 pressure_range = np.linspace(1, 60, 100)
 OF_range = np.linspace(0.1, 30, 100)
 
-
 data = []
 for OF in OF_range:
+
     for chamber_pressure in pressure_range:
         cstar = combo_to_sim.get_Cstar(chamber_pressure, OF)
         Isp = combo_to_sim.estimate_Ambient_Isp(chamber_pressure, OF, expansion_ratio)[0]
@@ -59,6 +61,8 @@ for OF in OF_range:
         row = [chamber_pressure, OF, cstar, Isp, temperature, density, molar_mass, throat_velocity, exit_pressure, gamma, exit_velocity, coefficient]
         data.append(row)
 
+    print(f"Simulated O/F of {OF}")
+
 dataframe = pd.DataFrame(data, columns=["Chamber Pressure [bar]", "O/F Ratio", "C-star [m/s]", "Specific Impulse [s]", "Chamber Temperature [K]", "Chamber Density [kg/m^3]", "Molar Mass [g/mol]", "Throat Velocity [m/s]", "Exit Pressure [bar]", "gamma", "Exit Velocity [m/s]", "Thrust Coefficient"])
 print(dataframe)
-dataframe.to_csv(inputs_path + "/CombustionLookupABS.csv")
+dataframe.to_csv(inputs_path + "/CombustionLookup.csv")
