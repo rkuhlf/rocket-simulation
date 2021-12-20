@@ -11,3 +11,6 @@ Temporary
 *.uni
 *.blend1
 cache_*
+
+.vscode
+.VSCodeCounter
