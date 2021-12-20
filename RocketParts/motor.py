@@ -176,7 +176,7 @@ class CustomMotor(Motor):
 
         super().__init__()
 
-        self.self.adjust_for_atmospheric = True
+        self.adjust_for_atmospheric = True
         # If you want to adjust for the atmospheric pressure difference, you have to override the nozzle area
 
         self.overwrite_defaults(**kwargs)
