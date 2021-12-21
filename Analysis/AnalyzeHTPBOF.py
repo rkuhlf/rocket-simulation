@@ -19,8 +19,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-import sys
-sys.path.append(".")
+
 
 from Data.Input.CEAPropellants import define_HTPB_nitrous
 from Analysis.AnalyzeOFAtPressure import find_efficiencies, display_OF_graph

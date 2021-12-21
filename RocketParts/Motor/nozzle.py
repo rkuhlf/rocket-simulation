@@ -6,8 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-import sys
-sys.path.append(".")
+
 
 from presetObject import PresetObject
 from Helpers.general import linear_intersection, interpolate, interpolate_point, transpose_tuple, get_radius

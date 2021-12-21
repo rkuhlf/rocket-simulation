@@ -4,8 +4,7 @@
 
 
 import numpy as np
-import sys
-sys.path.append(".")
+
 
 from environment import Environment
 from RocketParts.motor import Motor

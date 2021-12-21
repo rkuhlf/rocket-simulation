@@ -5,12 +5,13 @@
 
 
 import numpy as np
-import sys
-sys.path.append(".")
+
 
 from presetObject import PresetObject
 from RocketParts.Motor.grain import Grain
 from Helpers.data import DataType
+from Helpers.general import cylindrical_volume
+from RocketParts.Motor.mixingChambers import PrecombustionChamber, PostcombustionChamber
 
 
 class CombustionChamber(PresetObject):
@@ -21,6 +22,9 @@ class CombustionChamber(PresetObject):
 
     def __init__(self, **kwargs):
         self.fuel_grain = Grain()
+        self.precombustion_chamber = PrecombustionChamber()
+        self.postcombustion_chamber = PostcombustionChamber()
+
 
         # The inside of the engine starts off at atmospheric conditions
         self.pressure_data_type = DataType.DEFAULT
@@ -50,8 +54,11 @@ class CombustionChamber(PresetObject):
 
     @property
     def volume(self):
-        # TODO: add a precombustion and postcombustion chamber
-        return np.pi * self.fuel_grain.port_radius ** 2
+        # TODO: move this volume into the grain class
+        v = cylindrical_volume(self.fuel_grain.length, self.fuel_grain.port_radius)
+        v += self.precombustion_chamber.volume + self.postcombustion_chamber.volume
+
+        return v
 
 
     def get_change_in_pressure(self, apparent_mass_flow):
@@ -93,17 +100,14 @@ class CombustionChamber(PresetObject):
                 
 
     def update_combustion(self, ox_mass_flow, nozzle, time_increment):
+        # Calculate the mass flow out
+        self.mass_flow_out = self.pressure * nozzle.throat_area / self.cstar
+
         # From the grain and the ox mass flow, calculate the mass flow of fuel
         self.fuel_grain.update_regression(ox_mass_flow, time_increment)
-
-        # Calculate the mass flow out (requires nozzle throat)
-        self.mass_flow_out = self.pressure * nozzle.throat_area / self.cstar
-        
-
         volume_regressed = self.fuel_grain.get_volume_flow() * time_increment
 
         # Update the pressure in the system. Uses the previously calculated mass flux out
-        # mass flow into the chamber
         effective_mass_flow_total = ox_mass_flow + (self.fuel_grain.density - self.density) * volume_regressed - self.mass_flow_out
         
         self.update_pressure(effective_mass_flow_total, time_increment)

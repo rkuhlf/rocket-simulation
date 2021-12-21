@@ -124,8 +124,6 @@ I also have a ToBlender.py file which can export your .csv file to Blender 3D. U
 # Unfortunate Eccentricities
 There are a few artifacts in my code due to my programming environment.
 
-I frequently use `import sys \ sys.path.append(".")`. This is because when Visual Studio Code runs a file in a folder, it doesn't include the project folder for imports (at least it doesn't on my computer). That code adds it.
-
 I use `#region` and VS Code (maybe some extension) to create foldable sections of code. Sorry if it gets in the way a little or it doesn't work with your editor
 
 There is a .replit file for when I occasionally need the configuration to edit my code online.
@@ -168,3 +166,4 @@ Go through and prioritize all of the other todos everywhere
 
 <!-- TODO: I need a refactor of how the variable names work for the logger. I think I will eventually end up passing logger objects around in lots of places, and you can use that logger object to read a data file that it created. The user will have to match the file to the logger. That way I can also make some objects for the Rasaero and openrocket loggers -->
 <!-- TODO: I really need to implement testing before anything can be pushed to the main branch -->
+<!-- TODO: I also need a separate class for things that have a radius that could also be set with a diameter. I could just have them inherit from an object. This is where MetaProgramming would be super nice, because I could allow the name to be custom -->

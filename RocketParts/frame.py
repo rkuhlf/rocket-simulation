@@ -3,11 +3,12 @@
 # Added some additional functions to help design with stresses and loads in mind
 
 import numpy as np
-import sys
-sys.path.append(".")
+
 
 from RocketParts.massObject import MassObject
+from Helpers.decorators import diametered
 
+@diametered
 class Frame(MassObject):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -20,14 +21,6 @@ class Frame(MassObject):
         self.radius = 0.0762 # meters = 3 in 
 
         self.overwrite_defaults(**kwargs)
-
-    @property
-    def diameter(self):
-        return self.radius * 2
-    
-    @diameter.setter
-    def diameter(self, d):
-        self.radius = d / 2
 
     @property
     def cross_sectional_area(self):

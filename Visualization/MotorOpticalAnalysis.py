@@ -1,16 +1,26 @@
+
+
+# Not great, but otherwise Matplotlib freaks out
+import warnings
+warnings.filterwarnings("ignore")
+
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import sys
-sys.path.append(".")
 
-from Helpers.visualization import make_matplotlib_big
+
+from Helpers.visualization import make_matplotlib_medium
+from Helpers.data import reimann_sum
 
 def display_pressures(data):
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
     ax1.plot(data["time"], np.asarray(data["combustion_chamber.pressure"]) / 10 ** 5)
     ax1.plot(data["time"], np.asarray(data["ox_tank.pressure"]) / 10 ** 5)
     ax1.set(title="Pressures over Time", xlabel="Time [s]", ylabel="Pressure [bar]")
+
+    ax2.plot(data["time"], np.array(data["combustion_chamber.fuel_grain.port_diameter"]) * 100)
+    ax2.set(title="Grain Diameter", xlabel="Time [s]", ylabel="Diameter [cm]")
 
     ax3.plot(data["time"], data["combustion_chamber.temperature"])
     ax3.set(title="Chamber Temperatures over Time")
@@ -21,17 +31,15 @@ def display_pressures(data):
     fig.tight_layout()
     plt.show()
 
-
-# FULL
 def display_efficiency(data):
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
 
     ax1.plot(data["time"], data["OF"])
     ax1.set(title="Mixing Ratio", xlabel="Time [s]", ylabel="O/F")
 
-    ax2.plot(data["time"], np.array(data["combustion_chamber.fuel_grain.port_diameter"]) * 100)
-    ax2.set(title="Grain Diameter", xlabel="Time [s]", ylabel="Diameter [cm]")
-
+    ax2.plot(data["time"], 1000 * 8.314 / np.array(data["combustion_chamber.ideal_gas_constant"]))
+    ax2.set(title="Molecular Weight", xlabel="Time [s]", ylabel="MW [g/mol]")
+    
     ax3.plot(data["time"], data["combustion_chamber.cstar"])
     ax3.set(title="Combustion Efficiency", xlabel="Time [s]", ylabel="C* [m/s]")
 
@@ -42,20 +50,15 @@ def display_efficiency(data):
 
     plt.show()
 
-
-def display_overall(data):
-    total_impulse = np.sum(data["thrust"]) * (data["time"][2] - data["time"][1])
+def print_total_impulse(data):
+    total_impulse = reimann_sum(data["time"], data["thrust"])
+    
     print(f"TOTAL IMPULSE: {total_impulse}")
     burn_time = data["time"].values[-1]
     print(f"BURN TIME: {burn_time}")
     average_thrust = total_impulse / burn_time
     print(f"AVERAGE THRUST: {average_thrust}")
 
-    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
-
-    fig.tight_layout()
-
-    plt.show()
 
 def display_flows(data):
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
@@ -88,6 +91,7 @@ def display_optical_analysis(target):
 
     display_pressures(data)
     display_efficiency(data)
+    print_total_impulse(data)
     display_flows(data)
 
 
@@ -97,5 +101,5 @@ def display_optical_analysis(target):
 
 
 if __name__ == "__main__":
-    # make_matplotlib_big()
+    make_matplotlib_medium()
     display_optical_analysis("Data/Output/motorOutput.csv")

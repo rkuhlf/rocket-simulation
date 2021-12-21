@@ -3,9 +3,6 @@
 # TODO: move everything into a thrust curves folder, then refactor everything. I would really ike to have some global variables with folder destinations, and I really do not like the sys path . garbage. maybe somthing with project setup in python will do the trick
 
 import pandas as pd
-import sys
-
-sys.path.append(".")
 
 from Helpers.general import interpolate
 from Helpers.data import interpolated_lookup

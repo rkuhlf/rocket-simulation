@@ -16,8 +16,7 @@ import matplotlib.pyplot as plt
 from random import random, normalvariate
 from copy import deepcopy
 
-import sys
-sys.path.append(".")
+
 
 from environment import Environment
 from simulation import RocketSimulation

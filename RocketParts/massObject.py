@@ -2,8 +2,7 @@
 # Everything on the rocket that has mass should inherit from this class
 # Stores some basic physics equations that need to be evaluated in all kinds of places
 
-import sys
-sys.path.append(".")
+
 
 from Helpers.data import DataType
 from presetObject import PresetObject

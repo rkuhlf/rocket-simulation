@@ -18,8 +18,9 @@ from Data.Input.models import get_splined_coefficient_of_drag, get_coefficient_o
 from RocketParts.motor import Motor
 from logger import RocketLogger
 from environment import Environment
+from Helpers.decorators import diametered
 
-
+@diametered
 class Rocket(MassObject):
     """
         Class that holds all of the aerodynamic calculations for a rocket and very little else
@@ -153,13 +154,8 @@ class Rocket(MassObject):
 
     # region PROPERTIES
     @property
-    def diameter(self):
-        return self.radius * 2
-
-    @diameter.setter
-    def diameter(self, d):
-        self.radius = d / 2
-        self.reference_area = np.pi * self.radius ** 2
+    def reference_area(self):
+        return np.pi * self.radius ** 2
 
     @property
     def has_lifted(self):

@@ -7,8 +7,7 @@
 
 
 import numpy as np
-import sys
-sys.path.append(".")
+
 
 from Helpers.design import get_propellant_mass, get_ox_mass, get_fuel_mass
 # from Helpers.general import get_radius

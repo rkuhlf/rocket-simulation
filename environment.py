@@ -6,8 +6,7 @@
 import numpy as np
 import pandas as pd
 
-import sys
-sys.path.append(".")
+
 
 from Helpers.data import inputs_path
 from Helpers.general import interpolate, get_next

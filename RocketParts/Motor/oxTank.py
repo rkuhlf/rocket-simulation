@@ -4,13 +4,11 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-import sys
-
-sys.path.append(".")
 
 from presetObject import PresetObject
 from Helpers.general import cylindrical_volume, cylindrical_length
 from RocketParts.Motor.nitrousProperties import *
+from Helpers.decorators import diametered
 
 
 #region DESIGN EQUATIONS
@@ -147,7 +145,7 @@ def find_ullage(
 
 #endregion
 
-
+@diametered
 class OxTank(PresetObject):
     '''
         Ox tank model of the rocket
@@ -194,14 +192,6 @@ class OxTank(PresetObject):
             self.calculate_ullage(constant_temperature=True)
 
     #region Getters
-    @property
-    def diameter(self):
-        return self.radius * 2
-
-    @diameter.setter
-    def diameter(self, d):
-        self.radius = d / 2
-
     def get_mass_flow_vap(self, time_increment):
         return (self.p_gas_mass - self.get_gas_mass()) / time_increment
 

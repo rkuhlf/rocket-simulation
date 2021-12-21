@@ -4,8 +4,7 @@
 from fluids.friction import friction_factor, helical_turbulent_fd_Prasad, Blasius, friction_factor_curved, friction_laminar
 import numpy as np
 import matplotlib.pyplot as plt
-import sys
-sys.path.append(".")
+
 
 from RocketParts.Motor.grain import bath_correction_for_helical_regression
 

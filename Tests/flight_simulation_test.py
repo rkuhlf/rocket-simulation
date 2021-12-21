@@ -7,8 +7,7 @@ import pandas as pd
 import numpy as np
 from random import random
 
-import sys
-sys.path.append(".")
+
 
 import SimulateRocket
 from Helpers.general import angle_between

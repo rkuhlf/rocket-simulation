@@ -3,8 +3,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-import sys
-sys.path.append(".")
+
 
 
 def display_margin(data):

@@ -11,4 +11,14 @@ def make_matplotlib_big():
 
     matplotlib.rc('font', **font)
 
-    matplotlib.rc('legend', fontsize=15) 
+    matplotlib.rc('legend', fontsize=15)
+
+
+def make_matplotlib_medium():
+    font = {'family' : 'DejaVu Sans',
+        # 'weight' : 'bold',
+        'size'   : 15}
+
+    matplotlib.rc('font', **font)
+
+    matplotlib.rc('legend', fontsize=12) 

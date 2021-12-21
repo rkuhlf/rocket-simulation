@@ -5,8 +5,7 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
-import sys
-sys.path.append(".")
+
 
 from Helpers.general import numpy_from_string
 

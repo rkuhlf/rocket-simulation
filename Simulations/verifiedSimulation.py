@@ -4,8 +4,7 @@
 # This class simply extends the base simulation class to offer both features
 # As a side note, you should really also like at a 3D representation of the flight over time, it will make many rotations easier to interpret
 
-import sys
-sys.path.append(".")
+
 
 from simulation import RocketSimulation
 from Visualization.FlightOpticalAnalysis import display_optical_analysis

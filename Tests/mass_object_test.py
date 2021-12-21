@@ -2,8 +2,7 @@
 # Bugs might be difficult to find in this, so I'll have some very specific tests to make sure everything is working exactly correctly
 
 import unittest
-import sys
-sys.path.append(".")
+
 
 from RocketParts.massObject import MassObject
 

@@ -2,8 +2,7 @@
 # The ox tank is already calculated in a separate file, and I am just going to run the fuel grain as decreasing in mass perfectly proportional to ox
 # In the thrust curve, this mass loss will be made proportional to thrust
 
-import sys
-sys.path.append(".")
+
 
 from Visualization.OxTankCG import run_simulation
 from RocketParts.massObject import MassObject

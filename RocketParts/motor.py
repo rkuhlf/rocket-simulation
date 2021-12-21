@@ -4,8 +4,7 @@
 
 
 import pandas as pd
-import sys
-sys.path.append(".")
+from presetObject import PresetObject
 
 from RocketParts.massObject import MassObject
 from Helpers.general import interpolate
@@ -162,6 +161,9 @@ class CustomMotor(Motor):
     def __init__(self, **kwargs):
         self.thrust_multiplier = 1
         self.time_multiplier = 1
+        self.pressurization_time_increment = None
+        self.post_pressurization_time_increment = None
+
         self.finished_thrusting = False
 
         self._ox_tank = OxTank()
@@ -180,6 +182,10 @@ class CustomMotor(Motor):
         # If you want to adjust for the atmospheric pressure difference, you have to override the nozzle area
 
         self.overwrite_defaults(**kwargs)
+
+        self.pressurization_time_increment = self.pressurization_time_increment or self.environment.time_increment
+        self.post_pressurization_time_increment = self.post_pressurization_time_increment or self.environment.time_increment
+        self.environment.time_increment = self.pressurization_time_increment
 
         self.nozzle_area = self._nozzle.exit_area
 
@@ -215,6 +221,7 @@ class CustomMotor(Motor):
                 # Eventually, I should probably add an output for the nozzle throat temperature over time. We want to be certain that our graphite won't be damaged by the extreme heat
                 # Actually we don't even need the velocity at the throat because we can calculate it from the c-star and the internal pressure
                 self.nozzle.throat_velocity = row["Throat Velocity [m/s]"]
+                # TODO: add nozzle exit velocity just to check that the methods are the same (they should not be anymore; I added the effect of separation)
                 self.nozzle.exit_pressure = row["Exit Pressure [bar]"] * 10**5 # Convert from bar to Pa
                 self.nozzle.isentropic_exponent = row["gamma"]
                 self.combustion_chamber.density = row["Chamber Density [kg/m^3]"]
@@ -257,6 +264,9 @@ class CustomMotor(Motor):
         self.thrust = nozzle_coefficient * self.nozzle.throat_area * self.combustion_chamber.pressure * self.thrust_multiplier
 
         self.total_impulse += self.thrust * self.environment.time_increment
+
+        if not self.combustion_chamber.pressurizing:
+            self.environment.time_increment = self.post_pressurization_time_increment
 
         return self.thrust
 

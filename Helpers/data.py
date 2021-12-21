@@ -4,8 +4,7 @@
 import re
 from enum import Enum, auto
 import numpy as np
-import sys
-sys.path.append(".")
+
 
 from Helpers.general import interpolate
 
@@ -28,6 +27,18 @@ class DataType(Enum):
     # It should expect an injector object to be passed in
     FUNCTION_INJECTOR = auto()
     FUNCTION_MACH_ALPHA = auto()
+
+
+def fahrenheit_from_kelvin(kelvin):
+    return (kelvin - 273.15) * 9/5 + 32
+
+def reimann_sum(x, y):
+    total = 0
+    for i in range(len(x) - 1):
+        # Use a trapezoidal reimann sum to approximate the integral
+        total += (x[i + 1] - x[i]) * (y[i] + y[i + 1]) / 2
+
+    return total
 
 
 def nested_dictionary_lookup(dictionary, key):

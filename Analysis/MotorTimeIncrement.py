@@ -7,8 +7,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-import sys
-sys.path.append(".")
+
 
 from Data.Input.ThrustProfile import scale_saved_curve
 from Simulations.DesignedMotor import get_sim

@@ -1,8 +1,5 @@
-import sys
-
-sys.path.append(".")
-
-
+# EFFECT OF DELTA TIME
+# Determine when further decreasing the time increment makes no change
 
 from Helpers.general import angles_from_vector_3d
 import matplotlib.pyplot as plt

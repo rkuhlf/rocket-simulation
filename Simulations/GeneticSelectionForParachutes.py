@@ -6,16 +6,6 @@ from RocketParts.parachute import ApogeeParachute, Parachute
 import numpy as np
 from random import random, normalvariate
 from copy import deepcopy
-import sys
-
-sys.path.append(".")
-
-
-
-
-
-
-
 
 
 

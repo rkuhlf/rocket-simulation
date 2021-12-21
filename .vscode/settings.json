@@ -6,10 +6,14 @@
         "-p",
         "*test*.py"
     ],
+    // This adds the workspace root when you try to execute in the terminal
+    "terminal.integrated.env.windows": {
+        "PYTHONPATH": "."
+    },
     "python.testing.pytestEnabled": false,
     "python.testing.nosetestsEnabled": false,
     "python.testing.unittestEnabled": true,
     "csv-preview.formatValues": "never",
     "editor.formatOnSave": false,
-    "python.linting.lintOnSave": false
+    "python.linting.lintOnSave": false,
 }

@@ -6,10 +6,9 @@
 import numpy as np
 from numpy.core import overrides
 import pandas as pd
-from rocketcea.cea_obj import CEA_Obj, add_new_fuel, add_new_oxidizer, add_new_propellant
+from rocketcea.cea_obj import CEA_Obj
 
-import sys
-sys.path.append(".")
+
 
 from Helpers.data import inputs_path
 from Data.Input.CEAPropellants import define_ABS_nitrous, define_HTPB_nitrous
@@ -32,7 +31,7 @@ for OF in OF_range:
 
     for chamber_pressure in pressure_range:
         cstar = combo_to_sim.get_Cstar(chamber_pressure, OF)
-        Isp = combo_to_sim.estimate_Ambient_Isp(chamber_pressure, OF, expansion_ratio)[0]
+        Isp = combo_to_sim.estimate_Ambient_Isp(chamber_pressure, OF, expansion_ratio, Pamb=1.01325)[0]
         temperature = combo_to_sim.get_Temperatures(chamber_pressure, OF, expansion_ratio)[0]
         # I don't think this one needs the expansion ratio
         density = combo_to_sim.get_Chamber_Density(chamber_pressure, OF, expansion_ratio)

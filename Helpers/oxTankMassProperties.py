@@ -1,8 +1,7 @@
 # Generate a table with the ox tank mass over time
 import numpy as np
 
-import sys
-sys.path.append(".")
+
 
 
 from RocketParts.Motor.oxTank import OxTank

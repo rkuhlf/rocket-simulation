@@ -8,8 +8,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-import sys
-sys.path.append(".")
+
 
 
 from Helpers.general import angles_from_vector_3d

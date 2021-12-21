@@ -11,8 +11,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-import sys
-sys.path.append(".")
+
 
 from RocketParts.Motor.nitrousProperties import calculate_maximum_liquid_expansion
 from RocketParts.Motor.grain import determine_optimal_starting_diameter, regression_rate_HTPB_nitrous, find_required_length as find_required_length_fuel

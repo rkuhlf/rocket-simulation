@@ -5,9 +5,7 @@
 
 
 import numpy as np
-import sys
 from Helpers.data import DataType
-sys.path.append('.')
 
 from RocketParts.massObject import MassObject
 from RocketParts.Motor.nitrousProperties import get_nitrous_vapor_pressure, get_liquid_nitrous_density, find_specific_enthalpy_of_gaseous_nitrous, find_specific_enthalpy_of_liquid_nitrous

@@ -6,8 +6,7 @@
 # TODO: finish implementing this class
 
 
-import sys
-sys.path.append(".")
+
 
 from RocketParts.massObject import MassObject
 
