@@ -4,6 +4,7 @@
 
 from presetObject import PresetObject
 
+from rocket import Rocket
 from Helpers.general import magnitude
 from logger import Logger, RocketLogger
 from environment import Environment
@@ -18,8 +19,7 @@ class Simulation(PresetObject):
 
     def override_subobjects(self):
         """
-        Ensure that all of the subobjects the simulation references have the correct memory addresses in there
-        This should almost always be overriden
+        Ensure that all of the subobjects the simulation references have the correct memory addresses in there. This should almost always be overriden.
         """
         if self.logger is not None:
             self.logger.simulation = self
@@ -27,9 +27,8 @@ class Simulation(PresetObject):
     def __init__(self, **kwargs):
         """
         You could potentially pass in a logger, but a default one will be created for you
-        Other variables are max_frames and stopping_errors
+        Other variables are max_frames and stop_on_error
         """
-        # FIXME: this one is not going to work with keyword arguments
         self._logger = Logger(self)
         self.max_frames = -1
         self.frames = 0
@@ -119,7 +118,7 @@ class RocketSimulation(Simulation):
 
     def __init__(self, **kwargs):
         self._environment = Environment()
-        self.rocket = None
+        self.rocket: Rocket = None
 
         self.apply_angular_forces = True
 
@@ -212,6 +211,11 @@ class RocketSimulation(Simulation):
 
     # endregion
 
+class RocketSimulationToApogee(RocketSimulation):
+    @property
+    def should_continue_simulating(self):
+        # We only need to go until the apogee is set
+        return self.apogee is None
 
 class MotorSimulation(Simulation):
     """

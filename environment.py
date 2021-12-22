@@ -124,7 +124,7 @@ class Environment(PresetObject):
 
 
     def get_air_density_from_lookup(self, altitude):
-        # This is mostly just here to double check that the model is wokring
+        # This is mostly just here to double check that the model is working
         return interpolated_lookup(self.atmospheric_data, "Altitude", altitude, "Density")
 
 

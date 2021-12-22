@@ -202,8 +202,14 @@ def angle_between(v1, v2):
     return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
 
 
-def angles_from_vector_3d(np_array):
-    normalized = np_array / magnitude(np_array)
+def angles_from_vector_3d(np_array, silent=True):
+    try:
+        normalized = np_array / magnitude(np_array)
+    except RuntimeWarning as e:
+        if not silent:
+            print(e.with_traceback())
+            print("You are dividing by zero. I believe this should happen one time, when the thrust is zero for one frame. It could also happen for some very low drags.")
+
     x, y, z = normalized
 
     den = (x ** 2 + y ** 2) ** (1/2)
@@ -211,6 +217,7 @@ def angles_from_vector_3d(np_array):
     if den == 0 or abs(y) > den:
         # I do not like this extremely annoying warning that the x and y change is extremely close to zero
         theta_around = 0 # zero is arbitrary, could be anything
+    
     # For some reason the axes lines are poorly defined, so I just encode them manually
     elif x == 0:
         if y < 0:

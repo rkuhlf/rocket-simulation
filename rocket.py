@@ -30,9 +30,15 @@ class Rocket(MassObject):
         Also, everything is in radians.
     """
 
+    def override_subobjects(self):
+        # This might be called by the environment setter before we have established the rocket
+        if self.motor is not None:
+            if self.motor.environment is not self.environment:
+                self.motor.environment = self.environment
+
     # Torque is in radians per second-squared * kg
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__()
         # X, Y, Z values, where Z is upwards
         self.position = np.array([0, 0, 0], dtype="float64")
         self.velocity = np.array([0, 0, 0], dtype="float64")
@@ -64,8 +70,8 @@ class Rocket(MassObject):
         self.length = 7  # meters
 
         # region SET REFERENCES
-        self.motor = Motor()
-        self.environment = Environment()
+        self._motor = Motor()
+        self._environment = Environment()
         self.parachutes = []
         self.logger = RocketLogger(self)
 
@@ -90,12 +96,11 @@ class Rocket(MassObject):
         self.parachute_deployed = False
 
         super().overwrite_defaults(**kwargs)
+        self.override_subobjects()
         # Everything before this is saved as a preset including whatever is overridden by config
 
         self.mass_objects.extend(self.parachutes)
         self.mass_objects.extend([self.motor])
-
-        self.reference_area = np.pi * self.radius ** 2
 
         # This is overriden in the simulation initialization, so it is just here as a reminder
         self.apply_angular_forces = True
@@ -153,6 +158,24 @@ class Rocket(MassObject):
         self.torque = np.array([0., 0.])
 
     # region PROPERTIES
+    @property
+    def motor(self):
+        return self._motor or None
+
+    @motor.setter
+    def motor(self, m):
+        self._motor = m
+        self.override_subobjects()
+
+    @property
+    def environment(self):
+        return self._environment
+
+    @environment.setter
+    def environment(self, e):
+        self._environment = e
+        self.override_subobjects()
+    
     @property
     def reference_area(self):
         return np.pi * self.radius ** 2
@@ -528,8 +551,6 @@ class Rocket(MassObject):
 
 
     # region Cached Values
-
-
     def calculate_dynamic_pressure(self):
         relative_velocity = self.velocity - \
             self.environment.get_air_speed(self.altitude)
@@ -550,6 +571,7 @@ class Rocket(MassObject):
                 relative_velocity, vector_from_angle(self.rotation))
 
         self.log_data("AOA", self.angle_of_attack)
+
 
     def get_coefficient_of_drag(self, mach, alpha):
         return self.CD
@@ -617,8 +639,6 @@ class Rocket(MassObject):
 
 
     # region DATA INPUTS
-
-
     def set_CP_constant(self, value):
         self.CP_data_type = DataType.CONSTANT
         self.CP = value

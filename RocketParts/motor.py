@@ -63,7 +63,7 @@ class Motor(MassObject):
         dataframe = pd.read_csv(path)
         self.set_thrust_data(dataframe)
 
-    def set_thrust_data(self, dataframe):
+    def set_thrust_data(self, dataframe: pd.DataFrame):
         self.thrust_curve = None
         self.thrust_data = dataframe
 
@@ -91,11 +91,11 @@ class Motor(MassObject):
 
 
         # The longer we want the burn time, the more we want to shrink the lookup time
-        self.environment.time /= self.time_multiplier
+        lookup_time = self.environment.time / self.time_multiplier
 
         
         try:
-            self.thrust = self.thrust_multiplier * interpolated_lookup(self.thrust_data, "time", self.environment.time, "thrust")
+            self.thrust = self.thrust_multiplier * interpolated_lookup(self.thrust_data, "time", lookup_time, "thrust")
 
             new_mass = self.total_mass - self.thrust_to_mass(self.thrust, self.environment.time_increment)
             self.set_mass_constant(new_mass)

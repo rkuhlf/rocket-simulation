@@ -36,16 +36,15 @@ def get_mass_objects():
 
     # Should come out to about 60 kg
     return [nose_cone_tip, nose_cone, fiberglass_avionics_tube, ox_tank_shell, injector, phenolic, carbon_fiber_overwrap, fins, nozzle_overwrap, nozzle, avionics_bay]
-# COnfirmin tat apoees matc perfeclty; maybe acc rocket dra will fix descent rate
-# Debug completely wack stoppage of parachute in the middle of descent
 
-def get_sim():
+
+def get_rocket():
     env = Environment(time_increment=0.1, apply_wind=False)
     motor = Motor(front=2, center_of_gravity=2, mass=61, propellant_mass=60, thrust_curve="Data/Input/finleyThrust.csv", environment=env)
     motor.adjust_for_atmospheric = True
-    motor.nozzle_area = np.pi * (0.10399776 / 2) ** 2 # This will probably underestimate the effects
+    motor.nozzle_area = np.pi * (0.10399776 / 2) ** 2
     
-    print(motor.get_total_impulse())
+    # print(f"Running with {motor.get_total_impulse()} Ns")
 
 
     main_parachute = ApogeeParachute(diameter=3.04800, CD=2.2)
@@ -64,6 +63,11 @@ def get_sim():
     mass_objects = [motor]
     mass_objects.extend(get_mass_objects())
     rocket.mass_objects = mass_objects
+
+    return rocket, motor, env
+
+def get_sim():
+    rocket, motor, env = get_rocket()
 
     logger = RocketLogger(rocket)
 
