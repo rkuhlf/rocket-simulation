@@ -24,12 +24,13 @@ from RocketParts.motor import Motor
 
 #region Global Variables
 # FIXME: once I have debugged this, I want to change it back to use the wind
-base_env = Environment(time_increment=0.1, apply_wind=False)
+base_env = Environment(time_increment=1, apply_wind=False)
 total_impulse = 120000
-num_rockets = 3
+num_rockets = 6
 # The leftover fraction is randomly generated
 fraction_mutated = 0.75
 fraction_copied = 0.2
+cutoff = 0.3
 
 num_iterations = 4
 #endregion
@@ -243,12 +244,47 @@ def graph_sim_thrust(sim, **kwargs):
     plt.plot(np.asarray(data["time"]) * time_scale, np.asarray(data["thrust"] * thrust_scale), **kwargs)
 
 
+BEST_CURVES = "Best Curves"
+ALL_CURVES = "All Curves"
+PERCENTILES = "Percentiles"
+PROGRESSION = "Progression"
+
+
+def initialize_figs():
+    figs = []
+
+    figs.append(plt.figure(BEST_CURVES))
+    plt.title("Best Thrust Curves")
+    plt.xlabel("Time [s]")
+    plt.ylabel("Thrust [N]")
+    plt.legend()
+
+
+    figs.append(plt.figure(ALL_CURVES))
+    plt.title("All Thrust Curves")
+    plt.xlabel("Time [s]")
+    plt.ylabel("Thrust [N]")
+
+
+    figs.append(plt.figure(PERCENTILES))
+    plt.title("Progression of Simulation Percentiles")
+    plt.xlabel("Iteration Number")
+    plt.ylabel("Fitness")
+
+    figs.append(plt.figure(PROGRESSION))
+    plt.title("Overall Progression")
+    plt.xlabel("Iteration Number")
+    plt.ylabel("Average Fitness")
+    plt.legend()
+
+    return figs
 
 
 # Just call this display results function after every single iteration
 def display_best(sim_fit_pairs: "list[tuple[RocketSimulationToApogee, float]]", cutoff):
     count = int(np.ceil(cutoff * num_rockets))
-
+    
+    plt.figure(BEST_CURVES)
     for sim, fit in sim_fit_pairs[-count:]:
         graph_sim_thrust(sim, alpha=1/np.sqrt(count))
     
@@ -260,53 +296,44 @@ def display_best(sim_fit_pairs: "list[tuple[RocketSimulationToApogee, float]]", 
     print("It had a fitness of", sim_fit_pairs[-1][1])
 
 
-    plt.title("Best Thrust Curves")
-    plt.xlabel("Time [s]")
-    plt.ylabel("Thrust [N]")
-    plt.legend()
-
-    plt.show()
-
 def display_all(sim_fit_pairs):
+    plt.figure(ALL_CURVES)
+
     for sim, fit in sim_fit_pairs:
         graph_sim_thrust(sim)
 
-    plt.title("All Thrust Curves")
-    plt.xlabel("Time [s]")
-    plt.ylabel("Thrust [N]")
-
-    plt.show()
 
 def display_progression(collective_fits, cutoff):
     top_fits = []
     average_fits = []
+
+    plt.figure(PROGRESSION)
     for trial in collective_fits:
         top_fits.append(np.average(trial[-round(num_rockets * cutoff):]))
         average_fits.append(np.average(trial))
 
     collective_fits = np.transpose(np.asarray(collective_fits))
 
+    fig = plt.figure(PERCENTILES)
     # Plot how the best rocket progressed over time, then the second best progressed over time, and so on
     for percentile in collective_fits:
         plt.plot(range(len(percentile)), percentile)
-    
-    plt.title("Progression of Simulation Percentiles")
-    plt.xlabel("Iteration Number")
-    plt.ylabel("Fitness")
-    plt.show()
+
+    simulated_so_far = len(average_fits)
+    plt.plot(range(simulated_so_far), average_fits, label="Average")
+    plt.plot(range(simulated_so_far), top_fits, label="Top")
+    fig.canvas.draw()
 
 
-    plt.plot(range(num_iterations), average_fits, label="Average")
-    plt.plot(range(num_iterations), top_fits, label="Top")
 
-    plt.title("Overall Progression")
-    plt.xlabel("Iteration Number")
-    plt.ylabel("Average Fitness")
-    plt.legend()
-    plt.show()
-
-
+shown = False
 def display_results(collective_fits, sim_fit_pairs, cutoff=0.2):
+    global shown
+    figs = initialize_figs()
+    if not shown:
+        plt.show(False)
+        shown = True
+
     print("FINAL SIMULATIONS")
     display_best(sim_fit_pairs, cutoff)
 
@@ -315,20 +342,21 @@ def display_results(collective_fits, sim_fit_pairs, cutoff=0.2):
     print("PROGRESSION")
     display_progression(collective_fits, cutoff)
 
-    
-    
+    plt.draw()
+
 
 if __name__ == "__main__":
     sims: "list[RocketSimulationToApogee]" = []
     fits = []
     collective_fits = []
 
-
     generate_random_rockets(sims, num_rockets)
 
     for iteration in range(num_iterations):
         fits = []
         sim_fit_pairs = run_simulations(sims, fits)
+        display_results(collective_fits, sim_fit_pairs, cutoff)
+
         fits: np.ndarray = np.asarray(fits)
         
         print("AVERAGE FITNESS", fits.mean())
@@ -360,7 +388,9 @@ if __name__ == "__main__":
     fits = []
     sim_fit_pairs = run_simulations(sims, fits)
     
-    display_results(collective_fits, sim_fit_pairs, 0.6)
+    display_results(collective_fits, sim_fit_pairs, cutoff)
+
+    plt.show()
     
     
 
