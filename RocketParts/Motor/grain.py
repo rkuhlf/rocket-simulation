@@ -7,26 +7,25 @@ import numpy as np
 
 from presetObject import PresetObject
 from Helpers.general import cylindrical_volume, interpolate
-from Helpers.data import DataType
-
+from Helpers.decorators import diametered
 
 #region REGRESSION-RATE EQUATIONS
 # This is just a list of pre-programmed regression-rate equations that I have come across
 
-def regression_rate_paraffin_nitrous(mass_flux):
+def regression_rate_paraffin_nitrous(grain):
     leading_ballistic_coefficient = 1.550 * 10 ** -4
     exponential_ballistic_coefficient = 0.5
-    return leading_ballistic_coefficient * mass_flux ** exponential_ballistic_coefficient
+    return leading_ballistic_coefficient * grain.get_flux() ** exponential_ballistic_coefficient
 
-def regression_rate_HTPB_nitrous(mass_flux):
+def regression_rate_HTPB_nitrous(grain):
     # https://classroom.google.com/u/0/c/MzgwNjcyNDIwMDg3/m/NDA0NTQyMjUyODI4/details
     leading_ballistic_coefficient = 1.8756 * 10 ** -4
     # Notice that n is even less than 0.5, which means that your burn will end fuel-rich with annular
     exponential_ballistic_coefficient = 0.347
-    return leading_ballistic_coefficient * mass_flux ** exponential_ballistic_coefficient
+    return leading_ballistic_coefficient * grain.get_flux() ** exponential_ballistic_coefficient
 
 
-def regression_rate_ABS_nitrous_constant(mass_flux):
+def regression_rate_ABS_nitrous_constant(grain):
     # https://classroom.google.com/u/2/c/MzgwNjcyNDIwMDg3/m/Mzg1OTk5OTY1Njc5/details (table 4.1)
     return 0.0007
 
@@ -67,7 +66,7 @@ def determine_optimal_starting_diameter_minimizing_weight(min_mass, outer_diamet
     grain = Grain()
     grain.density = density
     grain.outer_diameter = outer_diameter
-    grain.set_regression_rate_function(regression_func)
+    grain.regression_rate_function = regression_func
 
     # Based on a brief survey of several papers, it looks like you do not want to go too high for flux because you get combustion instability and eventually either blow-out or flooding
     # And you do not want to go too low because eventually you get cooking
@@ -141,7 +140,8 @@ def determine_optimal_starting_diameter(outer_diameter, target_mass, density, ox
 
 #endregion
 
-
+@diametered("port_radius", "port_diameter")
+@diametered("outer_radius", "outer_diameter")
 class Grain(PresetObject):
     def __init__(self, **kwargs):
         self.port_radius = 0.05 # random
@@ -155,16 +155,17 @@ class Grain(PresetObject):
         # Should usually be overriden in MotorSimulation
         self.stop_on_error = True
 
-        self.regression_data_type = DataType.FUNCTION_FLUX
-        self.regression_rate = 0
+        self.regression_rate_function = regression_rate_paraffin_nitrous
 
         super().overwrite_defaults(**kwargs)
+
+        self.ox_flow = 0
 
 
         if self.verbose:
             print(f"Initialized fuel grain with {self.fuel_mass} kg of fuel. It has an {self.port_diameter} m port diameter and a {self.outer_diameter} m outer diameter.")
 
-    #region Ease of access properties
+    #region Properties
     @property
     def fuel_mass(self):
         return self.fuel_volume * self.density
@@ -174,24 +175,15 @@ class Grain(PresetObject):
         return cylindrical_volume(self.length, self.outer_radius) - cylindrical_volume(self.length, self.port_radius)
 
     @property
-    def port_diameter(self):
-        return self.port_radius * 2
-
-    @port_diameter.setter
-    def port_diameter(self, d):
-        self.port_radius = d / 2
-
-    @property
-    def outer_diameter(self):
-        return self.outer_radius * 2
-
-    @outer_diameter.setter
-    def outer_diameter(self, d):
-        self.outer_radius = d / 2
+    def regression_rate(self):
+        return self.regression_rate_function(self)
 
     #endregion
 
-    def get_flux(self, ox_flow, port_diameter=None):
+    def get_flux(self, ox_flow=None, port_diameter=None):
+        if ox_flow is None:
+            ox_flow = self.ox_flow
+
         if port_diameter is None:
             port_diameter = self.port_diameter
 
@@ -228,51 +220,50 @@ class Grain(PresetObject):
     def get_outer_cross_sectional_area(self):
         return np.pi * self.outer_radius ** 2
 
-    def regression_rate_function(self, mass_flux):
-        # Everything in meters and kg; this is an equation for Paraffin-Nitrous
-        leading_ballistic_coefficient = 1.550 * 10 ** -4
-        exponential_ballistic_coefficient = 0.5
-        return leading_ballistic_coefficient * mass_flux ** exponential_ballistic_coefficient
-
-    def get_regression_rate(self, mass_flux):
-        if self.regression_data_type is DataType.CONSTANT:
-            return self.regression_rate
-
-        if self.regression_data_type is DataType.FUNCTION_FLUX:
-            return self.regression_rate_function(mass_flux)
-
-    def set_regression_rate_constant(self, value):
-        self.regression_data_type = DataType.CONSTANT
-        self.regression_rate = value
-
-    def set_regression_rate_function(self, func):
-        self.regression_data_type = DataType.FUNCTION_FLUX
-        self.regression_rate_function = func
-
     def get_volume_flow(self):
         return self.mass_flow / self.density
 
     def update_regression(self, ox_flow, time_increment):
-        port_area = np.pi * self.port_radius ** 2
-        ox_flux = ox_flow / port_area
+        self.ox_flow = ox_flow
+
+        ox_flux = self.get_flux()
+
         # Give a warning if ox flux is too big: might blow fire out, might cause combustion instability
         if ox_flux > 700: # assumes kg/m^2
             raise Warning("McLeod told us not to go past 500 kg/m^2-s. He warned of blowing the flame out, but I have also seen some combustion instability stuff.")
 
         if self.port_radius > self.outer_radius:
             raise Warning("You have burned through the entire fuel grain")
-            return
 
         # Right now this is space-averaged. TODO: It might be kind of fun to do a not space-averaged thing, just simulating about 25 separate points along the grain
-        burn_area = 2 * np.pi * self.port_radius * self.length
-        regression_rate = self.get_regression_rate(ox_flux)
+        burn_area = self.get_burn_area()
+        regression_rate = self.regression_rate
         self.mass_flow = regression_rate * burn_area * self.density
 
         regressed_distance = regression_rate * time_increment
         self.port_radius += regressed_distance
 
+    def __repr__(self) -> str:
+        ans = f"Fuel grain of density {self.density} kg/m^3 with port diameter {self.port_diameter} m and outer diameter {self.outer_diameter} m, giving mass of {self.fuel_mass:.2f} kg. "
+
+        if self.ox_flow:
+            ans += f"Current regression rate is {self.regression_rate:.6f} m/s with a flux of {self.get_flux():.1f} kg/m^2-s. "
+        else:
+            ans += "Flow has not started yet. "
+
+        return ans
+
 
 if __name__ == "__main__":
+    g = Grain()
+
+    print(g)
+
+    g.update_regression(2.7, 0.1)
+
+    print(g)
+
+
     # best_ID = determine_optimal_starting_diameter(0.2032, 15, 920, 4.8, regression_rate_HTPB_nitrous, 6) 
     # print(best_ID)
 
@@ -287,11 +278,11 @@ if __name__ == "__main__":
     # Found new best fuel grain, has 0.146 m OD, 0.1213269691560687 m ID (initially), and a length of 1.6794435545384543 meters, giving a mass of 8.482525721614701, only 0.002525721614700771 kg heavier than specified
 
 
-    print(determine_optimal_starting_diameter_minimizing_weight(12.48, 0.08255 * 2, 2.1, regression_rate_ABS_nitrous_constant, 1060, 6.18, optimize_for=0.5, max_flux=1000))
+    # print(determine_optimal_starting_diameter_minimizing_weight(12.48, 0.08255 * 2, 2.1, regression_rate_ABS_nitrous_constant, 1060, 6.18, optimize_for=0.5, max_flux=1000))
 
 
-    test_grain = Grain(density=1060, length=1.147, port_diameter=0.127, outer_radius=0.08255)
-    print(test_grain.fuel_volume)
-    print(test_grain.fuel_mass)
+    # test_grain = Grain(density=1060, length=1.147, port_diameter=0.127, outer_radius=0.08255)
+    # print(test_grain.fuel_volume)
+    # print(test_grain.fuel_mass)
 
     pass

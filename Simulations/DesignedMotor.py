@@ -22,7 +22,7 @@ def get_sim():
     ox = OxTank(temperature=293.15, length=2.54, diameter=0.1905, ox_mass=52.43)
 
     grain = Grain(verbose=True, length=0.8, port_diameter=0.15, outer_diameter=0.1905)
-    grain.set_regression_rate_function(regression_rate_HTPB_nitrous)
+    grain.regression_rate_function = regression_rate_HTPB_nitrous
 
     chamber = CombustionChamber(fuel_grain=grain, limit_pressure_change=False)
     
