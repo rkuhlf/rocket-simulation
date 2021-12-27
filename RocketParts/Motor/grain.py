@@ -2,6 +2,7 @@
 # Simulate the properties of the fuel grain
 # Mostly covers regression calculations
 
+from typing import Callable
 import numpy as np
 
 
@@ -28,6 +29,43 @@ def regression_rate_HTPB_nitrous(grain):
 def regression_rate_ABS_nitrous_constant(grain):
     # https://classroom.google.com/u/2/c/MzgwNjcyNDIwMDg3/m/Mzg1OTk5OTY1Njc5/details (table 4.1)
     return 0.0007
+
+# A function like this makes it very easy to create a function that returns a value, so ever other model of this value should just be a drop in replacement
+def constant(value: float) -> Callable:
+    # https://digitalcommons.usu.edu/cgi/viewcontent.cgi?article=1148&context=spacegrant suggests 0.8
+    def inner(*args, **kwargs) -> float: # does not matter what it is passed; it will be constant
+        return value
+
+    return inner
+
+constant_prandtl_number = constant(0.8)
+constant_latent_heat_paraffin = constant(1.8 * 10**6) # 1.8 MJ/kg
+constant_nitrous_viscosity = constant(4 * 10**-5)
+
+def no_internal_transfer_enthalpy_difference(grain):
+    specific_heat = 877.8032 # J / kg for Nitrous
+
+    return specific_heat * (grain.flame_temperature - grain.fuel_temperature)
+
+def whitmore_friction_coefficient(grain):
+    # https://digitalcommons.usu.edu/cgi/viewcontent.cgi?article=1148&context=spacegrant
+    # I have no idea if this is correct
+    re = grain.reynolds_number
+    if grain.verbose:
+        if re < 10 ** 6 or re > 10 ** 7:
+            print(f"Reynolds number of {re:.1e} is outside of the theoretical range of 10^6 to 10^7 for this friction model")
+
+    return 0.074 / grain.reynolds_number ** 0.2
+
+def whitmore_regression_model(grain):
+    ans = grain.friction_coefficient
+    ans *= grain.get_flux() / (2 * grain.density * grain.prandtl_number ** (2/3))
+    ans *= grain.enthalpy_difference / grain.latent_heat
+
+    return ans
+
+def regression_rate_ABS_nitrous_a_priori(grain):
+    pass
 
 def bath_correction_for_helical_regression(regression, reynolds_number, port_diameter, helix_diameter):
     """The correction uses a ratio of diameters, so the units must match"""
@@ -140,6 +178,8 @@ def determine_optimal_starting_diameter(outer_diameter, target_mass, density, ox
 
 #endregion
 
+
+# TODO: integrate this with the mass object class
 @diametered("port_radius", "port_diameter")
 @diametered("outer_radius", "outer_diameter")
 class Grain(PresetObject):
@@ -151,16 +191,20 @@ class Grain(PresetObject):
         self.density = 920 # kg / m^3
         self.length = 0.4 # m
 
+        self.fuel_temperature = 300 # Kelvin
+
         self.verbose = False
         # Should usually be overriden in MotorSimulation
         self.stop_on_error = True
 
         self.regression_rate_function = regression_rate_paraffin_nitrous
+        self.prandtl_number_function = constant_prandtl_number
+        self.latent_heat_function = constant_latent_heat_paraffin
+        self.friction_coefficient_function = whitmore_friction_coefficient
+        self.oxidizer_dynamic_viscosity_function = constant_nitrous_viscosity
+        self.enthalpy_difference_function = no_internal_transfer_enthalpy_difference
 
         super().overwrite_defaults(**kwargs)
-
-        self.ox_flow = 0
-
 
         if self.verbose:
             print(f"Initialized fuel grain with {self.fuel_mass} kg of fuel. It has an {self.port_diameter} m port diameter and a {self.outer_diameter} m outer diameter.")
@@ -177,6 +221,30 @@ class Grain(PresetObject):
     @property
     def regression_rate(self):
         return self.regression_rate_function(self)
+
+    @property
+    def prandtl_number(self):
+        return self.prandtl_number_function(self)
+
+    @property
+    def friction_coefficient(self):
+        return self.friction_coefficient_function(self)
+
+    @property
+    def latent_heat(self):
+        return self.latent_heat_function(self)
+
+    @property
+    def enthalpy_difference(self):
+        return self.enthalpy_difference_function(self)
+
+    @property
+    def oxidizer_dynamic_viscosity(self):
+        return self.oxidizer_dynamic_viscosity_function(self)
+
+    @property
+    def reynolds_number(self):
+        return self.get_flux() * self.length / self.oxidizer_dynamic_viscosity
 
     #endregion
 
@@ -223,8 +291,9 @@ class Grain(PresetObject):
     def get_volume_flow(self):
         return self.mass_flow / self.density
 
-    def update_regression(self, ox_flow, time_increment):
+    def update_regression(self, ox_flow, time_increment, flame_temperature=2000):
         self.ox_flow = ox_flow
+        self.flame_temperature = flame_temperature
 
         ox_flux = self.get_flux()
 
@@ -243,10 +312,11 @@ class Grain(PresetObject):
         regressed_distance = regression_rate * time_increment
         self.port_radius += regressed_distance
 
+
     def __repr__(self) -> str:
         ans = f"Fuel grain of density {self.density} kg/m^3 with port diameter {self.port_diameter} m and outer diameter {self.outer_diameter} m, giving mass of {self.fuel_mass:.2f} kg. "
 
-        if self.ox_flow:
+        if hasattr(self, "ox_flow"):
             ans += f"Current regression rate is {self.regression_rate:.6f} m/s with a flux of {self.get_flux():.1f} kg/m^2-s. "
         else:
             ans += "Flow has not started yet. "
@@ -256,6 +326,7 @@ class Grain(PresetObject):
 
 if __name__ == "__main__":
     g = Grain()
+    g.regression_rate_function = whitmore_regression_model
 
     print(g)
 
