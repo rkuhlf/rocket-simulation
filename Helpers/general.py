@@ -26,11 +26,15 @@ def get_radius(area):
 # TODO: find a better naming convention for these: maybe the helpers don't need a keyword and I should assume they return a value
 
 def interpolate(x, x1, x2, y1, y2):
-    '''Map one point from one range to another'''
+    '''
+    Map one point from one range to another. 
+    Should also work for arrays
+    '''
 
     if x2 == x1:
         return (y1 + y2) / 2
     return (x - x1) / (x2 - x1) * (y2 - y1) + y1
+
 
 def interpolate_point(value, input_min, input_max, p1, p2):
     x = interpolate(value, input_min, input_max, p1[0], p2[0])

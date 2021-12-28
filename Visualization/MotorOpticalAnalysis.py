@@ -70,7 +70,7 @@ def display_flows(data):
 
     ax3.plot(data["time"], np.asarray(data["ox_flow"]))
     ax3.plot(data["time"], np.asarray(data["fuel_flow"]))
-    ax3.set(title="Ox Flow and Fuel Flow", xlabel="Time [s]", ylabel="Pressure [bar]")
+    ax3.set(title="Ox Flow and Fuel Flow", xlabel="Time [s]", ylabel="Flow [kg/s]")
 
     ax4.plot(data["time"], data["OF"])
     ax4.set(title="O/F over Time", xlabel="Time [s]")
@@ -101,5 +101,5 @@ def display_optical_analysis(target):
 
 
 if __name__ == "__main__":
-    make_matplotlib_medium()
+    # make_matplotlib_medium()
     display_optical_analysis("Data/Output/motorOutput.csv")

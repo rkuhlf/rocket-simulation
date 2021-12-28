@@ -2,6 +2,7 @@
 # This is the file for the basic connections between a rocket, a logger, and an environment
 # It doesn't really do much math, but there are a few basic utilities that help in other places
 
+from RocketParts.motor import Motor
 from presetObject import PresetObject
 
 from rocket import Rocket
@@ -238,7 +239,7 @@ class MotorSimulation(Simulation):
 
     def __init__(self, **kwargs):
         self._environment = Environment()
-        self.motor = None
+        self.motor: Motor = None
 
         super().__init__(**kwargs)
 
@@ -322,6 +323,14 @@ class MotorSimulation(Simulation):
     def specific_impulse(self):
         """Return the overall specific impulse for the whole of the designed motor"""
 
+        return self.total_specific_impulse
+
+    @property
+    def used_specific_impulse(self):
+        return self.motor.used_specific_impulse
+
+    @property
+    def total_specific_impulse(self):
         return self.motor.total_specific_impulse
 
     # endregion

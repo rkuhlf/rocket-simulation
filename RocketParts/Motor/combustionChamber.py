@@ -96,8 +96,7 @@ class CombustionChamber(PresetObject):
                         planned_increment = - self.pressure * self.relative_pressure_decrease_limit
 
             self.pressure += planned_increment
-            self.pressurizing = planned_increment > 0
-                
+            self.pressurizing = planned_increment > 0         
 
     def update_combustion(self, ox_mass_flow, nozzle, time_increment):
         # Calculate the mass flow out
