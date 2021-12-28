@@ -1,6 +1,7 @@
 # How much does the combustion efficiency affect the performance of the motor
 # Conclusion:
-# The c* combustion efficiency
+# The c* combustion efficiency has an almost perfectly linear relationship with the total impulse because it is highly correlated with the burn time
+# It would be inaccurate to scale the thrust based on the combustion efficiency, you should be scaling the burn time.
 
 
 import numpy as np
