@@ -22,46 +22,48 @@ combo_to_sim = define_HTPB_nitrous(overrides_units=True)
 
 # expansion ratio is from 25 bar to 90,000 Pa based on OpenRocket with correct external atmosphere
 expansion_ratio = 4.78
-# The input is also taken in bar now
-pressure_range = np.linspace(1, 60, 100)
-OF_range = np.linspace(0.1, 30, 100)
-
-data = []
-for OF in OF_range:
-
-    for chamber_pressure in pressure_range:
-        cstar = combo_to_sim.get_Cstar(chamber_pressure, OF)
-        Isp = combo_to_sim.estimate_Ambient_Isp(chamber_pressure, OF, expansion_ratio, Pamb=1.01325)[0]
-        temperature = combo_to_sim.get_Temperatures(chamber_pressure, OF, expansion_ratio)[0]
-        # I don't think this one needs the expansion ratio
-        density = combo_to_sim.get_Chamber_Density(chamber_pressure, OF, expansion_ratio)
-        molar_mass = combo_to_sim.get_Chamber_MolWt_gamma(chamber_pressure, OF, expansion_ratio)[0]
-        throat_velocity = combo_to_sim.get_SonicVelocities(chamber_pressure, OF, expansion_ratio)[1]
-        exit_pressure = chamber_pressure / combo_to_sim.get_PcOvPe(chamber_pressure, OF, expansion_ratio)
-        # Using the gamma average in the nozzle, which isn't perfect but should be closer
-        gamma = combo_to_sim.get_Throat_MolWt_gamma(chamber_pressure, OF, expansion_ratio)[1]
-        gamma += combo_to_sim.get_exit_MolWt_gamma(chamber_pressure, OF, expansion_ratio)[1]
-        gamma /= 2
-        exit_mach = combo_to_sim.get_MachNumber(chamber_pressure, OF, expansion_ratio)
-        exit_velocity = exit_mach * combo_to_sim.get_SonicVelocities(chamber_pressure, OF, expansion_ratio)[2]
-        coefficient = combo_to_sim.get_PambCf(Pc=chamber_pressure, MR=OF, eps=expansion_ratio)[0]
-
-        
-        expansion = combo_to_sim.get_PambCf(Pc=chamber_pressure, MR=OF, eps=expansion_ratio)[2]
-        separated = expansion.startswith("Separated")
-        if separated:
-            to_find = "epsSep="
-            index = expansion.index(to_find) + len(to_find)
-            epsilon_of_separation = float(expansion[index:-1])
-            
-            exit_velocity = combo_to_sim.get_MachNumber(chamber_pressure, OF, epsilon_of_separation) * combo_to_sim.get_SonicVelocities(chamber_pressure, OF, epsilon_of_separation)[2]
 
 
-        row = [chamber_pressure, OF, cstar, Isp, temperature, density, molar_mass, throat_velocity, exit_pressure, gamma, exit_velocity, coefficient]
-        data.append(row)
+if __name__ == "__main__":
+    # The input is also taken in bar now
+    pressure_range = np.linspace(1, 60, 100)
+    OF_range = np.linspace(0.1, 30, 100)
 
-    print(f"Simulated O/F of {OF}")
+    data = []
+    for OF in OF_range:
+        for chamber_pressure in pressure_range:
+            cstar = combo_to_sim.get_Cstar(chamber_pressure, OF)
+            Isp = combo_to_sim.estimate_Ambient_Isp(chamber_pressure, OF, expansion_ratio, Pamb=1.01325)[0]
+            temperature = combo_to_sim.get_Temperatures(chamber_pressure, OF, expansion_ratio)[0]
+            # I don't think this one needs the expansion ratio
+            density = combo_to_sim.get_Chamber_Density(chamber_pressure, OF, expansion_ratio)
+            molar_mass = combo_to_sim.get_Chamber_MolWt_gamma(chamber_pressure, OF, expansion_ratio)[0]
+            throat_velocity = combo_to_sim.get_SonicVelocities(chamber_pressure, OF, expansion_ratio)[1]
+            exit_pressure = chamber_pressure / combo_to_sim.get_PcOvPe(chamber_pressure, OF, expansion_ratio)
+            # Using the gamma average in the nozzle, which isn't perfect but should be closer
+            gamma = combo_to_sim.get_Throat_MolWt_gamma(chamber_pressure, OF, expansion_ratio)[1]
+            gamma += combo_to_sim.get_exit_MolWt_gamma(chamber_pressure, OF, expansion_ratio)[1]
+            gamma /= 2
+            exit_mach = combo_to_sim.get_MachNumber(chamber_pressure, OF, expansion_ratio)
+            exit_velocity = exit_mach * combo_to_sim.get_SonicVelocities(chamber_pressure, OF, expansion_ratio)[2]
+            coefficient = combo_to_sim.get_PambCf(Pc=chamber_pressure, MR=OF, eps=expansion_ratio)[0]
 
-dataframe = pd.DataFrame(data, columns=["Chamber Pressure [bar]", "O/F Ratio", "C-star [m/s]", "Specific Impulse [s]", "Chamber Temperature [K]", "Chamber Density [kg/m^3]", "Molar Mass [g/mol]", "Throat Velocity [m/s]", "Exit Pressure [bar]", "gamma", "Exit Velocity [m/s]", "Thrust Coefficient"])
-print(dataframe)
-dataframe.to_csv(inputs_path + "/CombustionLookup.csv")
+            # ! FIXME: some of this is seriously wrong. I have a coefficient less than 1 for most of the time
+            expansion = combo_to_sim.get_PambCf(Pc=chamber_pressure, MR=OF, eps=expansion_ratio)[2]
+            separated = expansion.startswith("Separated")
+            if separated:
+                to_find = "epsSep="
+                index = expansion.index(to_find) + len(to_find)
+                epsilon_of_separation = float(expansion[index:-1])
+                
+                exit_velocity = combo_to_sim.get_MachNumber(chamber_pressure, OF, epsilon_of_separation) * combo_to_sim.get_SonicVelocities(chamber_pressure, OF, epsilon_of_separation)[2]
+
+
+            row = [chamber_pressure, OF, cstar, Isp, temperature, density, molar_mass, throat_velocity, exit_pressure, gamma, exit_velocity, coefficient]
+            data.append(row)
+
+        print(f"Simulated O/F of {OF}")
+
+    dataframe = pd.DataFrame(data, columns=["Chamber Pressure [bar]", "O/F Ratio", "C-star [m/s]", "Specific Impulse [s]", "Chamber Temperature [K]", "Chamber Density [kg/m^3]", "Molar Mass [g/mol]", "Throat Velocity [m/s]", "Exit Pressure [bar]", "gamma", "Exit Velocity [m/s]", "Thrust Coefficient"])
+    print(dataframe)
+    dataframe.to_csv(inputs_path + "/CombustionLookup.csv")

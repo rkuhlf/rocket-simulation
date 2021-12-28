@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 
 from Helpers.visualization import make_matplotlib_medium
-from Helpers.data import reimann_sum
+from Helpers.data import riemann_sum
 
 def display_pressures(data):
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
@@ -51,7 +51,7 @@ def display_efficiency(data):
     plt.show()
 
 def print_total_impulse(data):
-    total_impulse = reimann_sum(data["time"], data["thrust"])
+    total_impulse = riemann_sum(data["time"], data["thrust"])
     
     print(f"TOTAL IMPULSE: {total_impulse}")
     burn_time = data["time"].values[-1]
@@ -65,8 +65,10 @@ def display_flows(data):
     ax1.plot(data["time"], data["thrust"])
     ax1.set(title="Thrust Over Time", xlabel="Time [s]", ylabel="Thrust [N]")
 
-    ax2.plot(data["time"], data["mass_flow"])
+    ax2.plot(data["time"], data["mass_flow"], label="in")
+    ax2.plot(data["time"], data["mass_flow_out"], label="out")
     ax2.set(title="Mass Flow Over Time", xlabel="Time [s]", ylabel="Mass Flow in [kg/s]")
+    ax2.legend()
 
     ax3.plot(data["time"], np.asarray(data["ox_flow"]))
     ax3.plot(data["time"], np.asarray(data["fuel_flow"]))

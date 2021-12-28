@@ -60,7 +60,6 @@ class CombustionChamber(PresetObject):
 
         return v
 
-
     def get_change_in_pressure(self, apparent_mass_flow):
         '''
         Returns the rate of pressure change with respect to time. 
@@ -104,10 +103,10 @@ class CombustionChamber(PresetObject):
 
         # From the grain and the ox mass flow, calculate the mass flow of fuel
         self.fuel_grain.update_regression(ox_mass_flow, time_increment)
-        volume_regressed = self.fuel_grain.get_volume_flow() * time_increment
+        volume_regression = self.fuel_grain.get_volume_flow()
 
         # Update the pressure in the system. Uses the previously calculated mass flux out
-        effective_mass_flow_total = ox_mass_flow + (self.fuel_grain.density - self.density) * volume_regressed - self.mass_flow_out
+        effective_mass_flow_total = ox_mass_flow + (self.fuel_grain.density - self.density) * volume_regression - self.mass_flow_out
         
         self.update_pressure(effective_mass_flow_total, time_increment)
         

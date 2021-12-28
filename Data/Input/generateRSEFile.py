@@ -6,7 +6,7 @@ import pandas as pd
 
 from Helpers.general import interpolate
 from Helpers.data import interpolated_lookup
-from Data.Input.ThrustProfile import reimann_sum
+from Data.Input.ThrustProfile import riemann_sum
 
 
 mass_CG_lookup = pd.read_csv("Data/Input/massCGLookup.csv")
@@ -16,7 +16,7 @@ max_mass = mass_CG_lookup["mass"][0]
 min_mass = mass_CG_lookup["mass"][len(mass_CG_lookup["mass"]) - 1]
 
 thrust_profile = pd.read_csv("Data/Input/finleyThrust.csv")
-total_impulse = reimann_sum(thrust_profile["time"], thrust_profile["thrust"])
+total_impulse = riemann_sum(thrust_profile["time"], thrust_profile["thrust"])
 
 
 from xml.dom import minidom

@@ -151,7 +151,7 @@ class Motor(MassObject):
 
     #endregion
 
-
+# ! FIXME: I am pretty sure the specific impulse for the simulations should be getting higher than it is currently. At the moment, it never really gets above 210
 class CustomMotor(Motor):
     # FIXME: scaling the burn time does not work for custom motors
     # TODO: add a simulation for the gas phase
@@ -309,8 +309,12 @@ class CustomMotor(Motor):
         return self.ox_flow + self.fuel_flow
 
     @property
+    def mass_flow_out(self):
+        return self.combustion_chamber.mass_flow_out
+
+    @property
     def specific_impulse(self):
-        return self.thrust / (self.mass_flow * 9.81)
+        return self.thrust / (self.mass_flow_out * 9.81)
 
     def check_finished(self):
         if not self.finished_simulating:

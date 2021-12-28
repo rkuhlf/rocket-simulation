@@ -6,7 +6,7 @@
 import pandas as pd
 
 
-from Helpers.data import reimann_sum
+from Helpers.data import riemann_sum
 
 def scale_saved_curve(path, desired_burn_time, desired_average_thrust, target_path=None):
     if target_path is None:
@@ -32,7 +32,7 @@ def scale_curve(data, desired_burn_time, desired_average_thrust):
     thrusts = list(data["thrust"])
 
     # Don't worry too much about total impulse; it has extremely high variability between runs of the motor and depending on how you count the in betweens you can get a range of 5000 Ns
-    total_impulse = reimann_sum(times, thrusts)
+    total_impulse = riemann_sum(times, thrusts)
 
     average_thrust = total_impulse / burn_time
 

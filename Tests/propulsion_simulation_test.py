@@ -10,14 +10,15 @@ import numpy as np
 from random import random
 
 
+from Helpers.data import riemann_sum
+# import SimulateMotor
+import Simulations.DesignedMotor as SimulateMotor
 
-import SimulateRocket
 
-
-class TestSimulateRocket(unittest.TestCase):        
+class TestSimulateMotor(unittest.TestCase):        
     def get_current_simulation(self):
         if not hasattr(self, "sim"):
-            self.sim = SimulateRocket.simulate_rocket()
+            self.sim = SimulateMotor.get_sim()
         
         return self.sim
 
@@ -30,18 +31,18 @@ class TestSimulateRocket(unittest.TestCase):
         return self.data
 
 
-class TestAverages(TestSimulateRocket):
+class TestAverages(TestSimulateMotor):
     def test_total_impulse(self):
         # The total impulse of the motor should be the same in the inputs and the outputs
         sim = self.get_current_simulation()
-        target = sim.rocket.motor.get_total_impulse()
+        target = sim.motor.get_total_impulse()
 
         time_increment = sim.environment.time_increment
 
 
         data = self.get_current_output()
 
-        # Integrate over the thrust using a trapezoidal reimann sum (that is how it is added in the model)
+        # Integrate over the thrust using a trapezoidal riemann sum (that is how it is added in the model)
         actual = 0
         previous_thrust = 0
         for i, row in data.iterrows():
@@ -52,10 +53,20 @@ class TestAverages(TestSimulateRocket):
         self.assertLess(percent_error, 1, 
         "The computed thrust of your model is more than 1 percent off of what it should be. This is likely caused by a time increment that is too large relative to your burn time.")
 
+    def test_mass_flow(self):
+        data = self.get_current_output()
+
+        flow_in = riemann_sum(data["time"], data["mass_flow"])
+        flow_out = riemann_sum(data["time"], data["mass_flow_out"])
+
+        # Based on the math, even if you stop as soon as pressure equalizes, there is no way you have more than 2 kilograms in there
+        self.assertLess(flow_in - flow_out, 2)
 
 
 
-class TestWholeFlight(TestSimulateRocket):
+
+
+class TestWholeFlight(TestSimulateMotor):
     def test_flipping(self):
         data = self.get_current_output()
 

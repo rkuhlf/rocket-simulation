@@ -32,10 +32,10 @@ class DataType(Enum):
 def fahrenheit_from_kelvin(kelvin):
     return (kelvin - 273.15) * 9/5 + 32
 
-def reimann_sum(x, y):
+def riemann_sum(x, y):
     total = 0
     for i in range(len(x) - 1):
-        # Use a trapezoidal reimann sum to approximate the integral
+        # Use a trapezoidal riemann sum to approximate the integral
         total += (x[i + 1] - x[i]) * (y[i] + y[i + 1]) / 2
 
     return total
