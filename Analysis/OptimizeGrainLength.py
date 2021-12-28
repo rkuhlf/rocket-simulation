@@ -48,8 +48,6 @@ ax2.plot(grain_lengths, burn_times)
 ax2.set(title="Burn Time vs Grain Length", xlabel="Length [m]", ylabel="Burn Time [s]")
 
 ax3.plot(grain_lengths, specific_impulse_total, label="Total")
-print(specific_impulse_total)
-print(specific_impulse_used)
 ax3.plot(grain_lengths, specific_impulse_used, label="Used")
 ax3.set(title="Specific Impulse vs Grain Length", xlabel="Length [m]", ylabel="Specific Impulse [s]")
 ax3.legend()

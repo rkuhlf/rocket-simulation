@@ -151,7 +151,7 @@ class Motor(MassObject):
 
     #endregion
 
-# ! FIXME: I am pretty sure the specific impulse for the simulations should be getting higher than it is currently. At the moment, it never really gets above 210
+
 class CustomMotor(Motor):
     # FIXME: scaling the burn time does not work for custom motors
     # TODO: add a simulation for the gas phase
@@ -172,6 +172,8 @@ class CustomMotor(Motor):
         self.data = pd.read_csv(self.data_path)
 
         self.logger = MotorLogger(self)
+
+        self.cstar_efficiency = 0.85
 
         super().__init__()
 
@@ -230,7 +232,7 @@ class CustomMotor(Motor):
         self.nozzle.isentropic_exponent = target_data["gamma"]
         self.combustion_chamber.density = target_data["Chamber Density [kg/m^3]"]
         self.combustion_chamber.temperature = target_data["Chamber Temperature [K]"]
-        self.combustion_chamber.cstar = target_data["C-star [m/s]"]
+        self.combustion_chamber.cstar = target_data["C-star [m/s]"] * self.cstar_efficiency
         
         average_molar_mass = target_data["Molar Mass [g/mol]"]
         # The molar mass is in g/mol by default, so we convert it to kg/mol

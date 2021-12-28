@@ -120,7 +120,7 @@ def interpolated_lookup_2D(dataframe, key1, key2, value1, value2, lookup_key, sa
     after_keys = dataframe[dataframe[key1] >= value1]
 
     if safe and len(after_keys) == 0:
-        after_keys = dataframe.iloc[-1]
+        after_key1 = dataframe.iloc[-1]
     else:
         after_key1 = after_keys.iloc[0]
 
