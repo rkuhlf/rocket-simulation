@@ -4,6 +4,7 @@
 
 from typing import Callable
 import numpy as np
+from numpy.core.numeric import tensordot
 
 
 from presetObject import PresetObject
@@ -39,11 +40,15 @@ def constant(value: float) -> Callable:
     return inner
 
 constant_prandtl_number = constant(0.8)
+constant_latent_heat_HTPB = constant(1.8 * 10**6) # 1.8 MJ/kg
+# ! FIXME: figure out the actual value for this
 constant_latent_heat_paraffin = constant(1.8 * 10**6) # 1.8 MJ/kg
+constant_latent_heat_ABS = constant(2.3 * 10**6) # 1.8 MJ/kg
 constant_nitrous_viscosity = constant(4 * 10**-5)
 
 def no_internal_transfer_enthalpy_difference(grain):
-    specific_heat = 877.8032 # J / kg for Nitrous
+    # It varies from about 800 to 1300 for Nitrous gas http://edge.rit.edu/edge/P07106/public/Nox.pdf
+    specific_heat = 1200 # J / kg for Nitrous
 
     return specific_heat * (grain.flame_temperature - grain.fuel_temperature)
 
@@ -58,13 +63,14 @@ def whitmore_friction_coefficient(grain):
     return 0.074 / grain.reynolds_number ** 0.2
 
 def whitmore_regression_model(grain):
+    """Predict the regression rate of non-entraining fuels. For a low viscosity fuel like Paraffin, use the whitmore_regression_model_with_entrainment"""
     ans = grain.friction_coefficient
     ans *= grain.get_flux() / (2 * grain.density * grain.prandtl_number ** (2/3))
     ans *= grain.enthalpy_difference / grain.latent_heat
 
     return ans
 
-def regression_rate_ABS_nitrous_a_priori(grain):
+def whitmore_regression_model_with_entrainment(grain):
     pass
 
 def bath_correction_for_helical_regression(regression, reynolds_number, port_diameter, helix_diameter):
@@ -324,13 +330,42 @@ class Grain(PresetObject):
         return ans
 
 
+class HTPBGrain(Grain):
+    """Exact same as Grain, just uses different defaults. Be aware that you must also override the motor data_path to correct CEA data"""
+    # This would probably be better implemented with the prototype design pattern, but I do not know how to use that
+
+    def __init__(self, **kwargs):
+        super().__init__()
+
+        self.density = 930 # kg/m^3; from google. I have also seen 920
+        self.regression_rate_function = regression_rate_HTPB_nitrous
+        self.latent_heat_function = constant_latent_heat_HTPB
+
+        self.overwrite_defaults(**kwargs)
+
+class ABSGrain(Grain):
+    """Exact same as Grain, just uses different defaults. Be aware that you must also override the motor data_path to correct CEA data"""
+    # This would probably be better implemented with the prototype design pattern, but I do not know how to use that
+
+    def __init__(self, **kwargs):
+        super().__init__()
+
+        self.density = 1000 # kg/m^3; from google. I have also seen 975
+        self.regression_rate_function = whitmore_regression_model
+        self.latent_heat_function = constant_latent_heat_ABS
+
+        self.overwrite_defaults(**kwargs)
+
+
 if __name__ == "__main__":
-    g = Grain()
-    g.regression_rate_function = whitmore_regression_model
+    g = HTPBGrain()
+    g.length = 0.86
+    g.port_diameter = 0.0254
+
 
     print(g)
-
-    g.update_regression(2.7, 0.1)
+    area = np.pi * g.port_radius ** 2
+    g.update_regression(350 * area, 0, flame_temperature=3000)
 
     print(g)
 

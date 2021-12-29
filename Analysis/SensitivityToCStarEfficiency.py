@@ -7,7 +7,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from Simulations.DesignedMotor import get_sim
+from Simulations.DesignedMotorHTPB import get_sim
 
 # As a percentage of 1
 min_efficiency = 0.1

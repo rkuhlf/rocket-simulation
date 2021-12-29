@@ -168,8 +168,8 @@ class CustomMotor(Motor):
         self.combustion_chamber = CombustionChamber()
         self._nozzle = Nozzle()
 
-        self.data_path = "./Data/Input/CombustionLookup.csv"
-        self.data = pd.read_csv(self.data_path)
+        self._data_path = "./Data/Input/CombustionLookup.csv"
+        self.update_data()
 
         self.logger = MotorLogger(self)
 
@@ -204,6 +204,19 @@ class CustomMotor(Motor):
     def nozzle(self, n):
         self._nozzle = n
         self.nozzle_area = n.exit_area
+
+
+    @property
+    def data_path(self):
+        return self._data_path
+
+    @data_path.setter
+    def data_path(self, d):
+        self._data_path = d
+        self.update_data()
+    
+    def update_data(self):
+        self.data = pd.read_csv(self.data_path)
 
     def update_values_from_CEA(self, chamber_pressure, OF):
         """

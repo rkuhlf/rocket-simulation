@@ -7,13 +7,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-from Simulations.DesignedMotor import get_sim
+from Simulations.DesignedMotorABS import get_sim
+# from Simulations.DesignedMotorHTPB import get_sim
 
 # In meters
 min_length = 0.1
-max_length = 2
+max_length = 5
 
-iterations = 30
+iterations = 10
 grain_lengths = np.linspace(min_length, max_length, iterations)
 burn_times = []
 total_impulses = []
@@ -28,6 +29,7 @@ for length in grain_lengths:
     # TODO: I do not know how to make this happen automatically
     sim.motor.initial_mass = sim.motor.propellant_mass
     sim.logger = None
+    sim.motor.fuel_grain.verbose = False
 
     sim.run_simulation()
 

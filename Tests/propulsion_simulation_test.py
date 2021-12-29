@@ -12,7 +12,7 @@ from random import random
 
 from Helpers.data import riemann_sum
 # import SimulateMotor
-import Simulations.DesignedMotor as SimulateMotor
+import Simulations.DesignedMotorHTPB as SimulateMotor
 
 
 class TestSimulateMotor(unittest.TestCase):        

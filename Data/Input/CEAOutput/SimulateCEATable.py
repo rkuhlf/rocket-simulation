@@ -16,8 +16,8 @@ from Data.Input.CEAPropellants import define_ABS_nitrous, define_HTPB_nitrous
 
 # by default, it has the HTPB and N2O at 76-ish F. This is probably fine for the HTPB, we will see what effect it has to change it
 # combo_to_sim = CEA_Obj(oxName="N2O", fuelName="HTPB")
-# combo_to_sim = define_ABS_nitrous(overrides_units=True)
-combo_to_sim = define_HTPB_nitrous(overrides_units=True)
+combo_to_sim = define_ABS_nitrous(overrides_units=True)
+# combo_to_sim = define_HTPB_nitrous(overrides_units=True)
 
 
 # expansion ratio is from 25 bar to 90,000 Pa based on OpenRocket with correct external atmosphere
@@ -66,4 +66,4 @@ if __name__ == "__main__":
 
     dataframe = pd.DataFrame(data, columns=["Chamber Pressure [bar]", "O/F Ratio", "C-star [m/s]", "Specific Impulse [s]", "Chamber Temperature [K]", "Chamber Density [kg/m^3]", "Molar Mass [g/mol]", "Throat Velocity [m/s]", "Exit Pressure [bar]", "gamma", "Exit Velocity [m/s]", "Thrust Coefficient"])
     print(dataframe)
-    dataframe.to_csv(inputs_path + "/CombustionLookup.csv")
+    dataframe.to_csv(inputs_path + "/CombustionLookupABS.csv")

@@ -3,8 +3,9 @@
 # CONCLUSION:
 # The regression rate is highly dependent on the Prandtl number; if you are going to use a constant one, be confident
 # Length is not nearly as important (it only affects Reynolds number); basically causes a max change of 1 mm/s depending on how much we change
-# The r-dot is basically directly proportional to temperature. Could be anywhere from 0.2 to 1.15 mm/s, based on 500 to 3000 K. Probably closest to 0.75
+# The r-dot is basically directly proportional to temperature. Could be anywhere from 0.2 to 1.15 mm/s, based on 500 to 3000 K. Probably closest to 0.75. Presumably, the same thing is true of specific heat - the regression is directly proportional to it
 # Should really try to get viscosity correct - I would say that we have a range of something like 4e-5 to 8e-5, but it is extremely hard to tell with the temperature variation through the chamber and the various combustion products and the not pure compositions. Those values give a range of 0.88 mm/s to 1.01 mm/s. Probably closest to 0.95 mm/s
+# Latent heat of vaporization is really important to get correct
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -50,9 +51,31 @@ def display_viscosity():
 
     plt.plot(viscosities * 1e6, np.asarray(rates) * 1000)
     plt.title("Regression rate versus Constant Viscosities")
-    plt.xlabel("Viscosities [MJ/kg]")
+    # FIXME: units are wrong
+    plt.xlabel("Viscosities [Pa/s]")
     plt.ylabel("Regression Rate [mm/s]")
     plt.show()
+
+def display_latent_heat():
+    """
+    Display the effect that the latent heat of vaporization of the fuel grain has on the regression rate. The number is very difficult to determine and depends highly on the differing makeup of composites.
+    """
+    g = new_grain()
+    # My only data point is that paraffin is 1.8e6
+    heats = np.linspace(1e5, 1e7)
+    rates = []
+
+    for h in heats:
+        g.latent_heat_function = constant(h)
+
+        rates.append(g.regression_rate)
+
+    plt.plot(heats, np.asarray(rates) * 1000)
+    plt.title("Regression rate versus Constant Latent Heat")
+    plt.xlabel("Latent Heats [MJ/kg]")
+    plt.ylabel("Regression Rate [mm/s]")
+    plt.show()
+
 
 def display_length():
     g = new_grain()
@@ -91,8 +114,9 @@ if __name__ == "__main__":
 
     # display_prandtl()
     # display_viscosity()
-    display_temperature()
+    # display_temperature()
+    # display_latent_heat()
     
     # display_length()
 
-    
+    pass

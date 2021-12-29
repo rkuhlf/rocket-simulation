@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-from Simulations.DesignedMotor import get_sim
+from Simulations.DesignedMotorHTPB import get_sim
 from Helpers.data import fahrenheit_from_kelvin
 
 
