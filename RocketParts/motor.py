@@ -3,8 +3,8 @@
 # Now there is a custom motor that can simulate a hybrid's combustion process
 
 
+import numpy as np
 import pandas as pd
-from presetObject import PresetObject
 
 from RocketParts.massObject import MassObject
 from Helpers.data import interpolated_lookup, interpolated_lookup_2D
@@ -244,7 +244,7 @@ class CustomMotor(Motor):
         self.nozzle.exit_pressure = target_data["Exit Pressure [bar]"] * 10**5 # Convert from bar to Pa
         self.nozzle.isentropic_exponent = target_data["gamma"]
         self.combustion_chamber.density = target_data["Chamber Density [kg/m^3]"]
-        self.combustion_chamber.temperature = target_data["Chamber Temperature [K]"]
+        self.combustion_chamber.temperature = target_data["Chamber Temperature [K]"] * np.sqrt(self.cstar_efficiency)
         self.combustion_chamber.cstar = target_data["C-star [m/s]"] * self.cstar_efficiency
         
         average_molar_mass = target_data["Molar Mass [g/mol]"]
@@ -255,7 +255,7 @@ class CustomMotor(Motor):
     
     def calculate_thrust(self, altitude=0):
         self.ox_tank.update_drain(self.ox_flow * self.environment.time_increment)
-        self.combustion_chamber.update_combustion(self.ox_flow, self.nozzle, self.environment.time_increment, self.cstar_efficiency)
+        self.combustion_chamber.update_combustion(self.ox_flow, self.nozzle, self.environment.time_increment)
 
         if self.fuel_flow == 0:
             self.OF = 1e10

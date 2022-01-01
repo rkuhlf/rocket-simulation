@@ -60,7 +60,7 @@ class CombustionChamber(PresetObject):
 
         return v
 
-    def get_change_in_pressure(self, apparent_mass_flow, efficiency=1):
+    def get_change_in_pressure(self, apparent_mass_flow):
         '''
         Returns the rate of pressure change with respect to time. 
         Based off of mass continuity in the combustion chamber.
@@ -73,14 +73,15 @@ class CombustionChamber(PresetObject):
         # The apparent mass flow already accounts for the effect of the regression of the grain
         # To be honest, assumptions in this equation affect mostly the charge-up time, and I am pretty sure the way we ignite is going to play a much larger role
         # TODO: you should also be able to get pressure change from C*; would be nice to see if it is the same
-        return efficiency * apparent_mass_flow * self.ideal_gas_constant * self.temperature / self.volume
+        # Combustion temperature is already multiplied by sqrt(combustion efficiency), since I think that is the main effect. It is usually measured holistically, so hard to tell what impact it has on molecular mass
+        return apparent_mass_flow * self.ideal_gas_constant * self.temperature / self.volume
 
-    def update_pressure(self, effective_mass_flow, time_increment, efficiency=1):
+    def update_pressure(self, effective_mass_flow, time_increment):
         if self.pressure_data_type == DataType.CONSTANT:
             pass
 
         elif self.pressure_data_type is DataType.DEFAULT:
-            pressure_increase_rate = self.get_change_in_pressure(effective_mass_flow, efficiency)
+            pressure_increase_rate = self.get_change_in_pressure(effective_mass_flow)
             planned_increment = pressure_increase_rate * time_increment
             # I am arbitrarily limiting this to not have pressure swings bigger than five times the current
             # Should allow us to run a shorter time increment
@@ -98,7 +99,7 @@ class CombustionChamber(PresetObject):
             self.pressure += planned_increment
             self.pressurizing = planned_increment > 0         
 
-    def update_combustion(self, ox_mass_flow, nozzle, time_increment, efficiency=1):
+    def update_combustion(self, ox_mass_flow, nozzle, time_increment):
         # Calculate the mass flow out
         self.mass_flow_out = self.pressure * nozzle.throat_area / self.cstar
 
@@ -109,7 +110,7 @@ class CombustionChamber(PresetObject):
         # Update the pressure in the system. Uses the previously calculated mass flux out
         effective_mass_flow_total = ox_mass_flow + (self.fuel_grain.density - self.density) * volume_regression - self.mass_flow_out
         
-        self.update_pressure(effective_mass_flow_total, time_increment, efficiency)
+        self.update_pressure(effective_mass_flow_total, time_increment)
         
 
 
