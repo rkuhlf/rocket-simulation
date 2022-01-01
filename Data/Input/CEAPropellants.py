@@ -36,15 +36,7 @@ def define_nitrous_card(percent_sulfur_contamination=0, percent_nitrogen_contami
 
     return card_str
 
-
-
-
-def define_HTPB_nitrous(percent_sulfur_contamination=0, percent_nitrogen_contamination=0, percent_curative=17, percent_carbon_black=3, oxidizer_temperature = 298.15, fuel_temperature=298.15, overrides_units=False):
-    # Notice that all of these custom cards require the enthalpy in cal/mol
-    # Sulfur Dioxide can apparently contaminate the nitrous up to 2% mass, so we should take a look at the differences
-    
-    define_nitrous_card(percent_sulfur_contamination, percent_nitrogen_contamination, oxidizer_temperature)
-
+def define_HTPB_card(percent_curative, percent_carbon_black, fuel_temperature):
     card_str = f"""
     fuel HTPB   C 0.662 H 1.0 O 0.00662    wt%={(100 - percent_curative) * (100 - percent_carbon_black) / 100}
     h,cal=-271.96 t(k)={fuel_temperature}
@@ -55,6 +47,14 @@ def define_HTPB_nitrous(percent_sulfur_contamination=0, percent_nitrogen_contami
     """
 
     add_new_fuel('MixedHTPB', card_str)
+
+
+def define_HTPB_nitrous(percent_sulfur_contamination=0, percent_nitrogen_contamination=0, percent_curative=17, percent_carbon_black=3, oxidizer_temperature = 298.15, fuel_temperature=298.15, overrides_units=False):
+    # Notice that all of these custom cards require the enthalpy in cal/mol
+    # Sulfur Dioxide can apparently contaminate the nitrous up to 2% mass, so we should take a look at the differences
+    
+    define_nitrous_card(percent_sulfur_contamination, percent_nitrogen_contamination, oxidizer_temperature)
+    define_HTPB_card(percent_curative, percent_carbon_black, fuel_temperature)
 
     cea_obj._CacheObjDict = {}
 
@@ -102,4 +102,10 @@ def get_hydrocarbon_molar_mass(carbons, hydrogens, oxygens, nitrogens=0):
 
 
 if __name__ == "__main__":
-    print(get_cal_per_mole(74, get_hydrocarbon_molar_mass(3, 3, 0, 1)))
+    # print(get_cal_per_mole(74, get_hydrocarbon_molar_mass(3, 3, 0, 1)))
+    define_HTPB_card(17, 3, 298.15)
+    output = CEA_Obj(oxName="GOX", fuelName="MixedHTPB")
+
+    print(output.get_Temperatures(Pc=360, MR=2, eps=5))
+
+    pass

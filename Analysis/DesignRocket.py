@@ -14,7 +14,7 @@ from Helpers.design import get_propellant_mass, get_ox_mass, get_fuel_mass
 
 from RocketParts.Motor.nitrousProperties import get_liquid_nitrous_density, get_gaseous_nitrous_density, get_nitrous_vapor_pressure
 
-from RocketParts.Motor.grain import determine_optimal_starting_diameter, regression_rate_HTPB_nitrous, find_required_length as find_required_length_fuel
+from RocketParts.Motor.grain import determine_optimal_starting_diameter, marxman_doran_HTPB_nitrous, find_required_length as find_required_length_fuel
 from RocketParts.Motor.oxTank import find_required_length as find_required_length_oxidizer
 from RocketParts.Motor.injector import determine_required_thickness, determine_orifice_count_MR, find_mass_flow_MR, get_cross_sectional_area
 from RocketParts.Motor.nozzle import find_nozzle_length, find_equilibrium_throat_area, find_equilibrium_throat_diameter, determine_expansion_ratio
@@ -94,7 +94,7 @@ print(f"Your target average fuel flow is now {fuel_flow} kg/s, and you target ox
 print(f"In addition, you now have an initial ox flow rate of {find_mass_flow_MR(get_nitrous_vapor_pressure(ox_tank_initial_temperature) * 10**5 - combustion_chamber_pressure, get_liquid_nitrous_density(ox_tank_initial_temperature), get_gaseous_nitrous_density(ox_tank_initial_temperature), get_cross_sectional_area(orifices, injector_diameter), coefficient_of_discharge=0.68)}")
 
 
-port_diameter = determine_optimal_starting_diameter(inner_diameter, fuel_mass, fuel_density, ox_flow, regression_rate_HTPB_nitrous, OF)
+port_diameter = determine_optimal_starting_diameter(inner_diameter, fuel_mass, fuel_density, ox_flow, marxman_doran_HTPB_nitrous, OF)
 grain_length = find_required_length_fuel(port_diameter, inner_diameter, fuel_mass, fuel_density)
 
 print(f"A port diameter of {port_diameter} meters and a length of {grain_length} meters should mean that your fuel burns up at about the same time as your ox runs out.")

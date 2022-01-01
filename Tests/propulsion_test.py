@@ -38,7 +38,7 @@ class TestingGrain(unittest.TestCase):
         fuel_density = 920
         target_OF = 7
 
-        port_diameter = determine_optimal_starting_diameter(outer_diameter, fuel_mass, fuel_density, 4.8, regression_rate_HTPB_nitrous, target_OF)
+        port_diameter = determine_optimal_starting_diameter(outer_diameter, fuel_mass, fuel_density, 4.8, marxman_doran_HTPB_nitrous, target_OF)
         grain_length = find_required_length(port_diameter, outer_diameter, fuel_mass, fuel_density)
 
         calculated_mass = (np.pi * (outer_diameter / 2) ** 2 - (np.pi * (port_diameter / 2) ** 2)) * grain_length * fuel_density

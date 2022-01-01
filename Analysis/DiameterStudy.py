@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 
 
 from RocketParts.Motor.nitrousProperties import calculate_maximum_liquid_expansion
-from RocketParts.Motor.grain import determine_optimal_starting_diameter, regression_rate_HTPB_nitrous, find_required_length as find_required_length_fuel
+from RocketParts.Motor.grain import determine_optimal_starting_diameter, marxman_doran_HTPB_nitrous, find_required_length as find_required_length_fuel
 from RocketParts.Motor.oxTank import find_required_length as find_required_length_oxidizer
 from RocketParts.Motor.nozzle import find_nozzle_length, find_equilibrium_throat_area
 from RocketParts.Motor.injector import determine_required_thickness
@@ -61,7 +61,7 @@ for d in possible_diameters:
     print(f"{tank_length} meters")
     print(f"{tank_length * 3.281} feet")
 
-    port_diameter = determine_optimal_starting_diameter(d, fuel_mass, fuel_density, 2, regression_rate_HTPB_nitrous, target_OF)
+    port_diameter = determine_optimal_starting_diameter(d, fuel_mass, fuel_density, 2, marxman_doran_HTPB_nitrous, target_OF)
     grain_length = find_required_length_fuel(port_diameter, d, fuel_mass, fuel_density)
 
     print("FUEL GRAIN LENGTHS")

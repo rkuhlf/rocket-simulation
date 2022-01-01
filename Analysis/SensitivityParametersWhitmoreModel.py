@@ -9,13 +9,16 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from RocketParts.Motor.grain import Grain, constant, whitmore_regression_model
+from RocketParts.Motor.grain import constant, whitmore_regression_model
+# from RocketParts.Motor.grain import HTPBGrain as Grain
+from RocketParts.Motor.grain import ABSGrain as Grain
 
 
 def new_grain():
     g = Grain()
     g.regression_rate_function = whitmore_regression_model
     g.update_regression(3, 0, flame_temperature=2400)
+    print(f"FLUX: {g.get_flux()}")
 
     return g
 
@@ -41,7 +44,8 @@ def display_viscosity():
     I believe it only affects the reynolds number of the flow, but that has some impact on the ultimate rate.
     """
     g = new_grain()
-    viscosities = np.linspace(4e-5, 8e-5)
+    # Viscosity of some kind of Gox HTPB mixture was 1.37e-4
+    viscosities = np.linspace(4e-5, 13.7e-5)
     rates = []
 
     for v in viscosities:
@@ -52,7 +56,7 @@ def display_viscosity():
     plt.plot(viscosities * 1e6, np.asarray(rates) * 1000)
     plt.title("Regression rate versus Constant Viscosities")
     # FIXME: units are wrong
-    plt.xlabel("Viscosities [Pa/s]")
+    plt.xlabel("Viscosities [Pa/s * e-6]")
     plt.ylabel("Regression Rate [mm/s]")
     plt.show()
 
@@ -113,7 +117,7 @@ def display_temperature():
 if __name__ == "__main__":
 
     # display_prandtl()
-    # display_viscosity()
+    display_viscosity()
     # display_temperature()
     # display_latent_heat()
     

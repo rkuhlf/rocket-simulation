@@ -7,7 +7,7 @@ from RocketParts.motor import CustomMotor
 from RocketParts.Motor.oxTank import OxTank
 from RocketParts.Motor.injector import Injector
 from RocketParts.Motor.combustionChamber import CombustionChamber
-from RocketParts.Motor.grain import HTPBGrain, regression_rate_HTPB_nitrous, whitmore_regression_model
+from RocketParts.Motor.grain import HTPBGrain, marxman_doran_HTPB_nitrous, whitmore_regression_model
 from RocketParts.Motor.nozzle import Nozzle
 from environment import Environment
 

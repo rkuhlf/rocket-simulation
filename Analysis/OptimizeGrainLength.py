@@ -12,9 +12,9 @@ from Simulations.DesignedMotorABS import get_sim
 
 # In meters
 min_length = 0.1
-max_length = 5
+max_length = 2
 
-iterations = 10
+iterations = 30
 grain_lengths = np.linspace(min_length, max_length, iterations)
 burn_times = []
 total_impulses = []

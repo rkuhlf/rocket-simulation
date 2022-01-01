@@ -1,6 +1,7 @@
 # SIMULATE THE MOTOR I DESIGNED FOR MMR
 # Uses HTPB-Nitrous
 # Designed for a 120 kg wet mass rocket with 7.75 inch ID (I forgot to include paraffin thickness for the fuel grain) 
+# Can get up to 125_000 Ns for a really long grain, only 92_000 Ns for a 1m grain. Or, if the regression equation is different, I can get 143000 for a really long grain
 
 # TODO: create a designed file like this for ABS and Paraffin also
 
@@ -11,7 +12,7 @@ from RocketParts.motor import CustomMotor
 from RocketParts.Motor.oxTank import OxTank
 from RocketParts.Motor.injector import Injector
 from RocketParts.Motor.combustionChamber import CombustionChamber
-from RocketParts.Motor.grain import ABSGrain, constant
+from RocketParts.Motor.grain import ABSGrain, marxman_whitman_ABS_nitrous
 from RocketParts.Motor.nozzle import Nozzle
 from environment import Environment
 
@@ -22,7 +23,9 @@ def get_sim():
     # Usually we use 293.15
     ox = OxTank(temperature=293.15, length=2.54, diameter=0.1905, ox_mass=52.43)
 
-    grain = ABSGrain(verbose=True, length=0.9, port_diameter=0.15, outer_diameter=0.1905)
+    # This is why you cannot simply use a cylindrical port. 4.5 meters (for the whitmore model) is too long, simple as that
+    grain = ABSGrain(verbose=True, length=1.3, port_diameter=0.12, outer_diameter=0.1651)
+    grain.regression_rate_function = marxman_whitman_ABS_nitrous
 
     chamber = CombustionChamber(fuel_grain=grain, limit_pressure_change=False)
     

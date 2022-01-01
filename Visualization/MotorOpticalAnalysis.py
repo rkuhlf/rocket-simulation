@@ -52,12 +52,14 @@ def display_efficiency(data):
 
 def print_total_impulse(data):
     total_impulse = riemann_sum(data["time"], data["thrust"])
+    total_mass = riemann_sum(data["time"], data["mass_flow_out"])
     
     print(f"TOTAL IMPULSE: {total_impulse}")
     burn_time = data["time"].values[-1]
     print(f"BURN TIME: {burn_time}")
     average_thrust = total_impulse / burn_time
     print(f"AVERAGE THRUST: {average_thrust}")
+    print(f"SPECIFIC IMPULSE: {total_impulse / (total_mass * 9.81)}")
 
 
 def display_flows(data):

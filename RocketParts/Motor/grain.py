@@ -14,53 +14,30 @@ from Helpers.decorators import diametered
 #region REGRESSION-RATE EQUATIONS
 # This is just a list of pre-programmed regression-rate equations that I have come across
 
-def regression_rate_paraffin_nitrous(grain):
-    leading_ballistic_coefficient = 1.550 * 10 ** -4
-    exponential_ballistic_coefficient = 0.5
-    return leading_ballistic_coefficient * grain.get_flux() ** exponential_ballistic_coefficient
-
-def regression_rate_HTPB_nitrous(grain):
-    # https://classroom.google.com/u/0/c/MzgwNjcyNDIwMDg3/m/NDA0NTQyMjUyODI4/details
-    leading_ballistic_coefficient = 1.8756 * 10 ** -4
-    # Notice that n is even less than 0.5, which means that your burn will end fuel-rich with annular
-    exponential_ballistic_coefficient = 0.347
-    return leading_ballistic_coefficient * grain.get_flux() ** exponential_ballistic_coefficient
-
-
-def regression_rate_ABS_nitrous_constant(grain):
-    # https://classroom.google.com/u/2/c/MzgwNjcyNDIwMDg3/m/Mzg1OTk5OTY1Njc5/details (table 4.1)
-    return 0.0007
-
 # A function like this makes it very easy to create a function that returns a value, so ever other model of this value should just be a drop in replacement
 def constant(value: float) -> Callable:
-    # https://digitalcommons.usu.edu/cgi/viewcontent.cgi?article=1148&context=spacegrant suggests 0.8
-    def inner(*args, **kwargs) -> float: # does not matter what it is passed; it will be constant
+    # does not matter what it is passed; it will be constant
+    def inner(*args, **kwargs) -> float: 
         return value
 
     return inner
 
-constant_prandtl_number = constant(0.8)
-constant_latent_heat_HTPB = constant(1.8 * 10**6) # 1.8 MJ/kg
-# ! FIXME: figure out the actual value for this
-constant_latent_heat_paraffin = constant(1.8 * 10**6) # 1.8 MJ/kg
-constant_latent_heat_ABS = constant(2.3 * 10**6) # 1.8 MJ/kg
-constant_nitrous_viscosity = constant(4 * 10**-5)
+def exponential(leading: float, exponent: float) -> Callable:
+    def inner(grain) -> float: # does not matter what it is passed; it will be constant
 
-def no_internal_transfer_enthalpy_difference(grain):
-    # It varies from about 800 to 1300 for Nitrous gas http://edge.rit.edu/edge/P07106/public/Nox.pdf
-    specific_heat = 1200 # J / kg for Nitrous
+        return leading * grain.get_flux() ** exponent
 
-    return specific_heat * (grain.flame_temperature - grain.fuel_temperature)
+    return inner
 
-def whitmore_friction_coefficient(grain):
-    # https://digitalcommons.usu.edu/cgi/viewcontent.cgi?article=1148&context=spacegrant
-    # I have no idea if this is correct
-    re = grain.reynolds_number
-    if grain.verbose:
-        if re < 10 ** 6 or re > 10 ** 7:
-            print(f"Reynolds number of {re:.1e} is outside of the theoretical range of 10^6 to 10^7 for this friction model")
 
-    return 0.074 / grain.reynolds_number ** 0.2
+# https://classroom.google.com/u/0/c/MzgwNjcyNDIwMDg3/m/NDA0NTQyMjUyODI4/details
+# Notice that n is even less than 0.5, which means that your burn will end fuel-rich with annular
+marxman_doran_HTPB_nitrous = exponential(1.8756e-4, 0.347)
+marxman_whitman_HTPB_nitrous = exponential(2.55e-5, 0.679)
+marxman_waxman_paraffin_nitrous = exponential(1.55e-4, 0.5)
+# https://classroom.google.com/u/2/c/MzgwNjcyNDIwMDg3/m/Mzg1OTk5OTY1Njc5/details (table 4.1)
+regression_rate_ABS_nitrous_constant = constant(0.0007)
+marxman_whitman_ABS_nitrous = exponential(2.623e-5, 0.664)
 
 def whitmore_regression_model(grain):
     """Predict the regression rate of non-entraining fuels. For a low viscosity fuel like Paraffin, use the whitmore_regression_model_with_entrainment"""
@@ -72,6 +49,43 @@ def whitmore_regression_model(grain):
 
 def whitmore_regression_model_with_entrainment(grain):
     pass
+
+def marxman_original_flat_plate_regression(grain):
+    """For a given propellant system, everything except G and x is generally held constant"""
+    pass
+
+
+
+def whitmore_friction_coefficient(grain):
+    # https://digitalcommons.usu.edu/cgi/viewcontent.cgi?article=1148&context=spacegrant
+    # I have no idea if this is correct
+    re = grain.reynolds_number
+    if grain.verbose:
+        if re < 10 ** 6 or re > 10 ** 7:
+            print(f"Reynolds number of {re:.1e} is outside of the theoretical range of 10^6 to 10^7 for this friction model")
+
+    return 0.074 / grain.reynolds_number ** 0.2
+
+# https://digitalcommons.usu.edu/cgi/viewcontent.cgi?article=1148&context=spacegrant suggests 0.8
+constant_prandtl_number = constant(0.8)
+constant_latent_heat_HTPB = constant(1.8e6) # J/kg
+constant_latent_heat_karabeyoglu_HTPB = constant(1.812e6)
+constant_latent_heat_karabeyoglu_HDPE = constant(2.2e6)
+constant_latent_heat_karabeyoglu_PMMA = constant(9.66e5)
+constant_enthalpy_difference_karabeyoglu_PMMA_GOX = constant(22306e3)
+constant_enthalpy_difference_karabeyoglu_HDPE_GOX = constant(24734e3)
+constant_enthalpy_difference_karabeyoglu_HTPB_GOX = constant(25296e3)
+# ! FIXME: figure out the actual value for this
+constant_latent_heat_paraffin = constant(1.8e6)
+constant_latent_heat_ABS = constant(2.3e6)
+
+constant_nitrous_viscosity = constant(4e-5)
+
+def no_internal_transfer_enthalpy_difference(grain):
+    # It varies from about 800 to 1300 for Nitrous gas http://edge.rit.edu/edge/P07106/public/Nox.pdf
+    specific_heat = 1200 # J / kg for Nitrous
+
+    return specific_heat * (grain.flame_temperature - grain.fuel_temperature)
 
 def bath_correction_for_helical_regression(regression, reynolds_number, port_diameter, helix_diameter):
     """The correction uses a ratio of diameters, so the units must match"""
@@ -203,7 +217,7 @@ class Grain(PresetObject):
         # Should usually be overriden in MotorSimulation
         self.stop_on_error = True
 
-        self.regression_rate_function = regression_rate_paraffin_nitrous
+        self.regression_rate_function = marxman_waxman_paraffin_nitrous
         self.prandtl_number_function = constant_prandtl_number
         self.latent_heat_function = constant_latent_heat_paraffin
         self.friction_coefficient_function = whitmore_friction_coefficient
@@ -338,8 +352,8 @@ class HTPBGrain(Grain):
         super().__init__()
 
         self.density = 930 # kg/m^3; from google. I have also seen 920
-        self.regression_rate_function = regression_rate_HTPB_nitrous
-        self.latent_heat_function = constant_latent_heat_HTPB
+        self.regression_rate_function = marxman_doran_HTPB_nitrous
+        self.latent_heat_function = constant_latent_heat_karabeyoglu_HTPB
 
         self.overwrite_defaults(**kwargs)
 
@@ -360,7 +374,8 @@ class ABSGrain(Grain):
 if __name__ == "__main__":
     g = HTPBGrain()
     g.length = 0.86
-    g.port_diameter = 0.0254
+    g.port_diameter = 0.0254 # = 1 in
+    g.regression_rate_function = whitmore_regression_model
 
 
     print(g)
@@ -370,7 +385,7 @@ if __name__ == "__main__":
     print(g)
 
 
-    # best_ID = determine_optimal_starting_diameter(0.2032, 15, 920, 4.8, regression_rate_HTPB_nitrous, 6) 
+    # best_ID = determine_optimal_starting_diameter(0.2032, 15, 920, 4.8, marxman_doran_HTPB_nitrous, 6) 
     # print(best_ID)
 
     # Using an ID of 5 cm, an OD of 5.75 inches - 1 inches (0.5 inches on both sides in case we have extra regression)
