@@ -19,7 +19,7 @@ def get_sim():
     ox = OxTank(temperature=293.15, length=2.54, diameter=0.1905, ox_mass=52.43)
 
     grain = HTPBGrain(verbose=True, length=0.88, port_diameter=0.11, outer_diameter=0.1651)
-    grain.regression_rate_function = whitmore_regression_model
+    # grain.regression_rate_function = whitmore_regression_model
 
     chamber = CombustionChamber(fuel_grain=grain, limit_pressure_change=False)
     

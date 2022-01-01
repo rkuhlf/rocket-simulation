@@ -23,6 +23,14 @@ def get_radius(area):
     
     return (area / np.pi) ** (1/2)
 
+def helical_length(height, turns, radius):
+    circumference = np.pi * radius * 2
+    single = np.sqrt(circumference ** 2 + (height / turns) ** 2)
+    return single * turns
+
+def helical_area(height, turns, radius, port_radius):
+    return helical_length(height, turns, radius) * np.pi * port_radius * 2
+
 # TODO: find a better naming convention for these: maybe the helpers don't need a keyword and I should assume they return a value
 
 def interpolate(x, x1, x2, y1, y2):
