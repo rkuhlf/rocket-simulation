@@ -10,10 +10,10 @@ import matplotlib.pyplot as plt
 from Simulations.DesignedMotorHTPB import get_sim
 
 # As a percentage of 1
-min_efficiency = 0.1
+min_efficiency = 0.4
 max_efficiency = 1
 
-iterations = 30
+iterations = 10
 combustion_efficiencies = np.linspace(min_efficiency, max_efficiency, iterations)
 burn_times = []
 total_impulses = []

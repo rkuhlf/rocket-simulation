@@ -255,7 +255,7 @@ class CustomMotor(Motor):
     
     def calculate_thrust(self, altitude=0):
         self.ox_tank.update_drain(self.ox_flow * self.environment.time_increment)
-        self.combustion_chamber.update_combustion(self.ox_flow, self.nozzle, self.environment.time_increment)
+        self.combustion_chamber.update_combustion(self.ox_flow, self.nozzle, self.environment.time_increment, self.cstar_efficiency)
 
         if self.fuel_flow == 0:
             self.OF = 1e10
