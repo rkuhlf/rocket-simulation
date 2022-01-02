@@ -334,13 +334,19 @@ class Nozzle(PresetObject):
         return self.throat_area * self.area_ratio
         
 
-    def get_nozzle_coefficient(self, chamber_pressure, atmospheric_pressure):
+    def get_nozzle_coefficient(self, chamber_pressure, atmospheric_pressure=101325):
         """
             Calculate the multiplicative effect that the nozzle has on thrust
             Uses an exit pressure calculated from CEA
 
             Notice that pressure can be in any units so long as they are all the same
         """
+        # FIXME: occasionally this gives a very negative value
+
+
+        if chamber_pressure / atmospheric_pressure < 2:
+            # Assume it does not actually get choked
+            return 1
         
         # The isentropic exponent and the exit pressure is determined by CEA software and updated by our motor class. TODO: implement exit pressure calculations myself to validate
 
@@ -364,6 +370,22 @@ class Nozzle(PresetObject):
 
 
 if __name__ == "__main__":
+    # import matplotlib.pyplot as plt
+    # n = Nozzle()
+    # print(n.get_nozzle_coefficient(165128))
+
+    # n.exit_pressure = 100
+    
+    # for k in np.linspace(0.8, 1.4, num=6):
+    #     n.isentropic_exponent = k
+
+    #     inputs = np.linspace(0.01, 2_000_000, num=500) # Pa
+    #     outputs = [n.get_nozzle_coefficient(pressure) for pressure in inputs]
+
+    #     plt.plot(inputs, outputs, label=str(k))
+    # plt.legend()
+    # plt.show()
+
     # display_constructed_quadratic()
     # calculate_nozzle_coordinates_truncated_parabola((0, 0.1), 35 * np.pi / 180, (1, 0.5))
     # compare_truncated_to_quadratic()
@@ -390,7 +412,7 @@ if __name__ == "__main__":
     # I am going to look at a few diameters, but I think we are in the range of 3/8 inch
     # Highly sensitive to bolt diameter: 8 mm gives 30, 10 mm gives 20, 12 mm gives 14
     # Tanner said 620528156 Pa (90000 psi) was what he had been using for his bolts
-    print(4 / find_required_retention_bolts(120 * 9.81, 600, 53520, 620528156, 0.00635, safety_factor=1))
+    # print(4 / find_required_retention_bolts(120 * 9.81, 600, 53520, 620528156, 0.00635, safety_factor=1))
     # only giving two for some reason
 
     pass
