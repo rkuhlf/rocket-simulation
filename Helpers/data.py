@@ -1,6 +1,7 @@
 # DATA CLASSES AND ENUMS
 # Depending on what type of data input we are using, we will want to have an enum entry that is easily serializable to indicate to the object what to do
 
+import os
 import re
 from enum import Enum, auto
 import numpy as np
@@ -15,7 +16,7 @@ outputs_path = "./Data/Output/"
 #endregion
 
 
-
+# TODO: get rid of this for the pythonic functional approach
 # Mass object needs a data type for default (calculated), constant (not calculated), lookup (I am really concerned that I will end up having to have multiple input types for look up, like AOA_MACH; causes clutter), and function (once again, I do not want to have multiple function look ups)
 # There is no need for an individual lookup type. If the user wants to look up the thing they, can do the lookup themselves in the inputted function
 class DataType(Enum):
@@ -28,6 +29,9 @@ class DataType(Enum):
     FUNCTION_INJECTOR = auto()
     FUNCTION_MACH_ALPHA = auto()
 
+
+def hist_box_count(count, multiplier=2):
+    return int(np.sqrt(multiplier * count))
 
 def fahrenheit_from_kelvin(kelvin):
     return (kelvin - 273.15) * 9/5 + 32
@@ -131,3 +135,4 @@ def interpolated_lookup_2D(dataframe, key1, key2, value1, value2, lookup_key, sa
 
     # We have already interpolated along the isolines, now interpolate between them
     return interpolate(value1, value_before_value1, value_after_value1, before_value, after_value)
+

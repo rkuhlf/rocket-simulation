@@ -2,7 +2,6 @@
 # For our first math model review, we need a design for our rocket
 # I simulate it here
 
-
 import numpy as np
 
 
@@ -39,7 +38,7 @@ def get_mass_objects():
 
 
 def get_rocket():
-    env = Environment(time_increment=0.1, apply_wind=False)
+    env = Environment(time_increment=0.1, apply_wind=True)
     motor = Motor(front=2, center_of_gravity=2, mass=61, propellant_mass=60, thrust_curve="Data/Input/finleyThrust.csv", environment=env)
     motor.adjust_for_atmospheric = True
     motor.nozzle_area = np.pi * (0.10399776 / 2) ** 2
@@ -79,6 +78,9 @@ def get_sim():
 
     return sim
 
+def get_randomized_sim():
+    # TODO: implement randomizations
+    return get_sim()
 
 if __name__ == "__main__":
     sim = get_sim()

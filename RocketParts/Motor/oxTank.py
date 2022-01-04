@@ -2,6 +2,7 @@
 # Describes the ox tank - mostly just how to calculate ullage
 # In addition, it provides some design equations for determining the safety of the tank given the thickness and pressure
 
+from random import gauss
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -52,6 +53,10 @@ def find_center_of_mass(ullage, volume, length, temperature):
 
 
 #region DATA-ORIENTED EQUATIONS
+def random_WSMR_temperature():
+    """ Returns reasonable distribution of ox tank starting temperatures
+    https://workflowy.com/s/ox-tank-temperatures/uyeOIq6AbgfvoOoY"""
+    return gauss(288.7, 5.6)
 
 def find_combined_total_heat_capacity(gaseous_mass, liquid_mass,
                                       gaseous_specific_heat,
@@ -174,6 +179,8 @@ class OxTank(PresetObject):
 
         super().overwrite_defaults(**kwargs)
 
+        self.initial_temperature = self._temperature
+        self.initial_mass = self.ox_mass
         self.volume = self.get_volume()
 
         # Initialize the ullage in-place after declaring it
@@ -192,9 +199,6 @@ class OxTank(PresetObject):
             self.calculate_ullage(constant_temperature=True)
 
     #region Getters
-    def get_mass_flow_vap(self, time_increment):
-        return (self.p_gas_mass - self.get_gas_mass()) / time_increment
-
     def get_volume(self):
         '''
             Calculate the volume of a cylinder with flat heads
@@ -239,6 +243,13 @@ class OxTank(PresetObject):
 
         # it is converted from bar
         return get_nitrous_vapor_pressure(self.temperature) * 100000
+    
+    def get_mass_flow_vap(self, time_increment):
+        return (self.p_gas_mass - self.get_gas_mass()) / time_increment
+    
+    @property
+    def total_mass_used(self):
+        return self.initial_mass - self.ox_mass
 
     #endregion
 

@@ -16,4 +16,13 @@
     "csv-preview.formatValues": "never",
     "editor.formatOnSave": false,
     "python.linting.lintOnSave": false,
+    "files.exclude": {
+        ".replit": true,
+        "*-stubs": true,
+        "*.log": true,
+        "**/__pycache__": true
+    },
+    "files.watcherExclude": {
+        "**/__pycache__": true
+    },
 }

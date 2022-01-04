@@ -144,6 +144,7 @@ class Injector(MassObject):
 
         self.mass_flow_datatype = DataType.FUNCTION_INJECTOR
         self.mass_flow = 0
+        self.discharge_coefficient = 0.7
 
 
         super().overwrite_defaults(**kwargs)
@@ -164,11 +165,9 @@ class Injector(MassObject):
 
         density = get_liquid_nitrous_density(self.ox_tank.temperature)
 
-        discharge_coefficient = 0.7
-
         area_ratio = self.total_orifice_area / self.combustion_chamber.fuel_grain.get_outer_cross_sectional_area()
         
-        return discharge_coefficient * self.total_orifice_area * ((2 * density * pressure_drop) / (1 - area_ratio) ** 2) ** (1 / 2)
+        return self.discharge_coefficient * self.total_orifice_area * ((2 * density * pressure_drop) / (1 - area_ratio) ** 2) ** (1 / 2)
 
 
     def set_mass_flow_function(self, func):

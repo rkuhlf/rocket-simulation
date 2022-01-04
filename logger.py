@@ -82,14 +82,19 @@ class Logger(PresetObject):
 
         self.save_row()
 
-    def save_to_csv(self):
+    def get_dataframe(self):
         df = pd.DataFrame(self.rows)
 
         try:
             # Rather than using the index (0, 1, 2, 3, 4...), I will index the rows by the time the row is recorded at
             df.set_index('time', inplace=True)
         except KeyError as e:
-            print("Attempted to save to csv, but there was no time index. Likely, the simulation did not make it past one frame, and no time was ever logged.")
+            print("Attempted to create dataframe, but there was no time index. Likely, the simulation did not make it past one frame, and no time was ever logged.")
+        
+        return df
+
+    def save_to_csv(self):
+        df = self.get_dataframe()
         
         try:
             df.to_csv(self.full_path)
@@ -132,7 +137,7 @@ class FeedbackLogger(Logger):
 
     def handle_frame(self):
 
-        if self.simulation.environment.time > self.last_debugged + self.debug_every:
+        if self.partial_debugging and self.simulation.environment.time > self.last_debugged + self.debug_every:
             self.display_partial_data()
 
 

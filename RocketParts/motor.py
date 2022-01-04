@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 from RocketParts.massObject import MassObject
-from Helpers.data import interpolated_lookup, interpolated_lookup_2D
+from Helpers.data import interpolated_lookup, interpolated_lookup_2D, riemann_sum
 from environment import Environment
 
 # Imports for defaults
@@ -61,25 +61,19 @@ class Motor(MassObject):
         self.set_thrust_data(dataframe)
 
     def set_thrust_data(self, dataframe: pd.DataFrame):
+        if dataframe.empty:
+            raise ValueError("The indicated dataframe has no values.")
+        
+        if dataframe.iloc[0]["time"] != 0:
+            print("Passed motor thrust data has no zero time data point, it is added automatically")
+            dataframe.iloc[0]["time"] = 0
+
         self.thrust_curve = None
         self.thrust_data = dataframe
 
-        total_thrust = 0
-        
-        for index, row in self.thrust_data.iterrows():
-            if index == 0:
-                continue
-
-            p_row = self.thrust_data.iloc[index - 1]
-            change_in_time = row["time"] - p_row["time"]
-            average_thrust = (row["thrust"] + p_row["thrust"]) / 2
-            total_thrust += change_in_time * average_thrust
-
-        self.total_impulse = total_thrust
-
+        self.total_impulse = riemann_sum(self.thrust_data["time"], self.thrust_data["thrust"])
         self.burn_time = self.thrust_data.iloc[-1]["time"]
-
-        self.mass_per_thrust = self.propellant_mass / total_thrust
+        self.mass_per_thrust = self.propellant_mass / self.total_impulse
 
 
     def calculate_thrust(self, altitude=0):
@@ -156,7 +150,6 @@ class CustomMotor(Motor):
     # FIXME: scaling the burn time does not work for custom motors
     # TODO: add a simulation for the gas phase
 
-
     def __init__(self, **kwargs):
         self.pressurization_time_increment = None
         self.post_pressurization_time_increment = None
@@ -195,16 +188,6 @@ class CustomMotor(Motor):
         self.total_impulse = 0
 
         self.finished_simulating = False
-
-    @property
-    def nozzle(self):
-        return self._nozzle
-
-    @nozzle.setter
-    def nozzle(self, n):
-        self._nozzle = n
-        self.nozzle_area = n.exit_area
-
 
     @property
     def data_path(self):
@@ -280,6 +263,7 @@ class CustomMotor(Motor):
 
         return self.thrust
 
+
     # region Setters
     @property
     def ox_tank(self):
@@ -299,6 +283,14 @@ class CustomMotor(Motor):
         self.combustion_chamber.fuel_grain = grain
         self.initial_mass = self.propellant_mass
 
+    @property
+    def nozzle(self):
+        return self._nozzle
+
+    @nozzle.setter
+    def nozzle(self, n):
+        self._nozzle = n
+        self.nozzle_area = n.exit_area
     # endregion
 
     # region Helper Properties
@@ -331,6 +323,7 @@ class CustomMotor(Motor):
     def specific_impulse(self):
         return self.thrust / (self.mass_flow_out * 9.81)
 
+    # Whole Simulation Properties
     def check_finished(self):
         if not self.finished_simulating:
             raise Exception("Motor has not finished simulating")
@@ -355,6 +348,17 @@ class CustomMotor(Motor):
     def used_specific_impulse(self):
         """Divide by only the mass that has burned away"""
         return self.get_total_impulse() / ((self.initial_mass - self.propellant_mass) * 9.81)
+
+    # A few to evaluate it when there is no logger
+    @property
+    def average_OF(self):
+        # Total mass of oxidizer used divided by the total mass of fuel used
+        # TODO: Write a test that this works correctly
+        return self.ox_tank.total_mass_used / self.fuel_grain.total_mass_used
+
+    @property
+    def average_regression_rate(self):
+        return self.fuel_grain.approximate_average_regression_rate(self.get_burn_time())
 
     def end(self):
         self.finished_simulating = True

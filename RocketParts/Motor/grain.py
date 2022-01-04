@@ -2,6 +2,7 @@
 # Simulate the properties of the fuel grain
 # Mostly covers regression calculations
 
+from random import choice
 from typing import Callable
 import numpy as np
 from numpy.core.numeric import tensordot
@@ -226,6 +227,9 @@ class Grain(PresetObject):
 
         super().overwrite_defaults(**kwargs)
 
+        self.initial_mass = self.fuel_mass
+        self.initial_radius = self.port_radius
+
         if self.verbose:
             print(f"Initialized fuel grain with {self.fuel_mass} kg of fuel. It has an {self.port_diameter} m port diameter and a {self.outer_diameter} m outer diameter.")
 
@@ -265,9 +269,15 @@ class Grain(PresetObject):
     @property
     def reynolds_number(self):
         return self.get_flux() * self.length / self.oxidizer_dynamic_viscosity
-
     #endregion
 
+    def get_port_area(self, port_diameter=None):
+        if port_diameter is None:
+            port_diameter = self.port_diameter
+        
+        return np.pi * (port_diameter / 2) ** 2
+
+    # TODO: make a decorator for this kind of function that takes parameters as overrides (really think about it the other way; the self.__dict__ is overriding the parameters)
     def get_flux(self, ox_flow=None, port_diameter=None):
         if ox_flow is None:
             ox_flow = self.ox_flow
@@ -275,7 +285,7 @@ class Grain(PresetObject):
         if port_diameter is None:
             port_diameter = self.port_diameter
 
-        return ox_flow / (np.pi * (port_diameter / 2) ** 2)
+        return ox_flow / self.get_port_area(port_diameter)
 
     def get_burn_area(self, port_diameter=None, length=None):
         if port_diameter is None:
@@ -333,6 +343,15 @@ class Grain(PresetObject):
         self.port_radius += regressed_distance
 
 
+    #region Evaluations
+    def approximate_average_regression_rate(self, burn_time):
+        # Use the average diameter method
+        return (self.port_radius - self.initial_radius) / burn_time
+
+    @property
+    def total_mass_used(self):
+        return self.initial_mass - self.fuel_mass
+
     def __repr__(self) -> str:
         ans = f"Fuel grain of density {self.density} kg/m^3 with port diameter {self.port_diameter} m and outer diameter {self.outer_diameter} m, giving mass of {self.fuel_mass:.2f} kg. "
 
@@ -343,6 +362,7 @@ class Grain(PresetObject):
 
         return ans
 
+    #endregion
 
 class HTPBGrain(Grain):
     """Exact same as Grain, just uses different defaults. Be aware that you must also override the motor data_path to correct CEA data"""
@@ -369,6 +389,9 @@ class ABSGrain(Grain):
         self.latent_heat_function = constant_latent_heat_ABS
 
         self.overwrite_defaults(**kwargs)
+
+    def randomize_regression_algorithm(self):
+        self.regression_rate_function = choice([whitmore_regression_model, regression_rate_ABS_nitrous_constant, marxman_whitman_ABS_nitrous])
 
 
 if __name__ == "__main__":

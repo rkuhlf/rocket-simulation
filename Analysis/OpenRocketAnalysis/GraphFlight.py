@@ -13,6 +13,7 @@ with new_or_instance() as instance:
 
     # Load document, run simulation and get data and events
     sim = most_updated_sim(orh)
+    
     orh.run_simulation(sim)
     data = orh.get_timeseries(sim, [FlightDataType.TYPE_TIME, FlightDataType.TYPE_ALTITUDE, FlightDataType.TYPE_VELOCITY_Z])
     events = orh.get_events(sim)
@@ -31,6 +32,7 @@ with new_or_instance() as instance:
 
     ax1.plot(data[FlightDataType.TYPE_TIME], data[FlightDataType.TYPE_ALTITUDE], 'b-')
     ax2.plot(data[FlightDataType.TYPE_TIME], data[FlightDataType.TYPE_VELOCITY_Z], 'r-')
+    # ax2.plot(data[FlightDataType.TYPE_TIME], data[FlightDataType.TYPE_ACCELERATION_Z], 'r-')
     ax1.set_xlabel('Time (s)')
     ax1.set_ylabel('Altitude (m)', color='b')
     ax2.set_ylabel('Vertical Velocity (m/s)', color='r')
