@@ -72,6 +72,7 @@ def find_specific_enthalpy_of_liquid_nitrous(temperature):
 
 
 def find_specific_enthalpy_of_gaseous_nitrous(temperature):
+    """Intended for saturated vapor"""
     # kJ / kg
     coefficients = [-200, 440.055, -459.701, 434.081, -485.338]
     total = 0

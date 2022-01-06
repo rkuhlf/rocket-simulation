@@ -1,7 +1,6 @@
 
 import unittest
-import sys
-sys.path.append(".")
+
 
 from simulation import Simulation
 from logger import Logger

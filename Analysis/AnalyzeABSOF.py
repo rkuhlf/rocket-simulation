@@ -8,11 +8,9 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-import sys
 from numpy.lib.npyio import save
 
 from rocketcea.cea_obj import CEA_Obj
-sys.path.append(".")
 
 from Data.Input.CEA.CEAPropellants import define_ABS_nitrous
 from Analysis.AnalyzeOFAtPressure import find_efficiencies, display_OF_graph

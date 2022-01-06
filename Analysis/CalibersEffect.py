@@ -15,8 +15,7 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
-import sys
-sys.path.append(".")
+
 
 from Simulations.DesignedRocket import get_sim
 

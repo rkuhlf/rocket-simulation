@@ -8,11 +8,14 @@ import numpy as np
 from scipy.optimize import curve_fit
 
 
+from Helpers.visualization import make_matplotlib_big
+
+
+# Data from 1992 to 2011
+data = pd.read_csv("Data/Input/Wind/WSMRSpeedAltitude.csv")
+print(data)
+
 def fit_altitude_speed():
-    data = pd.read_csv("Data/Input/Wind/WSMRSpeedAltitude.csv")
-
-    print(data)
-
     # Does not match the first parts very well
     def polynomial(x, a, b, c, d, e, f):
         return a * b * x + c * x ** 2 + d * x ** 3 + e * x ** 4 + f * x ** 5
@@ -42,21 +45,29 @@ def fit_altitude_speed():
 
     func = piecewise_linear
     guesses = [500, 7000, 10700, 15000, 0, 0, 0, 0, 0, 3, 3, 5, 15, 2] # None
-
-    plt.plot(data["Altitude"], data["Speed"], 'b-', label='data')
-
     popt, pcov = curve_fit(func, data["Altitude"], data["Speed"], guesses)
 
-    print(popt)
+    return func, popt
 
 
-    plt.plot(data["Altitude"], func(data["Altitude"], *popt), "r-")
+def display_fit(func, popt):
+    make_matplotlib_big()
+    
+    fig, ax = plt.subplots()
+
+    ax.plot(data["Altitude"], data["Speed"], 'b-', label='data')
+
+
+    ax.plot(data["Altitude"], func(data["Altitude"], *popt), "r-")
+
+    ax.set(title="Speed at Altitude Comparison", xlabel="Altitude (meters)", ylabel="Wind Speed (m/s)")
 
     plt.show()
 
 
 
-
-
 if __name__ == "__main__":
-    fit_altitude_speed()
+    function, parameters = fit_altitude_speed()
+    display_fit(function, parameters)
+
+

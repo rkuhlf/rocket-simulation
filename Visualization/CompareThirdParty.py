@@ -4,11 +4,13 @@
 
 import pandas as pd
 import numpy as np
-import matplotlib
 import matplotlib.pyplot as plt
 
+
+from Helpers.visualization import make_matplotlib_big
+
 # TODO: This should use some kind of data structure to avoid all of the repetition
-def display_altitude(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None, rockSim=None):
+def display_altitude(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None, rockSim=None, show=True):
     fig, ax = plt.subplots()
 
     apogees = []
@@ -51,9 +53,10 @@ def display_altitude(openRocket=None, rasaero=None, no_angles=None, DIY_angles=N
     ax.set(title="Altitude AGL over Time", xlabel="Time (sec)", ylabel="Altitude (ft)")
     ax.legend(loc="upper left")
 
-    plt.show()
+    if show:
+        plt.show()
 
-def display_drag(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None, rockSim=None):
+def display_drag(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None, rockSim=None, show=True):
     fig, (ax1, ax2) = plt.subplots(2)
 
     ax1.set(title="CD over Time", xlabel="Time (sec)", ylabel="Coefficient of Drag")
@@ -63,9 +66,9 @@ def display_drag(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None,
 
     if openRocket is not None:
         # Hard code the CD of the parachute
-        openRocket['Drag coefficient (​)'] = openRocket['Drag coefficient (​)'].fillna(0.97)
+        openRocket['Drag coefficient ()'] = openRocket['Drag coefficient ()'].fillna(0.97)
 
-        ax1.plot(openRocket["Time (s)"], openRocket["Drag coefficient (​)"], label="OpenRocket")
+        ax1.plot(openRocket["Time (s)"], openRocket["Drag coefficient ()"], label="OpenRocket")
 
         drag_forces = openRocket["Drag force (N)"]
         ax2.plot(openRocket["Time (s)"], drag_forces, label="OpenRocket")
@@ -109,18 +112,19 @@ def display_drag(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None,
 
     ax1.legend(loc="upper right")
     fig.tight_layout()
-    plt.show()
+    if show:
+        plt.show()
 
-def display_mach(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None, rockSim=None):
+def display_mach(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None, rockSim=None, show=True):
     fig, ax = plt.subplots()
 
     max_machs = []
 
     if openRocket is not None:
         
-        ax.plot(openRocket["Time (s)"], openRocket["Mach number (​)"] * np.sign(openRocket["Vertical velocity (m/s)"]), label="OpenRocket")
+        ax.plot(openRocket["Time (s)"], openRocket["Mach number ()"] * np.sign(openRocket["Vertical velocity (m/s)"]), label="OpenRocket")
 
-        max_machs.append(np.max(openRocket["Mach number (​)"]))
+        max_machs.append(np.max(openRocket["Mach number ()"]))
 
     if rasaero is not None:
         ax.plot(rasaero["Time (sec)"], rasaero["Mach Number"] * np.sign(rasaero["Vel-V (ft/sec)"]), label="RASAero")
@@ -149,15 +153,16 @@ def display_mach(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None,
     ax.set(title="Mach Number over Time", xlabel="Time (sec)", ylabel="Mach")
     ax.legend(loc="upper right")
 
-    plt.show()
+    if show:
+        plt.show()
 
-def display_forces(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None, rockSim=None):
+def display_forces(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None, rockSim=None, show=True):
     """Plot the net forces for all supplied data"""
 
     fig, ax = plt.subplots()
 
     if openRocket is not None:
-        ax.plot(openRocket["Time (s)"], openRocket["Total acceleration (m/s²)"] * (openRocket["Mass (g)"] / 1000) * np.sign(openRocket["Vertical acceleration (m/s²)"]), label="OpenRocket")
+        ax.plot(openRocket["Time (s)"], openRocket["Total acceleration (m/s)"] * (openRocket["Mass (g)"] / 1000) * np.sign(openRocket["Vertical acceleration (m/s)"]), label="OpenRocket")
 
     if rasaero is not None:
         ax.plot(rasaero["Time (sec)"], (rasaero["Accel (ft/sec^2)"] / 3.28084) * (rasaero["Weight (lb)"] * 0.45359237), label="RASAero")
@@ -177,9 +182,10 @@ def display_forces(openRocket=None, rasaero=None, no_angles=None, DIY_angles=Non
 
     ax.legend(loc="upper right")
 
-    plt.show()
+    if show:
+        plt.show()
 
-def display_thrust(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None, rockSim=None):
+def display_thrust(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None, rockSim=None, show=True):
     # This one should be identical for all of them
     fig, ax = plt.subplots()
 
@@ -198,9 +204,10 @@ def display_thrust(openRocket=None, rasaero=None, no_angles=None, DIY_angles=Non
     ax.set(title="Thrust over Time", xlabel="Time (sec)", ylabel="Force (N)")
     ax.legend(loc="upper right")
 
-    plt.show()
+    if show:
+        plt.show()
 
-def display_weight(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None, rockSim=None):
+def display_weight(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None, rockSim=None, show=True):
     # This one should be identical for all of them
     fig, ax = plt.subplots()
 
@@ -219,9 +226,10 @@ def display_weight(openRocket=None, rasaero=None, no_angles=None, DIY_angles=Non
     ax.set(title="Weight over Time", xlabel="Time (sec)", ylabel="Force (N)")
     ax.legend(loc="upper right")
 
-    plt.show()
+    if show:
+        plt.show()
 
-def display_velocity(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None, rockSim=None):
+def display_velocity(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None, rockSim=None, show=True):
     fig, ax = plt.subplots()
 
     max_velocities = []
@@ -257,15 +265,16 @@ def display_velocity(openRocket=None, rasaero=None, no_angles=None, DIY_angles=N
     ax.set(title="Vertical Velocity over Time", xlabel="Time (sec)", ylabel="Velocity (m/s)")
     ax.legend(loc="upper right")
 
-    plt.show()
+    if show:
+        plt.show()
 
 
-def display_angles(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None, rockSim=None):
+def display_angles(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None, rockSim=None, show=True):
     # This one should be identical for all of them
     fig, ax = plt.subplots()
 
     if openRocket is not None:
-        ax.plot(openRocket["Time (s)"], openRocket["Angle of attack (°)"], label="OpenRocket")
+        ax.plot(openRocket["Time (s)"], openRocket["Angle of attack ()"], label="OpenRocket")
 
     if rasaero is not None:
         ax.plot(rasaero["Time (sec)"], np.abs(rasaero["Angle of Attack (deg)"]), label="RASAero")
@@ -279,34 +288,54 @@ def display_angles(openRocket=None, rasaero=None, no_angles=None, DIY_angles=Non
     ax.set(title="AOA over Time", xlabel="Time (sec)", ylabel="Angle of Attack (deg)")
     ax.legend(loc="upper right")
 
+    if show:
+        plt.show()
+
+def display_all_forces(rasaero=None, no_angles=None):
+    # Use scaling to make them line up by matching the burnouts, apogees, and landings
+    fig, ax = plt.subplots()
+
+    if rasaero is not None:
+        ax.plot(rasaero["Time (sec)"], rasaero["Weight (lb)"] * 4.44822, label="Weight")
+        ax.plot(rasaero["Time (sec)"], rasaero["Drag (lb)"] * 4.44822, label="Drag")
+        ax.plot(rasaero["Time (sec)"], rasaero["Thrust (lb)"] * 4.44822, label="Thrust")
+
+    if no_angles is not None:
+        ax.plot(no_angles["time"], no_angles["Gravity3"], label="Weight")
+        ax.plot(no_angles["time"], no_angles["Drag3"] * 4.44822, label="Drag")
+        ax.plot(no_angles["time"], no_angles["Thrust"] * 4.44822, label="Thrust")
+
+    ax.set(title="Rocket Forces", xlabel="Time (s)", ylabel="Magnitude (N)")
+    
+    plt.legend()
+
     plt.show()
 
 
 if __name__ == "__main__":
     openRocket = pd.read_csv("Data/Output/ThirdPartySimulations/OpenRocketData.csv")
     rasaero = pd.read_csv("Data/Output/ThirdPartySimulations/RasaeroAltitudeTime.CSV")
-    no_angles = pd.read_csv("Data/Output/output1DOFMMR.csv")
+    no_angles = pd.read_csv("Data/Output/parachuteDebugging.csv")
     DIY_angles = pd.read_csv("Data/Output/output5DOFWind.csv")
-    rockSim = pd.read_csv("Data/Output/ThirdPartySimulations/RockSim.csv")
+    # rockSim = pd.read_csv("Data/Output/ThirdPartySimulations/RockSim.csv")
     
-    
-    font = {'family' : 'DejaVu Sans',
-        # 'weight' : 'bold',
-        'size'   : 22}
+    make_matplotlib_big()
 
-    matplotlib.rc('font', **font)
+    # rasaero["Real Drag"] = rasaero["CD"] * 0.0023769 * rasaero["Velocity (ft/sec)"] ** 2
 
-    matplotlib.rc('legend', fontsize=15) 
+    # plt.plot(rasaero["Time (sec)"], rasaero["Drag (lb)"])
+    # plt.plot(rasaero["Time (sec)"], rasaero["Real Drag"])
 
 
 
-    display_altitude(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles, rockSim=rockSim)
-    display_drag(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles, rockSim=rockSim)
-    display_forces(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles, rockSim=rockSim)
-    display_mach(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles, rockSim=rockSim)
-    display_velocity(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles, rockSim=rockSim)
+    display_altitude(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)#, rockSim=rockSim)
+    display_drag(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)#, rockSim=rockSim)
+    # display_forces(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)#, rockSim=rockSim)
+    # display_mach(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)#, rockSim=rockSim)
+    display_velocity(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)#, rockSim=rockSim)
 
-    display_thrust(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles, rockSim=rockSim)
-    display_weight(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles, rockSim=rockSim)
-    display_angles(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles, rockSim=rockSim)
+    display_thrust(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)#, rockSim=rockSim)
+    display_weight(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)#, rockSim=rockSim)
+    # display_angles(openRocket=openRocket, rasaero=rasaero, no_angles=no_angles, DIY_angles=DIY_angles)#, rockSim=rockSim)
 
+    display_all_forces(rasaero=rasaero, no_angles=no_angles)

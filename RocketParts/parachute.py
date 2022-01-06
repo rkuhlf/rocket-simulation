@@ -3,13 +3,14 @@
 # This is really simple right now; it doesn't even have any snatch forces or rope stuff
 
 from numpy import pi
-import sys
-sys.path.append(".")
+
 
 from Helpers.general import interpolate
 from RocketParts.massObject import MassObject
+from Helpers.decorators import diametered
 
 
+@diametered
 class Parachute(MassObject):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -30,14 +31,6 @@ class Parachute(MassObject):
         self.overwrite_defaults(**kwargs)
 
     @property
-    def diameter(self):
-        return self.radius * 2
-
-    @diameter.setter
-    def diameter(self, d):
-        self.radius = d / 2
-
-    @property
     def area(self):
         return pi * self.radius ** 2
 
@@ -56,7 +49,8 @@ class Parachute(MassObject):
         if self.deployed:
             interpolated_area = interpolate(rocket.environment.time, self.time_of_deployment, self.time_of_deployment + self.required_deployment_time, 0, self.area)
             interpolated_area = min(interpolated_area, self.area)
-            return 1/2 * self.CD * interpolated_area * rocket.dynamic_pressure
+
+            return rocket.dynamic_pressure * self.CD * interpolated_area
 
         return 0
 

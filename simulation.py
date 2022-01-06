@@ -2,8 +2,11 @@
 # This is the file for the basic connections between a rocket, a logger, and an environment
 # It doesn't really do much math, but there are a few basic utilities that help in other places
 
+from RocketParts.Motor.grain import Grain
+from RocketParts.motor import Motor
 from presetObject import PresetObject
 
+from rocket import Rocket
 from Helpers.general import magnitude
 from logger import Logger, RocketLogger
 from environment import Environment
@@ -18,8 +21,7 @@ class Simulation(PresetObject):
 
     def override_subobjects(self):
         """
-        Ensure that all of the subobjects the simulation references have the correct memory addresses in there
-        This should almost always be overriden
+        Ensure that all of the subobjects the simulation references have the correct memory addresses in there. This should almost always be overriden.
         """
         if self.logger is not None:
             self.logger.simulation = self
@@ -27,13 +29,13 @@ class Simulation(PresetObject):
     def __init__(self, **kwargs):
         """
         You could potentially pass in a logger, but a default one will be created for you
-        Other variables are max_frames and stopping_errors
+        Other variables are max_frames and stop_on_error
         """
-        # FIXME: this one is not going to work with keyword arguments
         self._logger = Logger(self)
         self.max_frames = -1
         self.frames = 0
         self.stop_on_error = True
+        self.automatically_save = True
 
         super().overwrite_defaults(**kwargs)
 
@@ -69,7 +71,7 @@ class Simulation(PresetObject):
         self.frames += 1
 
     def end(self):
-        if self.logger is not None:
+        if self.logger is not None and self.automatically_save:
             self.logger.save_to_csv()
 
     @property
@@ -119,7 +121,7 @@ class RocketSimulation(Simulation):
 
     def __init__(self, **kwargs):
         self._environment = Environment()
-        self.rocket = None
+        self.rocket: Rocket = None
 
         self.apply_angular_forces = True
 
@@ -180,7 +182,7 @@ class RocketSimulation(Simulation):
     #region Helpers to evaluate the flight
 
     @property
-    def dist_from_start(self):
+    def dist_from_start(self) -> float:
         return (self.rocket.position[0] ** 2 + self.rocket.position[1] ** 2) ** (1 / 2)
 
     @property
@@ -212,6 +214,11 @@ class RocketSimulation(Simulation):
 
     # endregion
 
+class RocketSimulationToApogee(RocketSimulation):
+    @property
+    def should_continue_simulating(self):
+        # We only need to go until the apogee is set
+        return self.apogee is None
 
 class MotorSimulation(Simulation):
     """
@@ -234,7 +241,7 @@ class MotorSimulation(Simulation):
 
     def __init__(self, **kwargs):
         self._environment = Environment()
-        self.motor = None
+        self.motor: Motor = None
 
         super().__init__(**kwargs)
 
@@ -291,7 +298,7 @@ class MotorSimulation(Simulation):
         return self.motor.combustion_chamber
 
     @property
-    def grain(self):
+    def grain(self) -> Grain:
         return self.motor.combustion_chamber.fuel_grain
 
     @property
@@ -318,6 +325,14 @@ class MotorSimulation(Simulation):
     def specific_impulse(self):
         """Return the overall specific impulse for the whole of the designed motor"""
 
+        return self.total_specific_impulse
+
+    @property
+    def used_specific_impulse(self):
+        return self.motor.used_specific_impulse
+
+    @property
+    def total_specific_impulse(self):
         return self.motor.total_specific_impulse
 
     # endregion

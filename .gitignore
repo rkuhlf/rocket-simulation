@@ -6,8 +6,12 @@ __pycache__
 
 Helpers/__pycache__/general.cpython-36.pyc
 
-Temporary
+*Temporary
 
+*-stubs
+*.log
 *.uni
 *.blend1
 cache_*
+
+.VSCodeCounter

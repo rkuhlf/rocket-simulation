@@ -6,8 +6,7 @@
 import numpy as np
 import pandas as pd
 
-import sys
-sys.path.append(".")
+
 
 from Helpers.data import inputs_path
 from Helpers.general import interpolate, get_next
@@ -125,7 +124,7 @@ class Environment(PresetObject):
 
 
     def get_air_density_from_lookup(self, altitude):
-        # This is mostly just here to double check that the model is wokring
+        # This is mostly just here to double check that the model is working
         return interpolated_lookup(self.atmospheric_data, "Altitude", altitude, "Density")
 
 

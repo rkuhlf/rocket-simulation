@@ -6,8 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d, interp2d, fitpack, bisplrep, bisplev
 from math import isnan
-import sys
-sys.path.append(".")
+
 
 from Helpers.data import interpolated_lookup, interpolated_lookup_2D
 

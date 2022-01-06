@@ -7,8 +7,7 @@ import pandas as pd
 import numpy as np
 from random import random
 
-import sys
-sys.path.append(".")
+
 
 import SimulateRocket
 from Helpers.general import angle_between
@@ -41,7 +40,7 @@ class TestAverages(TestSimulateRocket):
 
         data = self.get_current_output()
 
-        # Integrate over the thrust using a trapezoidal reimann sum (that is how it is added in the model)
+        # Integrate over the thrust using a trapezoidal riemann sum (that is how it is added in the model)
         actual = 0
         previous_thrust = 0
         for i, row in data.iterrows():

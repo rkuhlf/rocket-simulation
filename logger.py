@@ -4,6 +4,8 @@
 
 import numpy as np
 import pandas as pd
+import string
+import random
 from copy import deepcopy, copy
 
 from presetObject import PresetObject
@@ -80,16 +82,28 @@ class Logger(PresetObject):
 
         self.save_row()
 
-    def save_to_csv(self):
+    def get_dataframe(self):
         df = pd.DataFrame(self.rows)
 
         try:
             # Rather than using the index (0, 1, 2, 3, 4...), I will index the rows by the time the row is recorded at
             df.set_index('time', inplace=True)
-        except:
-            print("Attempted to save to csv, but there was no time index. Likely, the simulation did not make it past one frame, and no time was ever logged.")
+        except KeyError as e:
+            print("Attempted to create dataframe, but there was no time index. Likely, the simulation did not make it past one frame, and no time was ever logged.")
         
-        df.to_csv(self.full_path)
+        return df
+
+    def save_to_csv(self):
+        df = self.get_dataframe()
+        
+        try:
+            df.to_csv(self.full_path)
+        except PermissionError as e:
+            # Hopefully ten random characters is enough that it does not try to save over an already generated one
+            new_path = self.full_path + "Redirected" + ''.join(random.choice(string.ascii_uppercase) for _ in range(10))
+
+            print("Could not save to {self.full_path}, instead saving to {new_path}. You likely have the target file open in another program.")
+            df.to_csv(new_path)
 
         return df
 
@@ -123,7 +137,7 @@ class FeedbackLogger(Logger):
 
     def handle_frame(self):
 
-        if self.simulation.environment.time > self.last_debugged + self.debug_every:
+        if self.partial_debugging and self.simulation.environment.time > self.last_debugged + self.debug_every:
             self.display_partial_data()
 
 
@@ -219,7 +233,8 @@ class MotorLogger(FeedbackLogger):
         # You need to make sure the parent's override doesn't override the self values we have already established
         super().__init__(motor)
 
-        self.to_record = ["thrust", "combustion_chamber.pressure", "ox_tank.pressure", "combustion_chamber.temperature", "ox_tank.temperature", "combustion_chamber.fuel_grain.port_diameter", "OF", "combustion_chamber.cstar", "specific_impulse", "fuel_flow", "ox_flow", "mass_flow"]
+        # TODO: it would be nice to have the average molar mass of the products displayed
+        self.to_record = ["thrust", "combustion_chamber.pressure", "ox_tank.pressure", "combustion_chamber.temperature", "ox_tank.temperature", "combustion_chamber.fuel_grain.port_diameter", "OF", "combustion_chamber.cstar", "specific_impulse", "fuel_flow", "ox_flow", "mass_flow", "mass_flow_out", "combustion_chamber.ideal_gas_constant"]
 
         self.debug_every = 2 # seconds
 

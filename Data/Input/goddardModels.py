@@ -8,17 +8,18 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from math import isnan
-import sys
-sys.path.append(".")
+
 
 from Helpers.data import interpolated_lookup, interpolated_lookup_2D
 
 
 # This code should run regardless of how you import this file
+# The idea is that it is a drop-in replacement for the RASAero data whenever you want to do it
 data = pd.read_csv('Data/Input/aerodynamicQualities.csv')
 mach = data['Mach']
 alpha = data['Alpha']
-CD = data['CD']
+# TODO: add the difference; should be the last fix (unless drag is really messed up)
+CD = data['CD Power-Off']
 CL = data['CL']
 CP = data['CP']
 

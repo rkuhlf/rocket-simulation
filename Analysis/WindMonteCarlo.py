@@ -10,8 +10,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-import sys
-sys.path.append(".")
+
 
 from Simulations.DesignedRocket import get_sim
 

@@ -1,5 +1,5 @@
 # DISPLAY WIND OVER TIME
-
+# Show some of the wind data I downloaded so that I can try to match it
 
 from scipy.io import netcdf
 import numpy as np
@@ -27,17 +27,22 @@ import matplotlib.pyplot as plt
 # f.close()
 
 
+def display_measured_wind():
+    # Some wind data from Utah
+    df = pd.read_csv('Data/Input/Wind/MoreData.csv')
 
-df = pd.read_csv('Data/Input/Wind/MoreData.csv')
+    fig, (ax1, ax2) = plt.subplots(2)
 
-fig, (ax1, ax2) = plt.subplots(2)
+    ax1.plot(df["index"], df["Magnitude"])
+    ax1.set(title='Actual Speeds')
 
-ax1.plot(df["index"], df["Magnitude"])
-ax1.set(title='Actual Speeds')
+    ax2.scatter(df["index"], df["Direction"], s=1)
+    ax2.set(title='Actual Directions')
 
-ax2.scatter(df["index"], df["Direction"], s=1)
-ax2.set(title='Actual Directions')
+    fig.tight_layout()
 
-fig.tight_layout()
+    plt.show()
 
-plt.show()
+
+if __name__ == "__main__":
+    display_measured_wind()

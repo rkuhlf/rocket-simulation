@@ -14,11 +14,17 @@ import numpy as np
 
 # Max g-force
 
+# Speed at recovery device deployment
 
-# I think there is some way to measure whether the rocket should be heavier with ballistic coefficient. I just want an indicator of how close we are to the best possible mass for a time
+
+# I think there is some way to measure whether the rocket should be heavier with ballistic coefficient. I just want an indicator of how close we are to the best possible mass for a time. Actually, just if it should be lighter or heavier
 
 
 # I want to have something in here for stability. Maybe I will optimize so that the CP is as close to the CG as possible divided by moment of inertia
+
+# Speed off the rail
+# Thrust-to-weight
+# Stability min and max in calibers (also difference between them) 
 
 
 # I guess I could import the Goddard problem solver and determine how close our thrust curve is to the best thrust curve for a flight of otherwise identical dimensions.
@@ -38,6 +44,7 @@ def find_max_compressive_force(data):
     return np.max(data["Compressive"])
 
 # Find the max force for buckling at a few different points
+# Do the total length with the max drag and weight and thrust
 
 # Find the max force on the nozzle retention at any time (need a constant fraction to use for base drag - something conservative)
 
@@ -46,6 +53,7 @@ def find_total_impulse(data):
     # Just use a rectangular approximation instead of the trapezoid
     return np.sum(data["Thrust"]) * (data.iloc[1]["time"] - data.iloc[0]["time"])
 
+# Drift distance
 
 if __name__ == "__main__":
     script_path = "Data/Output/output.csv"

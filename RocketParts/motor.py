@@ -3,13 +3,11 @@
 # Now there is a custom motor that can simulate a hybrid's combustion process
 
 
+import numpy as np
 import pandas as pd
-import sys
-sys.path.append(".")
 
 from RocketParts.massObject import MassObject
-from Helpers.general import interpolate
-from Helpers.data import interpolated_lookup
+from Helpers.data import interpolated_lookup, interpolated_lookup_2D, riemann_sum
 from environment import Environment
 
 # Imports for defaults
@@ -19,8 +17,6 @@ from RocketParts.Motor.combustionChamber import CombustionChamber
 from RocketParts.Motor.nozzle import Nozzle
 from logger import MotorLogger
 
-
-# TODO: add a simulation for the gas phase
 
 
 class Motor(MassObject):
@@ -64,26 +60,20 @@ class Motor(MassObject):
         dataframe = pd.read_csv(path)
         self.set_thrust_data(dataframe)
 
-    def set_thrust_data(self, dataframe):
+    def set_thrust_data(self, dataframe: pd.DataFrame):
+        if dataframe.empty:
+            raise ValueError("The indicated dataframe has no values.")
+        
+        if dataframe.iloc[0]["time"] != 0:
+            print("Passed motor thrust data has no zero time data point, it is added automatically")
+            dataframe.iloc[0]["time"] = 0
+
         self.thrust_curve = None
         self.thrust_data = dataframe
 
-        total_thrust = 0
-        
-        for index, row in self.thrust_data.iterrows():
-            if index == 0:
-                continue
-
-            p_row = self.thrust_data.iloc[index - 1]
-            change_in_time = row["time"] - p_row["time"]
-            average_thrust = (row["thrust"] + p_row["thrust"]) / 2
-            total_thrust += change_in_time * average_thrust
-
-        self.total_impulse = total_thrust
-
+        self.total_impulse = riemann_sum(self.thrust_data["time"], self.thrust_data["thrust"])
         self.burn_time = self.thrust_data.iloc[-1]["time"]
-
-        self.mass_per_thrust = self.propellant_mass / total_thrust
+        self.mass_per_thrust = self.propellant_mass / self.total_impulse
 
 
     def calculate_thrust(self, altitude=0):
@@ -92,11 +82,11 @@ class Motor(MassObject):
 
 
         # The longer we want the burn time, the more we want to shrink the lookup time
-        self.environment.time /= self.time_multiplier
+        lookup_time = self.environment.time / self.time_multiplier
 
         
         try:
-            self.thrust = self.thrust_multiplier * interpolated_lookup(self.thrust_data, "time", self.environment.time, "thrust")
+            self.thrust = self.thrust_multiplier * interpolated_lookup(self.thrust_data, "time", lookup_time, "thrust")
 
             new_mass = self.total_mass - self.thrust_to_mass(self.thrust, self.environment.time_increment)
             self.set_mass_constant(new_mass)
@@ -106,6 +96,7 @@ class Motor(MassObject):
             return self.thrust
 
         except IndexError as e:
+            print("Finished thrusting")
             self.finished_thrusting = True
             return 0
 
@@ -157,10 +148,12 @@ class Motor(MassObject):
 
 class CustomMotor(Motor):
     # FIXME: scaling the burn time does not work for custom motors
+    # TODO: add a simulation for the gas phase
 
     def __init__(self, **kwargs):
-        self.thrust_multiplier = 1
-        self.time_multiplier = 1
+        self.pressurization_time_increment = None
+        self.post_pressurization_time_increment = None
+
         self.finished_thrusting = False
 
         self._ox_tank = OxTank()
@@ -169,35 +162,44 @@ class CustomMotor(Motor):
         self._nozzle = Nozzle()
 
         self.data_path = "./Data/Input/CEA/CombustionLookup.csv"
-        self.data = pd.read_csv(self.data_path)
+        self.update_data()
 
         self.logger = MotorLogger(self)
 
+        self.cstar_efficiency = 0.85
+
         super().__init__()
 
-        self.self.adjust_for_atmospheric = True
+        self.adjust_for_atmospheric = True
         # If you want to adjust for the atmospheric pressure difference, you have to override the nozzle area
 
         self.overwrite_defaults(**kwargs)
+
+        self.pressurization_time_increment = self.pressurization_time_increment or self.environment.time_increment
+        self.post_pressurization_time_increment = self.post_pressurization_time_increment or self.environment.time_increment
+        self.environment.time_increment = self.pressurization_time_increment
 
         self.nozzle_area = self._nozzle.exit_area
 
         # This is only defined as a cached variable to provide easier graphing
         self.thrust = 0
         self.OF = 0
-        self.initial_mass = self.ox_tank.ox_mass + self.combustion_chamber.fuel_grain.fuel_mass
+        self.initial_mass = self.propellant_mass
         self.total_impulse = 0
 
         self.finished_simulating = False
 
     @property
-    def nozzle(self):
-        return self._nozzle
+    def data_path(self):
+        return self._data_path
 
-    @nozzle.setter
-    def nozzle(self, n):
-        self._nozzle = n
-        self.nozzle_area = n.exit_area
+    @data_path.setter
+    def data_path(self, d):
+        self._data_path = d
+        self.update_data()
+    
+    def update_data(self):
+        self.data = pd.read_csv(self.data_path)
 
     def update_values_from_CEA(self, chamber_pressure, OF):
         """
@@ -205,41 +207,41 @@ class CustomMotor(Motor):
         It will always round the O/F and pressure up
         """
 
-        looking_for_pressure = False
+        target_data = {
+            "Throat Velocity [m/s]": 0,
+            "Exit Pressure [bar]": 0,
+            "gamma": 0,
+            "Chamber Density [kg/m^3]": 0,
+            "Chamber Temperature [K]": 0,
+            "C-star [m/s]": 0,
+            "Molar Mass [g/mol]": 0,
+        }
+        target_keys = target_data.keys()
+        target_values = interpolated_lookup_2D(self.data, "Chamber Pressure [bar]", "O/F Ratio", chamber_pressure / 1e5, OF, target_keys, safe=True)
+        
+        for key, value in zip(target_keys, target_values):
+            target_data[key] = value
 
-        for index, row in self.data.iterrows():
-            if looking_for_pressure and chamber_pressure < row["Chamber Pressure [psia]"] * 6894.76: # convert to Pa
-                # We have found the row we want
-                # Eventually, I should probably add an output for the nozzle throat temperature over time. We want to be certain that our graphite won't be damaged by the extreme heat
-                # Actually we don't even need the velocity at the throat because we can calculate it from the c-star and the internal pressure
-                self.nozzle.throat_velocity = row["Throat Velocity [m/s]"]
-                self.nozzle.exit_pressure = row["Exit Pressure [psia]"] * 6894.76
-                self.nozzle.isentropic_exponent = row["gamma"]
-                self.combustion_chamber.density = row["Chamber Density [kg/m^3]"]
-                self.combustion_chamber.temperature = row["Chamber Temperature [K]"]
-                self.combustion_chamber.cstar = row["C-star"] # m/s
-                
-                average_molar_mass = row["Molar Mass [kg/mol]"]
-                # The molar mass is in g/mol by default
-                self.combustion_chamber.ideal_gas_constant = 8.314 / (average_molar_mass / 1000)
-                
-                self.combustion_chamber.OF = self.OF
+        self.nozzle.throat_velocity = target_data["Throat Velocity [m/s]"]
+        # TODO: add nozzle exit velocity just to check that the methods are the same (they should not be anymore; I added the effect of separation)
+        self.nozzle.exit_pressure = target_data["Exit Pressure [bar]"] * 10**5 # Convert from bar to Pa
+        self.nozzle.isentropic_exponent = target_data["gamma"]
+        self.combustion_chamber.density = target_data["Chamber Density [kg/m^3]"]
+        self.combustion_chamber.temperature = target_data["Chamber Temperature [K]"] * np.sqrt(self.cstar_efficiency)
+        self.combustion_chamber.cstar = target_data["C-star [m/s]"] * self.cstar_efficiency
+        
+        average_molar_mass = target_data["Molar Mass [g/mol]"]
+        # The molar mass is in g/mol by default, so we convert it to kg/mol
+        self.combustion_chamber.ideal_gas_constant = 8.314 / (average_molar_mass / 1000)
+        # Eventually, I should probably add an output for the nozzle throat temperature over time. We want to be certain that our graphite won't be damaged by the extreme heat
 
-                break
-            elif looking_for_pressure:
-                # If we are already looking for pressure, we don't need to set it true again
-                continue
-
-            if OF < row["O/F Ratio"]:
-                # To make sure that we always get a number, I am going to always pick the row that has an O/F ratio immediately above the current value
-                looking_for_pressure = True
     
     def calculate_thrust(self, altitude=0):
         self.ox_tank.update_drain(self.ox_flow * self.environment.time_increment)
         self.combustion_chamber.update_combustion(self.ox_flow, self.nozzle, self.environment.time_increment)
 
         if self.fuel_flow == 0:
-            self.OF = 100
+            self.OF = 1e10
         else:
             self.OF = self.ox_flow / self.fuel_flow
         
@@ -256,7 +258,11 @@ class CustomMotor(Motor):
 
         self.total_impulse += self.thrust * self.environment.time_increment
 
+        if not self.combustion_chamber.pressurizing:
+            self.environment.time_increment = self.post_pressurization_time_increment
+
         return self.thrust
+
 
     # region Setters
     @property
@@ -266,7 +272,7 @@ class CustomMotor(Motor):
     @ox_tank.setter
     def ox_tank(self, tank):
         self._ox_tank = tank
-        self.initial_mass = self.ox_tank.ox_mass + self.combustion_chamber.fuel_grain.fuel_mass
+        self.initial_mass = self.propellant_mass
 
     @property
     def fuel_grain(self):
@@ -275,11 +281,27 @@ class CustomMotor(Motor):
     @fuel_grain.setter
     def fuel_grain(self, grain):
         self.combustion_chamber.fuel_grain = grain
-        self.initial_mass = self.ox_tank.ox_mass + self.combustion_chamber.fuel_grain.fuel_mass
+        self.initial_mass = self.propellant_mass
 
+    @property
+    def nozzle(self):
+        return self._nozzle
+
+    @nozzle.setter
+    def nozzle(self, n):
+        self._nozzle = n
+        self.nozzle_area = n.exit_area
     # endregion
 
     # region Helper Properties
+    @property
+    def propellant_mass(self) -> float:
+        return self.ox_tank.ox_mass + self.combustion_chamber.fuel_grain.fuel_mass
+
+    @propellant_mass.setter
+    def propellant_mass(self, p):
+        print("You cannot set the propellant mass of a custom motor. Set either the ox_mass of the ox_tank or the fuel_mass of the fuel_grain. Continuing anyways because inheritance requires it")
+
     @property
     def ox_flow(self):
         # Actually it is probably bad not to cache this; there is a square root call
@@ -294,9 +316,14 @@ class CustomMotor(Motor):
         return self.ox_flow + self.fuel_flow
 
     @property
-    def specific_impulse(self):
-        return self.thrust / self.mass_flow / self.environment.gravitational_acceleration
+    def mass_flow_out(self):
+        return self.combustion_chamber.mass_flow_out
 
+    @property
+    def specific_impulse(self):
+        return self.thrust / (self.mass_flow_out * 9.81)
+
+    # Whole Simulation Properties
     def check_finished(self):
         if not self.finished_simulating:
             raise Exception("Motor has not finished simulating")
@@ -316,6 +343,22 @@ class CustomMotor(Motor):
         self.check_finished()
 
         return self.get_total_impulse() / (self.initial_mass * 9.81)
+
+    @property
+    def used_specific_impulse(self):
+        """Divide by only the mass that has burned away"""
+        return self.get_total_impulse() / ((self.initial_mass - self.propellant_mass) * 9.81)
+
+    # A few to evaluate it when there is no logger
+    @property
+    def average_OF(self):
+        # Total mass of oxidizer used divided by the total mass of fuel used
+        # TODO: Write a test that this works correctly
+        return self.ox_tank.total_mass_used / self.fuel_grain.total_mass_used
+
+    @property
+    def average_regression_rate(self):
+        return self.fuel_grain.approximate_average_regression_rate(self.get_burn_time())
 
     def end(self):
         self.finished_simulating = True

@@ -105,3 +105,10 @@ class TestGeneralHelpers(unittest.TestCase):
         #     np.isclose(
         #         np.abs(angles_from_vector_3d((-10, -10, 0))),
         #         (np))))
+
+    def test_helix_length(self):
+        self.assertAlmostEqual(47.504, helical_length(6, 3, 2.5), 2)
+
+    def test_helix_area(self):
+        # Do not really need too much accuracy for these regression things
+        self.assertAlmostEqual(148.648, helical_area(6, 3, 2.5, 0.5), -1)

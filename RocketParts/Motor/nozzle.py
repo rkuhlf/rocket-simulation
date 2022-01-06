@@ -6,8 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-import sys
-sys.path.append(".")
+
 
 from presetObject import PresetObject
 from Helpers.general import linear_intersection, interpolate, interpolate_point, transpose_tuple, get_radius
@@ -267,7 +266,7 @@ def find_nozzle_length(converging_angle, entrance_diameter, throat_diameter, div
 
     return entrance_distance + exit_distance * conical_proportion
 
-def find_nozzle_retention_shear(inner_weight, base_drag, pressure_force, bolt_shear_strength, bolt_diameter=0.003, safety_factor=1.5):
+def find_required_retention_bolts(inner_weight, base_drag, pressure_force, bolt_shear_strength, bolt_diameter=0.003, safety_factor=1.5):
     # https://workflowy.com/s/nozzle-retention/R3QmGFlhHrfeqdaw
     # shear load = abs(inner weight + base drag + internal pressure force - thrust - external weight - external drag)
     
@@ -335,13 +334,19 @@ class Nozzle(PresetObject):
         return self.throat_area * self.area_ratio
         
 
-    def get_nozzle_coefficient(self, chamber_pressure, atmospheric_pressure):
+    def get_nozzle_coefficient(self, chamber_pressure, atmospheric_pressure=101325):
         """
             Calculate the multiplicative effect that the nozzle has on thrust
             Uses an exit pressure calculated from CEA
 
             Notice that pressure can be in any units so long as they are all the same
         """
+        # FIXME: occasionally this gives a very negative value
+
+
+        if chamber_pressure / atmospheric_pressure < 2:
+            # Assume it does not actually get choked
+            return 1
         
         # The isentropic exponent and the exit pressure is determined by CEA software and updated by our motor class. TODO: implement exit pressure calculations myself to validate
 
@@ -365,6 +370,22 @@ class Nozzle(PresetObject):
 
 
 if __name__ == "__main__":
+    # import matplotlib.pyplot as plt
+    # n = Nozzle()
+    # print(n.get_nozzle_coefficient(165128))
+
+    # n.exit_pressure = 100
+    
+    # for k in np.linspace(0.8, 1.4, num=6):
+    #     n.isentropic_exponent = k
+
+    #     inputs = np.linspace(0.01, 2_000_000, num=500) # Pa
+    #     outputs = [n.get_nozzle_coefficient(pressure) for pressure in inputs]
+
+    #     plt.plot(inputs, outputs, label=str(k))
+    # plt.legend()
+    # plt.show()
+
     # display_constructed_quadratic()
     # calculate_nozzle_coordinates_truncated_parabola((0, 0.1), 35 * np.pi / 180, (1, 0.5))
     # compare_truncated_to_quadratic()
@@ -372,7 +393,7 @@ if __name__ == "__main__":
     # inputs = np.linspace(20, 50)
     # outputs = []
 
-    print(determine_expansion_ratio(25, 0.9, 1.2))
+    # print(determine_expansion_ratio(25, 0.9, 1.2))
     # a = find_equilibrium_throat_area(1619, 25*10**5, 2.7)
     # from Helpers.general import get_radius
     # print(get_radius(a))
@@ -390,7 +411,8 @@ if __name__ == "__main__":
     # Tensile strength of aluminum is much worse than steel
     # I am going to look at a few diameters, but I think we are in the range of 3/8 inch
     # Highly sensitive to bolt diameter: 8 mm gives 30, 10 mm gives 20, 12 mm gives 14
-    # print(find_nozzle_retention_shear(120 * 9.81, 600, 53520, 9 * 10 ** 7 * 0.6, 0.012))
+    # Tanner said 620528156 Pa (90000 psi) was what he had been using for his bolts
+    # print(4 / find_required_retention_bolts(120 * 9.81, 600, 53520, 620528156, 0.00635, safety_factor=1))
     # only giving two for some reason
 
     pass

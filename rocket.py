@@ -18,8 +18,9 @@ from Data.Input.models import get_splined_coefficient_of_drag, get_coefficient_o
 from RocketParts.motor import Motor
 from logger import RocketLogger
 from environment import Environment
+from Helpers.decorators import diametered
 
-
+@diametered
 class Rocket(MassObject):
     """
         Class that holds all of the aerodynamic calculations for a rocket and very little else
@@ -29,9 +30,15 @@ class Rocket(MassObject):
         Also, everything is in radians.
     """
 
+    def override_subobjects(self):
+        # This might be called by the environment setter before we have established the rocket
+        if self.motor is not None:
+            if self.motor.environment is not self.environment:
+                self.motor.environment = self.environment
+
     # Torque is in radians per second-squared * kg
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__()
         # X, Y, Z values, where Z is upwards
         self.position = np.array([0, 0, 0], dtype="float64")
         self.velocity = np.array([0, 0, 0], dtype="float64")
@@ -63,8 +70,8 @@ class Rocket(MassObject):
         self.length = 7  # meters
 
         # region SET REFERENCES
-        self.motor = Motor()
-        self.environment = Environment()
+        self._motor = Motor()
+        self._environment = Environment()
         self.parachutes = []
         self.logger = RocketLogger(self)
 
@@ -89,12 +96,11 @@ class Rocket(MassObject):
         self.parachute_deployed = False
 
         super().overwrite_defaults(**kwargs)
+        self.override_subobjects()
         # Everything before this is saved as a preset including whatever is overridden by config
 
         self.mass_objects.extend(self.parachutes)
         self.mass_objects.extend([self.motor])
-
-        self.reference_area = np.pi * self.radius ** 2
 
         # This is overriden in the simulation initialization, so it is just here as a reminder
         self.apply_angular_forces = True
@@ -153,13 +159,26 @@ class Rocket(MassObject):
 
     # region PROPERTIES
     @property
-    def diameter(self):
-        return self.radius * 2
+    def motor(self):
+        return self._motor or None
 
-    @diameter.setter
-    def diameter(self, d):
-        self.radius = d / 2
-        self.reference_area = np.pi * self.radius ** 2
+    @motor.setter
+    def motor(self, m):
+        self._motor = m
+        self.override_subobjects()
+
+    @property
+    def environment(self):
+        return self._environment
+
+    @environment.setter
+    def environment(self, e):
+        self._environment = e
+        self.override_subobjects()
+    
+    @property
+    def reference_area(self):
+        return np.pi * self.radius ** 2
 
     @property
     def has_lifted(self):
@@ -220,7 +239,7 @@ class Rocket(MassObject):
 
     def update_maxes(self):
         if self.position[2] < -100 and not self.has_lifted:
-            raise Exception("Your rocket fell straight into the ground")
+            raise Exception("Your rocket fell straight into the ground. It might be because there is no 0,0 point in the thrust curve")
 
         # If the current position is less than zero and the previous position was greater than zero, then the rocket has landed
         if self.position[2] < 0 and self.has_lifted:
@@ -381,8 +400,7 @@ class Rocket(MassObject):
         yaw_multiplier = np.sin(self.theta_around)
         # When the rocket is horizontal, the yaw will still be fully applied
         # so no angle of incidence component is necessary.
-        self.torque[0] += x_component * \
-            yaw_multiplier * distance_from_CG
+        self.torque[0] += x_component * yaw_multiplier * distance_from_CG
 
 
         y_component = direction[1] * value
@@ -426,6 +444,7 @@ class Rocket(MassObject):
                                      self.CP, debug=True, name="Lift")
 
 
+        # FIXME: Not currently applying angular air resistance
         # not (np.all(np.isclose(self.angular_velocity, 0)) or self.parachute_deployed):
         if False:
             drag_around, drag_down = self.get_angular_drag()
@@ -532,8 +551,6 @@ class Rocket(MassObject):
 
 
     # region Cached Values
-
-
     def calculate_dynamic_pressure(self):
         relative_velocity = self.velocity - \
             self.environment.get_air_speed(self.altitude)
@@ -554,6 +571,7 @@ class Rocket(MassObject):
                 relative_velocity, vector_from_angle(self.rotation))
 
         self.log_data("AOA", self.angle_of_attack)
+
 
     def get_coefficient_of_drag(self, mach, alpha):
         return self.CD
@@ -621,8 +639,6 @@ class Rocket(MassObject):
 
 
     # region DATA INPUTS
-
-
     def set_CP_constant(self, value):
         self.CP_data_type = DataType.CONSTANT
         self.CP = value

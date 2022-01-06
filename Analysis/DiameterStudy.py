@@ -11,11 +11,10 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-import sys
-sys.path.append(".")
+
 
 from RocketParts.Motor.nitrousProperties import calculate_maximum_liquid_expansion
-from RocketParts.Motor.grain import determine_optimal_starting_diameter, regression_rate_HTPB_nitrous, find_required_length as find_required_length_fuel
+from RocketParts.Motor.grain import determine_optimal_starting_diameter, marxman_doran_HTPB_nitrous, find_required_length as find_required_length_fuel
 from RocketParts.Motor.oxTank import find_required_length as find_required_length_oxidizer
 from RocketParts.Motor.nozzle import find_nozzle_length, find_equilibrium_throat_area
 from RocketParts.Motor.injector import determine_required_thickness
@@ -28,7 +27,7 @@ from Helpers.general import get_radius, normalized
 
 # Inner diameters in inches
 # possible_diameters = np.linspace(7, 10, 50)
-possible_diameters = np.array([7.5])
+possible_diameters = np.array([7 - 0.125 * 2])
 # inches to meters is 0.0254
 possible_diameters *= 0.0254
 lengths = []
@@ -62,7 +61,7 @@ for d in possible_diameters:
     print(f"{tank_length} meters")
     print(f"{tank_length * 3.281} feet")
 
-    port_diameter = determine_optimal_starting_diameter(d, fuel_mass, fuel_density, 2, regression_rate_HTPB_nitrous, target_OF)
+    port_diameter = determine_optimal_starting_diameter(d, fuel_mass, fuel_density, 2, marxman_doran_HTPB_nitrous, target_OF)
     grain_length = find_required_length_fuel(port_diameter, d, fuel_mass, fuel_density)
 
     print("FUEL GRAIN LENGTHS")

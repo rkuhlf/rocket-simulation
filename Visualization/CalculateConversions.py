@@ -6,9 +6,6 @@ import pandas as pd
 import numpy as np
 import re # FIXME: leave a comment that says what this is
 
-import sys
-sys.path.append('.')
-
 from Helpers.general import numpy_from_string
 
 # For each one, check if there is already a 'conversions.csv' in outputs

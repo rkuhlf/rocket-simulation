@@ -5,11 +5,7 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
-import sys
 import numpy as np
-
-# ctrl-K, ctrl-shift-s to save without screwing this up
-sys.path.append(".")
 
 from Data.Input.models import *
 

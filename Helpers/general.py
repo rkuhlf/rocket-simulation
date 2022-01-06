@@ -23,14 +23,26 @@ def get_radius(area):
     
     return (area / np.pi) ** (1/2)
 
+def helical_length(height, turns, radius):
+    circumference = np.pi * radius * 2
+    single = np.sqrt(circumference ** 2 + (height / turns) ** 2)
+    return single * turns
+
+def helical_area(height, turns, radius, port_radius):
+    return helical_length(height, turns, radius) * np.pi * port_radius * 2
+
 # TODO: find a better naming convention for these: maybe the helpers don't need a keyword and I should assume they return a value
 
 def interpolate(x, x1, x2, y1, y2):
-    '''Map one point from one range to another'''
+    '''
+    Map one point from one range to another. 
+    Should also work for arrays
+    '''
 
     if x2 == x1:
         return (y1 + y2) / 2
     return (x - x1) / (x2 - x1) * (y2 - y1) + y1
+
 
 def interpolate_point(value, input_min, input_max, p1, p2):
     x = interpolate(value, input_min, input_max, p1[0], p2[0])
@@ -202,12 +214,24 @@ def angle_between(v1, v2):
     return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
 
 
-def angles_from_vector_3d(np_array):
-    normalized = np_array / magnitude(np_array)
+def angles_from_vector_3d(np_array, silent=True):
+    try:
+        normalized = np_array / magnitude(np_array)
+    except RuntimeWarning as e:
+        if not silent:
+            print(e.with_traceback())
+            print("You are dividing by zero. I believe this should happen one time, when the thrust is zero for one frame. It could also happen for some very low drags.")
+
     x, y, z = normalized
 
+    den = (x ** 2 + y ** 2) ** (1/2)
+    # If abs(y) < den then the values are so small that python has an inaccurate sqrt
+    if den == 0 or abs(y) > den:
+        # I do not like this extremely annoying warning that the x and y change is extremely close to zero
+        theta_around = 0 # zero is arbitrary, could be anything
+    
     # For some reason the axes lines are poorly defined, so I just encode them manually
-    if x == 0:
+    elif x == 0:
         if y < 0:
             theta_around = np.pi * 3 / 2
         else:
@@ -217,9 +241,9 @@ def angles_from_vector_3d(np_array):
             theta_around = np.pi
         else:
             theta_around = 0
+
     else:
-        theta_around = np.arcsin(
-            abs(y) / (x ** 2 + y ** 2) ** (1 / 2))
+        theta_around = np.arcsin(abs(y) / den)
 
         if x < 0 and y > 0 or x > 0 and y < 0:
             theta_around = (np.pi / 2) - theta_around

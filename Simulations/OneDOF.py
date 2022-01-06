@@ -2,8 +2,7 @@
 # Simply disable the wind in the environment and shoot the rocket straight up. Because the parachute provides all of the CD on the descent, it doesn't matter that the rocket never turns over
 
 import numpy as np
-import sys
-sys.path.append(".")
+
 
 from environment import Environment
 from RocketParts.motor import Motor

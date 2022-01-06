@@ -2,10 +2,8 @@
 # For our first math model review, we need a design for our rocket
 # I simulate it here
 
-
 import numpy as np
-import sys
-sys.path.append(".")
+
 
 from environment import Environment
 from RocketParts.motor import Motor
@@ -39,20 +37,24 @@ def get_mass_objects():
     return [nose_cone_tip, nose_cone, fiberglass_avionics_tube, ox_tank_shell, injector, phenolic, carbon_fiber_overwrap, fins, nozzle_overwrap, nozzle, avionics_bay]
 
 
-def get_sim():
-    env = Environment(time_increment=0.01, apply_wind=True)
-    motor = Motor(front=2, center_of_gravity=2, mass=60, propellant_mass=60, thrust_curve="Data/Input/ThrustCurves/mmrThrust.csv", environment=env)
+def get_rocket():
+    env = Environment(time_increment=0.1, apply_wind=True)
+    motor = Motor(front=2, center_of_gravity=2, mass=61, propellant_mass=60, thrust_curve="Data/Input/ThrustCurves/finleyThrust.csv", environment=env)
     motor.adjust_for_atmospheric = True
-    motor.nozzle_area = np.pi * 0.06985 ** 2 # This will probably underestimate the effects
+    motor.nozzle_area = np.pi * (0.10399776 / 2) ** 2
     
-    print(motor.get_total_impulse())
+    # print(f"Running with {motor.get_total_impulse()} Ns")
 
 
-    main_parachute = ApogeeParachute(diameter=4.8768)
-    # angle is 0.0872665
-    rocket = Rocket(radius=0.1016, length=5.7912, rotation=np.array([np.pi / 2, 0.0872665], dtype="float64"),
-        environment=env, motor=motor, parachutes=[])
-    rocket.set_CP_function(get_sine_interpolated_center_of_pressure)
+    main_parachute = ApogeeParachute(diameter=3.04800, CD=2.2)
+
+    # angle is 0.0872665 radians = 5 degrees
+    rocket = Rocket(radius=0.0889, length=5.7912, rotation=np.array([np.pi / 2, 0], dtype="float64"),
+        environment=env, motor=motor, parachutes=[main_parachute])
+    # rocket.set_CP_function(get_sine_interpolated_center_of_pressure)
+    rocket.set_CP_constant(2) # meters
+    # This one is only because I did not have the time to rewrite all of the mass object positions
+    rocket.set_CG_constant(1.8)
     rocket.set_CL_function(linear_approximated_normal_force)
     rocket.set_CD_function(assumed_zero_AOA_CD)
     rocket.set_moment_constant(250)
@@ -61,16 +63,24 @@ def get_sim():
     mass_objects.extend(get_mass_objects())
     rocket.mass_objects = mass_objects
 
+    return rocket, motor, env
+
+def get_sim():
+    rocket, motor, env = get_rocket()
+
     logger = RocketLogger(rocket)
 
     logger.splitting_arrays = True
 
-    sim = RocketSimulation(apply_angular_forces=True, max_frames=-1, environment=env, rocket=rocket, logger=logger)
+    sim = RocketSimulation(apply_angular_forces=False, max_frames=-1, environment=env, rocket=rocket, logger=logger)
     motor.simulation = sim
 
 
     return sim
 
+def get_randomized_sim():
+    # TODO: implement randomizations
+    return get_sim()
 
 if __name__ == "__main__":
     sim = get_sim()

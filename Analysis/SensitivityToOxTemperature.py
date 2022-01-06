@@ -4,13 +4,14 @@
 
 
 # Increasing temperature looks like it increases the total impulse but decreases burn time, affecting the burn time more strongly
+# This is actually important as an application because we will get different drag and thrust values, which means that our designs could be incorrect 
 
 import numpy as np
 import matplotlib.pyplot as plt
-import sys
-sys.path.append(".")
 
-from Simulations.DesignedMotor import get_sim
+
+from Simulations.DesignedMotorHTPB import get_sim
+from Helpers.data import fahrenheit_from_kelvin
 
 
 # Iterating from the limits of theoretically reasonable temperatures in Kelvin
@@ -39,11 +40,12 @@ for temp in start_temps:
 
 fig, (ax1, ax2) = plt.subplots(2)
 
-ax1.plot(start_temps, total_impulses)
-ax1.set(title="Total Impulse vs Starting Temperature", xlabel="Temp [K]", ylabel="Total Impulse [Ns]")
+start_fahrenheits = fahrenheit_from_kelvin(start_temps)
+ax1.plot(start_fahrenheits, total_impulses)
+ax1.set(title="Total Impulse vs Starting Temperature", xlabel="Temp [F]", ylabel="Total Impulse [Ns]")
 
-ax2.plot(start_temps, burn_times)
-ax2.set(title="Burn Time vs Starting Temperature", xlabel="Temp [K]", ylabel="Burn Time [s]")
+ax2.plot(start_fahrenheits, burn_times)
+ax2.set(title="Burn Time vs Starting Temperature", xlabel="Temp [F]", ylabel="Burn Time [s]")
 
 
 fig.tight_layout()

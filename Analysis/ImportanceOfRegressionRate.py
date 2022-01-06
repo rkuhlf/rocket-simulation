@@ -1,0 +1,2 @@
+# Does it even matter if our regression rate is totally incorrect
+# TODO: implement some tests here for designed motor that just multiply our regression rate by 0.5 to 1.5 and see how it affects the total impulse and the burn time
