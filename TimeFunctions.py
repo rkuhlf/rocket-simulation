@@ -11,7 +11,7 @@ import pandas as pd
 from random import random
 from environment import Environment
 from rocket import Rocket
-from motor import Motor
+from RocketParts.motor import Motor
 
 
 # One Trial: 5.7
@@ -34,11 +34,12 @@ def test_overall_speed():
 # For 10,000 steps: 0.0173
 # For 100 steps: 0.0044
 def test_thrust():  # this one is fast
-    data = pd.read_csv("data/Input/thrustCurve.csv")
+    data = pd.read_csv("data/Input/ThrustCurves/thrustCurve.csv")
     end = data["time"].max()
     steps_to_take = 10000
     with Timer():
         for i in range(steps_to_take):
+            # FIXME: figure out what get_thrust used to be
             get_thrust(i * end / steps_to_take)
 
 
@@ -73,6 +74,7 @@ def test_gravity():
     with Timer():
         for i in range(iters):
             Helpers.variables.position[1] = random() * 3000
+            # Add the import for this back
             get_gravitational_attraction()
 
 

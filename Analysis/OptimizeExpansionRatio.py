@@ -4,7 +4,7 @@
 import sys
 sys.path.append(".")
 
-from Data.Input.CEAPropellants import define_ABS_nitrous
+from Data.Input.CEA.CEAPropellants import define_ABS_nitrous
 from RocketParts.Motor.nozzle import determine_expansion_ratio as determine_eps_constant_gamma
 
 

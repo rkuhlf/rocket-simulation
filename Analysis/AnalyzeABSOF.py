@@ -14,7 +14,7 @@ from numpy.lib.npyio import save
 from rocketcea.cea_obj import CEA_Obj
 sys.path.append(".")
 
-from Data.Input.CEAPropellants import define_ABS_nitrous
+from Data.Input.CEA.CEAPropellants import define_ABS_nitrous
 from Analysis.AnalyzeOFAtPressure import find_efficiencies, display_OF_graph
 
 abs_nitrous: CEA_Obj = None

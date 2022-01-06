@@ -23,7 +23,7 @@ from Data.Input.ThrustProfile import scale_saved_curve
 # from SimulateRocket import get_simulation as get_sim
 from Simulations.DesignedRocket import get_sim
 
-base_curve = "Data/Input/finleyThrust.csv"
+base_curve = "Data/Input/ThrustCurves/finleyThrust.csv"
 
 # With only 60 kg of propellant, it is more like 200 * 60 * 9.81 = 117720
 # Right now, the original simulation uses 220000

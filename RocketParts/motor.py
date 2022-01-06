@@ -37,7 +37,7 @@ class Motor(MassObject):
         self.center_of_gravity = 2 # m
         self.mass = 105 # kg
         self.propellant_mass = 105 # kg
-        self.thrust_curve = "Data/Input/currentGoddard.csv"
+        self.thrust_curve = "Data/Input/ThrustCurves/currentGoddard.csv"
 
         self.thrust_multiplier = 1
         self.time_multiplier = 1
@@ -168,7 +168,7 @@ class CustomMotor(Motor):
         self.combustion_chamber = CombustionChamber()
         self._nozzle = Nozzle()
 
-        self.data_path = "./Data/Input/CombustionLookup.csv"
+        self.data_path = "./Data/Input/CEA/CombustionLookup.csv"
         self.data = pd.read_csv(self.data_path)
 
         self.logger = MotorLogger(self)
