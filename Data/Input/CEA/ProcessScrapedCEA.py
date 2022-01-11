@@ -159,6 +159,6 @@ dataframe = dataframe.sort_values(["O/F Ratio", "Chamber Pressure [psia]"])
 print(dataframe)
 
 
-dataframe.to_csv("./Data/Input/CombustionLookupParaffinNitrous.csv")
+dataframe.to_csv("./Data/Input/CEA/CombustionLookupParaffinNitrous.csv")
 
 

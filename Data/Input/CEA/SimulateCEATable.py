@@ -11,7 +11,7 @@ from rocketcea.cea_obj import CEA_Obj
 
 
 from Helpers.data import inputs_path
-from Data.Input.CEAPropellants import define_ABS_nitrous, define_HTPB_nitrous
+from Data.Input.CEA.CEAPropellants import define_ABS_nitrous, define_HTPB_nitrous
 
 
 # by default, it has the HTPB and N2O at 76-ish F. This is probably fine for the HTPB, we will see what effect it has to change it
@@ -66,4 +66,4 @@ if __name__ == "__main__":
 
     dataframe = pd.DataFrame(data, columns=["Chamber Pressure [bar]", "O/F Ratio", "C-star [m/s]", "Specific Impulse [s]", "Chamber Temperature [K]", "Chamber Density [kg/m^3]", "Molar Mass [g/mol]", "Throat Velocity [m/s]", "Exit Pressure [bar]", "gamma", "Exit Velocity [m/s]", "Thrust Coefficient"])
     print(dataframe)
-    dataframe.to_csv(inputs_path + "/CombustionLookupABS.csv")
+    dataframe.to_csv(inputs_path + "/CEA/CombustionLookupABS.csv")

@@ -38,7 +38,7 @@ def get_mass_objects():
 
 def get_sim():
     env = Environment(time_increment=0.05, apply_wind=False)
-    motor = Motor(front=2, center_of_gravity=2, mass=60, propellant_mass=60, thrust_curve="Data/Input/mmrThrust.csv", environment=env)
+    motor = Motor(front=2, center_of_gravity=2, mass=60, propellant_mass=60, thrust_curve="Data/Input/ThrustCurves/mmrThrust.csv", environment=env)
 
     main_parachute = ApogeeParachute(diameter=4.8768)
     rocket = Rocket(radius=0.1016, length=5.7912, rotation=np.array([np.pi / 2, 0.0872665], dtype="float64"),

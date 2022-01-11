@@ -39,7 +39,7 @@ def get_mass_objects():
 
 def get_rocket():
     env = Environment(time_increment=0.1, apply_wind=True)
-    motor = Motor(front=2, center_of_gravity=2, mass=61, propellant_mass=60, thrust_curve="Data/Input/finleyThrust.csv", environment=env)
+    motor = Motor(front=2, center_of_gravity=2, mass=61, propellant_mass=60, thrust_curve="Data/Input/ThrustCurves/finleyThrust.csv", environment=env)
     motor.adjust_for_atmospheric = True
     motor.nozzle_area = np.pi * (0.10399776 / 2) ** 2
     
