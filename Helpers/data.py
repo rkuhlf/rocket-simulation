@@ -29,6 +29,30 @@ class DataType(Enum):
     FUNCTION_INJECTOR = auto()
     FUNCTION_MACH_ALPHA = auto()
 
+environment_variable_error_lookup = {
+    "OR_JAR_PATH": r"In order to run the orhelper library, you must have open rocket installed. Once you have installed it, OR needs to know where it is installed at, so you specify the OR_JAR_PATH in the .env file at the root of the project. It should look something like C:\Users\<username>\AppData\Local\OpenRocket\app\OpenRocket-15.03.jar"
+}
+
+loaded_dotenv = False
+
+def load_environment_variable(name):
+    global loaded_dotenv
+
+    if not loaded_dotenv:
+        from dotenv import load_dotenv
+        load_dotenv()
+        loaded_dotenv = True
+
+    import os
+
+    result = os.getenv(name)
+    if result is None:
+        print(f"Unable to load {name} from the .env variables.")
+        print(environment_variable_error_lookup.get(name,
+                "Unknown variable lookup. The error message may not have been written, or that may be an incorrect .env lookup."))
+
+
+
 
 def hist_box_count(count, multiplier=2):
     return int(np.sqrt(multiplier * count))

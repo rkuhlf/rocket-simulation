@@ -6,20 +6,31 @@ import numpy as np
 import orhelper
 from orhelper import FlightDataType
 
+
 from net.sf.openrocket import document # type: ignore
+
+
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+OR_JAR_PATH = os.getenv('OR_JAR_PATH')
+CURRENT_SIMULATION = os.getenv('CURRENT_OR_SIMULATION')
+
 
 def new_or_instance():
     import javaInitialization
-    return orhelper.OpenRocketInstance(jar_path=r"C:\Users\riley\AppData\Local\OpenRocket\app\OpenRocket-15.03.jar")
+    return orhelper.OpenRocketInstance(jar_path=OR_JAR_PATH)
 
 def most_updated_sim(orhelper):
-    doc = orhelper.load_doc(r"C:\Users\riley\Downloads\CorrectedMasses (1).ork")
+    doc = orhelper.load_doc(CURRENT_SIMULATION)
     sim = getSimulationByName(doc, 'White Sands Average')
 
     return sim
 
 def get_randomized_sim(orhelper):
-    doc = orhelper.load_doc(r"C:\Users\riley\Downloads\CorrectedMasses (1).ork")
+    doc = orhelper.load_doc(CURRENT_SIMULATION)
     sim = getSimulationByName(doc, 'White Sands Average')
     opts = sim.getOptions()
 

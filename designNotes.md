@@ -82,3 +82,7 @@ Unless there is wind, rotation around (index zero) should not change at all; Tha
 The 2020-2021 Goddard team used a linear increase in the radius
 
 In general, within the simulation folder, Optimize means that we have control over it, sensitivity to means we do not have control (but I still need to see the effect that using the wrong number will have).
+
+
+
+<!-- I have tried to put file paths that will usually need to be customized into a .env file. These will probably be different every time you clone the repository. -->
