@@ -13,6 +13,28 @@ import matplotlib.pyplot as plt
 from Helpers.visualization import make_matplotlib_medium
 from Helpers.data import riemann_sum
 
+def display_overall(data):
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
+    ax1.plot(data["time"], data["thrust"])
+    ax1.set(title="Thrust Over Time", xlabel="Time [s]", ylabel="Thrust [N]")
+
+    ax2.plot(data["time"], data["mass_flow"], label="in")
+    ax2.plot(data["time"], data["mass_flow_out"], label="out")
+    ax2.set(title="Mass Flow Over Time", xlabel="Time [s]", ylabel="Mass Flow in [kg/s]")
+    ax2.legend()
+
+    ax3.plot(data["time"], np.asarray(data["combustion_chamber.pressure"]) / 10 ** 5, label="Chamber")
+    ax3.plot(data["time"], np.asarray(data["ox_tank.pressure"]) / 10 ** 5, label="Tank")
+    ax3.set(title="Pressures over Time", xlabel="Time [s]", ylabel="Pressure [bar]")
+    ax3.legend()
+
+    # TODO Actually plot like exit velocity or something 
+    ax4.plot(data["time"], data["specific_impulse"])
+    ax4.set(title="Combustion Efficiency", xlabel="Time [s]", ylabel="Specific Impulse [s]")
+
+    fig.tight_layout()
+    plt.show()
+
 def display_pressures(data):
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
     ax1.plot(data["time"], np.asarray(data["combustion_chamber.pressure"]) / 10 ** 5)
@@ -99,7 +121,7 @@ def display_optical_analysis(target):
     display_flows(data)
 
 
-    # display_overall(data)
+    display_overall(data)
 
 
 
