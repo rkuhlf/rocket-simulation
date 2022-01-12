@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 OR_JAR_PATH = os.getenv('OR_JAR_PATH')
+print(OR_JAR_PATH)
 CURRENT_SIMULATION = os.getenv('CURRENT_OR_SIMULATION')
 
 

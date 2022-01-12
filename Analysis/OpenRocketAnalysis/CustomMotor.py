@@ -37,7 +37,7 @@ with new_or_instance() as instance:
     # sim.getRocket().hasMotors()
 
     m = Motor()
-    m.set_thrust_data_path("./Data/Input/finleyThrust.csv")
+    m.set_thrust_data_path("./Data/Input/ThrustCurves/finleyThrust.csv")
     custom_motor = OverrideThrustLookup(m)
     orh.run_simulation(sim, listeners=[custom_motor])
     # data = orh.get_timeseries(sim, [FlightDataType.TYPE_TIME, FlightDataType.TYPE_ALTITUDE, FlightDataType.TYPE_VELOCITY_Z])
