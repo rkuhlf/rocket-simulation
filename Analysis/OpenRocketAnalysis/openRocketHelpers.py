@@ -7,7 +7,7 @@ import orhelper
 from orhelper import FlightDataType
 
 
-from net.sf.openrocket import document # type: ignore
+from net.sf.openrocket import document
 
 
 import os
