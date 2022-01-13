@@ -27,19 +27,22 @@ class OverrideThrustLookup(AbstractSimulationListener):
         return self.motor.calculate_thrust()
 
 
-with new_or_instance() as instance:
-    orh = orhelper.Helper(instance)
 
-    # Load document, run simulation and get data and events
-    sim = most_updated_sim(orh)
+# Sample implementation of a CustomMotor
+if __name__ == "__main__":
+    with new_or_instance() as instance:
+        orh = orhelper.Helper(instance)
 
-    # print(sim.getRocket().getID())
-    # sim.getRocket().hasMotors()
+        # Load document, run simulation and get data and events
+        sim = most_updated_sim(orh)
 
-    m = Motor()
-    m.set_thrust_data_path("./Data/Input/ThrustCurves/finleyThrust.csv")
-    custom_motor = OverrideThrustLookup(m)
-    orh.run_simulation(sim, listeners=[custom_motor])
-    # data = orh.get_timeseries(sim, [FlightDataType.TYPE_TIME, FlightDataType.TYPE_ALTITUDE, FlightDataType.TYPE_VELOCITY_Z])
-    # events = orh.get_events(sim)
+        # print(sim.getRocket().getID())
+        # sim.getRocket().hasMotors()
+
+        m = Motor()
+        m.set_thrust_data_path("./Data/Input/ThrustCurves/finleyThrust.csv")
+        custom_motor = OverrideThrustLookup(m)
+        orh.run_simulation(sim, listeners=[custom_motor])
+        # data = orh.get_timeseries(sim, [FlightDataType.TYPE_TIME, FlightDataType.TYPE_ALTITUDE, FlightDataType.TYPE_VELOCITY_Z])
+        # events = orh.get_events(sim)
 

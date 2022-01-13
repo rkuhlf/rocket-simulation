@@ -9,7 +9,7 @@ import random
 from copy import deepcopy, copy
 
 from presetObject import PresetObject
-from Helpers.data import nested_dictionary_lookup
+from Helpers.data import nested_dictionary_lookup, force_save
 from Helpers.general import magnitude
 
 # TODO: I need to refactor the to_record feature to allow a different name for the columns
@@ -95,17 +95,9 @@ class Logger(PresetObject):
 
     def save_to_csv(self):
         df = self.get_dataframe()
+        force_save(df, self.full_path)
         
-        try:
-            df.to_csv(self.full_path)
-        except PermissionError as e:
-            # Hopefully ten random characters is enough that it does not try to save over an already generated one
-            new_path = self.full_path + "Redirected" + ''.join(random.choice(string.ascii_uppercase) for _ in range(10))
-
-            print("Could not save to {self.full_path}, instead saving to {new_path}. You likely have the target file open in another program.")
-            df.to_csv(new_path)
-
-        return df
+        
 
     def reset(self):
         """

@@ -2,10 +2,12 @@
 # Depending on what type of data input we are using, we will want to have an enum entry that is easily serializable to indicate to the object what to do
 
 import os
+from pathlib import Path
+import random
 import re
 from enum import Enum, auto
 import numpy as np
-
+import string
 
 from Helpers.general import interpolate
 
@@ -52,6 +54,35 @@ def load_environment_variable(name):
                 "Unknown variable lookup. The error message may not have been written, or that may be an incorrect .env lookup."))
 
 
+def random_file_name(original: str, random_chars: int=10):
+    # Hopefully ten random characters is enough that it does not try to save over an already generated one
+    return original + "Redirected" + ''.join(random.choice(string.ascii_uppercase) for _ in range(random_chars))
+
+
+def force_save(df, path, override=True):
+    p = Path(path)
+    
+    p.parents[0].mkdir(parents=True, exist_ok=True)
+
+    try:
+        if override:
+            df.to_csv(path)
+        else:
+            if p.is_file():
+                new_path = random_file_name(path)
+                print(f"A file named {path} already exists, and override is set to false, so it is saved at {new_path} instead.")
+                df.to_csv(new_path)
+            else:
+                df.to_csv(path)
+
+    except PermissionError as e:
+        new_path = random_file_name(path) 
+
+        print("Could not save to {path}, instead saving to {new_path}. You likely have the target file open in another program.")
+        df.to_csv(new_path)
+
+    finally:
+        return df
 
 
 def hist_box_count(count, multiplier=2):

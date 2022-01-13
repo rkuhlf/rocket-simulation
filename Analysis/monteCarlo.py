@@ -10,6 +10,8 @@ from simulation import Simulation
 import pandas as pd
 import numpy as np
 
+from Helpers.data import force_save
+
 
 def create_motors_from_directory(path, max_count=-1):
     filenames = os.listdir(path)
@@ -48,7 +50,7 @@ class MonteCarlo:
                 sim.automatically_save = False
                 sim.logger.partial_debugging = False
             except AttributeError as e:
-                print(f"Presumably because you are using somebody else's simulation class, this error was thrown {e}. It is being ignored.")
+                print(f"Presumably because you are using somebody else's simulation class (like OR), this error was thrown {e}. It is being ignored.")
 
             try:
                 # Use pass-by-reference
@@ -87,6 +89,7 @@ class MonteCarlo:
         for name in names:
             print(f"{name}: {np.average(figures[name]):.3e} +- {np.std(figures[name]):.2e} ")
 
+    # TODO: replace with surefire save
     def save_important_data(self, target_folder: str, names: "list[str]"=None):
         """Saves the series of dataframes into the target folder. Each of the file names will be a number counting up from one. Only the columns with the requested names will be saved.
         """
@@ -103,7 +106,10 @@ class MonteCarlo:
             file_path = Path(target_folder, str(index + 1) + ".csv")
             df = df[names]
             df.to_csv(file_path)
-        
+    
+    def save_characteristic_figures(self, target_path="./MonteCarloFlightSimulation"):
+        """Saves a table with all of the overall outputs to the specified target_path"""
+        force_save(self.characteristic_figures_dataframe, target_path, override=False)
 
     @property
     def characteristic_figures_dataframe(self):

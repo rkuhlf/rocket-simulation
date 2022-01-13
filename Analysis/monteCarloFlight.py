@@ -25,7 +25,6 @@ class MonteCarloFlight(MonteCarlo):
             "Max Velocity": sim.max_velocity,
             "Landing Speed": sim.landing_speed,
             "Landing Distance": sim.dist_from_start,
-            "Apogee Lateral Velocity": sim.apogee_lateral_velocity
         })
 
         data = sim.logger.get_dataframe()

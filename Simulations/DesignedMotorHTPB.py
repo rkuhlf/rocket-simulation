@@ -30,7 +30,7 @@ def get_sim():
 
     # I found pressure divergence at t_post = 0.2
     motor = CustomMotor(ox_tank=ox, injector=injector, combustion_chamber=chamber, nozzle=nozzle, environment=env, pressurization_time_increment=0.01, post_pressurization_time_increment=0.05)
-    motor.data_path = "./Data/Input/CombustionLookupHTPB.csv"
+    motor.data_path = "./Data/Input/CEA/CombustionLookupHTPB.csv"
 
     logger = MotorLogger(motor, target="motorOutput.csv", debug_every=0.5)
 

@@ -48,7 +48,8 @@ class MonteCarloFlightOR(MonteCarloFlight):
             "Max Velocity": sim.getSimulatedData().getMaxVelocity(),
             "Landing Velocity": sim.getSimulatedData().getGroundHitVelocity(),
             "Landing Distance": sim.getSimulatedData().getBranch(0).getLast(FlightDataType.TYPE_POSITION_XY),
-            "Apogee Lateral Velocity": sim.getSimulatedData().getDeploymentVelocity()
+            "Mean Wind Speed": sim.getOptions().getWindSpeedAverage(),
+            "Wind Speed Deviation": sim.getOptions().getWindSpeedDeviation()
         })
 
 

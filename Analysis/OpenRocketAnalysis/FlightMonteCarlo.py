@@ -22,14 +22,17 @@ if __name__ == '__main__':
 
         m = MonteCarloFlightRandomMotorOR(orh, motors)
 
+        
         m.simulate_randomized(100)
 
-        m.print_characteristic_figures()
+    m.print_characteristic_figures()
 
-        m.plot_overview()
-        m.plot_landing()
-        m.plot_max_velocity()
-        m.plot_max_mach()
-        m.plot_impulse_correlation()
+    m.plot_overview()
+    m.plot_landing()
+    m.plot_max_velocity()
+    m.plot_max_mach()
+    m.plot_impulse_correlation()
 
-        m.plot_altitude_curves()
+    m.plot_altitude_curves()
+
+    m.save_characteristic_figures("./Analysis/MonteCarloFlightData/output.csv")
