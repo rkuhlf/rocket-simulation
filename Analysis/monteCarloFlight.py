@@ -84,6 +84,17 @@ class MonteCarloFlight(MonteCarlo):
 
         plt.show()
     
+    def lateral_velocity(self):
+        df = self.characteristic_figures_dataframe
+
+        plt.hist(df[["Lateral Velocity"]].transpose(), hist_box_count(len(df.index)), density=True, histtype='bar')
+
+        plt.title("Range of Lateral Velocities")
+        plt.xlabel("Lateral Velocity (m/s)")
+        plt.ylabel("Frequency")
+
+        plt.show()
+    
     def plot_max_mach(self):
         df = self.characteristic_figures_dataframe
 
