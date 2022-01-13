@@ -10,14 +10,12 @@ from orhelper import FlightDataType
 from net.sf.openrocket import document # type: ignore
 
 
-import os
-from dotenv import load_dotenv
+from Helpers.data import load_environment_variable
 
-load_dotenv()
 
-OR_JAR_PATH = os.getenv('OR_JAR_PATH')
+OR_JAR_PATH = load_environment_variable('OR_JAR_PATH')
 print(OR_JAR_PATH)
-CURRENT_SIMULATION = os.getenv('CURRENT_OR_SIMULATION')
+CURRENT_SIMULATION = load_environment_variable('CURRENT_OR_SIMULATION')
 
 
 def new_or_instance():
