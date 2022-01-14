@@ -20,8 +20,9 @@ m: CustomMotor = get_sim().motor
 base_length = m.ox_tank.length
 
 # Gave it 3 inches in meters on both sides
-min_len = base_length - 0.0762
-max_len = base_length + 0.0762
+deviation = 1
+min_len = base_length - deviation
+max_len = base_length + deviation
 
 iterations = 20
 lengths = np.linspace(min_len, max_len, iterations)
@@ -34,8 +35,9 @@ for length in lengths:
         sim = get_sim()
         sim.logger = None
 
-        sim.motor.ox_tank.length = length
-        sim.motor.ox_tank.calculate_ullage(constant_temperature=True)
+        m: CustomMotor = sim.motor
+        m.ox_tank.length = length
+        m.ox_tank.calculate_phase_distribution()
 
         sim.run_simulation()
 

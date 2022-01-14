@@ -171,7 +171,7 @@ class OxTank(PresetObject):
         The ullage will be calculated automatically (assuming a constant temperature)
         """
         self._temperature = 293.15 # Kelvin
-        self.length = 3.7 # m
+        self._length = 3.7 # m
         self.radius = 0.1016 # m
         self.ox_mass = 70.0 # kg
         self.p_gas_mass = 0
@@ -197,6 +197,15 @@ class OxTank(PresetObject):
         self._temperature = t
         if hasattr(self, 'ullage'):
             self.calculate_ullage(constant_temperature=True)
+    
+    @property
+    def length(self):
+        return self._length
+    
+    @length.setter
+    def length(self, l):
+        self._length = l
+        self.volume = self.get_volume()
 
     #region Getters
     def get_volume(self):
@@ -253,7 +262,7 @@ class OxTank(PresetObject):
 
     #endregion
 
-    def calculate_phase_distribution(self):
+    def calculate_phase_distribution(self, strict=True):
         """Does algebra needed to calculate ullage; does not account for temperature change"""
 
         liquid_density = get_liquid_nitrous_density(self.temperature)
@@ -269,11 +278,12 @@ class OxTank(PresetObject):
         gas_mass = self.ox_mass - liquid_mass
 
         self.ullage = (gas_mass / gas_density) / self.volume
+
         self.ullage = max(min(self.ullage, 1), 0)
 
         return gas_mass
 
-    def calculate_ullage(self, constant_temperature=False, iterations=3, iters_so_far=0, warnings=True):
+    def calculate_ullage(self, constant_temperature=False, iterations=3, iters_so_far=0, strict=True):
         # FIXME: Right now, I just made gas-only constant because I don't know the math yet
         """
         Calculate indicates that it will not return a value, but there are side effects to the object - it changes the object.
@@ -302,7 +312,7 @@ class OxTank(PresetObject):
             self.calculate_ullage(iterations=iterations, 
                                   iters_so_far=iters_so_far + 1,
                                   constant_temperature=constant_temperature)
-        else:
+        elif iters_so_far == iterations: # not necessary if we say constant_temperatures
             # I think it is bad to end on a temperature change
             # it is giving me some serious inaccuracies because it changes the density significantly.
             # Therefore, I will recalculate the distributions with the new temperature,
@@ -311,7 +321,7 @@ class OxTank(PresetObject):
             
 
 
-        if warnings:
+        if strict:
             if self.ullage > 1:
                 raise Warning(
                     "Your ox tank is filled completely with gas. Be sure to use your own calculations for density rather than the saturated model.")

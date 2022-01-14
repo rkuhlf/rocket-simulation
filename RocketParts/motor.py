@@ -300,7 +300,7 @@ class CustomMotor(Motor):
 
     @propellant_mass.setter
     def propellant_mass(self, p):
-        print("You cannot set the propellant mass of a custom motor. Set either the ox_mass of the ox_tank or the fuel_mass of the fuel_grain. Continuing anyways because inheritance requires it")
+        print("You cannot set the propellant mass of a custom motor. Set either the ox_mass of the ox_tank or the fuel_mass of the fuel_grain. Continuing anyways because inheritance requires it (e.g. if you are running custom motor, this print statement is expected).")
 
     @property
     def ox_flow(self):
