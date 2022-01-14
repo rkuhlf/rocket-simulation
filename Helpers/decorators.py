@@ -33,7 +33,7 @@ def diameter_parameters(radius_name="radius", diameter_name="diameter"):
 
 
 def diametered(*args, **kwargs):
-    """Apply to a class that already has a radius property to allow the diameter to be set as well. You can pass in the radius_name and/or the diameter_name to change from the default"""
+    """Apply to a class that already has a radius property to allow the diameter to be set as well. You can pass in the radius_name and/or the diameter_name to change from the default. The radius must be the value specified in the class, and the diameter property will be added."""
     if len(args) == 1 and isinstance(args[0], type):
         return diameter_no_parameters(args[0])
     else:
