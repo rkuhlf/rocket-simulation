@@ -48,11 +48,13 @@ def load_environment_variable(name):
     import os
 
     result = os.getenv(name)
+    print(result)
     if result is None:
-        print(f"Unable to load {name} from the .env variables.")
         print(environment_variable_error_lookup.get(name,
                 "Unknown variable lookup. The error message may not have been written, or that may be an incorrect .env lookup."))
-    
+        
+        raise Exception(f"Unable to load {name} from the .env variables.")
+
     return result
 
 
