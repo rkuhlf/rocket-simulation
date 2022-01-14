@@ -52,6 +52,8 @@ def load_environment_variable(name):
         print(f"Unable to load {name} from the .env variables.")
         print(environment_variable_error_lookup.get(name,
                 "Unknown variable lookup. The error message may not have been written, or that may be an incorrect .env lookup."))
+    
+    return result
 
 
 def random_file_name(original: str, random_chars: int=10):
