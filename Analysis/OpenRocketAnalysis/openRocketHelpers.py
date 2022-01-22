@@ -14,7 +14,6 @@ from Helpers.data import load_environment_variable
 
 
 OR_JAR_PATH = load_environment_variable('OR_JAR_PATH')
-print(OR_JAR_PATH)
 CURRENT_SIMULATION = load_environment_variable('CURRENT_OR_SIMULATION')
 
 
