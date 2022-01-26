@@ -21,7 +21,7 @@ def new_or_instance():
     import javaInitialization
     return orhelper.OpenRocketInstance(jar_path=OR_JAR_PATH)
 
-def most_updated_sim(orhelper):
+def most_updated_sim(orhelper) -> document.Simulation:
     doc = orhelper.load_doc(CURRENT_SIMULATION)
     sim = getSimulationByName(doc, 'White Sands Average')
 

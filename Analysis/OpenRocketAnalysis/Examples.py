@@ -21,5 +21,4 @@ if __name__ == "__main__":
         # doc = orh.load_doc(os.path.join('examples', 'simple.ork'))
         sim = most_updated_sim(orh)
         orh.run_simulation(sim)
-        print(dir(sim))
 

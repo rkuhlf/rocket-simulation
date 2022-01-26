@@ -1,13 +1,8 @@
 from RocketParts.motor import Motor
 import javaInitialization
 
-import os
-
-import pandas as pd
-from matplotlib import pyplot as plt
-
 import orhelper
-from orhelper import FlightDataType, FlightEvent, AbstractSimulationListener
+from orhelper import AbstractSimulationListener
 from Analysis.OpenRocketAnalysis.openRocketHelpers import apogee
 from openRocketHelpers import getSimulationByName, most_updated_sim, new_or_instance
 
