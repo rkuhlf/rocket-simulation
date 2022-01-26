@@ -138,6 +138,7 @@ def nested_dictionary_lookup_array(dictionary, key_array):
     
 
 # FIXME: rename from safe
+# FIXME: Create a caching system for this that saves the previous key that worked
 def interpolated_lookup(dataframe, key, value, lookup_key, safe=False):
     before_keys = dataframe[dataframe[key] <= value]
     if safe and len(before_keys) == 0:
