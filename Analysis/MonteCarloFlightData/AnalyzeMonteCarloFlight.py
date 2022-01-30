@@ -31,6 +31,15 @@ def display_apogee_distribution(df):
 
     plt.show()
 
+def display_drift_distribution(df):
+    plt.scatter(df["Landing Distance"], df["Apogee"])
+
+    plt.title("Apogee Distribution")
+    plt.xlabel("Drift (m)")
+    plt.ylabel("Apogee (m)")
+
+    plt.show()
+
 def display_total_impulse_effect(df):
     plt.scatter(df["Total Impulse"], df["Apogee"])
 
@@ -67,9 +76,9 @@ def display_altitude_lines(sims):
 
 
 if __name__ == "__main__":
-    df = pd.read_csv("./Analysis/SAIC3-Temporary/MonteCarloFlightData/output2.csv")
+    df = pd.read_csv("./Analysis/SAIC4-Temporary/MonteCarloFlightData/output.csv")
 
-    best_motor_analysis(df)
+    display_drift_distribution(df)
 
     # sims = read_sims("./Analysis/SAIC3-Temporary/MonteCarloFlightSimulations")
     # display_altitude_lines(sims)

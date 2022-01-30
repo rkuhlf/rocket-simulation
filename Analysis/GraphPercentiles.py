@@ -41,11 +41,12 @@ if __name__ == "__main__":
     ]
 
     outlier_kwargs = {
-        "linestyle": "dashed",
+        "linestyle": "dotted",
         "color": "#9ca1b6"
     }
     confident_kwargs = {
-        "color": "#525666"
+        "color": "#525666",
+        "linestyle": "dashed",
     }
     percentile_kwargs = [
         {
@@ -54,11 +55,10 @@ if __name__ == "__main__":
         },
         {
             **confident_kwargs,
-            "label": "65%"
+            "label": "65%",
         },
         {
             "color": "#11191f",
-            "linestyle": "dashed",
             "label": "median"
         },
         confident_kwargs,
@@ -95,8 +95,8 @@ if __name__ == "__main__":
     from Helpers.visualization import make_matplotlib_big
     make_matplotlib_big()
 
-    plot_distribution("altitude", title="Distribution of Altitude", axis_label="Altitude (ft)")
-    plot_distribution("velocity", title="Distribution of Velocity", axis_label="Velocity (ft/s)")
+    # plot_distribution("altitude", title="Distribution of Altitude", axis_label="Altitude (ft)")
+    # plot_distribution("velocity", title="Distribution of Velocity", axis_label="Velocity (ft/s)")
     plot_distribution("drag", title="Distribution of Drag", axis_label="Drag (lbs)")
     plot_distribution("thrust", title="Simulated Thrust Curves", axis_label="Thrust (lbs)")    
     
