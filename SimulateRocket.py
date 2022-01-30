@@ -8,7 +8,7 @@ from environment import Environment
 from RocketParts.motor import Motor
 from rocket import Rocket
 from RocketParts.parachute import ApogeeParachute, Parachute
-from logger import RocketLogger
+from Logging.logger import RocketLogger
 from simulation import RocketSimulation
 from Visualization.FlightOpticalAnalysis import display_optical_analysis
 

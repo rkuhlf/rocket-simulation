@@ -15,7 +15,7 @@ from RocketParts.Motor.oxTank import OxTank
 from RocketParts.Motor.injector import Injector
 from RocketParts.Motor.combustionChamber import CombustionChamber
 from RocketParts.Motor.nozzle import Nozzle
-from logger import MotorLogger
+from Logging.logger import MotorLogger
 
 
 

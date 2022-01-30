@@ -1,3 +1,4 @@
+from Logging.ORLogger import ORLogger
 import Analysis.OpenRocketAnalysis.javaInitialization
 
 
@@ -66,6 +67,11 @@ class MonteCarloFlightOR(MonteCarloFlight):
     def finish_simulating(self):
         super().finish_simulating()
         # TODO: create count of tumbling rockets
+    
+    def save_all_sims(self, target_path="./MonteCarloFlightSimulations"):
+        for i, sim in enumerate(self.sims):
+            logger = ORLogger(sim)
+            logger.save_to_csv(f"{target_path}/{i}.csv")
 
 
 

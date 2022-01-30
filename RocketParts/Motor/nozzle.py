@@ -271,16 +271,20 @@ def find_nozzle_length(converging_angle, entrance_diameter, throat_diameter, div
 @diametered(radius_name="bolt_radius", diameter_name="bolt_diameter")
 class RetentionRing(MassObject):
     def __init__(self, **kwargs):
-        self.bolt_count = 6
-        self.bolt_radius = 0.00635 / 2
+        self.bolt_count = 24
+        self.bolt_radius = 0.009525 / 2
         self.target_safety_factor = 1.5
         self.bolt_shear_strength = 900_000_000 * 0.6 # Pa
-        self.retention_ring_shear_strength = 900_000_000 * 0.6 # Pa
-        self.retention_ring_compressive_strength = 250e6 # Pa
+        # Using 150 MPa for the shear strength of aluminum at 250 C
+        self.retention_ring_shear_strength = 150e6 * 0.6 # Pa
+        # Apparently this should be similar to tensile; hard to measure because ductile
+        # Assuming 250 C
+        self.retention_ring_compressive_strength = 150e6 # Pa
         # Width of the retention ring
-        self.bolt_length_into_ring = 0.0127 * 3/4 # m; totally made up
-        # The shortest length between the top of the retention ring and the middle of the top bolt
-        self.bolt_minor_thickness = 0.0254
+        self.bolt_length_into_ring = 0.0254 / 8 # 1 in = 0.0254 m; it is going through an eigth inch thick piece
+
+        # The shortest length between the edge of the retention ring and a point on the top bolt
+        self.bolt_minor_thickness = 0.0254 / 2 # 1 in = 0.0254 m; more lik 0.548 inches actually
 
         # Force variables that should change frequently through a simulation
         # # https://workflowy.com/s/nozzle-retention/R3QmGFlhHrfeqdaw

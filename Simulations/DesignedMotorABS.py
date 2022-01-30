@@ -5,7 +5,7 @@
 from random import gauss
 
 from simulation import MotorSimulation
-from logger import MotorLogger
+from Logging.logger import MotorLogger
 from RocketParts.motor import CustomMotor
 from RocketParts.Motor.oxTank import OxTank, random_WSMR_temperature
 from RocketParts.Motor.injector import Injector

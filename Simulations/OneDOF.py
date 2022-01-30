@@ -9,7 +9,7 @@ from RocketParts.motor import Motor
 from RocketParts.massObject import MassObject
 from rocket import Rocket
 from RocketParts.parachute import ApogeeParachute
-from logger import RocketLogger
+from Logging.logger import RocketLogger
 from simulation import RocketSimulation
 from Data.Input.goddardModels import get_sine_interpolated_center_of_pressure, linear_approximated_normal_force, assumed_zero_AOA_CD
 

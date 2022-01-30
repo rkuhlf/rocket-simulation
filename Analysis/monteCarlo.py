@@ -35,12 +35,12 @@ def create_motors_from_directory(path, max_count=-1):
 class MonteCarlo:
     def __init__(self, sims=[]):
         # You can start with an array of already run simulations, if you like
-        self.sims = sims
+        self.sims: list[Simulation] = sims
         self.failed_sims = []
 
         self.characteristic_figures: list[Dict] = []
         self.important_data: list[pd.DataFrame] = []
-
+    
     def simulate_randomized(self, count=20):
         for i in range(count):
             print(f"Simulating {i+1} out of {count}")
@@ -107,9 +107,15 @@ class MonteCarlo:
             df = df[names]
             df.to_csv(file_path)
     
-    def save_characteristic_figures(self, target_path="./MonteCarloFlightSimulation"):
+    def save_characteristic_figures(self, target_path="./MonteCarloFlightFigures"):
         """Saves a table with all of the overall outputs to the specified target_path"""
         force_save(self.characteristic_figures_dataframe, target_path, override=False)
+    
+    def save_all_sims(self, target_path="./MonteCarloFlightSimulations"):
+        """Writes all of the data for all of the simulations in separate files"""
+        for i, sim in enumerate(self.sims):
+            sim.logger.save_to_csv(f"{target_path}/{i}.csv")
+
 
     @property
     def characteristic_figures_dataframe(self):

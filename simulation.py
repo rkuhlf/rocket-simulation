@@ -8,7 +8,8 @@ from presetObject import PresetObject
 
 from rocket import Rocket
 from Helpers.general import magnitude
-from logger import Logger, RocketLogger
+from Logging.logger import Logger
+from Logging import CustomFlightLogger
 from environment import Environment
 
 
@@ -126,7 +127,7 @@ class RocketSimulation(Simulation):
         self.apply_angular_forces = True
 
         if "logger" not in kwargs.keys():
-            self.logger = RocketLogger(self.rocket)
+            self.logger = CustomFlightLogger(self.rocket)
 
         # This should already override the defaults in here, but I have an additional one because it wasn't working
         super().__init__(**kwargs)

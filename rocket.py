@@ -16,7 +16,7 @@ from Data.Input.models import get_splined_coefficient_of_drag, get_coefficient_o
 
 # Import some stuff for defaults
 from RocketParts.motor import Motor
-from logger import RocketLogger
+from Logging.logger import RocketLogger
 from environment import Environment
 from Helpers.decorators import diametered
 
