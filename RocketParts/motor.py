@@ -3,6 +3,7 @@
 # Now there is a custom motor that can simulate a hybrid's combustion process
 
 
+from typing import Type
 import numpy as np
 import pandas as pd
 
@@ -105,11 +106,15 @@ class Motor(MassObject):
             return 0
 
         # We assume that the inputted nozzle was simulated at sea level
-        # so the thrust curve data is based on a rocket that had too much exit pressure compared to what it currently has
+        # so the thrust curve data is based on a rocket that has more environmental pressure compared to what it currently has
         environmental_pressure = self.environment.get_air_pressure(altitude)
 
         # The higher the external pressure you tested at, the more of an increase we will get when the pressure is actually lower
-        return self.nozzle_area * (self.assumed_exit_pressure - environmental_pressure)
+        try:
+            return self.nozzle_area * (self.assumed_exit_pressure - environmental_pressure)
+        except TypeError as e:
+            print("You probably forgot to override the nozzle_area variable. It should be in m^2")
+            raise e
 
     def thrust_to_mass(self, thrust, time):
         return thrust * self.mass_per_thrust * time / (self.thrust_multiplier * self.time_multiplier)

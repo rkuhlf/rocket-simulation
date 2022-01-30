@@ -1,3 +1,5 @@
+import numpy as np
+from sqlalchemy import over
 import Analysis.OpenRocketAnalysis.javaInitialization
 
 
@@ -6,6 +8,7 @@ from random import choice
 import orhelper
 from Analysis.OpenRocketAnalysis.CustomMotor import OverrideThrustLookup
 from Analysis.OpenRocketAnalysis.openRocketHelpers import apogee
+from Analysis.OpenRocketAnalysis.overrideCDListener import OverrideCDDataFrame
 from Analysis.monteCarlo import MonteCarlo
 from Analysis.monteCarloFlight import MonteCarloFlight
 from net.sf.openrocket.simulation import FlightDataType, SimulationStatus # type: ignore
@@ -17,8 +20,10 @@ from RocketParts.motor import Motor
 import pandas as pd
 
 class MonteCarloFlightOR(MonteCarloFlight):
-    def __init__(self, orhelper: Helper, sims=[]):
+    def __init__(self, orhelper: Helper, sims=[], drag_dataframe=None):
+        """If the drag_dataframe is None, it will use OpenRocket's prediction"""
         self.orhelper = orhelper
+        self.drag_dataframe = drag_dataframe
         super().__init__(sims=sims)
 
     def initialize_simulation(self):
@@ -55,7 +60,11 @@ class MonteCarloFlightOR(MonteCarloFlight):
 
         data = {
             "time": sim.getSimulatedData().getBranch(0).get(FlightDataType.TYPE_TIME),
-            "altitude": sim.getSimulatedData().getBranch(0).get(FlightDataType.TYPE_ALTITUDE)
+            "altitude": sim.getSimulatedData().getBranch(0).get(FlightDataType.TYPE_ALTITUDE),
+            "velocity": sim.getSimulatedData().getBranch(0).get(FlightDataType.TYPE_VELOCITY_TOTAL),
+            "acceleration": sim.getSimulatedData().getBranch(0).get(FlightDataType.TYPE_ACCELERATION_TOTAL),
+            "drag": sim.getSimulatedData().getBranch(0).get(FlightDataType.TYPE_DRAG_FORCE),
+            "thrust": sim.getSimulatedData().getBranch(0).get(FlightDataType.TYPE_THRUST_FORCE),
         }
 
         data = pd.DataFrame(data)
@@ -70,8 +79,8 @@ class MonteCarloFlightOR(MonteCarloFlight):
 
 
 class MonteCarloFlightRandomMotorOR(MonteCarloFlightOR):
-    def __init__(self, orh, motors: 'list[Motor]', sims=[]):
-        super().__init__(orh, sims=sims)
+    def __init__(self, orh, motors: 'list[Motor]', sims=[], drag_dataframe=None):
+        super().__init__(orh, sims=sims, drag_dataframe=drag_dataframe)
 
         self.motors = motors
         self.selected_motor = motors[0].copy()
@@ -80,9 +89,12 @@ class MonteCarloFlightRandomMotorOR(MonteCarloFlightOR):
         # This is a horrible way to do this; motor should be reached through the sim.
         # This means that nothing can be multithreaded
         self.selected_motor = choice(self.motors).copy()
+        self.selected_motor.adjust_for_atmospheric = True
+        self.selected_motor.nozzle_area = np.pi * 0.0516382 ** 2 # m^2
         
-
-        self.orhelper.run_simulation(sim, listeners=[OverrideThrustLookup(self.selected_motor)])
+        listeners = [OverrideThrustLookup(self.selected_motor)]
+        listeners.append(OverrideCDDataFrame(sim, self.drag_dataframe))
+        self.orhelper.run_simulation(sim, listeners=listeners)
     
     def get_total_impulse(self, sim: document.Simulation):
         return self.selected_motor.total_impulse

@@ -3,16 +3,16 @@ import numpy as np
 from orhelper import AbstractSimulationListener
 from torch import double
 from Helpers.data import interpolated_lookup
-from net.sf.openrocket.document import Simulation
+from net.sf.openrocket.document import Simulation # type: ignore
 
 from net.sf.openrocket.simulation import SimulationStatus # type: ignore
 from net.sf.openrocket.aerodynamics import AerodynamicForces, FlightConditions # type: ignore
-from net.sf.openrocket.aerodynamics import BarrowmanCalculator
+from net.sf.openrocket.aerodynamics import BarrowmanCalculator # type: ignore
 
 import java # type: ignore
 import jpype
 
-from net.sf.openrocket.util import PolyInterpolator
+from net.sf.openrocket.util import PolyInterpolator # type: ignore
 
 
 class OverrideCDConstant(AbstractSimulationListener):

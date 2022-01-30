@@ -7,7 +7,7 @@ import orhelper
 from orhelper import FlightDataType
 
 
-from net.sf.openrocket import document
+from net.sf.openrocket import document # type: ignore
 
 
 from Helpers.data import load_environment_variable
@@ -23,13 +23,13 @@ def new_or_instance():
 
 def most_updated_sim(orhelper) -> document.Simulation:
     doc = orhelper.load_doc(CURRENT_SIMULATION)
-    sim = getSimulationByName(doc, 'White Sands Average')
+    sim = getSimulationByName(doc, 'Custom CG; Regular Wind')
 
     return sim
 
 def get_randomized_sim(orhelper):
     doc = orhelper.load_doc(CURRENT_SIMULATION)
-    sim = getSimulationByName(doc, 'White Sands Average')
+    sim = getSimulationByName(doc, 'Custom CG; Regular Wind')
     opts = sim.getOptions()
 
     opts.setWindSpeedAverage(gauss(15, 5))

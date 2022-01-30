@@ -1,5 +1,7 @@
+# Simulate randomized flights using OR stepper
+# They are randomized for launch conditions and use a selected motor
 
-
+import pandas as pd
 from Analysis.monteCarlo import create_motors_from_directory
 import numpy as np
 from random import gauss
@@ -18,14 +20,21 @@ if __name__ == '__main__':
 
     with new_or_instance() as instance:
         orh = Helper(instance)
-        motors = create_motors_from_directory("./Analysis/MotorMonteCarlo-Temporary/")
+        motors = create_motors_from_directory("./Analysis/MotorMonteCarlo-Temporary/", 100)
 
-        m = MonteCarloFlightRandomMotorOR(orh, motors)
+        df = pd.read_csv("./Data/Input/aerodynamicQualities.csv")
+        m = MonteCarloFlightRandomMotorOR(orh, motors, drag_dataframe=df)
 
         
         m.simulate_randomized(100)
 
     m.print_characteristic_figures()
+
+    root_folder = "./Analysis/SAIC3-Temporary"
+    m.save_important_data(f"{root_folder}/MonteCarloFlightSimulations/")
+
+    m.save_characteristic_figures(f"{root_folder}/MonteCarloFlightData/output.csv")
+
 
     m.plot_overview()
     m.plot_landing()
@@ -33,6 +42,5 @@ if __name__ == '__main__':
     m.plot_max_mach()
     m.plot_impulse_correlation()
 
+    # I think that the time values are off here for some reason
     m.plot_altitude_curves()
-
-    m.save_characteristic_figures("./Analysis/MonteCarloFlightData/output.csv")

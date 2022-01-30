@@ -108,7 +108,7 @@ class MonteCarloFlight(MonteCarlo):
 
     def plot_altitude_curves(self):
         for df in self.important_data:
-            plt.plot(df.index, df["altitude"])
+            plt.plot(df["time"], df["altitude"])
         
         plt.title("Flights")
         plt.xlabel("Time (s)")

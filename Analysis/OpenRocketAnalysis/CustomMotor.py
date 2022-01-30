@@ -19,7 +19,8 @@ class OverrideThrustLookup(AbstractSimulationListener):
     def postSimpleThrustCalculation(self, simulationStatus: SimulationStatus, thrust: float) -> float:
         self.motor.environment.time = simulationStatus.getSimulationTime()
         # ! TODO: The CG is very important too. I need that data from the motor sim
-        return self.motor.calculate_thrust()
+        # Pass the altitude in here
+        return self.motor.calculate_thrust(simulationStatus.getRocketPosition().z)
 
 
 

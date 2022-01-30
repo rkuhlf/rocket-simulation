@@ -1,6 +1,8 @@
 # Uses ABS-Nitrous
 # Designed for a 120 kg wet mass rocket with 7.75 inch ID (I forgot to include paraffin thickness for the fuel grain) 
 # Can get up to 125_000 Ns for a really long grain, only 92_000 Ns for a 1m grain. Or, if the regression equation is different, I can get 143000 for a really long grain
+# Ox mass, combustion efficiency, and regression equation should be the main things
+
 
 from random import gauss
 
@@ -64,7 +66,7 @@ def get_randomized_sim() -> MotorSimulation:
     m.injector.orifice_diameter *= gauss(1, 0.03)
 
     # --- Combustion Chamber ---
-    m.cstar_efficiency = min(1, gauss(0.83, 0.1))
+    m.cstar_efficiency = min(1, gauss(0.83, 0.06))
     # These are pretty set in stone, but there might be some variation
     m.combustion_chamber.precombustion_chamber.length *= gauss(1, 0.01)
     m.combustion_chamber.postcombustion_chamber.length *= gauss(1, 0.01)
@@ -73,8 +75,8 @@ def get_randomized_sim() -> MotorSimulation:
 
     # --- Fuel Grain ---
     f: ABSGrain = m.fuel_grain
-    # Do not really recall
-    f.density *= gauss(1, 0.02)
+    # Different varieties have different values
+    f.density *= gauss(1, 0.05)
     f.port_radius *= gauss(1, 0.002)
     f.initial_mass = f.fuel_mass
     f.initial_radius = f.port_radius
