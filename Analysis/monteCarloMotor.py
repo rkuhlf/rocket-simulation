@@ -94,7 +94,7 @@ class MonteCarloMotor(MonteCarlo):
 
         plt.show()
 
-    def plot_cstar_efficiency_correlation(self):
+    def plot_cstar_impulse_correlation(self):
         df = self.characteristic_figures_dataframe
 
         plt.scatter(df["Combustion Efficiency"], df["Total Impulse"])
@@ -102,6 +102,17 @@ class MonteCarloMotor(MonteCarlo):
         plt.title("Monte Carlo C* Efficiency Importance")
         plt.xlabel("C* Efficiency ()")
         plt.ylabel("Total Impulse (Ns)")
+
+        plt.show()
+    
+    def plot_cstar_time_correlation(self):
+        df = self.characteristic_figures_dataframe
+
+        plt.scatter(df["Combustion Efficiency"], df["Burn Time"])
+
+        plt.title("Monte Carlo C* Efficiency Importance")
+        plt.xlabel("C* Efficiency ()")
+        plt.ylabel("Burn Time (s)")
 
         plt.show()
     
@@ -155,6 +166,7 @@ class MonteCarloMotor(MonteCarlo):
 
 # FIXME: debug the NaN values that occasionally come up
 if __name__ == "__main__":
+    folder = "Analysis/MotorMonteCarlo1-Temporary"
     m = MonteCarloMotor()
     m.simulate_randomized(100)
 
@@ -162,7 +174,9 @@ if __name__ == "__main__":
 
     # time is logged automatically because it is the index
     # "thrust", "combustion_chamber.pressure", "ox_tank.pressure", "combustion_chamber.temperature", "ox_tank.temperature", "combustion_chamber.fuel_grain.port_diameter", "OF", "combustion_chamber.cstar", "specific_impulse", "fuel_flow", "ox_flow", "mass_flow", "mass_flow_out", "combustion_chamber.ideal_gas_constant"
-    # m.save_important_data("./Analysis/MotorMonteCarlo1-Temporary/", names=["thrust"])
+    m.save_important_data(folder)
+
+    m.save_characteristic_figures(f"{folder}/output.csv")
 
     m.plot_overview()
     m.plot_efficiency()
