@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
     with new_or_instance() as instance:
         orh = Helper(instance)
-        motors = create_motors_from_directory("./Analysis/MotorMonteCarlo-Temporary/", 100)
+        motors = create_motors_from_directory("./Analysis/MotorMonteCarlo1-Temporary/", 100)
 
         df = pd.read_csv("./Data/Input/aerodynamicQualities.csv")
         m = MonteCarloFlightRandomMotorOR(orh, motors, drag_dataframe=df)
@@ -30,7 +30,7 @@ if __name__ == '__main__':
 
     m.print_characteristic_figures()
 
-    root_folder = "./Analysis/SAIC3-Temporary"
+    root_folder = "./Analysis/SAIC4-Temporary"
     m.save_important_data(f"{root_folder}/MonteCarloFlightSimulations/")
 
     m.save_characteristic_figures(f"{root_folder}/MonteCarloFlightData/output.csv")

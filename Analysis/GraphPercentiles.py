@@ -4,9 +4,7 @@ import pandas as pd
 from torch import alpha_dropout
 
 
-# TODO: write explanation for odd thrust curve shapes
-
-folder = "Analysis/SAIC3-Temporary"
+folder = "Analysis/SAIC4-Temporary"
 
 def simulation_name_from_figures(row, target_folder=f"{folder}/MonteCarloFlightSimulations"):
     return f"{target_folder}/{int(row[0]) + 1}.csv"
