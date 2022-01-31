@@ -95,8 +95,8 @@ if __name__ == "__main__":
     from Helpers.visualization import make_matplotlib_big
     make_matplotlib_big()
 
-    # plot_distribution("altitude", title="Distribution of Altitude", axis_label="Altitude (ft)")
-    # plot_distribution("velocity", title="Distribution of Velocity", axis_label="Velocity (ft/s)")
+    plot_distribution("altitude", title="Distribution of Altitude", axis_label="Altitude (ft)")
+    plot_distribution("velocity", title="Distribution of Velocity", axis_label="Velocity (ft/s)")
     plot_distribution("drag", title="Distribution of Drag", axis_label="Drag (lbs)")
     plot_distribution("thrust", title="Simulated Thrust Curves", axis_label="Thrust (lbs)")    
     
