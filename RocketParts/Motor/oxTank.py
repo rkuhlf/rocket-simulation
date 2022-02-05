@@ -5,6 +5,7 @@
 from random import gauss
 import numpy as np
 import matplotlib.pyplot as plt
+from RocketParts.massObject import MassObject
 
 from presetObject import PresetObject
 from Helpers.general import cylindrical_volume, cylindrical_length
@@ -151,7 +152,7 @@ def find_ullage(
 #endregion
 
 @diametered
-class OxTank(PresetObject):
+class OxTank(MassObject):
     '''
         Ox tank model of the rocket
         Stores the oxidizer in terms of the temperature, total volume, and loaded ox mass
@@ -170,6 +171,8 @@ class OxTank(PresetObject):
 
         The ullage will be calculated automatically (assuming a constant temperature)
         """
+        super().__init__()
+
         self._temperature = 293.15 # Kelvin
         self._length = 3.7 # m
         self.radius = 0.1016 # m
@@ -226,7 +229,7 @@ class OxTank(PresetObject):
     def get_liquid_mass(self):
         return self.get_liquid_volume() * get_liquid_nitrous_density(self.temperature)
 
-    def get_center_of_mass(self):
+    def get_oxidizer_center_of_mass(self):
         # All centers of mass are with reference to the top of the ox tank
         # The current calculations do not account for hemispherical end caps
         gas_center_of_mass = self.length * self.ullage / 2
@@ -234,7 +237,7 @@ class OxTank(PresetObject):
         liquid_center_of_mass = gas_end_distance + self.length * (1 - self.ullage) / 2
 
 
-        return (liquid_center_of_mass * self.get_liquid_mass() + gas_center_of_mass * self.get_gas_mass()) / (self.get_liquid_mass() + self.get_gas_mass())
+        return self.front + (liquid_center_of_mass * self.get_liquid_mass() + gas_center_of_mass * self.get_gas_mass()) / (self.get_liquid_mass() + self.get_gas_mass())
 
     def get_combined_total_heat_capacity(self):
         # kJ / K

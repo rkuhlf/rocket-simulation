@@ -41,8 +41,8 @@ class MonteCarloMotor(MonteCarlo):
 
         data = sim.logger.get_dataframe()
 
-        # "thrust", "combustion_chamber.pressure", "ox_tank.pressure", "combustion_chamber.temperature", "ox_tank.temperature", "combustion_chamber.fuel_grain.port_diameter", "OF", "combustion_chamber.cstar", "specific_impulse", "fuel_flow", "ox_flow", "mass_flow", "mass_flow_out", "combustion_chamber.ideal_gas_constant"
-        data = data[["thrust", "OF", "ox_tank.pressure", "combustion_chamber.temperature"]].copy()
+        # "thrust", "combustion_chamber.pressure", "ox_tank.pressure", "combustion_chamber.temperature", "ox_tank.temperature", "combustion_chamber.fuel_grain.port_diameter", "OF", "combustion_chamber.cstar", "specific_impulse", "fuel_flow", "ox_flow", "mass_flow", "mass_flow_out", "combustion_chamber.ideal_gas_constant", "propellant_mass", "propellant_CG"
+        data = data[["thrust", "OF", "ox_tank.pressure", "combustion_chamber.temperature", "propellant_mass", "propellant_CG"]].copy()
 
         self.important_data.append(data)
 
@@ -166,7 +166,7 @@ class MonteCarloMotor(MonteCarlo):
 
 # FIXME: debug the NaN values that occasionally come up
 if __name__ == "__main__":
-    folder = "Analysis/MotorMonteCarlo1-Temporary"
+    folder = "Analysis/MotorMonteCarlo2-Temporary"
     m = MonteCarloMotor()
     m.simulate_randomized(100)
 
@@ -183,6 +183,6 @@ if __name__ == "__main__":
     m.plot_average_thrust()
     m.plot_thrust_curves()
 
-    m.plot_cstar_efficiency_correlation()
+    # m.plot_cstar_efficiency_correlation()
     m.plot_OF_correlation()
     m.plot_regression_correlation()

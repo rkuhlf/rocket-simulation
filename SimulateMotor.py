@@ -23,12 +23,11 @@ from Visualization.MotorOpticalAnalysis import display_optical_analysis
 
 
 def get_sim():
-    ox = OxTank(temperature=300)
-    # print(ox.temperature)
-    grain = Grain(verbose=True, length=0.38)
+    ox = OxTank(temperature=300, front=0)
+
+    grain = Grain(verbose=True, length=0.38, center_of_gravity=3.4)
     chamber = CombustionChamber(fuel_grain=grain)
     injector = Injector(ox_tank=ox, combustion_chamber=chamber)
-    # Stuttgart optimized at 30 bar, but that gives me a totally funny shape because the pressure never reaches it
 
     nozzle = Nozzle(throat_diameter=0.04, fuel_grain=grain) # meters
     env = Environment(time_increment=0.01)

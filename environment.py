@@ -107,7 +107,7 @@ class Environment(PresetObject):
         # https://www.quora.com/What-is-the-average-wind-speed-at-different-altitudes
         # https://globalwindatlas.info/ - I think this will tell me the z value
 
-        # I believe that Lake Jackson averae windspeed is about 2.1 m/s
+        # I believe that Lake Jackson average windspeed is about 2.1 m/s
         # https://globalwindatlas.info/ also has some direction data
         return self.wind.get_air_velocity(self.time, altitude)
 

@@ -1,16 +1,14 @@
-import os
-
 import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
-from torch import mul
 import javaInitialization
-from Analysis.OpenRocketAnalysis.overrideCDListener import OverrideCDConstant, OverrideCDDataFrame
+
+from Analysis.OpenRocketAnalysis.openRocketHelpers import apogee
+from Analysis.OpenRocketAnalysis.overrideAerodynamicsListener import OverrideAerodynamicsConstant, OverrideAerodynamicsDataFrame
 
 import orhelper
-from orhelper import FlightDataType, FlightEvent
 from openRocketHelpers import getSimulationNames, most_updated_sim, new_or_instance
-from net.sf.openrocket.aerodynamics import FlightConditions
+from net.sf.openrocket.aerodynamics import FlightConditions # type: ignore
 
 
 def display_constant_CD_effect():
@@ -25,7 +23,7 @@ def display_constant_CD_effect():
 
 
         for CD in CDs:
-            orh.run_simulation(sim, listeners=[OverrideCDConstant(sim, CD)])
+            orh.run_simulation(sim, listeners=[OverrideAerodynamicsConstant(sim, CD)])
             apogee = sim.getSimulatedData().getMaxAltitude() * 3.28084
             print(f"CD = {CD} --> {apogee} feet")
             apogees.append(apogee)
@@ -38,10 +36,6 @@ def display_constant_CD_effect():
         plt.ylim(bottom=0)
 
         plt.show()
-
-        # OverrideCDConstant(sim, 1.8) --> 10,800 meters = 35000 feet
-        # [] --> 23,000 meters = 75000 feet
-
 
 def display_multiplied_CD_effect():
     apogees = []
@@ -58,7 +52,7 @@ def display_multiplied_CD_effect():
         p_multiplier = 1
         for multiplier in multipliers:
             df["CD"] *= multiplier / p_multiplier
-            orh.run_simulation(sim, listeners=[OverrideCDDataFrame(sim, df)])
+            orh.run_simulation(sim, listeners=[OverrideAerodynamicsDataFrame(sim, df)])
             apogee = sim.getSimulatedData().getMaxAltitude() * 3.28084
             print(f"multiplier = {multiplier} --> {apogee} feet")
             apogees.append(apogee)
@@ -74,13 +68,26 @@ def display_multiplied_CD_effect():
 
         plt.show()
 
-        # OverrideCDConstant(sim, 1.8) --> 10,800 meters = 35000 feet
-        # [] --> 23,000 meters = 75000 feet
 
+def test_overridden_flight():
+    
+    with new_or_instance() as instance:
+        orh = orhelper.Helper(instance)
+
+        sim = most_updated_sim(orh)
+
+        sim.getOptions().setWindSpeedAverage(30)
+        sim.getOptions().setWindSpeedDeviation(0)
+
+        df = pd.read_csv("Data/Input/aerodynamicQualities.csv")
+        orh.run_simulation(sim, listeners=[OverrideAerodynamicsDataFrame(sim, df, override_CP=False, override_CD=True)])
+
+        print(apogee(sim))
+    
 
 
 if __name__ == "__main__":
-    display_multiplied_CD_effect()
-
+    # display_multiplied_CD_effect()
+    test_overridden_flight()
 
     pass

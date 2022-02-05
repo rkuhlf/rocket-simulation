@@ -21,10 +21,10 @@ from Visualization.MotorOpticalAnalysis import display_optical_analysis
 
 def get_sim() -> MotorSimulation:
     # Usually we use 293.15
-    ox = OxTank(temperature=293.15, length=2.54, diameter=0.1905, ox_mass=52.43)
+    ox = OxTank(temperature=293.15, length=2.54, diameter=0.1905, ox_mass=52.43, front=0)
 
     # This is why you cannot simply use a cylindrical port. 4.5 meters (for the whitmore model) is too long, simple as that
-    grain = ABSGrain(verbose=True, length=1.3, port_diameter=0.12, outer_diameter=0.1651)
+    grain = ABSGrain(verbose=True, length=1.3, port_diameter=0.12, outer_diameter=0.1651, center_of_gravity=3.4)
     grain.regression_rate_function = marxman_whitman_ABS_nitrous
 
     chamber = CombustionChamber(fuel_grain=grain, limit_pressure_change=False)
@@ -35,7 +35,7 @@ def get_sim() -> MotorSimulation:
     env = Environment()
 
     # I found pressure divergence at t_post = 0.2
-    motor = CustomMotor(ox_tank=ox, injector=injector, combustion_chamber=chamber, nozzle=nozzle, environment=env, pressurization_time_increment=0.01, post_pressurization_time_increment=0.05)
+    motor = CustomMotor(ox_tank=ox, injector=injector, combustion_chamber=chamber, nozzle=nozzle, environment=env, pressurization_time_increment=0.007, post_pressurization_time_increment=0.04)
     motor.data_path = "./Data/Input/CEA/CombustionLookupABS.csv"
 
     logger = MotorLogger(motor, target="motorOutput.csv", debug_every=0.5)

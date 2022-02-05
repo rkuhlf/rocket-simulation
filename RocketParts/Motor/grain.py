@@ -6,6 +6,7 @@ from random import choice
 from typing import Callable
 import numpy as np
 from numpy.core.numeric import tensordot
+from RocketParts.massObject import MassObject
 
 
 from presetObject import PresetObject
@@ -203,10 +204,12 @@ def determine_optimal_starting_diameter(outer_diameter, target_mass, density, ox
 # TODO: integrate this with the mass object class
 @diametered("port_radius", "port_diameter")
 @diametered("outer_radius", "outer_diameter")
-class Grain(PresetObject):
+class Grain(MassObject):
     def __init__(self, **kwargs):
-        self.port_radius = 0.05 # random
-        self.outer_radius = 0.5 # random
+        super().__init__(**kwargs)
+
+        self.port_radius = 0.05
+        self.outer_radius = 0.25
         # of the fuel
         self.mass_flow = 0
         self.density = 920 # kg / m^3

@@ -8,7 +8,7 @@ from random import choice
 import orhelper
 from Analysis.OpenRocketAnalysis.CustomMotor import OverrideThrustLookup
 from Analysis.OpenRocketAnalysis.openRocketHelpers import apogee
-from Analysis.OpenRocketAnalysis.overrideCDListener import OverrideCDDataFrame
+from Analysis.OpenRocketAnalysis.overrideAerodynamicsListener import OverrideAerodynamicsDataFrame
 from Analysis.monteCarlo import MonteCarlo
 from Analysis.monteCarloFlight import MonteCarloFlight
 from net.sf.openrocket.simulation import FlightDataType, SimulationStatus # type: ignore
@@ -93,7 +93,7 @@ class MonteCarloFlightRandomMotorOR(MonteCarloFlightOR):
         self.selected_motor.nozzle_area = np.pi * 0.0516382 ** 2 # m^2
         
         listeners = [OverrideThrustLookup(self.selected_motor)]
-        listeners.append(OverrideCDDataFrame(sim, self.drag_dataframe))
+        listeners.append(OverrideAerodynamicsDataFrame(sim, self.drag_dataframe))
         self.orhelper.run_simulation(sim, listeners=listeners)
     
     def get_total_impulse(self, sim: document.Simulation):

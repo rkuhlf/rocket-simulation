@@ -22,7 +22,7 @@ from logger import MotorLogger
 
 class Motor(MassObject):
     # TODO: rewrite so I can have some variable names that actually make sense. Right now, .total_impulse just gives you a value that is literally not the total impulse
-    # TODO: write adjustment for atmospheric pressure
+    # make some unscaled_variable names
 
     def __init__(self, **kwargs):
         self.environment = Environment()
@@ -306,6 +306,13 @@ class CustomMotor(Motor):
     @propellant_mass.setter
     def propellant_mass(self, p):
         print("You cannot set the propellant mass of a custom motor. Set either the ox_mass of the ox_tank or the fuel_mass of the fuel_grain. Continuing anyways because inheritance requires it (e.g. if you are running custom motor, this print statement is expected).")
+
+    @property
+    def propellant_CG(self):
+        ox_mass = self.ox_tank.ox_mass
+        fuel_mass = self.fuel_grain.fuel_mass
+
+        return (self.ox_tank.get_oxidizer_center_of_mass() * ox_mass + self.fuel_grain.total_CG * fuel_mass) / (ox_mass + fuel_mass)
 
     @property
     def ox_flow(self):
