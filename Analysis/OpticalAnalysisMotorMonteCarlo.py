@@ -23,12 +23,31 @@ def display_end_temperature_distribution(sims):
 
     plt.show()
 
+def display_final_mass_distribution(sims):
+    propellant_mass = []
+
+    for sim in sims:
+        try:
+            # 54 kg is the dry mass of the rocket
+            propellant_mass.append((sim.iloc[-1]["propellant_mass"]) + 54)
+        except Exception:
+            print("Skipping because of error; probable non-simulation included in folder")
+    
+    plt.hist(propellant_mass, bins=13)
+    plt.xlabel("Final Mass (kg)")
+    plt.ylabel("Frequency")
+    plt.title("Distribution of Deployment Masses")
+
+    plt.show()
+
+
 
 
 if __name__ == "__main__":
     sims = read_sims("Analysis/MotorMonteCarlo3-Temporary")
 
-    display_end_temperature_distribution(sims)
+    # display_end_temperature_distribution(sims)
+    display_final_mass_distribution(sims)
 
     # print(sims)
     
