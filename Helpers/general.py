@@ -3,7 +3,17 @@
 # Also has some interpolation helpers
 
 import re
+from typing import Callable
 import numpy as np
+
+
+# A function like this makes it very easy to create a function that returns a value, so ever other model of this value should just be a drop in replacement
+def constant(value: float) -> Callable:
+    # does not matter what it is passed; it will be constant
+    def inner(*args, **kwargs) -> float: 
+        return value
+
+    return inner
 
 
 def transpose_tuple(iterable):

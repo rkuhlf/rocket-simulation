@@ -10,7 +10,7 @@ from simulation import MotorSimulation
 from logger import MotorLogger
 from RocketParts.motor import CustomMotor
 from RocketParts.Motor.oxTank import OxTank, random_WSMR_temperature
-from RocketParts.Motor.injector import Injector
+from RocketParts.Motor.injector import Injector, mass_flow_fitted_HTPV
 from RocketParts.Motor.combustionChamber import CombustionChamber
 from RocketParts.Motor.grain import ABSGrain, marxman_whitman_ABS_nitrous
 from RocketParts.Motor.nozzle import Nozzle
@@ -30,6 +30,7 @@ def get_sim() -> MotorSimulation:
     chamber = CombustionChamber(fuel_grain=grain, limit_pressure_change=False)
     
     injector = Injector(ox_tank=ox, combustion_chamber=chamber, orifice_count=4, orifice_diameter=0.005)
+    injector.mass_flow_function = mass_flow_fitted_HTPV
     nozzle = Nozzle(throat_diameter=0.045, area_ratio=4.78) # meters
 
     env = Environment()

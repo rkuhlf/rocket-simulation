@@ -4,8 +4,10 @@
 # Mostly has formulas for a few different two-phase flow calculations
 
 
+from typing import Callable
 import numpy as np
 from Helpers.data import DataType
+from Helpers.general import constant
 
 from RocketParts.massObject import MassObject
 from RocketParts.Motor.nitrousProperties import get_nitrous_vapor_pressure, get_liquid_nitrous_density, find_specific_enthalpy_of_gaseous_nitrous, find_specific_enthalpy_of_liquid_nitrous
@@ -46,16 +48,83 @@ def get_cross_sectional_area(count, diameter):
 
 #endregion
 
+class Injector(MassObject):
+    def __init__(self, **kwargs):
+        """
+        :param int orifice_count: The number of holes the flow is going through
+        :param double orifice_diameter: the diameter of the circle through which the ox will flow (in meters)
+        """
+
+        # Since I don't know which properties I am going to be needing from the ox tank and the combustion chamber, I will just pass them in right here
+        self.ox_tank = None
+        self.combustion_chamber = None
+        
+        self.orifice_count = 3
+        # Recall that we do not have total control over this. We have to order some swagelock fittings
+        self.orifice_diameter = 0.005 # m
+
+        self.mass_flow_function = normal_SPI
+
+
+        super().overwrite_defaults(**kwargs)
+    
+    @property
+    def liquid_density(self):
+        return get_liquid_nitrous_density(self.ox_tank.temperature)
+
+    @property
+    def total_orifice_area(self):
+        return get_cross_sectional_area(self.orifice_count, self.orifice_diameter)
+    
+    @property
+    def upstream_pressure(self):
+        return self.ox_tank.pressure
+    
+    @property
+    def downstream_pressure(self):
+        return self.combustion_chamber.pressure
+    
+    @property
+    def pressure_drop(self):
+        return self.upstream_pressure - self.downstream_pressure
+
+    @property
+    def mass_flow(self):
+        if self.pressure_drop < 0:
+            return 0
+        
+        return self.mass_flow_function(self)
+        
+
+
 #region MASS FLOW CHARACTERISTICS
-def find_mass_flow_single_phase_incompressible(
-        liquid_density, pressure_drop, orifice_area,
-        upstream_cross_sectional_area):
+def mass_flow_SPI_function(discharge_coefficient: float) -> Callable:
     # Relatively simple model that assumes your flow is entirely liquid. This will work well for most liquid rockets, but very poorly for nitrous (it overestimates it; since it is actually lower density)
 
-    # most models actually discount the denominator for this model, since it is almost exactly equal to unity. I put it in because that is how the model is derived
+    def inner(injector) -> float: # does not matter what it is passed; it will be constant
+        area_ratio = injector.total_orifice_area / injector.combustion_chamber.fuel_grain.get_outer_cross_sectional_area()
 
-    return ((2 * liquid_density * pressure_drop) /
-            (1 - (orifice_area / upstream_cross_sectional_area) ** 2)) ** (1 / 2)
+        effective_area = discharge_coefficient * injector.total_orifice_area
+        
+        # most models actually discount the denominator for this model, since it is almost exactly equal to unity. I put it in because that is how the model is derived
+        return effective_area * ((2 * injector.liquid_density * injector.pressure_drop) / (1 - area_ratio) ** 2) ** (1 / 2)
+
+    return inner
+
+poor_SPI = mass_flow_SPI_function(0.45)
+normal_SPI = mass_flow_SPI_function(0.7)
+efficient_SPI = mass_flow_SPI_function(0.95)
+
+def mass_flow_fitted_HTPV(injector: Injector):
+    # Conversion to MPa to match the graph it was fitted to
+    
+    return 1.2 * np.log10(injector.pressure_drop / 1e6 + 1) * injector.orifice_count
+
+def mass_flow_fitted_square_root_HTPV(injector: Injector):
+    return 0.0205 * np.sqrt(400 * injector.pressure_drop / 10e6) * injector.orifice_count
+
+
+# TODO: rewrite some of these to simply take an injector as a parameter
 
 def find_mass_flow_MR(pressure_drop, liquid_density, gas_density, total_area, coefficient_of_discharge=0.7, mixing_ratio=0.2552):
     density = mixing_ratio * gas_density + (1 - mixing_ratio) * liquid_density
@@ -63,8 +132,7 @@ def find_mass_flow_MR(pressure_drop, liquid_density, gas_density, total_area, co
     return total_area * coefficient_of_discharge * (2 * density * pressure_drop) ** (1/2)
 
 
-def find_mass_flow_homogenous_equilibrium(
-        density, upstream_enthalpy, downstream_enthalpy):
+def find_mass_flow_homogenous_equilibrium(density, upstream_enthalpy, downstream_enthalpy):
     # Some implementations of this model are going to include a C_d here, but I think it is better to only have the one C_d with dyer
 
     # Underpredicts flow rate, assumes equilibrium of flow
@@ -75,8 +143,7 @@ def find_mass_flow_homogenous_equilibrium(
     return density * (2 * (upstream_enthalpy - downstream_enthalpy)) ** (1 / 2)
 
 
-def find_dyer_interpolation_factor(
-        upstream_pressure, vapor_pressure, downstream_pressure):
+def find_dyer_interpolation_factor(upstream_pressure, vapor_pressure, downstream_pressure):
     # upstream pressure is in the ox tank
     # downstream is in the combustion chamber
     k = ((upstream_pressure - downstream_pressure) /
@@ -92,9 +159,8 @@ def find_dyer_interpolation_factor(
 
 # TODO: I need to implement the critical velocity point for when the pressure downstream is very low and things are basically choked
 
-# TODO: I have a major problem; probably the best solution will be found in one of the 2 100 page papers on ox tanks
-# The upstream pressure is calculated identically to the calculations for the vapor pressure in the injector. That means that k will always be sqrt(1)
-# I believe that the way I am supposed to fix this is to implement a more advanced equation of state for the ox tank. I think I will try to do the Helmholtz one. It looks like it will make the 
+# TODO: I have a major problem: currently the upstream pressure is calculated identically to the calculations for the vapor pressure in the injector. That means that k will always be sqrt(1); probably the best solution will be found in one of the 2 100 page papers on ox tanks
+# I believe that the way I am supposed to fix this is to implement a more advanced equation of state for the ox tank. I think I will try to do the Helmholtz one. It looks like it will make the liquid a different temperature
 
 
 def find_mass_flow_dyer_interpolation(
@@ -127,57 +193,6 @@ def find_mass_flow_dyer_interpolation(
 
 #endregion
 
-class Injector(MassObject):
-    def __init__(self, **kwargs):
-        """
-        :param int orifice_count: The number of holes the flow is going through
-        :param double orifice_diameter: the diameter of the circle through which the ox will flow (in meters)
-        """
-
-        # Since I don't know which properties I am going to be needing from the ox tank and the combustion chamber, I will just pass them in right here
-        self.ox_tank = None
-        self.combustion_chamber = None
-        
-        self.orifice_count = 3
-        # Recall that we do not have total control over this. We have to order some swagelock fittings
-        self.orifice_diameter = 0.005 # m
-
-        self.mass_flow_datatype = DataType.FUNCTION_INJECTOR
-        self.mass_flow = 0
-        self.discharge_coefficient = 0.7
-
-
-        super().overwrite_defaults(**kwargs)
-
-    @property
-    def total_orifice_area(self):
-        return get_cross_sectional_area(self.orifice_count, self.orifice_diameter)
-
-
-    def mass_flow_function(self):
-        # This is just the model for single phase incompressible
-        upstream_pressure = self.ox_tank.pressure
-        downstream_pressure = self.combustion_chamber.pressure
-        pressure_drop = upstream_pressure - downstream_pressure
-
-        if pressure_drop < 0:
-            return 0
-
-        density = get_liquid_nitrous_density(self.ox_tank.temperature)
-
-        area_ratio = self.total_orifice_area / self.combustion_chamber.fuel_grain.get_outer_cross_sectional_area()
-        
-        return self.discharge_coefficient * self.total_orifice_area * ((2 * density * pressure_drop) / (1 - area_ratio) ** 2) ** (1 / 2)
-
-
-    def set_mass_flow_function(self, func):
-        self.mass_flow_datatype = DataType.FUNCTION_INJECTOR
-        self.mass_flow_function = func
-
-    def get_mass_flow(self):
-        if self.mass_flow_datatype is DataType.FUNCTION_INJECTOR:
-            return self.mass_flow_function()
-        
 
 
 

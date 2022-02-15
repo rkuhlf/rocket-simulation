@@ -2,7 +2,6 @@
 # All of the math is located within different files, and the motor file brings them all together
 # This script simply instantiates them, runs the simulation, then makes a ton of graphs
 # Right now, all of the inputs are based off of the Heros 3 rocket, developed at Stuttgart, because I am trying to confirm that my simulated output vaguely matches theirs
-# TODO: Make this file run
 
 
 import matplotlib.pyplot as plt
@@ -12,7 +11,7 @@ from simulation import MotorSimulation
 from logger import MotorLogger
 from RocketParts.motor import CustomMotor
 from RocketParts.Motor.oxTank import OxTank
-from RocketParts.Motor.injector import Injector
+from RocketParts.Motor.injector import Injector, mass_flow_fitted_HTPV
 from RocketParts.Motor.combustionChamber import CombustionChamber
 from RocketParts.Motor.grain import Grain
 from RocketParts.Motor.nozzle import Nozzle
@@ -28,6 +27,8 @@ def get_sim():
     grain = Grain(verbose=True, length=0.38, center_of_gravity=3.4)
     chamber = CombustionChamber(fuel_grain=grain)
     injector = Injector(ox_tank=ox, combustion_chamber=chamber)
+    injector.orifice_count = 4
+    injector.mass_flow_function = mass_flow_fitted_HTPV
 
     nozzle = Nozzle(throat_diameter=0.04, fuel_grain=grain) # meters
     env = Environment(time_increment=0.01)

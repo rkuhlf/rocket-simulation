@@ -316,8 +316,8 @@ class CustomMotor(Motor):
 
     @property
     def ox_flow(self):
-        # Actually it is probably bad not to cache this; there is a square root call
-        return self.injector.get_mass_flow()
+        # FIXME: it is probably bad not to cache this; there is a square root call
+        return self.injector.mass_flow
 
     @property
     def fuel_flow(self):

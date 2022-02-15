@@ -10,19 +10,11 @@ from RocketParts.massObject import MassObject
 
 
 from presetObject import PresetObject
-from Helpers.general import cylindrical_volume, interpolate
+from Helpers.general import cylindrical_volume, interpolate, constant
 from Helpers.decorators import diametered
 
 #region REGRESSION-RATE EQUATIONS
 # This is just a list of pre-programmed regression-rate equations that I have come across
-
-# A function like this makes it very easy to create a function that returns a value, so ever other model of this value should just be a drop in replacement
-def constant(value: float) -> Callable:
-    # does not matter what it is passed; it will be constant
-    def inner(*args, **kwargs) -> float: 
-        return value
-
-    return inner
 
 def exponential(leading: float, exponent: float) -> Callable:
     def inner(grain) -> float: # does not matter what it is passed; it will be constant
@@ -77,7 +69,7 @@ constant_latent_heat_karabeyoglu_PMMA = constant(9.66e5)
 constant_enthalpy_difference_karabeyoglu_PMMA_GOX = constant(22306e3)
 constant_enthalpy_difference_karabeyoglu_HDPE_GOX = constant(24734e3)
 constant_enthalpy_difference_karabeyoglu_HTPB_GOX = constant(25296e3)
-# ! FIXME: figure out the actual value for this
+# ! FIXME: figure out the actual value for this. At the moment paraffin is just copied from HTPB
 constant_latent_heat_paraffin = constant(1.8e6)
 constant_latent_heat_ABS = constant(2.3e6)
 
