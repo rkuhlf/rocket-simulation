@@ -1,3 +1,12 @@
+# Old plan of overriding the CP and CG is temporarily put on hold
+# To get it working correctly, I would have to recalculate the CAxial for every single component
+# And I would have to recalculate local centers of pressure
+# The only real way to get a global override working is to calculate one global torque myself. I do not even know if this is correct
+# --- New Plan ---
+# Will just graph the CP and override CG alongside the OpenRocket ones
+# It would be better to figure out how to load a .rse engine
+
+
 import pandas as pd
 import numpy as np
 from orhelper import AbstractSimulationListener
@@ -38,7 +47,7 @@ class OverrideAerodynamicsConstant(AbstractSimulationListener):
 
 
         super().__init__()
-    
+        
     def postFlightConditions(self, status: SimulationStatus, flight_conditions: FlightConditions):
         self.flight_conditions = flight_conditions
 
@@ -59,13 +68,13 @@ class OverrideAerodynamicsConstant(AbstractSimulationListener):
             # Basically overriding the Barrowman calculator methods of OpenRocket
 
             # There is also a weight option here that appears to be changing; probably important
-            CP_coord = forces.getCP()
-            CP_coord = CP_coord.setX(self.CP)
-            forces.setCP(CP_coord)
+            # CP_coord = forces.getCP()
+            # CP_coord = CP_coord.setX(self.CP)
+            # forces.setCP(CP_coord)
             # print(forces.getCP())
-
+            
             # TODO: probably have to override CSide or something
-        
+            pass
 
         if self.CD_is_overriden:
             # This is not necessary to setCAxial, but it is good practice to keep everything correct
@@ -103,6 +112,6 @@ class OverrideAerodynamicsDataFrame(OverrideAerodynamicsConstant):
     def postAerodynamicCalculation(self, status: SimulationStatus, forces: AerodynamicForces):
         mach = self.flight_conditions.getMach()
         self.CD = interpolated_lookup(self.data_frame, "Mach", mach, "CD")
-        self.CP = 15
+        # self.CP = 15
 
         return super().postAerodynamicCalculation(status, forces)

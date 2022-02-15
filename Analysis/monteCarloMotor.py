@@ -162,6 +162,16 @@ class MonteCarloMotor(MonteCarlo):
 
         plt.show()
     
+    def plot_mass_movement(self):
+        for df in self.important_data:
+            plt.plot(df.index, df["propellant_CG"])
+        
+        plt.title("CG Curves")
+        plt.xlabel("Time (s)")
+        plt.ylabel("Distance (m)")
+
+        plt.show()
+    
 
 
 # FIXME: debug the NaN values that occasionally come up

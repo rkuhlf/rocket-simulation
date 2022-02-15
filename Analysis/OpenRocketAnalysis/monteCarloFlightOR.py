@@ -11,6 +11,7 @@ from Analysis.OpenRocketAnalysis.openRocketHelpers import apogee
 from Analysis.OpenRocketAnalysis.overrideAerodynamicsListener import OverrideAerodynamicsDataFrame
 from Analysis.monteCarlo import MonteCarlo
 from Analysis.monteCarloFlight import MonteCarloFlight
+from Helpers.data import interpolated_lookup
 from net.sf.openrocket.simulation import FlightDataType, SimulationStatus # type: ignore
 from net.sf.openrocket.simulation.listeners import SimulationListener # type: ignore
 from openRocketHelpers import get_randomized_sim
@@ -24,6 +25,7 @@ class MonteCarloFlightOR(MonteCarloFlight):
         """If the drag_dataframe is None, it will use OpenRocket's prediction"""
         self.orhelper = orhelper
         self.drag_dataframe = drag_dataframe
+        self.drag_dataframe = self.drag_dataframe[self.drag_dataframe["Alpha"] == 0]
         super().__init__(sims=sims)
 
     def initialize_simulation(self):
@@ -42,6 +44,23 @@ class MonteCarloFlightOR(MonteCarloFlight):
         m = m.getMotor(fcid)
         return m.getTotalImpulseEstimate()
 
+
+    def store_data(self, sim):
+        data = {
+            "time": sim.getSimulatedData().getBranch(0).get(FlightDataType.TYPE_TIME),
+            "altitude": sim.getSimulatedData().getBranch(0).get(FlightDataType.TYPE_ALTITUDE),
+            "velocity": sim.getSimulatedData().getBranch(0).get(FlightDataType.TYPE_VELOCITY_TOTAL),
+            "mach": sim.getSimulatedData().getBranch(0).get(FlightDataType.TYPE_MACH_NUMBER),
+            "acceleration": sim.getSimulatedData().getBranch(0).get(FlightDataType.TYPE_ACCELERATION_TOTAL),
+            "drag": sim.getSimulatedData().getBranch(0).get(FlightDataType.TYPE_DRAG_FORCE),
+            "thrust": sim.getSimulatedData().getBranch(0).get(FlightDataType.TYPE_THRUST_FORCE),
+            "CP": sim.getSimulatedData().getBranch(0).get(FlightDataType.TYPE_CP_LOCATION),
+            "CG": sim.getSimulatedData().getBranch(0).get(FlightDataType.TYPE_CG_LOCATION)
+        }
+
+        return data
+
+
     def save_simulation(self, sim: document.Simulation):
         MonteCarlo.save_simulation(self, sim)
 
@@ -57,20 +76,25 @@ class MonteCarloFlightOR(MonteCarloFlight):
             "Wind Speed Deviation": sim.getOptions().getWindSpeedDeviation()
         })
 
-
-        data = {
-            "time": sim.getSimulatedData().getBranch(0).get(FlightDataType.TYPE_TIME),
-            "altitude": sim.getSimulatedData().getBranch(0).get(FlightDataType.TYPE_ALTITUDE),
-            "velocity": sim.getSimulatedData().getBranch(0).get(FlightDataType.TYPE_VELOCITY_TOTAL),
-            "acceleration": sim.getSimulatedData().getBranch(0).get(FlightDataType.TYPE_ACCELERATION_TOTAL),
-            "drag": sim.getSimulatedData().getBranch(0).get(FlightDataType.TYPE_DRAG_FORCE),
-            "thrust": sim.getSimulatedData().getBranch(0).get(FlightDataType.TYPE_THRUST_FORCE),
-        }
+        data = self.store_data(sim)
+        
+        if self.drag_dataframe is not None:
+            CPs = self.lookup_CP_custom_data(data["mach"])
+            data["RASAero CP"] = CPs
 
         data = pd.DataFrame(data)
         data.set_index("time")
 
         self.important_data.append(data)
+    
+    def lookup_CP_custom_data(self, mach_numbers):
+        CPs = []
+
+        for mach in mach_numbers:
+            # Convert inches to meters
+            CPs.append(interpolated_lookup(self.drag_dataframe, "Mach", mach, "CP") * 0.0254)
+        
+        return CPs
 
     def finish_simulating(self):
         super().finish_simulating()
@@ -79,8 +103,12 @@ class MonteCarloFlightOR(MonteCarloFlight):
 
 
 class MonteCarloFlightRandomMotorOR(MonteCarloFlightOR):
-    def __init__(self, orh, motors: 'list[Motor]', sims=[], drag_dataframe=None):
+    def __init__(self, orh, motors: 'list[Motor]', sims=[], drag_dataframe=None, dry_mass=None, dry_CG=None, ox_tank_front=None):
         super().__init__(orh, sims=sims, drag_dataframe=drag_dataframe)
+
+        self.ox_tank_front = ox_tank_front
+        self.dry_mass = dry_mass
+        self.dry_CG = dry_CG
 
         self.motors = motors
         self.selected_motor = motors[0].copy()
@@ -98,3 +126,22 @@ class MonteCarloFlightRandomMotorOR(MonteCarloFlightOR):
     
     def get_total_impulse(self, sim: document.Simulation):
         return self.selected_motor.total_impulse
+    
+    def store_data(self, sim):
+        data = super().store_data(sim)
+
+        
+        data["custom CG"] = self.lookup_CG_custom_data(data["time"])
+
+        return data
+    
+    def lookup_CG_custom_data(self, times):
+        CGs = []
+
+        for time in times:
+            propellant_CG = interpolated_lookup(self.selected_motor.thrust_data, "time", time, "propellant_CG", safe=True) + self.ox_tank_front
+            propellant_mass = interpolated_lookup(self.selected_motor.thrust_data, "time", time, "propellant_mass", safe=True)
+
+            CGs.append((self.dry_mass * self.dry_CG + propellant_mass * propellant_CG) / (self.dry_mass + propellant_mass))
+        
+        return CGs

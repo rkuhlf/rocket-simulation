@@ -13,7 +13,9 @@ jar_path = load_environment_variable("OR_JAR_PATH")
 jpype.startJVM(jvm_path, "-ea", classpath=[jar_path])
 import jpype.imports  # noqa
 
-stubgenj.generateJavaStubs([jpype.JPackage("net").sf.openrocket], useStubsSuffix=True)
+stubgenj.generateJavaStubs([jpype.JPackage("net").sf.openrocket.masscalc], useStubsSuffix=True)
 
 
-# \U is the Unicode Escape character
+import net.sf.openrocket.masscalc
+
+pass

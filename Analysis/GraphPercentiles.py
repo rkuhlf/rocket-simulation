@@ -4,7 +4,7 @@ import pandas as pd
 from torch import alpha_dropout
 
 
-folder = "Analysis/SAIC4-Temporary"
+folder = "Analysis/LowerDragFlightMonteCarlo-Temporary"
 
 def simulation_name_from_figures(row, target_folder=f"{folder}/MonteCarloFlightSimulations"):
     return f"{target_folder}/{int(row[0]) + 1}.csv"
@@ -19,10 +19,19 @@ def get_data_from_row(figures, row):
     df["drag"] *= 0.22480894244319
     df["thrust"] *= 0.22480894244319
 
+    df["CP"] /= 0.0254
+    df["CG"] /= 0.0254
+    df["custom CG"] /= 0.0254
+    df["RASAero CP"] /= 0.0254
+
+    diameter = 7 # in
+    df["used stability"] = (df["CP"] - df["CG"]) / diameter
+    df["accurate stability"] = (df["RASAero CP"] - df["custom CG"]) / diameter
+
     return df
 
 if __name__ == "__main__":
-    figures = pd.read_csv(f"{folder}/MonteCarloFlightData/output.csv")
+    figures = pd.read_csv(f"{folder}/MonteCarloFlightData/finalOutput.csv")
 
     figures = figures.sort_values("Apogee")
 
@@ -99,6 +108,8 @@ if __name__ == "__main__":
     plot_distribution("velocity", title="Distribution of Velocity", axis_label="Velocity (ft/s)")
     plot_distribution("drag", title="Distribution of Drag", axis_label="Drag (lbs)")
     plot_distribution("thrust", title="Simulated Thrust Curves", axis_label="Thrust (lbs)")    
+    # plot_distribution("used stability", title="OpenRocket Stability", axis_label="Used Stability (cal)")
+    # plot_distribution("accurate stability", title="RASAero Stability", axis_label="Actual Stability (cal)")
     
 
     pass

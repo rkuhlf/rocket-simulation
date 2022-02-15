@@ -66,21 +66,57 @@ def read_sims(path):
     return sims
         
 
-
+def plot_all_sims(sims, x="time", y="altitude"):
+    for sim in sims:
+        plt.plot(sim[x], sim[y])
 
 def display_altitude_lines(sims):
-    for sim in sims:
-        plt.plot(sim["time"], sim["altitude"])
+    plot_all_sims(sims)
     
+    plt.show()
+
+def convert_to_calibers(sims, caliber=0.1778):
+    for sim in sims:
+        sim["CP"] /= caliber
+        sim["CG"] /= caliber
+        sim["RASAero CP"] /= caliber
+        sim["custom CG"] /= caliber
+    
+    return sims
+
+
+def display_flight_stability(sim, caliber=0.1778):
+    sims = convert_to_calibers([sim], caliber)[0]
+
+    plt.plot(sim["time"], sim["CP"])
+    plt.plot(sim["time"], sim["CG"])
+
+    plt.plot(sim["time"], sim["RASAero CP"])
+    plt.plot(sim["time"], sim["custom CG"])
+
+    plt.show()
+
+def display_stabilities(sims, caliber=0.1778):
+    sims = convert_to_calibers(sims, caliber)
+
+    # CP,CG,custom CG,RASAero CP
+    plot_all_sims(sims, y="CP")
+    plot_all_sims(sims, y="CG")
+
+    plt.show()
+
+    plot_all_sims(sims, y="RASAero CP")
+    plot_all_sims(sims, y="custom CG")
+
     plt.show()
 
 
 if __name__ == "__main__":
-    df = pd.read_csv("./Analysis/SAIC4-Temporary/MonteCarloFlightData/output.csv")
+    df = pd.read_csv("./Analysis/Testing-Temporary/MonteCarloFlightSimulations/1.csv")
 
-    display_drift_distribution(df)
+    display_flight_stability(df)
 
-    # sims = read_sims("./Analysis/SAIC3-Temporary/MonteCarloFlightSimulations")
-    # display_altitude_lines(sims)
+    # sims = read_sims("./Analysis/Testing-Temporary/MonteCarloFlightSimulations")
+    # display_stabilities(sims)
 
     pass

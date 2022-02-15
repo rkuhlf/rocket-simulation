@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
+from Analysis.OpenRocketAnalysis.CustomMotor import OverrideThrustLookup
 import javaInitialization
 
 from Analysis.OpenRocketAnalysis.openRocketHelpers import apogee
