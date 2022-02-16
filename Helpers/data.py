@@ -6,8 +6,11 @@ from pathlib import Path
 import random
 import re
 from enum import Enum, auto
+from matplotlib import pyplot as plt
 import numpy as np
 import string
+
+import pandas as pd
 
 from Helpers.general import interpolate
 
@@ -59,6 +62,26 @@ def load_environment_variable(name):
 
     return result
 
+
+
+def read_sims(path):
+    sims = []
+
+    with os.scandir(path) as folder:
+        for file in folder:
+            sims.append(pd.read_csv(file.path))
+    
+    return sims
+        
+
+def plot_all_sims(sims, x="time", y="altitude", **kwargs):
+    for sim in sims:
+        try:
+            plt.plot(sim[x], sim[y], **kwargs)
+        except KeyError as e:
+            print("Sim skipped because the requested variable was not found")
+
+        
 
 def random_file_name(original: str, random_chars: int=10):
     # Hopefully ten random characters is enough that it does not try to save over an already generated one

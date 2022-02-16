@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-from Helpers.data import hist_box_count
+from Helpers.data import hist_box_count, plot_all_sims
 
 
 def burn_time(df):
@@ -56,19 +56,6 @@ def best_apogee_analysis(df):
 def best_motor_analysis(df):
     print(df[df["Total Impulse"] > 100_000][["Apogee", "Lateral Velocity", "Total Impulse", "Mean Wind Speed", "Wind Speed Deviation"]])
 
-def read_sims(path):
-    sims = []
-
-    with os.scandir(path) as folder:
-        for file in folder:
-            sims.append(pd.read_csv(file.path))
-    
-    return sims
-        
-
-def plot_all_sims(sims, x="time", y="altitude"):
-    for sim in sims:
-        plt.plot(sim[x], sim[y])
 
 def display_altitude_lines(sims):
     plot_all_sims(sims)

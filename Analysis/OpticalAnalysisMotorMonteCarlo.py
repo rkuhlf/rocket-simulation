@@ -1,8 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from Analysis.MonteCarloFlightData.AnalyzeMonteCarloFlight import read_sims
-
+from Helpers.data import plot_all_sims, read_sims
+from Helpers.visualization import make_matplotlib_big
 
 
 def display_end_temperature_distribution(sims):
@@ -41,13 +41,23 @@ def display_final_mass_distribution(sims):
     plt.show()
 
 
+def display_curves(sims):
+    
+    plot_all_sims(sims, x="time", y="thrust", linewidth=1.5, alpha=0.3, color=(31/255, 145/255, 38/255))
+    plt.title("Thrust Curves")
+    plt.xlabel("Time (s)")
+    plt.ylabel("Thrust (N)")
+
+    plt.show()
 
 
 if __name__ == "__main__":
     sims = read_sims("Analysis/MotorMonteCarlo3-Temporary")
 
     # display_end_temperature_distribution(sims)
-    display_final_mass_distribution(sims)
+    # display_final_mass_distribution(sims)
+    make_matplotlib_big()
+    display_curves(sims)
 
     # print(sims)
     

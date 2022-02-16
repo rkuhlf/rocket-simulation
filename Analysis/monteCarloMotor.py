@@ -1,5 +1,6 @@
 # Monte carlo base class for motor simulations
 
+from typing import List
 import numpy as np
 from RocketParts.motor import CustomMotor
 from monteCarlo import MonteCarlo
@@ -10,7 +11,7 @@ import matplotlib.pyplot as plt
 
 # TODO: create some sensitivity analysis functions that find correlations in the characteristic figures.
 class MonteCarloMotor(MonteCarlo):
-    def __init__(self, sims=[]):
+    def __init__(self, sims: "List[MotorSimulation]"=[]):
         super().__init__(sims=sims)
 
         self.supercritical_nitrous_count = 0
@@ -59,6 +60,7 @@ class MonteCarloMotor(MonteCarlo):
 
 
     #region Characteristic Figure Displays
+    # TODO: change this to a more general logger class that has all of these analysis functions and can read in simulations using a function or can simply accept some pandas arrays
     def plot_overview(self):
         df = self.characteristic_figures_dataframe
 
@@ -173,12 +175,9 @@ class MonteCarloMotor(MonteCarlo):
         plt.show()
     
 
-
-# FIXME: debug the NaN values that occasionally come up
-if __name__ == "__main__":
-    folder = "Analysis/MotorMonteCarlo3-Temporary"
+def run_analysis(count=100, folder="Analysis/MotorMonteCarlo-Temporary"):
     m = MonteCarloMotor()
-    m.simulate_randomized(100)
+    m.simulate_randomized(count)
 
     m.print_characteristic_figures()
 
@@ -188,11 +187,27 @@ if __name__ == "__main__":
 
     m.save_characteristic_figures(f"{folder}/output.csv")
 
-    m.plot_overview()
-    m.plot_efficiency()
-    m.plot_average_thrust()
-    m.plot_thrust_curves()
+    return m
 
-    m.plot_cstar_impulse_correlation()
-    m.plot_OF_correlation()
-    m.plot_regression_correlation()
+    
+
+def display_analysis(motorSim):
+    motorSim.plot_overview()
+    motorSim.plot_efficiency()
+    motorSim.plot_average_thrust()
+    motorSim.plot_thrust_curves()
+
+    motorSim.plot_cstar_impulse_correlation()
+    motorSim.plot_OF_correlation()
+    motorSim.plot_regression_correlation()
+
+
+
+# FIXME: debug the NaN values that occasionally come up
+if __name__ == "__main__":
+    # m = run_analysis()
+
+    # display_analysis(m)
+
+    pass
+
