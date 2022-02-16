@@ -18,7 +18,11 @@ def display_mach_importance(sim: pd.DataFrame):
     bucket_values = np.zeros(bucket_labels.size[0])
 
     for index, row in sim.iterrows():
-        pass
+        for bucket_index, label in enumerate(bucket_labels):
+            if label > row["Mach"]:
+                bucket_values[bucket_index] += row["Dynamic Pressure"]
+    
+    # Graph in matplotlib
 
 
 
