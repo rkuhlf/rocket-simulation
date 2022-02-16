@@ -8,12 +8,12 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from numpy.lib.npyio import save
 
 from rocketcea.cea_obj import CEA_Obj
 
 from Data.Input.CEA.CEAPropellants import define_ABS_nitrous
-from Analysis.AnalyzeOFAtPressure import find_efficiencies, display_OF_graph
+from Data.Input.CEA.AnalyzeOFAtPressure import find_efficiencies, display_OF_graph
+from Helpers.visualization import make_matplotlib_big
 
 abs_nitrous: CEA_Obj = None
 
@@ -72,39 +72,41 @@ def display_effect_of_styrene():
 
     ax1.set(title="Effect of Styrene Concentration")
 
-    fig.legend()
+    plt.legend()
     plt.show()
 
 def display_effect_of_pressure(pressures=np.linspace(100, 1000, 10)):
     global abs_nitrous
 
     
-    fig, ax1 = plt.subplots()
-
-    for pressure in pressures:
+    for pressure, color in zip(pressures, np.linspace(0.8, 0.3, len(pressures))):
         _, impulses, OFs = find_efficiencies(abs_nitrous, chamber_pressure=pressure)
         
-        ax1.plot(OFs, impulses, label=f"{pressure}")
+        plt.plot(OFs, impulses, label=f"{pressure}", c=f"{color}")
 
-    ax1.set(title="Effect of Pressure on Efficiency")
+    plt.title("Effect of Pressure on Efficiency")
+    plt.xlabel("O/F ()")
+    plt.ylabel("Specific Impulse (s)")
 
-    fig.legend()
+    # plt.legend()
     plt.show()
 
 
 if __name__ == "__main__":
+    abs_nitrous = define_ABS_nitrous()
+
     # display_effect_of_styrene()
 
-    # chamber_pressure = 362.6
-    # environmental_pressure = 11.965613
-    # k = define_ABS_nitrous()
-    # display_OF_graph(k, chamber_pressure=chamber_pressure, area_ratio=5.09)
-    # print(k.get_eps_at_PcOvPe(chamber_pressure, 6.18, chamber_pressure/environmental_pressure))
+    chamber_pressure = 362.6
+    environmental_pressure = 11.965613
+    # display_OF_graph(abs_nitrous, chamber_pressure=chamber_pressure, area_ratio=5.09)
+    # print(abs_nitrous.get_eps_at_PcOvPe(chamber_pressure, 6.18, chamber_pressure/environmental_pressure))
 
-    # display_effect_of_pressure(pressures=np.linspace(100, 10000, 50), best_possible=True)
+    make_matplotlib_big()
+    display_effect_of_pressure(pressures=np.linspace(100, 10000, 20))
 
-    abs_nitrous = define_ABS_nitrous()
-    save_full_output()
+    # abs_nitrous = define_ABS_nitrous()
+    # save_full_output()
     pass
 
 

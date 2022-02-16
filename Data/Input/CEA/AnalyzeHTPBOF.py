@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 
 
 from Data.Input.CEA.CEAPropellants import define_HTPB_nitrous
-from Analysis.AnalyzeOFAtPressure import find_efficiencies, display_OF_graph
+from Data.Input.CEA.AnalyzeOFAtPressure import find_efficiencies, display_OF_graph
 
 htpb_nitrous = None
 
