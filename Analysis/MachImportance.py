@@ -21,9 +21,16 @@ def display_mach_importance(sim: pd.DataFrame):
         for bucket_index, label in enumerate(bucket_labels):
             if label > row["Mach"]:
                 bucket_values[bucket_index] += row["Dynamic Pressure"]
+                break
     
     # Graph in matplotlib
-
+    plt.bar(bucket_labels, bucket_values)
+    
+    plt.title("Drag Importance of Mach Numbers")
+    plt.xlabel("Mach Number ()")
+    plt.ylabel("Weighted Density (Pa)")
+    
+    plt.show()
 
 
 
