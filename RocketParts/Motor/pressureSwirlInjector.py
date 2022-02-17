@@ -27,6 +27,7 @@ class PressureSwirlInjector(Injector):
 
     @property
     def injector_constant(self): # often abbreviated by K
+        """Based primarily on the dimensions of the tangential ports and the swirl chamber"""
         # I think this is the congruent definition of this value
         numerator = self.tangential_port_area
         denominator = (self.swirl_chamber_diameter - self.tangential_port_diameter) * self.injector_diameter
@@ -40,12 +41,12 @@ class PressureSwirlInjector(Injector):
         return self.spray_angle_function(self)
     
     @property
-    def geometry_characteristic_constant(self):
+    def geometry_characteristic_constant(self): # Usually abbreviated by A
         numerator = (1 - self.filling_coefficient) * np.sqrt(2)
         denominator = self.filling_coefficient * np.sqrt(self.filling_coefficient)
     
     @property
-    def filling_coefficient(self):
+    def filling_coefficient(self): # Abbreviated by phi
         return 1 - self.dimensionless_air_core_area
     
 
@@ -102,5 +103,78 @@ def spray_angle_liu(injector: PressureSwirlInjector):
     
     return np.arccos(ratio)
                         
-                        
-                        
+def spray_angle_giffen(injector: PressureSwirlInjector):
+    X = injector.dimensionless_area_ratio # Might be diameter ratio
+    K = injector.injector_constant
+    
+    numerator = (np.pi / 2) * (1 - X) ** 1.5
+    denominator = K * (1 + np.sqrt(X)) * np.sqrt(1 + X)
+    
+    return np.arcsin(numerator / denominator)
+
+def spray_angle_giffen_santangelo_variation(injector: PressureSwirlInjector):
+#   # I am not 100% sure that this is actually the correct source for this equation
+    X = injector.dimensionless_something
+    
+    C_d = np.sqrt((1 - X) ** 3 / (1 + X))
+    # It is very weird that they define K like this. I don't think that is how it is theoretically defined
+    K = np.sqrt(np.pi ** 2 * (1 - X) ** 3 / (32 * X** 2))
+        
+    return np.arcsin(np.pi * C_d / (2 * K * (1 + np.sqrt(X)))
+
+
+def spray_angle_xue(injector: PressureSwirlInjector):
+    pass
+
+def spray_angle_giffen_2(injector: PressureSwirlInjector):
+    pass
+
+def spray_angle_orzechowski(injector: PressureSwirlInjector):
+    pass
+
+def spray_angle_chinn(injector: PressureSwirlInjector):
+    pass
+
+def spray_angle_fu(injector: PressureSwirlInjector):
+    pass
+
+def spray_angle_inamura(injector: PressureSwirlInjector):
+    # Solves for a different kind of spray angle
+    pass
+
+def spray_angle_lefebvre_3(injector: PressureSwirlInjector):
+    # This is a nice equation because it does not require the dimensionless air core (X)
+    K = injector.injector_constant
+    A_t = injector.tangential_port_diameter
+    D_s = injector.diameter_swirl_port
+    D_0 = injector.injector_diameter
+
+    # The A_t / D_s / D_0 term comes up a lot
+    first_term = A_t / D_s / D_0
+    second_term = injector.pressure_drop * injector.injector_diameter ** 2 * injector.liquid_density / injector.liquid_dynamic_viscosity ** 2
+    
+    # The division by two is because the paper fitted it to the half-angle
+    return 6 * first_term ** -0.15 * second_term ** 0.11 / 2
+    
+
+def spray_angle_khil(injector: PressureSwirlInjector):
+    # Very slight adjustment of the lefebvre 3 equation to use the injector constant instead of the dimensions
+    K = injector.injector_constant
+    
+    second_term = injector.pressure_drop * injector.injector_diameter ** 2 * injector.liquid_density / injector.liquid_dynamic_viscosity ** 2
+    
+    # The division by two is because the paper fitted it to the half-angle
+    return 6 * K ** -0.15 * second_term ** 0.11 / 2
+
+def spray_angle_benjamin(injector: PressureSwirlInjector):
+    # Fitted to the same parameters as Lefebvre 3, but it has significantly different coefficients
+    A_t = injector.tangential_port_area
+    D_s = injector.swirl_chamber_diameter
+    D_0 = injector.injector_diameter
+    
+    first_term = (A_t / D_s / D_0) ** -0.237
+    second_term = (injector.pressure_drop * D_0 ** 2 * injector.liquid_density / injector.liquid_dynamic_viscosity ** 2) ** 0.067
+    
+    # The division by two is because the paper fitted it to the half-angle
+    return 9.75 * first_term * second_term / 2
+
