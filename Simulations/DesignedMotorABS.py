@@ -29,7 +29,7 @@ def get_sim() -> MotorSimulation:
 
     chamber = CombustionChamber(fuel_grain=grain, limit_pressure_change=False)
     
-    injector = Injector(ox_tank=ox, combustion_chamber=chamber, orifice_count=4, orifice_diameter=0.005)
+    injector = Injector(ox_tank=ox, combustion_chamber=chamber, orifice_count=5, orifice_diameter=0.005)
     injector.mass_flow_function = mass_flow_fitted_HTPV
     nozzle = Nozzle(throat_diameter=0.045, area_ratio=4.78) # meters
 

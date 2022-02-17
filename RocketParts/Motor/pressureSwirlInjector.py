@@ -1,10 +1,15 @@
 # Most of the equations in here are based off of https://www.researchgate.net/publication/324141385_Review_on_pressure_swirl_injector_in_liquid_rocket_engine/link/5b1bb892aca272021cf44bc6/download
+# It turns out that most of this stuff is kind of irrelevant because this isn't how our PSV injectors work
+
 
 import numpy as np
 
 from Helpers.general import constant
 from RocketParts.Motor.injector import Injector
+from RocketParts.Motor.oxTank import OxTank
 
+
+# TODO: make graphs of all of these over different pressures, debug the reason for numbers being different
 
 
 class PressureSwirlInjector(Injector):
@@ -119,8 +124,10 @@ def spray_angle_giffen_santangelo_variation(injector: PressureSwirlInjector):
     C_d = np.sqrt((1 - X) ** 3 / (1 + X))
     # It is very weird that they define K like this. I don't think that is how it is theoretically defined
     K = np.sqrt(np.pi ** 2 * (1 - X) ** 3 / (32 * X** 2))
+    
+    denominator = 2 * K * (1 + np.sqrt(X))
         
-    return np.arcsin(np.pi * C_d / (2 * K * (1 + np.sqrt(X)))
+    return np.arcsin(np.pi * C_d / denominator)
 
 
 def spray_angle_xue(injector: PressureSwirlInjector):
@@ -153,7 +160,7 @@ def spray_angle_lefebvre_3(injector: PressureSwirlInjector):
 
     # The A_t / D_s / D_0 term comes up a lot
     first_term = A_t / D_s / D_0
-    second_term = injector.pressure_drop * injector.injector_diameter ** 2 * injector.liquid_density / injector.liquid_dynamic_viscosity ** 2
+    second_term = 30 * 10**5 * injector.injector_diameter ** 2 * injector.liquid_density / injector.liquid_dynamic_viscosity ** 2
     
     # The division by two is because the paper fitted it to the half-angle
     return 6 * first_term ** -0.15 * second_term ** 0.11 / 2
@@ -175,8 +182,19 @@ def spray_angle_benjamin(injector: PressureSwirlInjector):
     D_0 = injector.injector_diameter
     
     first_term = (A_t / D_s / D_0) ** -0.237
-    second_term = (injector.pressure_drop * D_0 ** 2 * injector.liquid_density / injector.liquid_dynamic_viscosity ** 2) ** 0.067
+    second_term = (30 * 10**5 * D_0 ** 2 * injector.liquid_density / injector.liquid_dynamic_viscosity ** 2) ** 0.067
     
     # The division by two is because the paper fitted it to the half-angle
     return 9.75 * first_term * second_term / 2
+
+
+
+
+if __name__ == "__main__":
+    ox = OxTank()
+    inj = PressureSwirlInjector(ox_tank=ox)
+    inj.spray_angle_function = spray_angle_lefebvre_3
+    # inj.spray_angle_function = spray_angle_benjamin
+    
+    print(inj.spray_angle)
 
