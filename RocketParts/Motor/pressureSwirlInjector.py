@@ -19,8 +19,6 @@ class PressureSwirlInjector(Injector):
         self.swirl_chamber_diameter = 0.002 # D_s; TODO: find a real value
         self.injector_diameter = 0.005 # often abbreivated D_0; TODO: find a real value
 
-        self.geometry_characteristic_constant
-
 
         # 50 degrees converted to radians
         self.spray_angle_function = constant(50 * 180 / np.pi)
@@ -41,8 +39,17 @@ class PressureSwirlInjector(Injector):
 
         return self.spray_angle_function(self)
     
+    @property
+    def geometry_characteristic_constant(self):
+        numerator = (1 - self.filling_coefficient) * np.sqrt(2)
+        denominator = self.filling_coefficient * np.sqrt(self.filling_coefficient)
+    
+    @property
+    def filling_coefficient(self):
+        return 1 - self.dimensionless_air_core_area
+    
 
-    # TODO: equations for X
+    # TODO: equations for X. It also says that X is the dimensionless air core area
     def dimensionless_air_core_diameter(self):
         pass
 
@@ -83,3 +90,17 @@ def spray_angle_rizk(injector: PressureSwirlInjector):
     C_d = 0.35 * K ** 0.5 * (D_s / D_o) ** 0.25
 
     return C_d / (K_v * (1 - X))
+
+def spray_angle_liu(injector: PressureSwirlInjector):
+    # This is an empirical equation that requires the port_angle in degrees
+    A = injector.geometry_characteristic_coefficient
+    L_0 = injector.orifice_length
+    D_s = injector.swirl_chamber_diameter
+    D_0 = injector.injector_diameter
+    
+    ratio = 0.302 * (1 + np.tan(injector.tangential_port_angle * 180 / np.pi)) ** 0.414 * (1/A) ** 0.35 * (L_0 / D_0) ** 0.043 * (D_s / D_0) ** 0.026 + 0.612
+    
+    return np.arccos(ratio)
+                        
+                        
+                        
