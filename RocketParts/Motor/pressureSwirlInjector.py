@@ -136,7 +136,9 @@ def spray_angle_chinn(injector: PressureSwirlInjector):
     pass
 
 def spray_angle_fu(injector: PressureSwirlInjector):
-    pass
+    A = injector.geometry_characteristic_constant
+    Re = injector.tangential_inlet_reynolds # Re_t, technically
+    return np.arctan(0.033 * A ** 0.338 * Re ** 0.249)
 
 def spray_angle_inamura(injector: PressureSwirlInjector):
     # Solves for a different kind of spray angle
