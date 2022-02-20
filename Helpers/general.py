@@ -15,6 +15,20 @@ def constant(value: float) -> Callable:
 
     return inner
 
+def modify_function_multiplication(func, multiplier: float):
+    def modified(*args, **kwargs):
+        return func(*args, **kwargs) * multiplier
+
+    return modified
+
+def create_multiplication_modifier(multiplier):
+    def modifier(func):
+        return modify_function_multiplication(func, multiplier)
+    
+    return modifier
+
+
+
 
 def transpose_tuple(iterable):
     iterable = np.array([*iterable])
