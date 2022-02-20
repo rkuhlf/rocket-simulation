@@ -6,8 +6,10 @@
 import numpy as np
 
 # This is Nitrous's boiling point. Below this, the solution is no longer saturated, and you need to use a different model
-minimum_temperature = 273.15 - 90 # Kelvin
-critical_temperature = 273.15 + 36 # Kelvin
+minimum_temperature = 273.15 - 90.82 # Kelvin
+critical_temperature = 309.57 # Kelvin; about 36 C = 96.8 F
+
+# TODO: change everything to get instead of find
 
 def confirm_range(temperature):
     # Errors if temperature is outside the acceptable range
@@ -17,6 +19,17 @@ def confirm_range(temperature):
     if temperature < minimum_temperature:
         raise ValueError(
             "The model is not accurate below Nitrous's boiling point. I don't know why this would happen (check that your temperature is in Kelvin?)")
+
+def get_liquid_dynamic_viscosity(temperature: float):
+    # Returns the value in N * s / m^2
+    confirm_range(temperature)
+    
+    
+    # For some reason this 5.24 is correct, it does not need to be converted to Kelvin or anything
+    theta = (critical_temperature - 5.24) / (temperature - 5.24)
+    
+    # Division by 1000 converts from mN to N
+    return 0.0293423 / 1000 * np.exp(1.6089 * (theta - 1) ** (1/3) + 2.0439 * (theta - 1) ** (4/3))
 
 
 # Also important for getting the tank pressure
@@ -121,18 +134,25 @@ def calculate_maximum_liquid_expansion(temperature, max_temperature=None):
 
 
 if __name__ == "__main__":
-    print("Calculating Compressibility Ratios")
+    print(get_liquid_dynamic_viscosity(-30 + 273.15))
+    
+    
+    
+    # print("Calculating Compressibility Ratios")
 
 
-    temperatures = np.linspace(273.15 - 90, 273.15 + 36, num=50)
-    compressibilities = []
+    # temperatures = np.linspace(273.15 - 90, 273.15 + 36, num=50)
+    # compressibilities = []
 
-    for t in temperatures:
-        P = get_nitrous_vapor_pressure(t)* 10**5
-        rho = get_gaseous_nitrous_density(t)
-        R = 188.91 # J/ kgK
+    # for t in temperatures:
+    #     P = get_nitrous_vapor_pressure(t)* 10**5
+    #     rho = get_gaseous_nitrous_density(t)
+    #     R = 188.91 # J/ kgK
 
-        compressibilities.append(P / (rho * t * R))
+    #     compressibilities.append(P / (rho * t * R))
 
-    for i in range(len(temperatures)):
-        print(temperatures[i], compressibilities[i])
+    # for i in range(len(temperatures)):
+    #     print(temperatures[i], compressibilities[i])
+    
+    
+    pass

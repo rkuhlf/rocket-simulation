@@ -10,7 +10,7 @@ from Helpers.data import DataType
 from Helpers.general import constant
 
 from RocketParts.massObject import MassObject
-from RocketParts.Motor.nitrousProperties import get_nitrous_vapor_pressure, get_liquid_nitrous_density, find_specific_enthalpy_of_gaseous_nitrous, find_specific_enthalpy_of_liquid_nitrous
+from RocketParts.Motor.nitrousProperties import get_nitrous_vapor_pressure, get_liquid_nitrous_density, find_specific_enthalpy_of_gaseous_nitrous, find_specific_enthalpy_of_liquid_nitrous, get_liquid_dynamic_viscosity
 
 
 #region DESIGN/WEIGHT FUNCTIONS
@@ -72,6 +72,10 @@ class Injector(MassObject):
     def liquid_density(self):
         return get_liquid_nitrous_density(self.ox_tank.temperature)
 
+    @property
+    def liquid_dynamic_viscosity(self):
+        return get_liquid_dynamic_viscosity(self.ox_tank.temperature)
+    
     @property
     def total_orifice_area(self):
         return get_cross_sectional_area(self.orifice_count, self.orifice_diameter)
