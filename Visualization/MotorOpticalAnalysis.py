@@ -45,7 +45,7 @@ def display_pressures(data):
     ax2.set(title="Grain Diameter", xlabel="Time [s]", ylabel="Diameter [cm]")
 
     ax3.plot(data["time"], data["combustion_chamber.temperature"])
-    ax3.set(title="Chamber Temperatures over Time")
+    ax3.set(title="Chamber Temperatures over Time", xlabel="Time [s]", ylabel="Temperature [K]")
 
     ax4.plot(data["time"], data["ox_tank.temperature"])
     ax4.set(title="Ox Temperatures over Time", xlabel="Time [s]", ylabel="Temperature [K]")
