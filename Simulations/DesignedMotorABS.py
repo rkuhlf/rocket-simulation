@@ -4,7 +4,7 @@
 # Ox mass, combustion efficiency, and regression equation should be the main things
 
 
-from random import gauss
+from random import choice, gauss, random
 
 from simulation import MotorSimulation
 from logger import MotorLogger
@@ -12,7 +12,8 @@ from RocketParts.motor import CustomMotor
 from RocketParts.Motor.oxTank import OxTank, random_WSMR_temperature
 from RocketParts.Motor.injector import Injector, mass_flow_fitted_HTPV
 from RocketParts.Motor.combustionChamber import CombustionChamber
-from RocketParts.Motor.grain import ABSGrain, marxman_whitman_ABS_nitrous
+from RocketParts.Motor.grain import ABSGrain, marxman_whitman_ABS_nitrous, star_swirl_modifiers
+from RocketParts.Motor.pressureSwirlInjector import PSW_modifiers
 from RocketParts.Motor.nozzle import Nozzle
 from environment import Environment
 
@@ -45,6 +46,8 @@ def get_sim() -> MotorSimulation:
 
     return sim
 
+adjusted_regression_functions = []
+
 def get_randomized_sim() -> MotorSimulation:
     """Used for monte carlo simulations. This is just me adding in standard deviations for all of the design parameters for this motor. I tried to be as realistic as possible, but I just randomized the regression laws, and I just made up multiplicative factors for some things."""
 
@@ -55,19 +58,21 @@ def get_randomized_sim() -> MotorSimulation:
     m.ox_tank.temperature = random_WSMR_temperature()
     m.ox_tank.initial_temperature = m.ox_tank.temperature
     # I think we probably get most of the way filled quite often, but sometimes we do not
-    m.ox_tank.ox_mass *= min(1, gauss(0.9, 0.1))
-    m.ox_tank.initial_mass = m.ox_tank.ox_mass
+    m.ox_tank.ox_mass *= min(1, gauss(0.9, 0.07))
+    # m.ox_tank.initial_mass = m.ox_tank.ox_mass
 
-    # Almost certainly correct
+    # Almost certainly correct; also it makes no difference so this is pointless
     m.ox_tank.length *= gauss(1, 0.005)
 
     # --- Injector ---
     # TODO: I need to redo the models of injector flow the same way I did regression equations; it is already sort of close; replace this with a function in the thing that makes a random injector
-    m.injector.discharge_coefficient = min(1, gauss(0.7, 0.15))
-    m.injector.orifice_diameter *= gauss(1, 0.03)
+    # They told us exactly what it would be, but I do not believe them
+    m.injector.discharge_coefficient = gauss(1, 0.05)
+    # Simulates something getting stuck in one of them
+    m.injector.orifice_diameter *= gauss(1, 0.02)
 
     # --- Combustion Chamber ---
-    m.cstar_efficiency = min(1, gauss(0.83, 0.06))
+    m.cstar_efficiency = min(1, gauss(0.80, 0.07))
     # These are pretty set in stone, but there might be some variation
     m.combustion_chamber.precombustion_chamber.length *= gauss(1, 0.01)
     m.combustion_chamber.postcombustion_chamber.length *= gauss(1, 0.01)
@@ -78,7 +83,7 @@ def get_randomized_sim() -> MotorSimulation:
     f: ABSGrain = m.fuel_grain
     # Different varieties have different values
     f.density *= gauss(1, 0.05)
-    f.port_radius *= gauss(1, 0.002)
+    f.geometry.port_radius *= gauss(1, 0.002)
     f.initial_mass = f.fuel_mass
     f.initial_radius = f.port_radius
     f.randomize_regression_algorithm()

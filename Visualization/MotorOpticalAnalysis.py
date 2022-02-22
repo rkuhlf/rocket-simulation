@@ -41,7 +41,7 @@ def display_pressures(data):
     ax1.plot(data["time"], np.asarray(data["ox_tank.pressure"]) / 10 ** 5)
     ax1.set(title="Pressures over Time", xlabel="Time [s]", ylabel="Pressure [bar]")
 
-    ax2.plot(data["time"], np.array(data["combustion_chamber.fuel_grain.port_diameter"]) * 100)
+    ax2.plot(data["time"], np.array(data["combustion_chamber.fuel_grain.geometry.effective_radius"]) * 100)
     ax2.set(title="Grain Diameter", xlabel="Time [s]", ylabel="Diameter [cm]")
 
     ax3.plot(data["time"], data["combustion_chamber.temperature"])

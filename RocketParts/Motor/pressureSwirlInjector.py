@@ -4,7 +4,7 @@
 
 import numpy as np
 
-from Helpers.general import constant
+from Helpers.general import constant, create_multiplication_modifier
 from RocketParts.Motor.injector import Injector
 from RocketParts.Motor.oxTank import OxTank
 
@@ -65,9 +65,19 @@ class PressureSwirlInjector(Injector):
         pass
 
 
+#region Regression Adjustments
+# Since the fluid is being injected slightly differently, it will regress slightly faster or slower. The current research makes it hard to discern.
+
+bouziane_PSW_adjustment = create_multiplication_modifier(0.8)
+null_PSW_adjustment = create_multiplication_modifier(1)
+bertoldi_PSW_adjustment = create_multiplication_modifier(1.2)
+
+PSW_modifiers = [bouziane_PSW_adjustment, null_PSW_adjustment, bertoldi_PSW_adjustment]
+
+#endregion
 
 
-
+#region Spray Angle
 def spray_angle_lefebvre(injector: PressureSwirlInjector):
     """Requires K_v, X"""
     K_v = injector.K_v
@@ -187,6 +197,7 @@ def spray_angle_benjamin(injector: PressureSwirlInjector):
     # The division by two is because the paper fitted it to the half-angle
     return 9.75 * first_term * second_term / 2
 
+#endregion
 
 
 

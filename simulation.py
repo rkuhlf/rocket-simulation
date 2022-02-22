@@ -266,7 +266,7 @@ class MotorSimulation(Simulation):
 
     @property
     def should_continue_simulating(self):
-        return self.tank.pressure > self.chamber.pressure and self.tank.ox_mass > 0 and self.grain.port_diameter < self.grain.outer_diameter
+        return self.tank.pressure > self.chamber.pressure and self.tank.ox_mass > 0 and not self.grain.burned_through
         
     def end(self):
         self.motor.end()

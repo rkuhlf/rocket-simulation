@@ -205,9 +205,9 @@ def display_analysis(motorSim):
 
 # FIXME: debug the NaN values that occasionally come up
 if __name__ == "__main__":
-    # m = run_analysis()
+    m = run_analysis(100, "Analysis/MotorMonteCarlo4-Temporary")
 
-    # display_analysis(m)
+    display_analysis(m)
 
     pass
 
