@@ -4,7 +4,6 @@
 
 from random import choice
 from typing import Callable
-from attr import Attribute
 import numpy as np
 import pandas as pd
 from RocketParts.Motor.grainGeometry import Annular
@@ -46,7 +45,7 @@ kuhlman_STSW_modifier = create_multiplication_modifier(1.5)
 star_swirl_modifiers = [mcKnight_STSW_modifier, kuhlman_STSW_modifier]
 
 
-def whitmore_regression_model(grain):
+def whitmore_regression_model(grain: "Grain"):
     """Predict the regression rate of non-entraining fuels. For a low viscosity fuel like Paraffin, use the whitmore_regression_model_with_entrainment"""
     ans = grain.friction_coefficient
     ans *= grain.get_flux() / (2 * grain.density * grain.prandtl_number ** (2/3))
@@ -285,7 +284,6 @@ class Grain(MassObject):
         
         return np.pi * (port_diameter / 2) ** 2
 
-    # TODO: make a decorator for this kind of function that takes parameters as overrides (really think about it the other way; the self.__dict__ is overriding the parameters)
     def get_flux(self, ox_flow=None, port_area=None):
         if ox_flow is None:
             ox_flow = self.ox_flow
@@ -294,6 +292,10 @@ class Grain(MassObject):
             port_area = self.geometry.port_area
 
         return ox_flow / port_area
+    
+    @property
+    def flux(self):
+        return self.get_flux()
 
     @property
     def burn_area(self):
@@ -351,7 +353,7 @@ class Grain(MassObject):
 
         regressed_distance = regression_rate * time_increment
         volume_flow = self.geometry.update_regression(regressed_distance)
-        self.mass_flow = volume_flow * self.density
+        self.mass_flow = (volume_flow / time_increment) * self.density
 
 
     #region Evaluations

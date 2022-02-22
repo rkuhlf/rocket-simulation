@@ -4,7 +4,7 @@ from typing import List
 import numpy as np
 from RocketParts.motor import CustomMotor
 from monteCarlo import MonteCarlo
-from Simulations.DesignedMotorABS import get_randomized_sim
+from Simulations.DesignedMotor2022 import get_randomized_sim
 from simulation import MotorSimulation
 
 import matplotlib.pyplot as plt
@@ -38,6 +38,7 @@ class MonteCarloMotor(MonteCarlo):
             "Average OF": m.average_OF,
             "Average Regression": m.average_regression_rate,
             "Discharge Coefficient": m.injector.discharge_coefficient,
+            "Length Regressed": m.fuel_grain.geometry.length_regressed,
         })
 
         data = sim.logger.get_dataframe()
@@ -203,9 +204,13 @@ def display_analysis(motorSim):
 
 
 
+# TODO: Fix error
+# You probably have to override the run_simulation method in an implementation of the Monte Carlo class, since the sim you are using does not have such a method
+# Simulation threw error single positional indexer is out-of-bounds. Failed sims is now 1
+
 # FIXME: debug the NaN values that occasionally come up
 if __name__ == "__main__":
-    m = run_analysis(100, "Analysis/MotorMonteCarlo4-Temporary")
+    m = run_analysis(10, "Analysis/MotorMonteCarlo5-Temporary")
 
     display_analysis(m)
 

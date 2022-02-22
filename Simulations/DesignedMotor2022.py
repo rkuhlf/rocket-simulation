@@ -21,13 +21,18 @@ from environment import Environment
 from Visualization.MotorOpticalAnalysis import display_optical_analysis
 
 
+
+adjusted_regression_functions = []
+
+
 def get_sim() -> MotorSimulation:
     # Usually we use 293.15
     ox = OxTank(temperature=293.15, length=2.54, diameter=0.1905, ox_mass=52.43, front=0)
 
     geo = StarSwirl(length=1.3, outer_diameter=0.17145)
     grain = ABSGrain(verbose=True, center_of_gravity=3.4, geometry=geo)
-    grain.regression_rate_function = marxman_whitman_ABS_nitrous
+    adjusted_regression_functions = generate_regression_functions()
+    grain.regression_rate_function = adjusted_regression_functions[0]
 
     chamber = CombustionChamber(fuel_grain=grain, limit_pressure_change=False)
     
@@ -48,28 +53,33 @@ def get_sim() -> MotorSimulation:
     return sim
 
 
-adjusted_regression_functions = []
+def generate_regression_functions():
+    global adjusted_regression_functions
+
+    base_algorithms = ABSGrain.get_regression_algorithms()
+
+    pressure_swirl_adjusted = []
+    # Pressure swirl
+    for alteration_method in PSW_modifiers:
+        for base_algorithm in base_algorithms:
+            pressure_swirl_adjusted.append(alteration_method(base_algorithm))
+
+    star_swirl_adjusted = []
+    # Star Swirl
+    for alteration_method in star_swirl_modifiers:
+        for base_algorithm in pressure_swirl_adjusted:
+            star_swirl_adjusted.append(alteration_method(base_algorithm))
+    
+    adjusted_regression_functions = star_swirl_adjusted
+    return adjusted_regression_functions
+
 
 def get_random_adjusted_ABS_regression_function():
     global adjusted_regression_functions
-
+    
     # We only want to generate this if it asks for it. Basically naive caching
     if len(adjusted_regression_functions) == 0:
-        base_algorithms = ABSGrain.get_regression_algorithms()
-
-        pressure_swirl_adjusted = []
-        # Pressure swirl
-        for alteration_method in PSW_modifiers:
-            for base_algorithm in base_algorithms:
-                pressure_swirl_adjusted.append(alteration_method(base_algorithm))
-
-        star_swirl_adjusted = []
-        # Star Swirl
-        for alteration_method in star_swirl_modifiers:
-            for base_algorithm in pressure_swirl_adjusted:
-                star_swirl_adjusted.append(alteration_method(base_algorithm))
-        
-        adjusted_regression_functions = star_swirl_adjusted
+        adjusted_regression_functions = generate_regression_functions()
     
     return choice(adjusted_regression_functions)
 
@@ -111,17 +121,17 @@ def get_randomized_sim() -> MotorSimulation:
     m.combustion_chamber.precombustion_chamber.length *= gauss(1, 0.01)
     m.combustion_chamber.postcombustion_chamber.length *= gauss(1, 0.01)
     # I really do not know what we are going to end up at, but I am assuming we can get it accurate, so this does not have much variation from what I think it currently is
-    m.combustion_chamber.fuel_grain.length *= gauss(1, 0.02)
+    m.combustion_chamber.fuel_grain.geometry.length *= gauss(1, 0.02)
 
     # --- Fuel Grain ---
     f: ABSGrain = m.fuel_grain
     # Different varieties have different values
     f.density *= gauss(1, 0.05)
-    f.port_radius *= gauss(1, 0.002)
+    # f.port_radius *= gauss(1, 0.002)
     f.initial_mass = f.fuel_mass
-    f.initial_radius = f.port_radius
+    # f.initial_radius = f.port_radius
     f.regression_rate_function = get_random_adjusted_ABS_regression_function()
-    # TODO: create a surface area function
+    # TODO: create some multipliers that will allow me to randomize the surface area
 
     # --- Nozzle ---
     # This one is not really a randomization because that would require running CEA again every time, and I can't really be bothered to wait that long
