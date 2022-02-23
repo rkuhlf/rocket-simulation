@@ -73,7 +73,7 @@ class MonteCarlo:
         print("")
         try:
             sim.run_simulation()
-        except:
+        except AttributeError as e:
             print("You probably have to override the run_simulation method in an implementation of the Monte Carlo class, since the sim you are using does not have such a method")
             raise
     
