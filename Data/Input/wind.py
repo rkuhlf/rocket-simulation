@@ -10,6 +10,10 @@ import scipy.stats as st
 
 
 
+# TODO: write some custom functions that work as settings for the wind
+# One can be a constant magnitude
+# One can be the OpenRocket method
+# One can be the method that I made up
 
 class Wind(PresetObject):
     """
@@ -190,8 +194,6 @@ class Wind(PresetObject):
 
         return np.array([(self.wind_direction + noise_component) %
                          (2 * np.pi) - np.pi, np.pi / 2])
-
-
 
 
 

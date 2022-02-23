@@ -76,7 +76,8 @@ class MonteCarloMotor(MonteCarlo):
     def plot_efficiency(self):
         df = self.characteristic_figures_dataframe
 
-        plt.hist(df[["Total Specific Impulse", "Used Specific Impulse"]].transpose(), int(np.sqrt(2 * len(df.index))), density=True, histtype='bar', label=["Total Specific Impulse", "Used Specific Impulse"])
+        # FIXME: This graph is no longer working int(np.sqrt(2 * len(df.index)))
+        plt.hist(df[["Total Specific Impulse", "Used Specific Impulse"]].transpose(), 3, density=True, histtype='bar', label=["Total Specific Impulse", "Used Specific Impulse"])
         plt.legend()
 
         plt.title("Monte Carlo Motor Efficiencies")
@@ -192,7 +193,7 @@ def run_analysis(count=100, folder="Analysis/MotorMonteCarlo-Temporary"):
 
     
 
-def display_analysis(motorSim):
+def display_analysis(motorSim: MonteCarloMotor):
     motorSim.plot_overview()
     motorSim.plot_efficiency()
     motorSim.plot_average_thrust()
@@ -204,13 +205,9 @@ def display_analysis(motorSim):
 
 
 
-# TODO: Fix error
-# You probably have to override the run_simulation method in an implementation of the Monte Carlo class, since the sim you are using does not have such a method
-# Simulation threw error single positional indexer is out-of-bounds. Failed sims is now 1
-
 # FIXME: debug the NaN values that occasionally come up
 if __name__ == "__main__":
-    m = run_analysis(10, "Analysis/MotorMonteCarlo5-Temporary")
+    m = run_analysis(100, "Analysis/MotorMonteCarlo75cm-Temporary")
 
     display_analysis(m)
 

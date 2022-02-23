@@ -29,7 +29,7 @@ def get_sim() -> MotorSimulation:
     # Usually we use 293.15
     ox = OxTank(temperature=293.15, length=2.54, diameter=0.1905, ox_mass=52.43, front=0)
 
-    geo = StarSwirl(length=1.3, outer_diameter=0.17145)
+    geo = StarSwirl(length=0.75, outer_diameter=0.17145)
     grain = ABSGrain(verbose=True, center_of_gravity=3.4, geometry=geo)
     adjusted_regression_functions = generate_regression_functions()
     grain.regression_rate_function = adjusted_regression_functions[0]

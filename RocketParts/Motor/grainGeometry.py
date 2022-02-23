@@ -115,9 +115,9 @@ def get_areas_csv(table_path: string, per_meter: bool = True):
         # TODO: write port volume function; adds regression * burn_area every time
         r = grain.length_regressed
         
-        burn_area = interpolated_lookup(df, "LengthRegressed", r, "BurnArea")
-        port_area = interpolated_lookup(df, "LengthRegressed", r, "PortArea")
-        port_volume = interpolated_lookup(df, "LengthRegressed", r, "PortVolume")
+        burn_area = interpolated_lookup(df, "LengthRegressed", r, "BurnArea", safe=True)
+        port_area = interpolated_lookup(df, "LengthRegressed", r, "PortArea", safe=True)
+        port_volume = interpolated_lookup(df, "LengthRegressed", r, "PortVolume", safe=True)
 
         if per_meter:
             burn_area *= grain.length
