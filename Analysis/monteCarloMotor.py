@@ -1,10 +1,9 @@
 # Monte carlo base class for motor simulations
 
 from typing import List
-import numpy as np
 import matplotlib.pyplot as plt
-from Helpers.data import hist_box_count
 
+from Helpers.data import hist_box_count
 from RocketParts.motor import CustomMotor
 from monteCarlo import MonteCarlo
 from Simulations.DesignedMotor2022 import get_randomized_sim
@@ -39,7 +38,7 @@ class MonteCarloMotor(MonteCarlo):
             "Launch Temperature": m.ox_tank.initial_temperature,
             "Average OF": m.average_OF,
             "Average Regression": m.average_regression_rate,
-            "Discharge Coefficient": m.injector.discharge_coefficient,
+            # "Discharge Coefficient": m.injector.discharge_coefficient,
             "Length Regressed": m.fuel_grain.geometry.length_regressed,
         })
 
@@ -78,8 +77,8 @@ class MonteCarloMotor(MonteCarlo):
     def plot_efficiency(self):
         df = self.characteristic_figures_dataframe
 
-        # FIXME: This graph is no longer working int(np.sqrt(2 * len(df.index)))
-        plt.hist(df[["Total Specific Impulse", "Used Specific Impulse"]].transpose(), 3, density=True, histtype='bar', label=["Total Specific Impulse", "Used Specific Impulse"])
+        # FIXME: This graph is no longer working int(np.sqrt(2 * len(df)))
+        plt.hist(df[["Total Specific Impulse", "Used Specific Impulse"]].transpose(), hist_box_count(len(df)), histtype='bar', label=["Total Specific Impulse", "Used Specific Impulse"])
         plt.legend()
 
         plt.title("Monte Carlo Motor Efficiencies")
@@ -215,12 +214,13 @@ def display_analysis(motorSim: MonteCarloMotor):
     motorSim.plot_cstar_impulse_correlation()
     motorSim.plot_OF_correlation()
     motorSim.plot_regression_correlation()
+    motorSim.plot_regressed()
 
 
 
 # FIXME: debug the NaN values that occasionally come up
 if __name__ == "__main__":
-    m = run_analysis(100, "Analysis/MotorMonteCarlo75cm-Temporary")
+    m = run_analysis(100, "Analysis/MotorMonteCarlo60cm-Temporary")
 
     display_analysis(m)
 
