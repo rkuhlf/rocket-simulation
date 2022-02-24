@@ -55,7 +55,7 @@ class CombustionChamber(PresetObject):
     @property
     def volume(self):
         # TODO: move this volume into the grain class
-        v = cylindrical_volume(self.fuel_grain.length, self.fuel_grain.port_radius)
+        v = self.fuel_grain.geometry.port_volume
         v += self.precombustion_chamber.volume + self.postcombustion_chamber.volume
 
         return v

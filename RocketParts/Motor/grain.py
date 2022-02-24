@@ -5,18 +5,19 @@
 from random import choice
 from typing import Callable
 import numpy as np
-from numpy.core.numeric import tensordot
+import pandas as pd
+from RocketParts.Motor.grainGeometry import Annular
 from RocketParts.massObject import MassObject
 
 
 from presetObject import PresetObject
-from Helpers.general import cylindrical_volume, interpolate, constant
+from Helpers.general import create_multiplication_modifier, cylindrical_volume, interpolate, constant
 from Helpers.decorators import diametered
 
 #region REGRESSION-RATE EQUATIONS
 # This is just a list of pre-programmed regression-rate equations that I have come across
 
-def exponential(leading: float, exponent: float) -> Callable:
+def power(leading: float, exponent: float) -> Callable:
     def inner(grain) -> float: # does not matter what it is passed; it will be constant
 
         return leading * grain.get_flux() ** exponent
@@ -26,14 +27,25 @@ def exponential(leading: float, exponent: float) -> Callable:
 
 # https://classroom.google.com/u/0/c/MzgwNjcyNDIwMDg3/m/NDA0NTQyMjUyODI4/details
 # Notice that n is even less than 0.5, which means that your burn will end fuel-rich with annular
-marxman_doran_HTPB_nitrous = exponential(1.8756e-4, 0.347)
-marxman_whitman_HTPB_nitrous = exponential(2.55e-5, 0.679)
-marxman_waxman_paraffin_nitrous = exponential(1.55e-4, 0.5)
+marxman_doran_HTPB_nitrous = power(1.8756e-4, 0.347)
+marxman_whitman_HTPB_nitrous = power(2.55e-5, 0.679)
+marxman_waxman_paraffin_nitrous = power(1.55e-4, 0.5)
 # https://classroom.google.com/u/2/c/MzgwNjcyNDIwMDg3/m/Mzg1OTk5OTY1Njc5/details (table 4.1)
 regression_rate_ABS_nitrous_constant = constant(0.0007)
-marxman_whitman_ABS_nitrous = exponential(2.623e-5, 0.664)
+marxman_whitman_ABS_nitrous = power(2.623e-5, 0.664)
 
-def whitmore_regression_model(grain):
+# All of these seem equally likely to be the most correct
+power_ABS_nitrous_functions = [marxman_whitman_ABS_nitrous, power(3.8e-5, 0.5), power(2.1e-5, 0.73), power(1.55e-5, 0.76), power(1.18e-5, 0.799)]
+
+# This is not great still, because the effect will be most intense at the start and wear off. I can probably figure out an okay approximation from looking at it TODO
+mcKnight_STSW_modifier = create_multiplication_modifier(2.1)
+# I quite simply do not believe that it would be this effective. We are using fewer tpi anyways
+kuhlman_STSW_modifier = create_multiplication_modifier(1.5)
+
+star_swirl_modifiers = [mcKnight_STSW_modifier, kuhlman_STSW_modifier]
+
+
+def whitmore_regression_model(grain: "Grain"):
     """Predict the regression rate of non-entraining fuels. For a low viscosity fuel like Paraffin, use the whitmore_regression_model_with_entrainment"""
     ans = grain.friction_coefficient
     ans *= grain.get_flux() / (2 * grain.density * grain.prandtl_number ** (2/3))
@@ -90,8 +102,6 @@ def bath_correction_for_helical_regression(regression, reynolds_number, port_dia
 
 
 #endregion
-
-
 
 
 #region DESIGN-ORIENTED FUNCTIONS
@@ -194,18 +204,14 @@ def determine_optimal_starting_diameter(outer_diameter, target_mass, density, ox
 
 
 # TODO: integrate this with the mass object class
-@diametered("port_radius", "port_diameter")
-@diametered("outer_radius", "outer_diameter")
 class Grain(MassObject):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
-        self.port_radius = 0.05
-        self.outer_radius = 0.25
+        self.geometry = Annular()
+        
         # of the fuel
         self.mass_flow = 0
         self.density = 920 # kg / m^3
-        self.length = 0.4 # m
 
         self.fuel_temperature = 300 # Kelvin
 
@@ -223,10 +229,10 @@ class Grain(MassObject):
         super().overwrite_defaults(**kwargs)
 
         self.initial_mass = self.fuel_mass
-        self.initial_radius = self.port_radius
+        self.initial_radius = self.geometry.port_radius
 
         if self.verbose:
-            print(f"Initialized fuel grain with {self.fuel_mass} kg of fuel. It has an {self.port_diameter} m port diameter and a {self.outer_diameter} m outer diameter.")
+            print(f"Initialized fuel grain with {self.fuel_mass} kg of fuel. It has an {self.geometry.port_diameter} m port diameter and a {self.geometry.outer_diameter} m outer diameter.")
 
     #region Properties
     @property
@@ -235,7 +241,7 @@ class Grain(MassObject):
 
     @property
     def fuel_volume(self):
-        return cylindrical_volume(self.length, self.outer_radius) - cylindrical_volume(self.length, self.port_radius)
+        return self.geometry.fuel_volume
 
     @property
     def regression_rate(self):
@@ -263,32 +269,45 @@ class Grain(MassObject):
 
     @property
     def reynolds_number(self):
-        return self.get_flux() * self.length / self.oxidizer_dynamic_viscosity
+        return self.get_flux() * self.geometry.length / self.oxidizer_dynamic_viscosity
     #endregion
 
     def get_port_area(self, port_diameter=None):
         if port_diameter is None:
-            port_diameter = self.port_diameter
+            try:
+                port_diameter = self.geometry.port_diameter
+            except AttributeError as e:
+                print("You likely intended to have the grain geometry set to annular to allow for easy manipulation of the port area.")
+
+                raise e
+
         
         return np.pi * (port_diameter / 2) ** 2
 
-    # TODO: make a decorator for this kind of function that takes parameters as overrides (really think about it the other way; the self.__dict__ is overriding the parameters)
-    def get_flux(self, ox_flow=None, port_diameter=None):
+    def get_flux(self, ox_flow=None, port_area=None):
         if ox_flow is None:
             ox_flow = self.ox_flow
 
-        if port_diameter is None:
-            port_diameter = self.port_diameter
+        if port_area is None:
+            port_area = self.geometry.port_area
 
-        return ox_flow / self.get_port_area(port_diameter)
+        return ox_flow / port_area
+    
+    @property
+    def flux(self):
+        return self.get_flux()
 
-    def get_burn_area(self, port_diameter=None, length=None):
-        if port_diameter is None:
-            port_diameter = self.port_diameter
-        if length is None:
-            length = self.length
-
-        return np.pi * port_diameter * length
+    @property
+    def burn_area(self):
+        return self.geometry.burn_area
+    
+    @property
+    def port_diameter(self):
+        return self.port_radius * 2
+    
+    @property
+    def port_radius(self):
+        return self.geometry.effective_radius
 
     def determine_optimal_length_OF(self, ox_flow, target_OF, port_diameter=None):
         if port_diameter is None:
@@ -326,16 +345,15 @@ class Grain(MassObject):
         if ox_flux > 700: # assumes kg/m^2
             raise Warning("McLeod told us not to go past 500 kg/m^2-s. He warned of blowing the flame out, but I have also seen some combustion instability stuff.")
 
-        if self.port_radius > self.outer_radius:
+        if self.geometry.burned_through:
             raise Warning("You have burned through the entire fuel grain")
 
         # Right now this is space-averaged. TODO: It might be kind of fun to do a not space-averaged thing, just simulating about 25 separate points along the grain
-        burn_area = self.get_burn_area()
         regression_rate = self.regression_rate
-        self.mass_flow = regression_rate * burn_area * self.density
 
         regressed_distance = regression_rate * time_increment
-        self.port_radius += regressed_distance
+        volume_flow = self.geometry.update_regression(regressed_distance)
+        self.mass_flow = (volume_flow / time_increment) * self.density
 
 
     #region Evaluations
@@ -347,8 +365,13 @@ class Grain(MassObject):
     def total_mass_used(self):
         return self.initial_mass - self.fuel_mass
 
+    @property
+    def burned_through(self):
+        return self.geometry.burned_through
+
+
     def __repr__(self) -> str:
-        ans = f"Fuel grain of density {self.density} kg/m^3 with port diameter {self.port_diameter} m and outer diameter {self.outer_diameter} m, giving mass of {self.fuel_mass:.2f} kg. "
+        ans = f"Fuel grain of density {self.density} kg/m^3, outer diameter {self.geometry.outer_diameter} m, and effective radius {self.geometry.effective_radius} m, giving mass of {self.fuel_mass:.2f} kg. "
 
         if hasattr(self, "ox_flow"):
             ans += f"Current regression rate is {self.regression_rate:.6f} m/s with a flux of {self.get_flux():.1f} kg/m^2-s. "
@@ -358,6 +381,8 @@ class Grain(MassObject):
         return ans
 
     #endregion
+
+
 
 class HTPBGrain(Grain):
     """Exact same as Grain, just uses different defaults. Be aware that you must also override the motor data_path to correct CEA data"""
@@ -384,44 +409,53 @@ class ABSGrain(Grain):
         self.latent_heat_function = constant_latent_heat_ABS
 
         self.overwrite_defaults(**kwargs)
+    
+    @staticmethod
+    def get_regression_algorithms():
+        return [whitmore_regression_model, regression_rate_ABS_nitrous_constant] + power_ABS_nitrous_functions
 
     def randomize_regression_algorithm(self):
-        self.regression_rate_function = choice([whitmore_regression_model, regression_rate_ABS_nitrous_constant, marxman_whitman_ABS_nitrous])
+        """Chooses between several regression algorithms for a straight port"""
+        self.regression_rate_function = choice(ABSGrain.get_regression_algorithms())
+
+
 
 
 if __name__ == "__main__":
-    g = HTPBGrain()
-    g.length = 0.86
-    g.port_diameter = 0.0254 # = 1 in
-    g.regression_rate_function = whitmore_regression_model
+    def test_whitmore():
+        g = HTPBGrain()
+        g.geometry.length = 0.86
+        g.geometry.port_diameter = 0.0254 # = 1 in
+        g.regression_rate_function = whitmore_regression_model
 
 
-    print(g)
-    area = np.pi * g.port_radius ** 2
-    g.update_regression(350 * area, 0, flame_temperature=3000)
+        print(g)
+        area = np.pi * g.geometry.port_radius ** 2
+        g.update_regression(350 * area, 0, flame_temperature=3000)
 
-    print(g)
+        print(g)
 
+    def figure_ID():
+        best_ID = determine_optimal_starting_diameter(0.2032, 15, 920, 4.8, marxman_doran_HTPB_nitrous, 6) 
+        print(best_ID)
 
-    # best_ID = determine_optimal_starting_diameter(0.2032, 15, 920, 4.8, marxman_doran_HTPB_nitrous, 6) 
-    # print(best_ID)
+        # Using an ID of 5 cm, an OD of 5.75 inches - 1 inches (0.5 inches on both sides in case we have extra regression)
+        print(find_required_length(0.025, 0.146, 8.48381877, 1000))
 
-    # Using an ID of 5 cm, an OD of 5.75 inches - 1 inches (0.5 inches on both sides in case we have extra regression)
-    # print(find_required_length(0.025, 0.146, 8.48381877, 1000))
-
-    # print(determine_optimal_starting_diameter_minimizing_weight(8.48, 0.146, 2.7, regression_rate_ABS_nitrous_constant, 975, 6.18, optimize_for=0.5))
-    # Give an extra half inch on each side
-    # print(determine_optimal_starting_diameter_minimizing_weight(8.48, 0.120, 2.7, regression_rate_ABS_nitrous_constant, 975, 6.18, optimize_for=0.5, max_flux=1000)) # will be more than 650 kg/m2s; there just is not enough space to have the proper O/F through the whole burn
-    # Give an extra 10 centimeters on either side (1.5 SF of r-dot)
-    # print(determine_optimal_starting_diameter_minimizing_weight(8.48, 0.126, 2.7, regression_rate_ABS_nitrous_constant, 1000, 6.18, optimize_for=0.5, max_flux=1000)) # will be more than 650 kg/m2s; there just is not enough space to have the proper O/F through the whole burn
-    # Found new best fuel grain, has 0.146 m OD, 0.1213269691560687 m ID (initially), and a length of 1.6794435545384543 meters, giving a mass of 8.482525721614701, only 0.002525721614700771 kg heavier than specified
-
-
-    # print(determine_optimal_starting_diameter_minimizing_weight(12.48, 0.08255 * 2, 2.1, regression_rate_ABS_nitrous_constant, 1060, 6.18, optimize_for=0.5, max_flux=1000))
+        print(determine_optimal_starting_diameter_minimizing_weight(8.48, 0.146, 2.7, regression_rate_ABS_nitrous_constant, 975, 6.18, optimize_for=0.5))
+        # Give an extra half inch on each side
+        print(determine_optimal_starting_diameter_minimizing_weight(8.48, 0.120, 2.7, regression_rate_ABS_nitrous_constant, 975, 6.18, optimize_for=0.5, max_flux=1000)) # will be more than 650 kg/m2s; there just is not enough space to have the proper O/F through the whole burn
+        # Give an extra 10 centimeters on either side (1.5 SF of r-dot)
+        print(determine_optimal_starting_diameter_minimizing_weight(8.48, 0.126, 2.7, regression_rate_ABS_nitrous_constant, 1000, 6.18, optimize_for=0.5, max_flux=1000)) # will be more than 650 kg/m2s; there just is not enough space to have the proper O/F through the whole burn
+        # Found new best fuel grain, has 0.146 m OD, 0.1213269691560687 m ID (initially), and a length of 1.6794435545384543 meters, giving a mass of 8.482525721614701, only 0.002525721614700771 kg heavier than specified
 
 
-    # test_grain = Grain(density=1060, length=1.147, port_diameter=0.127, outer_radius=0.08255)
-    # print(test_grain.fuel_volume)
-    # print(test_grain.fuel_mass)
+        print(determine_optimal_starting_diameter_minimizing_weight(12.48, 0.08255 * 2, 2.1, regression_rate_ABS_nitrous_constant, 1060, 6.18, optimize_for=0.5, max_flux=1000))
+
+
+    g = Annular(length=1.147, port_diameter=0.127, outer_radius=0.08255)
+    test_grain = Grain(density=1060, geometry=g)
+    print(test_grain.fuel_volume)
+    print(test_grain.fuel_mass)
 
     pass

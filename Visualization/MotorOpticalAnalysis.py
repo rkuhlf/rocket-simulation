@@ -41,7 +41,7 @@ def display_pressures(data):
     ax1.plot(data["time"], np.asarray(data["ox_tank.pressure"]) / 10 ** 5)
     ax1.set(title="Pressures over Time", xlabel="Time [s]", ylabel="Pressure [bar]")
 
-    ax2.plot(data["time"], np.array(data["combustion_chamber.fuel_grain.port_diameter"]) * 100)
+    ax2.plot(data["time"], np.array(data["combustion_chamber.fuel_grain.geometry.effective_radius"]) * 100)
     ax2.set(title="Grain Diameter", xlabel="Time [s]", ylabel="Diameter [cm]")
 
     ax3.plot(data["time"], data["combustion_chamber.temperature"])
@@ -83,6 +83,31 @@ def print_total_impulse(data):
     print(f"AVERAGE THRUST: {average_thrust}")
     print(f"SPECIFIC IMPULSE: {total_impulse / (total_mass * 9.81)}")
 
+def display_regression(data):
+    """Show all of the important inputs and outputs for a complex regression simulation."""
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
+
+    # Regression rate and regression
+    # Convert from cm to mm
+    ax1.plot(data["time"], np.asarray(100 * data["combustion_chamber.fuel_grain.geometry.length_regressed"]), label="Radius [cm]")
+    ax1.plot(data["time"], np.asarray(1000 * data["combustion_chamber.fuel_grain.regression_rate"]), label="Regression Rate [mm/s]")
+    ax1.set(title="Regression over Time", xlabel="Time [s]", ylabel="Regression")
+
+    # Flux
+    ax2.plot(data["time"], np.asarray(data["combustion_chamber.fuel_grain.flux"]), label="Ox Flux")
+    ax2.plot(data["time"], np.asarray(data["combustion_chamber.fuel_grain.flux"] * (1 + 1 / data["OF"])), label="Total Flux")
+    ax2.set(title="Flux over Time", xlabel="Time [s]", ylabel="Flux [kg/m^2-s]")
+
+    # Burn and port area
+    ax3.plot(data["time"], 10000 * np.asarray(data["combustion_chamber.fuel_grain.geometry.port_area"]), label="Port Area")
+    ax3.plot(data["time"], 10000 * np.asarray(data["combustion_chamber.fuel_grain.geometry.burn_area"]), label="Burn Area")
+    ax3.set(title="Areas over Time", xlabel="Time [s]", ylabel="Area [cm^2]")
+
+    # O/F
+
+
+    plt.show()
+
 
 def display_flows(data):
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
@@ -118,14 +143,27 @@ def display_optical_analysis(target):
     display_pressures(data)
     display_efficiency(data)
     print_total_impulse(data)
-    display_flows(data)
 
 
     display_overall(data)
 
+    return data
+
+def display_detailed(target):
+    data = display_optical_analysis(target)
+
+    display_regression(data)
+    display_flows(data)
 
 
 
 if __name__ == "__main__":
     # make_matplotlib_medium()
-    display_optical_analysis("Data/Output/motorOutput.csv")
+
+    target = "Data/Output/motorOutput.csv"
+
+    data = pd.read_csv(target)
+
+    # display_regression(data)
+    # display_optical_analysis(target)
+    display_detailed(target)

@@ -3,10 +3,7 @@
 # It models the wind (hopefully it will eventually include gusts, but right now it's a DIY thing that's wrong)
 # Also models air density, pressure, and temperature.
 
-import numpy as np
 import pandas as pd
-
-
 
 from Helpers.data import inputs_path
 from Helpers.general import interpolate, get_next

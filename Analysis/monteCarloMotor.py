@@ -7,7 +7,7 @@ from Helpers.data import hist_box_count
 
 from RocketParts.motor import CustomMotor
 from monteCarlo import MonteCarlo
-from Simulations.DesignedMotorABS import get_randomized_sim
+from Simulations.DesignedMotor2022 import get_randomized_sim
 from simulation import MotorSimulation
 
 
@@ -40,6 +40,7 @@ class MonteCarloMotor(MonteCarlo):
             "Average OF": m.average_OF,
             "Average Regression": m.average_regression_rate,
             "Discharge Coefficient": m.injector.discharge_coefficient,
+            "Length Regressed": m.fuel_grain.geometry.length_regressed,
         })
 
         data = sim.logger.get_dataframe()
@@ -77,7 +78,8 @@ class MonteCarloMotor(MonteCarlo):
     def plot_efficiency(self):
         df = self.characteristic_figures_dataframe
 
-        plt.hist(df[["Total Specific Impulse", "Used Specific Impulse"]].transpose(), int(np.sqrt(2 * len(df.index))), density=True, histtype='bar', label=["Total Specific Impulse", "Used Specific Impulse"])
+        # FIXME: This graph is no longer working int(np.sqrt(2 * len(df.index)))
+        plt.hist(df[["Total Specific Impulse", "Used Specific Impulse"]].transpose(), 3, density=True, histtype='bar', label=["Total Specific Impulse", "Used Specific Impulse"])
         plt.legend()
 
         plt.title("Monte Carlo Motor Efficiencies")
@@ -204,7 +206,7 @@ def run_analysis(count=100, folder="Analysis/MotorMonteCarlo-Temporary"):
 
     
 
-def display_analysis(motorSim):
+def display_analysis(motorSim: MonteCarloMotor):
     motorSim.plot_overview()
     motorSim.plot_efficiency()
     motorSim.plot_average_thrust()
@@ -218,9 +220,9 @@ def display_analysis(motorSim):
 
 # FIXME: debug the NaN values that occasionally come up
 if __name__ == "__main__":
-    # m = run_analysis()
+    m = run_analysis(100, "Analysis/MotorMonteCarlo75cm-Temporary")
 
-    # display_analysis(m)
+    display_analysis(m)
 
     pass
 

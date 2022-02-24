@@ -4,8 +4,8 @@
 
 import numpy as np
 import pandas as pd
-import string
-import random
+
+
 from copy import deepcopy, copy
 
 from presetObject import PresetObject
@@ -226,7 +226,7 @@ class MotorLogger(FeedbackLogger):
         super().__init__(motor)
 
         # TODO: it would be nice to have the average molar mass of the products displayed
-        self.to_record = ["thrust", "combustion_chamber.pressure", "ox_tank.pressure", "combustion_chamber.temperature", "ox_tank.temperature", "combustion_chamber.fuel_grain.port_diameter", "OF", "combustion_chamber.cstar", "specific_impulse", "fuel_flow", "ox_flow", "mass_flow", "mass_flow_out", "combustion_chamber.ideal_gas_constant", "propellant_CG", "propellant_mass"]
+        self.to_record = ["thrust", "combustion_chamber.pressure", "ox_tank.pressure", "combustion_chamber.temperature", "ox_tank.temperature", "combustion_chamber.fuel_grain.geometry.effective_radius", "OF", "combustion_chamber.cstar", "specific_impulse", "fuel_flow", "ox_flow", "mass_flow", "mass_flow_out", "combustion_chamber.ideal_gas_constant", "propellant_CG", "propellant_mass", "combustion_chamber.fuel_grain.regression_rate", "combustion_chamber.fuel_grain.flux", "combustion_chamber.fuel_grain.geometry.port_area", "combustion_chamber.fuel_grain.geometry.burn_area", "combustion_chamber.fuel_grain.geometry.length_regressed"]
 
         self.debug_every = 2 # seconds
 
@@ -263,7 +263,7 @@ class MotorLogger(FeedbackLogger):
     def save_to_csv(self):
         # Give some information about how we are looking a the end of the burn
 
-        print(f"The motor finished with {self.motor.combustion_chamber.fuel_grain.fuel_mass} kg of fuel and {self.motor.combustion_chamber.fuel_grain.outer_radius - self.motor.combustion_chamber.fuel_grain.port_radius} meters left")
+        print(f"The motor finished with {self.motor.combustion_chamber.fuel_grain.fuel_mass} kg of fuel and {self.motor.combustion_chamber.fuel_grain.geometry.outer_radius - self.motor.combustion_chamber.fuel_grain.geometry.effective_radius} meters left")
 
         print(f"There is {self.motor.ox_tank.ox_mass} kg of oxidizer left and there is still a pressure difference of {self.motor.ox_tank.pressure - self.motor.combustion_chamber.pressure} Pa")
 
