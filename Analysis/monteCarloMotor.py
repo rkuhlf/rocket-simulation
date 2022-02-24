@@ -2,12 +2,14 @@
 
 from typing import List
 import numpy as np
+import matplotlib.pyplot as plt
+from Helpers.data import hist_box_count
+
 from RocketParts.motor import CustomMotor
 from monteCarlo import MonteCarlo
 from Simulations.DesignedMotorABS import get_randomized_sim
 from simulation import MotorSimulation
 
-import matplotlib.pyplot as plt
 
 # TODO: create some sensitivity analysis functions that find correlations in the characteristic figures.
 class MonteCarloMotor(MonteCarlo):
@@ -149,6 +151,17 @@ class MonteCarloMotor(MonteCarlo):
         plt.title("Monte Carlo Regression Rate Importance")
         plt.xlabel("Regression Rate (mm/s)")
         plt.ylabel("Total Impulse (Ns)")
+
+        plt.show()
+        
+    def plot_regressed(self):
+        df = self.characteristic_figures_dataframe
+
+        # Convert from m to mm
+        plt.hist(df["Length Regressed"] * 1000, hist_box_count(len(df)))
+
+        plt.title("Distribution of Ending Regression")
+        plt.xlabel("Length Regressed (mm)")
 
         plt.show()
     
