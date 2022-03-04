@@ -120,7 +120,9 @@ def find_gaseous_heat_capacity(temperature):
     return 132.632 * total
 
 
-def calculate_maximum_liquid_expansion(temperature, max_temperature=None):
+def calculate_maximum_liquid_expansion(temperature=293.15, max_temperature=None):
+    """Expects temperature in Kelvin. Will use the max temperature (the last point before it goes supercritical; about 36 C)"""
+    
     min_density = minimum_liquid_density
     if max_temperature is not None:
         min_density = get_liquid_nitrous_density(max_temperature)

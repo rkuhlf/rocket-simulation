@@ -94,11 +94,12 @@ print(f"Your target average fuel flow is now {fuel_flow} kg/s, and you target ox
 print(f"In addition, you now have an initial ox flow rate of {find_mass_flow_MR(get_nitrous_vapor_pressure(ox_tank_initial_temperature) * 10**5 - combustion_chamber_pressure, get_liquid_nitrous_density(ox_tank_initial_temperature), get_gaseous_nitrous_density(ox_tank_initial_temperature), get_cross_sectional_area(orifices, injector_diameter), coefficient_of_discharge=0.68)}")
 
 
-port_diameter = determine_optimal_starting_diameter(inner_diameter, fuel_mass, fuel_density, ox_flow, marxman_doran_HTPB_nitrous, OF)
-grain_length = find_required_length_fuel(port_diameter, inner_diameter, fuel_mass, fuel_density)
+# FIXME: Update for new features
+# port_diameter = determine_optimal_starting_diameter(inner_diameter, fuel_mass, fuel_density, ox_flow, marxman_doran_HTPB_nitrous, OF)
+# grain_length = find_required_length_fuel(port_diameter, inner_diameter, fuel_mass, fuel_density)
 
-print(f"A port diameter of {port_diameter} meters and a length of {grain_length} meters should mean that your fuel burns up at about the same time as your ox runs out.")
-print(f"That is {port_diameter * 3.28 * 12} inches and {grain_length * 3.28} feet")
+# print(f"A port diameter of {port_diameter} meters and a length of {grain_length} meters should mean that your fuel burns up at about the same time as your ox runs out.")
+# print(f"That is {port_diameter * 3.28 * 12} inches and {grain_length * 3.28} feet")
 
 
 # Calculate the total length of the rocket that we are looking at

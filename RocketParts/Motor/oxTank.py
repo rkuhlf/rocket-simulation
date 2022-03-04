@@ -349,9 +349,13 @@ if __name__ == '__main__':
     # print(get_length(70.61538462 / get_liquid_nitrous_density(280), 0.1905 / 2))
     
     # print(find_specific_enthalpy_of_gaseous_nitrous(273 - 0))
-    ox_mass = 70  # kg
+    ox_mass = 45  # kg
     # 4ish cubic feet converted to meters cubed
     volume = 4 / 35.3147
-    print(find_ullage(ox_mass, volume, 298, constant_temperature=False))
-    print(find_ullage(ox_mass, volume, 298, constant_temperature=True))
+    # print(find_ullage(ox_mass, volume, 298, constant_temperature=False))
+    # print(find_ullage(ox_mass, volume, 298, constant_temperature=True))
+
+    print(find_required_length(45, 0.1723136, ullage=0.1))
+
+    print(calculate_maximum_liquid_expansion(293.15, max_temperature=302))
     
