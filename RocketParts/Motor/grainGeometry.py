@@ -1,7 +1,6 @@
 
 
 from abc import ABC
-import abc
 import string
 from typing import Callable
 import numpy as np
@@ -133,6 +132,16 @@ def get_areas_cylindrical(grain: "Annular"):
     port_volume = port_area * grain.length
 
     return burn_area, port_area, port_volume
+
+def multiply_areas(original_func: Callable, burn_area_multiplier=1, port_area_multiplier=1, port_volume_multiplier=1):
+    # Unfortunatel coupled to the return signature of burn area func
+    def new_func(*args, **kwargs):
+        burn_area, port_area, port_volume = original_func(*args, **kwargs)
+
+        return burn_area_multiplier * burn_area, port_area_multiplier * port_area, port_volume_multiplier * port_volume
+    
+    return new_func
+
 
 #endregion
 

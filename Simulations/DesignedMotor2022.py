@@ -5,7 +5,8 @@
 
 
 from random import choice, gauss, random
-from RocketParts.Motor.grainGeometry import StarSwirl
+from Helpers.general import modify_function_multiplication
+from RocketParts.Motor.grainGeometry import StarSwirl, multiply_areas
 
 from simulation import MotorSimulation
 from logger import MotorLogger
@@ -13,7 +14,7 @@ from RocketParts.motor import CustomMotor
 from RocketParts.Motor.oxTank import OxTank, random_WSMR_temperature
 from RocketParts.Motor.injector import Injector, mass_flow_fitted_HTPV
 from RocketParts.Motor.combustionChamber import CombustionChamber
-from RocketParts.Motor.grain import ABSGrain, marxman_whitman_ABS_nitrous, star_swirl_modifiers
+from RocketParts.Motor.grain import ABSGrain, star_swirl_modifiers, power_ABS_nitrous_functions
 from RocketParts.Motor.pressureSwirlInjector import PSW_modifiers
 from RocketParts.Motor.nozzle import Nozzle
 from environment import Environment
@@ -56,7 +57,7 @@ def get_sim() -> MotorSimulation:
 def generate_regression_functions():
     global adjusted_regression_functions
 
-    base_algorithms = ABSGrain.get_regression_algorithms()
+    base_algorithms = power_ABS_nitrous_functions
 
     pressure_swirl_adjusted = []
     # Pressure swirl
@@ -96,7 +97,8 @@ def get_randomized_sim() -> MotorSimulation:
     m.ox_tank.temperature = random_WSMR_temperature()
     m.ox_tank.initial_temperature = m.ox_tank.temperature
     # I think we probably get most of the way filled quite often, but sometimes we do not
-    m.ox_tank.ox_mass *= min(1, gauss(0.9, 0.07))
+    # They are looking at a load cell to see if we get completely filled
+    m.ox_tank.ox_mass *= min(1, gauss(0.93, 0.06))
 
     # Commented out because I do not believe this will happen. If it does, we can just borrow someone else's oxidizer
     # if random() < 0.05:
@@ -109,11 +111,8 @@ def get_randomized_sim() -> MotorSimulation:
     m.ox_tank.length *= gauss(1, 0.005)
 
     # --- Injector ---
-    # TODO: I need to redo the models of injector flow the same way I did regression equations; it is already sort of close; replace this with a function in the thing that makes a random injector
-    # They told us exactly what it would be, but I do not believe them
-    m.injector.discharge_coefficient = gauss(1, 0.05)
-    # Simulates something getting stuck in one of them
-    m.injector.orifice_diameter *= gauss(1, 0.02)
+    # They told us exactly what it would be, but I do not believe them; could also simulate something getting stuck in one of them
+    m.injector.mass_flow_function = modify_function_multiplication(m.injector.mass_flow_function, gauss(1, 0.02))
 
     # --- Combustion Chamber ---
     m.cstar_efficiency = min(1, gauss(0.85, 0.04))
@@ -121,7 +120,7 @@ def get_randomized_sim() -> MotorSimulation:
     m.combustion_chamber.precombustion_chamber.length *= gauss(1, 0.01)
     m.combustion_chamber.postcombustion_chamber.length *= gauss(1, 0.01)
     # I really do not know what we are going to end up at, but I am assuming we can get it accurate, so this does not have much variation from what I think it currently is
-    m.combustion_chamber.fuel_grain.geometry.length *= gauss(1, 0.02)
+    m.combustion_chamber.fuel_grain.geometry.length *= gauss(1, 0.005)
 
     # --- Fuel Grain ---
     f: ABSGrain = m.fuel_grain
@@ -131,12 +130,15 @@ def get_randomized_sim() -> MotorSimulation:
     f.initial_mass = f.fuel_mass
     # f.initial_radius = f.port_radius
     f.regression_rate_function = get_random_adjusted_ABS_regression_function()
-    # TODO: create some multipliers that will allow me to randomize the surface area
+    
+    f.geometry.area_function = multiply_areas(f.geometry.area_function, gauss(0.95, 0.03), gauss(1, 0.005), gauss(1, 0.001))
 
     # --- Nozzle ---
     # This one is not really a randomization because that would require running CEA again every time, and I can't really be bothered to wait that long
     # This one is still included because it will change the mass flow rates and the pressures
     m.nozzle.throat_radius *= gauss(1, 0.001)
+
+    # TODO: randomize the nozzle performance multiplier
 
     
     return sim
