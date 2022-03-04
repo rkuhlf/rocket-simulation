@@ -1,5 +1,4 @@
 import numpy as np
-from sqlalchemy import over
 import Analysis.OpenRocketAnalysis.javaInitialization
 
 

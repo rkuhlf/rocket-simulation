@@ -17,10 +17,10 @@ zero_AOA = data[data["Alpha"] == 0]
 zero_AOA.sort_values(["Mach"], inplace=True)
 zero_AOA.plot.line(x='Mach', y='CD')
 
-machs = np.linspace(0, 5, 50)
-zero_AOA_model = get_splined_coefficient_of_drag(machs, 0)
+# machs = np.linspace(0, 5, 50)
+# zero_AOA_model = get_splined_coefficient_of_drag(machs, 0)
 
-plt.plot(machs, zero_AOA_model)
+# plt.plot(machs, zero_AOA_model)
 
 
 # TODO: show 10-odd isolines for different angles of attack over mach numbers

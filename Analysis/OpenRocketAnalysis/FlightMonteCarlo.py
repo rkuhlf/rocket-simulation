@@ -20,10 +20,10 @@ if __name__ == '__main__':
 
     with new_or_instance() as instance:
         orh = Helper(instance)
-        motors = create_motors_from_directory("./Analysis/MotorMonteCarlo2-Temporary/")
+        motors = create_motors_from_directory("./Analysis/MotorMonteCarloShorterOx-Temporary/")
 
         df = pd.read_csv("./Data/Input/aerodynamicQualities.csv")
-        m = MonteCarloFlightRandomMotorOR(orh, motors, drag_dataframe=df, dry_mass=54, dry_CG=3.3, ox_tank_front=1.8542)
+        m = MonteCarloFlightRandomMotorOR(orh, motors, drag_dataframe=df, dry_mass=50.2, dry_CG=3.404, ox_tank_front=1.600)
 
         
         m.simulate_randomized(100)
