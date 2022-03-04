@@ -16,7 +16,9 @@ def display_overview(characteristic_figures):
     plt.show()
 
 def display_efficiency(characteristic_figures):
-    plt.hist(characteristic_figures[["Total Specific Impulse", "Used Specific Impulse"]].transpose(), hist_box_count(len(characteristic_figures)), histtype='bar', label=["Total Specific Impulse", "Used Specific Impulse"])
+    # I think that this does not work right when it is passed the characteristic figures in one transposition, and it does work in the other
+    # Might need a .transpose()
+    plt.hist(characteristic_figures[["Total Specific Impulse", "Used Specific Impulse"]], hist_box_count(len(characteristic_figures)), histtype='bar', label=["Total Specific Impulse", "Used Specific Impulse"])
     plt.legend()
 
     plt.title("Monte Carlo Motor Efficiencies")
@@ -112,6 +114,7 @@ black = {
 }
 
 def display_curves(sims):
+    # Once again, this is not working for the monte carlo class. Skips all of the sims
     plot_all_sims(sims, x="time", y="thrust", **thin_lines, **black)
     plt.title("Thrust Curves")
     plt.xlabel("Time (s)")
@@ -163,8 +166,8 @@ if __name__ == "__main__":
     # display_final_mass_distribution(sims)
     # make_matplotlib_big()
     # display_general(characteristic_figures, sims)
-    display_curves(sims)
-    # display_regression(characteristic_figures, sims)
+    display_efficiency(characteristic_figures)
+    # display_curves(sims)
     # display_regression(characteristic_figures, sims)
 
     # print(sims)

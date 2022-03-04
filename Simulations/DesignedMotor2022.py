@@ -28,9 +28,11 @@ adjusted_regression_functions = []
 
 def get_sim() -> MotorSimulation:
     # Usually we use 293.15
-    ox = OxTank(temperature=293.15, length=2.54, diameter=0.1905, ox_mass=52.43, front=0)
+    # The ID is 6.785 in
+    # This length should give us enough room for liquid to expand until we reach
+    ox = OxTank(temperature=293.15, length=2.67, diameter=0.172339, ox_mass=45, front=0)
 
-    geo = StarSwirl(length=0.75, outer_diameter=0.17145)
+    geo = StarSwirl(length=0.78, outer_diameter=0.17145)
     grain = ABSGrain(verbose=True, center_of_gravity=3.4, geometry=geo)
     adjusted_regression_functions = generate_regression_functions()
     grain.regression_rate_function = adjusted_regression_functions[-2]
@@ -139,7 +141,6 @@ def get_randomized_sim() -> MotorSimulation:
     m.nozzle.throat_radius *= gauss(1, 0.001)
 
     # TODO: randomize the nozzle performance multiplier
-
     
     return sim
 
