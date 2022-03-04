@@ -1,7 +1,4 @@
 import numpy as np
-import Analysis.OpenRocketAnalysis.javaInitialization
-
-
 from random import choice
 
 import orhelper
