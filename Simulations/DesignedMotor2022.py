@@ -32,7 +32,7 @@ def get_sim() -> MotorSimulation:
     geo = StarSwirl(length=0.75, outer_diameter=0.17145)
     grain = ABSGrain(verbose=True, center_of_gravity=3.4, geometry=geo)
     adjusted_regression_functions = generate_regression_functions()
-    grain.regression_rate_function = adjusted_regression_functions[0]
+    grain.regression_rate_function = adjusted_regression_functions[-2]
 
     chamber = CombustionChamber(fuel_grain=grain, limit_pressure_change=False)
     
@@ -116,7 +116,7 @@ def get_randomized_sim() -> MotorSimulation:
     m.injector.orifice_diameter *= gauss(1, 0.02)
 
     # --- Combustion Chamber ---
-    m.cstar_efficiency = min(1, gauss(0.80, 0.07))
+    m.cstar_efficiency = min(1, gauss(0.85, 0.04))
     # These are pretty set in stone, but there might be some variation
     m.combustion_chamber.precombustion_chamber.length *= gauss(1, 0.01)
     m.combustion_chamber.postcombustion_chamber.length *= gauss(1, 0.01)

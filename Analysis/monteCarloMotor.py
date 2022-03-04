@@ -2,6 +2,7 @@
 
 from typing import List
 import matplotlib.pyplot as plt
+from Analysis.OpticalAnalysisMotorMonteCarlo import display_CG_movement, display_OF_correlation, display_average_thrust, display_cstar_importance, display_curves, display_regression, display_efficiency, display_overview
 
 from Helpers.data import hist_box_count
 from RocketParts.motor import CustomMotor
@@ -45,7 +46,7 @@ class MonteCarloMotor(MonteCarlo):
         data = sim.logger.get_dataframe()
 
         # "thrust", "combustion_chamber.pressure", "ox_tank.pressure", "combustion_chamber.temperature", "ox_tank.temperature", "combustion_chamber.fuel_grain.port_diameter", "OF", "combustion_chamber.cstar", "specific_impulse", "fuel_flow", "ox_flow", "mass_flow", "mass_flow_out", "combustion_chamber.ideal_gas_constant", "propellant_mass", "propellant_CG"
-        data = data[["thrust", "OF", "ox_tank.pressure", "ox_tank.temperature", "combustion_chamber.temperature", "propellant_mass", "propellant_CG"]].copy()
+        data = data[["thrust", "OF", "ox_tank.pressure", "ox_tank.temperature", "combustion_chamber.temperature", "propellant_mass", "propellant_CG", "combustion_chamber.fuel_grain.geometry.length_regressed"]].copy()
 
         self.important_data.append(data)
 
@@ -61,133 +62,40 @@ class MonteCarloMotor(MonteCarlo):
         print(f"Nitrous went supercritical {self.supercritical_nitrous_count} times")
 
 
-    #region Characteristic Figure Displays
+    #region Plots/Displays
     # TODO: change this to a more general logger class that has all of these analysis functions and can read in simulations using a function or can simply accept some pandas arrays
     def plot_overview(self):
         df = self.characteristic_figures_dataframe
 
-        plt.scatter(df["Burn Time"], df["Total Impulse"])
-
-        plt.title("Motor Comprehensive Monte Carlo")
-        plt.xlabel("Burn Time (s)")
-        plt.ylabel("Total Impulse (Ns)")
-
-        plt.show()
+        display_overview(df)
     
     def plot_efficiency(self):
         df = self.characteristic_figures_dataframe
-
-        # FIXME: This graph is no longer working int(np.sqrt(2 * len(df)))
-        plt.hist(df[["Total Specific Impulse", "Used Specific Impulse"]].transpose(), hist_box_count(len(df)), histtype='bar', label=["Total Specific Impulse", "Used Specific Impulse"])
-        plt.legend()
-
-        plt.title("Monte Carlo Motor Efficiencies")
-        plt.xlabel("Efficiency [s]")
-        plt.ylabel("Frequency")
-
-        plt.show()
+        display_efficiency(df)
     
     def plot_average_thrust(self):
         df = self.characteristic_figures_dataframe
+        display_average_thrust(df)
 
-        plt.scatter(df["Total Impulse"], df["Average Thrust"])
-
-        plt.title("Monte Carlo Motor Average Thrust")
-        # We should be aiming for all of the average thrust values to be above a certain threshold, which will give us a good liftoff, and we want everything to be as far to the right as possible
-        plt.ylabel("Average Thrust (N)")
-        plt.xlabel("Total Impulse (Ns)")
-
-        plt.show()
-
-    def plot_cstar_impulse_correlation(self):
+    def plot_cstar_importance(self):
         df = self.characteristic_figures_dataframe
-
-        plt.scatter(df["Combustion Efficiency"], df["Total Impulse"])
-
-        plt.title("Monte Carlo C* Efficiency Importance")
-        plt.xlabel("C* Efficiency ()")
-        plt.ylabel("Total Impulse (Ns)")
-
-        plt.show()
-    
-    def plot_cstar_time_correlation(self):
-        df = self.characteristic_figures_dataframe
-
-        plt.scatter(df["Combustion Efficiency"], df["Burn Time"])
-
-        plt.title("Monte Carlo C* Efficiency Importance")
-        plt.xlabel("C* Efficiency ()")
-        plt.ylabel("Burn Time (s)")
-
-        plt.show()
-    
-    def plot_discharge_correlation(self):
-        df = self.characteristic_figures_dataframe
-
-        plt.scatter(df["Discharge Coefficient"], df["Total Impulse"])
-
-        plt.title("Monte Carlo Discharge Importance")
-        plt.xlabel("Discharge Coefficient ()")
-        plt.ylabel("Total Impulse (Ns)")
-
-        plt.show()
+        display_cstar_importance(df)
     
     def plot_OF_correlation(self):
         df = self.characteristic_figures_dataframe
-
-        plt.scatter(df["Average OF"], df["Total Impulse"])
-
-        plt.title("Monte Carlo OF Importance")
-        plt.xlabel("O/F ()")
-        plt.ylabel("Total Impulse (Ns)")
-
-        plt.show()
-    
-    def plot_regression_correlation(self):
-        df = self.characteristic_figures_dataframe
-
-        # Convert from m to mm
-        plt.scatter(df["Average Regression"] * 1000, df["Total Impulse"])
-
-        plt.title("Monte Carlo Regression Rate Importance")
-        plt.xlabel("Regression Rate (mm/s)")
-        plt.ylabel("Total Impulse (Ns)")
-
-        plt.show()
+        display_OF_correlation(df)
         
-    def plot_regressed(self):
-        df = self.characteristic_figures_dataframe
-
-        # Convert from m to mm
-        plt.hist(df["Length Regressed"] * 1000, hist_box_count(len(df)))
-
-        plt.title("Distribution of Ending Regression")
-        plt.xlabel("Length Regressed (mm)")
-
-        plt.show()
-    
-    #endregion
+    def plot_regression(self):
+        display_regression(self.characteristic_figures_dataframe, self.important_data)
 
     def plot_thrust_curves(self):
-        for df in self.important_data:
-            plt.plot(df.index, df["thrust"])
-        
-        plt.title("Thrust Curves")
-        plt.xlabel("Time (s)")
-        plt.ylabel("Thrust (N)")
-
-        plt.show()
+        # FIXME: not working - variable not found maybe
+        display_curves(self.important_data)
     
     def plot_mass_movement(self):
-        for df in self.important_data:
-            plt.plot(df.index, df["propellant_CG"])
-        
-        plt.title("CG Curves")
-        plt.xlabel("Time (s)")
-        plt.ylabel("Distance (m)")
-
-        plt.show()
+        display_CG_movement(self.important_data)
     
+    #endregion
 
 def run_analysis(count=100, folder="Analysis/MotorMonteCarlo-Temporary"):
     m = MonteCarloMotor()
@@ -203,24 +111,24 @@ def run_analysis(count=100, folder="Analysis/MotorMonteCarlo-Temporary"):
 
     return m
 
-    
+
 
 def display_analysis(motorSim: MonteCarloMotor):
+    # More analysis available in opticalAnalysisMotorMonteCarlo
     motorSim.plot_overview()
     motorSim.plot_efficiency()
     motorSim.plot_average_thrust()
     motorSim.plot_thrust_curves()
 
-    motorSim.plot_cstar_impulse_correlation()
+    motorSim.plot_cstar_importance()
     motorSim.plot_OF_correlation()
-    motorSim.plot_regression_correlation()
-    motorSim.plot_regressed()
+    motorSim.plot_regression()
 
 
 
 # FIXME: debug the NaN values that occasionally come up
 if __name__ == "__main__":
-    m = run_analysis(100, "Analysis/MotorMonteCarlo60cm-Temporary")
+    m = run_analysis(100, "Analysis/MotorMonteCarloLowerCombustion-Temporary")
 
     display_analysis(m)
 

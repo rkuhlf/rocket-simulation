@@ -2,6 +2,7 @@
 # Simulate the properties of the fuel grain
 # Mostly covers regression calculations
 
+from email.mime import base
 from random import choice
 from typing import Callable
 import numpy as np
@@ -24,6 +25,12 @@ def power(leading: float, exponent: float) -> Callable:
 
     return inner
 
+def diameter_scaled(func: Callable, base_diameter: float, exponent=-0.2):
+    def inner(grain):
+        return func(grain) * (grain.port_diameter / base_diameter) ** exponent
+
+    return inner
+
 
 # https://classroom.google.com/u/0/c/MzgwNjcyNDIwMDg3/m/NDA0NTQyMjUyODI4/details
 # Notice that n is even less than 0.5, which means that your burn will end fuel-rich with annular
@@ -35,14 +42,22 @@ regression_rate_ABS_nitrous_constant = constant(0.0007)
 marxman_whitman_ABS_nitrous = power(2.623e-5, 0.664)
 
 # All of these seem equally likely to be the most correct
-power_ABS_nitrous_functions = [marxman_whitman_ABS_nitrous, power(3.8e-5, 0.5), power(2.1e-5, 0.73), power(1.55e-5, 0.76), power(1.18e-5, 0.799)]
+# It is not super accurate to scale from the initial diameter by an increasing diameter. That is just how it works atm
+power_ABS_nitrous_functions = [diameter_scaled(marxman_whitman_ABS_nitrous, 0.0254), 
+    diameter_scaled(power(3.8e-5, 0.5), 0.01524), 
+    diameter_scaled(power(2.1e-5, 0.73), 0.0127), 
+    diameter_scaled(power(1.55e-5, 0.76), 0.0254), 
+    # I cannot even figure out the source for this, so idk the ID
+    diameter_scaled(power(1.18e-5, 0.799), 0.05)]
 
 # This is not great still, because the effect will be most intense at the start and wear off. I can probably figure out an okay approximation from looking at it TODO
-mcKnight_STSW_modifier = create_multiplication_modifier(2.1)
+# mcKnight_STSW_modifier = create_multiplication_modifier(2.1)
+# That is too much of a multiplier because they were only burning for a little and we are burning the entire complexity away.
+mcKnight_STSW_modifier = create_multiplication_modifier(1.7)
 # I quite simply do not believe that it would be this effective. We are using fewer tpi anyways
-kuhlman_STSW_modifier = create_multiplication_modifier(1.5)
+flower_swirl_modifier = create_multiplication_modifier(1.3)
 
-star_swirl_modifiers = [mcKnight_STSW_modifier, kuhlman_STSW_modifier]
+star_swirl_modifiers = [mcKnight_STSW_modifier, flower_swirl_modifier]
 
 
 def whitmore_regression_model(grain: "Grain"):
