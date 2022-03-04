@@ -7,7 +7,7 @@ import orhelper
 from orhelper import FlightDataType
 
 
-from net.sf.openrocket import document # type: ignore
+# from net.sf.openrocket import document # type: ignore
 
 
 from Helpers.data import load_environment_variable
@@ -21,7 +21,7 @@ def new_or_instance():
     import javaInitialization
     return orhelper.OpenRocketInstance(jar_path=OR_JAR_PATH)
 
-def most_updated_sim(orhelper) -> document.Simulation:
+def most_updated_sim(orhelper):
     doc = orhelper.load_doc(CURRENT_SIMULATION)
     sim = getSimulationByName(doc, 'Custom CG; Regular Wind')
 
@@ -47,10 +47,10 @@ def get_randomized_sim(orhelper):
     return sim
 
 
-def getSimulationNames(document: document.OpenRocketDocument):
+def getSimulationNames(document):
     print([sim.getName() for sim in document.getSimulations()])
 
-def getSimulationByName(document: document.OpenRocketDocument, name: str):
+def getSimulationByName(document, name: str):
     """Accepts openrocket document; returns simulation with the given name"""
 
     for sim in document.getSimulations():
@@ -60,13 +60,13 @@ def getSimulationByName(document: document.OpenRocketDocument, name: str):
 
     return None
 
-def apogee(sim: document.Simulation):
+def apogee(sim):
     return sim.getSimulatedData().getMaxAltitude()
 
 
 
 # FIXME: this should really be a part of the Logger rewrite
-def graph_vertical(orh: orhelper.Helper, sim: document.Simulation):
+def graph_vertical(orh: orhelper.Helper, sim):
     data = orh.get_timeseries(sim, [FlightDataType.TYPE_TIME, FlightDataType.TYPE_ALTITUDE, FlightDataType.TYPE_VELOCITY_Z])
 
     fig, ax1 = plt.subplots()
@@ -86,7 +86,7 @@ def graph_vertical(orh: orhelper.Helper, sim: document.Simulation):
     ax1.grid(True)
     plt.show()
 
-def graph_stability(orh: orhelper.Helper, sim: document.Simulation):
+def graph_stability(orh: orhelper.Helper, sim):
     cp = FlightDataType.TYPE_CP_LOCATION
     cg = FlightDataType.TYPE_CG_LOCATION
     stability = FlightDataType.TYPE_STABILITY
@@ -114,7 +114,7 @@ def graph_stability(orh: orhelper.Helper, sim: document.Simulation):
     plt.tight_layout()
     plt.show()
 
-def graph_angles(orh: orhelper.Helper, sim: document.Simulation):
+def graph_angles(orh: orhelper.Helper, sim):
     phi = FlightDataType.TYPE_ORIENTATION_PHI
     theta = FlightDataType.TYPE_ORIENTATION_THETA
     aoa = FlightDataType.TYPE_AOA
@@ -145,7 +145,7 @@ def graph_angles(orh: orhelper.Helper, sim: document.Simulation):
 
 
 
-def graph_destabilization(orh: orhelper.Helper, sim: document.Simulation):
+def graph_destabilization(orh: orhelper.Helper, sim):
     phi = FlightDataType.TYPE_ORIENTATION_PHI
     theta = FlightDataType.TYPE_ORIENTATION_THETA
     aoa = FlightDataType.TYPE_AOA

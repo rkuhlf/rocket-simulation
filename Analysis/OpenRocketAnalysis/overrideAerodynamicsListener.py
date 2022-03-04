@@ -10,7 +10,6 @@
 import pandas as pd
 import numpy as np
 from orhelper import AbstractSimulationListener
-from torch import double
 from Helpers.data import interpolated_lookup
 from net.sf.openrocket.document import Simulation # type: ignore
 
@@ -25,7 +24,7 @@ from net.sf.openrocket.util import Coordinate, PolyInterpolator # type: ignore
 
 
 class OverrideAerodynamicsConstant(AbstractSimulationListener):
-    def __init__(self, sim: Simulation, CD: double, CP: double, override_CD=True, override_CP=True):
+    def __init__(self, sim: Simulation, CD: float, CP: float, override_CD=True, override_CP=True):
         self.sim = sim
         self.CD = CD
         self.CP = CP
@@ -84,7 +83,7 @@ class OverrideAerodynamicsConstant(AbstractSimulationListener):
 
         return forces
 
-    def calculateAxialDrag(self, conditions: FlightConditions, cd: double): 
+    def calculateAxialDrag(self, conditions: FlightConditions, cd: float): 
         aoa = min(max(conditions.getAOA(), 0.0), np.pi)
 
         if (aoa > 1.5707963267948966):

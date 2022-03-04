@@ -1,8 +1,11 @@
 import jpype
 
+from Helpers.data import load_environment_variable
+
 def jvm_instance():
+    # TODO: Understan this, then make it better
     jvm_path = jpype.getDefaultJVMPath()
-    jar_path = r"C:\Users\riley\AppData\Local\OpenRocket\app\OpenRocket-15.03.jar"
+    jar_path = load_environment_variable("OR_JAR_PATH")
 
     jpype.startJVM(jvm_path, "-ea", f"-Djava.class.path={jar_path}")
 
