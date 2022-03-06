@@ -101,7 +101,8 @@ def get_randomized_sim() -> MotorSimulation:
     m.ox_tank.initial_temperature = m.ox_tank.temperature
     # I think we probably get most of the way filled quite often, but sometimes we do not
     # They are looking at a load cell to see if we get completely filled
-    m.ox_tank.ox_mass *= min(1, gauss(0.93, 0.06))
+    # Last year they actually overfilled
+    m.ox_tank.ox_mass *= gauss(0.99, 0.01)
 
     # Commented out because I do not believe this will happen. If it does, we can just borrow someone else's oxidizer
     # if random() < 0.05:
