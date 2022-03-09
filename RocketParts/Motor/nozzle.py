@@ -289,6 +289,7 @@ class Nozzle(PresetObject):
         # Both are  overriden by a CEA lookup in the actual motor simulation
         self.isentropic_exponent = 1.3
         self.exit_pressure = 100000 # Pascals. Assumes the nozzle is optimized for sea level
+        self.efficiency = 1
 
         self.overexpanded = False
 
@@ -340,7 +341,7 @@ class Nozzle(PresetObject):
         second_coefficient = (2 / isentropic_more) ** (isentropic_more / isentropic_less)
         third_coefficient = 1 - (self.exit_pressure / chamber_pressure) ** (isentropic_less / self.isentropic_exponent)
 
-        momentum_component = (first_coefficient * second_coefficient * third_coefficient) ** (1 / 2)
+        momentum_component = self.efficiency * (first_coefficient * second_coefficient * third_coefficient) ** (1 / 2)
 
         pressure_difference_component = (self.exit_pressure - atmospheric_pressure) / chamber_pressure * self.area_ratio
 
