@@ -20,17 +20,17 @@ if __name__ == '__main__':
 
     with new_or_instance() as instance:
         orh = Helper(instance)
-        motors = create_motors_from_directory("./Analysis/MotorMonteCarloCorrectCGs/", 10)
+        motors = create_motors_from_directory("./Analysis/MotorMonteCarloAccurateLoadDistribution/")
 
         df = pd.read_csv("./Data/Input/aerodynamicQualities.csv")
-        m = MonteCarloFlightRandomMotorOR(orh, motors, drag_dataframe=df, dry_mass=50.2, dry_CG=3.404, ox_tank_front=1.600)
+        m = MonteCarloFlightRandomMotorOR(orh, motors, drag_dataframe=df, dry_mass=48.191, dry_CG=3.36, ox_tank_front=0.61)
 
         
-        m.simulate_randomized(5)
+        m.simulate_randomized(100)
 
     m.print_characteristic_figures()
 
-    root_folder = "./Analysis/ShortenedRocketFlight"
+    root_folder = "./Analysis/LighterRocketFlight"
     m.save_important_data(f"{root_folder}/MonteCarloFlightSimulations/")
 
     m.save_characteristic_figures(f"{root_folder}/MonteCarloFlightData/output.csv")
