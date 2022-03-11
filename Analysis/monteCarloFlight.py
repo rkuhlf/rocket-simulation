@@ -36,7 +36,13 @@ class MonteCarloFlight(MonteCarlo):
 
     def finish_simulating(self):
         super().finish_simulating()
-        # TODO: create count of tumbling rockets    
+        # TODO: create count of tumbling rockets
+
+    
+    # TODO: Convert the other monte carlo analysis to be included in something like this
+    # TODO: write this. And a method to read in from a path
+    def add_characteristic_figures(self, new_characteristic_figures):
+        pass
 
     
 
@@ -76,14 +82,14 @@ class MonteCarloFlight(MonteCarlo):
     def plot_max_velocity(self):
         df = self.characteristic_figures_dataframe
 
-        plt.hist(df[["Max Velocity"]].transpose(), hist_box_count(len(df.index)), density=True, histtype='bar')
+        plt.hist(df[["Max Velocity"]], hist_box_count(len(df)), histtype='bar')
 
         plt.title("Range of Max Velocities")
         plt.xlabel("Max Velocity (m/s)")
         plt.ylabel("Frequency")
 
         plt.show()
-    
+            
     def lateral_velocity(self):
         df = self.characteristic_figures_dataframe
 
@@ -98,7 +104,7 @@ class MonteCarloFlight(MonteCarlo):
     def plot_max_mach(self):
         df = self.characteristic_figures_dataframe
 
-        plt.hist(df[["Max Mach"]].transpose(), hist_box_count(len(df.index)), density=True, histtype='bar')
+        plt.hist(df[["Max Mach"]], hist_box_count(len(df)), histtype='bar')
 
         plt.title("Range of Max Mach Numbers")
         plt.xlabel("Max Mach ()")

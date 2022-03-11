@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-from Helpers.data import hist_box_count, plot_all_sims
+from Helpers.data import hist_box_count, plot_all_sims, read_sims
 
 
 def burn_time(df):
@@ -99,11 +99,15 @@ def display_stabilities(sims, caliber=0.1778):
 
 
 if __name__ == "__main__":
-    df = pd.read_csv("./Analysis/Testing-Temporary/MonteCarloFlightSimulations/1.csv")
+    # df = pd.read_csv("./Analysis/Testing-Temporary/MonteCarloFlightSimulations/1.csv")
 
-    display_flight_stability(df)
+    # display_flight_stability(df)
 
-    # sims = read_sims("./Analysis/Testing-Temporary/MonteCarloFlightSimulations")
+    # sims = read_sims("./Analysis/Lighter/MonteCarloFlightSimulations")
     # display_stabilities(sims)
+
+    df = pd.read_csv("./Analysis/LighterRocketFlight/MonteCarloFlightData/output.csv")
+
+    display_deployment_distribution(df)
 
     pass
