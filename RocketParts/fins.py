@@ -15,6 +15,13 @@ def trapezoidal_area(fins: "Fins"):
     return (fins.root + fins.tip) / 2 * fins.height
 
 
+def basic_fin_density_closure(density=2700):
+    def basic_fin_density(fins: "Fins"):
+        return fins.area * fins.count * fins.thickness * density
+    
+    return basic_fin_density
+
+
 # TODO: write an abstract class with a basic init defined for the Fins
 
 class Fins(MassObject):
@@ -22,33 +29,38 @@ class Fins(MassObject):
         super().__init__(**kwargs)
         # TODO: convert everything to inches
         # CR	=	fin root chord
-        self.root = 15
+        self.root = 0.381
         # CT	=	fin tip chord
-        self.tip = 5
+        self.tip = 0.127
         # S	=	fin semispan
-        self.height = 5
+        self.height = 0.127
         
-        self.sweep = 10
+        self.sweep = 0.254
 
-        self.thickness = 3/8
+        self.thickness = 0.009525
 
         # N	=	number of fins
         self.count = 4
 
         # Arbitrarily set to 2 kg
-        self.mass_function = constant(2)
+        self.mass_function = basic_fin_density_closure()
         # Area function for a single fin
         self.area_function = trapezoidal_area
 
-        self.layers = 1
-
         super().overwrite_defaults(**kwargs)
     
+    @property
     def area(self):
         return self.area_function(self)
 
+    @property
     def mass(self):
         return self.mass_function(self)
+    
+    @mass.setter
+    def mass(self, m):
+        # You cannot set the mass
+        pass
 
 
 
