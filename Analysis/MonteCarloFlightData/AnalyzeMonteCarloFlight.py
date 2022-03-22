@@ -3,15 +3,17 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-from Helpers.data import hist_box_count, plot_all_sims
+from Helpers.data import hist_box_count, plot_all_sims, read_sims
 
+def failed_rockets(df, apogee_cutoff=2500):
+    return df[df["Apogee"] < apogee_cutoff]
 
 def burn_time(df):
     burning = df[df["thrust"] > 1]
 
     return max(burning["time"])
 
-# TODO: if I could just decouple the visulation from the simulation of the monte carlo class, I would not have to rewrite all of this stuff
+# TODO: if I could just decouple the visualization from the simulation of the monte carlo class, I would not have to rewrite all of this stuff
 
 def display_deployment_distribution(df):
     plt.hist(df["Lateral Velocity"], hist_box_count(len(df.index)), histtype='bar')
@@ -19,6 +21,24 @@ def display_deployment_distribution(df):
     plt.title("Range of Lateral Velocities")
     plt.xlabel("Lateral Velocity (m/s)")
     plt.ylabel("Frequency")
+
+    plt.show()
+
+def display_max_mach_distribution(df):
+    plt.hist(df["Max Mach"], hist_box_count(len(df.index)), histtype='bar')
+
+    plt.title("Range of Mach Number")
+    plt.xlabel("Mach ()")
+    plt.ylabel("Frequency")
+
+    plt.show()
+
+def display_AOA_velocities(df):
+    plt.scatter(df["Mean Wind Speed"], df["Max Velocity"])
+
+    plt.title("AOA Determining Velocities")
+    plt.xlabel("Wind Speed (m/s)")
+    plt.ylabel("Max Speed (m/s)")
 
     plt.show()
 
@@ -99,11 +119,20 @@ def display_stabilities(sims, caliber=0.1778):
 
 
 if __name__ == "__main__":
-    df = pd.read_csv("./Analysis/Testing-Temporary/MonteCarloFlightSimulations/1.csv")
+    # df = pd.read_csv("./Analysis/ShortenedRocketFlight4/MonteCarloFlightSimulations/1.csv")
 
-    display_flight_stability(df)
+    # display_flight_stability(df)
 
-    # sims = read_sims("./Analysis/Testing-Temporary/MonteCarloFlightSimulations")
+    # sims = read_sims("./Analysis/ShortenedRocketFlight4/MonteCarloFlightSimulations")
     # display_stabilities(sims)
+
+
+    df = pd.read_csv("./Analysis/ShortenedRocketFlight4/MonteCarloFlightData/output.csv")
+
+    df = failed_rockets(df)
+    # display_drift_distribution(df)
+    # display_total_impulse_effect(df)
+    display_AOA_velocities(df)
+
 
     pass

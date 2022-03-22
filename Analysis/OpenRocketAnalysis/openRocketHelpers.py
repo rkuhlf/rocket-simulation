@@ -32,7 +32,9 @@ def get_randomized_sim(orhelper):
     sim = getSimulationByName(doc, 'Custom CG; Regular Wind')
     opts = sim.getOptions()
 
-    opts.setWindSpeedAverage(gauss(15, 5))
+    # TODO: make a better wind speed override that varies with altitude
+    # This is a single data point from a wind table at ~30,000 ft in the air
+    opts.setWindSpeedAverage(gauss(12.2, 6.1))
     opts.setISAAtmosphere(gauss(0, 1) < 0)
     opts.setWindTurbulenceIntensity(gauss(0.1, 0.05))
 

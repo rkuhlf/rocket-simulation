@@ -109,8 +109,12 @@ class OverrideAerodynamicsDataFrame(OverrideAerodynamicsConstant):
         super().__init__(sim, 0, 0, override_CD=override_CD, override_CP=override_CP)
     
     def postAerodynamicCalculation(self, status: SimulationStatus, forces: AerodynamicForces):
-        mach = self.flight_conditions.getMach()
-        self.CD = interpolated_lookup(self.data_frame, "Mach", mach, "CD")
-        # self.CP = 15
+        try:
+            mach = self.flight_conditions.getMach()
+            # This line is throwing the error
+            self.CD = interpolated_lookup(self.data_frame, "Mach", mach, "CD", safe=True)
+            # self.CP = 15
 
-        return super().postAerodynamicCalculation(status, forces)
+            return super().postAerodynamicCalculation(status, forces)
+        except IndexError as e:
+            print("Error in aerodynamics listener")

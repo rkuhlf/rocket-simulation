@@ -90,6 +90,8 @@ def create_linearly_interpolated_CG(CG_data_file, thrust_data_file, output_path,
     save_root_xml(root, output_path)
 
 def convert_full_csv_to_rse(csv_path, output_path, use_every=30, **kwargs):
+    """Pass optional name, length, and diameter parameters
+    In mm"""
     motor_data = pd.read_csv(csv_path)
 
     # Convert from kg to g for RSE
@@ -129,8 +131,8 @@ def convert_csv_folder_to_rse(csv_folder_path, output_folder_path):
 if __name__ == "__main__":
     # create_linearly_interpolated_CG("Data/Input/massCGLookup.csv", "Data/Input/ThrustCurves/currentGoddard.csv", "Data/Input/finleyThrust.rse")
 
-    # convert_full_csv_to_rse("Data/Output/motorOutput.csv", "Data/Input/newMotor.rse")
-    convert_csv_folder_to_rse("Analysis/MotorMonteCarlo2-Temporary", "Data/Input/ThrustCurves/RSEMotors-Temporary")
+    convert_full_csv_to_rse("Data/Output/motorOutput.csv", "Data/Input/newMotor.rse", length=3851)
+    # convert_csv_folder_to_rse("Analysis/MotorMonteCarlo2-Temporary", "Data/Input/ThrustCurves/RSEMotors-Temporary")
 
     pass
 

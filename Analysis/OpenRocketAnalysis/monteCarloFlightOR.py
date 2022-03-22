@@ -15,6 +15,8 @@ from orhelper import Helper
 from net.sf.openrocket import document # type: ignore
 from RocketParts.motor import Motor
 import pandas as pd
+from net.sf.openrocket.simulation.exception import MotorIgnitionException # type: ignore
+
 
 class MonteCarloFlightOR(MonteCarloFlight):
     def __init__(self, orhelper: Helper, sims=[], drag_dataframe=None):
@@ -88,13 +90,22 @@ class MonteCarloFlightOR(MonteCarloFlight):
 
         for mach in mach_numbers:
             # Convert inches to meters
-            CPs.append(interpolated_lookup(self.drag_dataframe, "Mach", mach, "CP") * 0.0254)
+            CPs.append(interpolated_lookup(self.drag_dataframe, "Mach", mach, "CP", safe=True) * 0.0254)
         
         return CPs
 
     def finish_simulating(self):
-        super().finish_simulating()
         # TODO: create count of tumbling rockets
+        super().finish_simulating()
+    
+    def handle_failed_sim(self, sim, e):
+        super().handle_failed_sim(sim, e)
+
+        if isinstance(e, MotorIgnitionException):
+            # You may want to try restarting OpenRocket to make sure that your motors are actually defined.
+            # The debugger will also tell you which motors were loaded
+            print("It appears that the OpenRocket simulation does not have a motor. I think anything that ignites at t=0 should work with the rest of the code. Simply add a motor to the default configuration in the file.")
+        
 
 
 

@@ -10,8 +10,6 @@ from Helpers.data import interpolated_lookup
 
 from net.sf.openrocket.simulation import SimulationStatus # type: ignore
 # from net.sf.openrocket.masscalc import RigidBody
-from net.sf.openrocket.database.motor import ThrustCurveMotorSetDatabase
-from net.sf.openrocket.rocketcomponent import FlightConfiguration, MotorMount
 
 
 class OverrideThrustLookup(AbstractSimulationListener):
@@ -24,7 +22,13 @@ class OverrideThrustLookup(AbstractSimulationListener):
         self.motor.environment.time = simulationStatus.getSimulationTime()
         # ! TODO: The CG is very important too. I need that data from the motor sim
         # Pass the altitude in here
-        return self.motor.calculate_thrust(simulationStatus.getRocketPosition().z)
+        try:
+            ans = self.motor.calculate_thrust(simulationStatus.getRocketPosition().z)
+        except IndexError as e:
+            print("Error in thrust lookup")
+            ans = False
+
+        return ans
     
     # def postMassCalculation(self, status: SimulationStatus, mass_data: RigidBody):
     #     pass

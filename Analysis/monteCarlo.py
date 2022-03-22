@@ -52,18 +52,20 @@ class MonteCarlo:
             except AttributeError as e:
                 print(f"Presumably because you are using somebody else's simulation class (like OR), this error was thrown {e}. It is being ignored.")
 
-            try:
-                # Use pass-by-reference
-                self.run_simulation(sim)
-                self.save_simulation(sim)
-            except Exception as e:
-                self.handle_failed_sim(sim, e)
+            # try:
+            # Use pass-by-reference
+            self.run_simulation(sim)
+            self.save_simulation(sim)
+            # except Exception as e:
+            #     self.handle_failed_sim(sim, e)
 
         self.finish_simulating()
 
     def handle_failed_sim(self, sim, e):
         self.failed_sims.append(sim)
         print(f"Simulation threw error {e}. Failed sims is now {len(self.failed_sims)}")
+
+        
 
     def initialize_simulation(self) -> Simulation:
         raise NotImplementedError("This function must be overriden by children")
