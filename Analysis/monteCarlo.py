@@ -23,11 +23,14 @@ def create_motors_from_directory(path, max_count=-1):
     motors = []
 
     for filename in filenames[:max_count]:
-        print(f"Reading file {filename}")
-        motor = Motor()
-        motor.set_thrust_data_path(os.path.join(path, filename))
+        try:
+            print(f"Reading file {filename}")
+            motor = Motor()
+            motor.set_thrust_data_path(os.path.join(path, filename))
 
-        motors.append(motor)
+            motors.append(motor)
+        except Exception as e:
+            print("You probably are including an output.csv file in this directory. Skipping over the non-working file.")
         
     return motors
 

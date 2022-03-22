@@ -34,9 +34,9 @@ class DataType(Enum):
     FUNCTION_INJECTOR = auto()
     FUNCTION_MACH_ALPHA = auto()
 
+# Note that all of the paths provided must use forward slashes rather than backslashes.
 environment_variable_error_lookup = {
     "OR_JAR_PATH": r"In order to run the orhelper library, you must have open rocket installed. Once you have installed it, OR needs to know where it is installed at, so you specify the OR_JAR_PATH in the .env file at the root of the project. It should look something like C:\Users\<username>\AppData\Local\OpenRocket\app\OpenRocket-15.03.jar",
-
     "JVM_PATH": r"Used to generate the stubs. I think it runs its own separate instance of java from this jvm. idk. Originally I was using C:\Program Files\Java\jdk1.8.0_251\jre\bin\server\jvm.dll"
 }
 

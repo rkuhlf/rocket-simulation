@@ -93,13 +93,21 @@ def convert_to_calibers(sims, caliber=0.1778):
 
 
 def display_flight_stability(sim, caliber=0.1778):
-    sims = convert_to_calibers([sim], caliber)[0]
+    sim = convert_to_calibers([sim], caliber)[0]
 
-    plt.plot(sim["time"], sim["CP"])
-    plt.plot(sim["time"], sim["CG"])
+    plt.plot(sim["time"], sim["CP"], label="CP")
+    plt.plot(sim["time"], sim["CG"], label="CG")
 
-    plt.plot(sim["time"], sim["RASAero CP"])
-    plt.plot(sim["time"], sim["custom CG"])
+    plt.plot(sim["time"], sim["RASAero CP"], label="RASAero CP")
+    plt.plot(sim["time"], sim["custom CG"], label="Custom CG")
+
+    plt.title("Stability Predictions")
+    plt.ylabel("Distance from Nose Tip (cal)")
+    plt.xlabel("Time (s)")
+    plt.xlim(-1, 31)
+
+
+    plt.legend()
 
     plt.show()
 
@@ -119,14 +127,6 @@ def display_stabilities(sims, caliber=0.1778):
 
 
 if __name__ == "__main__":
-    # df = pd.read_csv("./Analysis/ShortenedRocketFlight4/MonteCarloFlightSimulations/1.csv")
-
-    # display_flight_stability(df)
-
-    # sims = read_sims("./Analysis/ShortenedRocketFlight4/MonteCarloFlightSimulations")
-    # display_stabilities(sims)
-
-
     df = pd.read_csv("./Analysis/ShortenedRocketFlight4/MonteCarloFlightData/output.csv")
 
     df = failed_rockets(df)
@@ -134,5 +134,16 @@ if __name__ == "__main__":
     # display_total_impulse_effect(df)
     display_AOA_velocities(df)
 
+    for i in range(100):
+        df = pd.read_csv(f"./Analysis/LighterRocketFlight/MonteCarloFlightSimulations/{i + 1}.csv")
+
+        display_flight_stability(df)
+
+    # sims = read_sims("./Analysis/Lighter/MonteCarloFlightSimulations")
+    # display_stabilities(sims)
+
+    # df = pd.read_csv("./Analysis/LighterRocketFlight/MonteCarloFlightData/output.csv")
+
+    # display_deployment_distribution(df)
 
     pass

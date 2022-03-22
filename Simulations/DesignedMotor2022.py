@@ -101,7 +101,8 @@ def get_randomized_sim() -> MotorSimulation:
     m.ox_tank.initial_temperature = m.ox_tank.temperature
     # I think we probably get most of the way filled quite often, but sometimes we do not
     # They are looking at a load cell to see if we get completely filled
-    m.ox_tank.ox_mass *= min(1, gauss(0.93, 0.06))
+    # Last year they actually overfilled
+    m.ox_tank.ox_mass *= gauss(0.99, 0.02)
 
     # Commented out because I do not believe this will happen. If it does, we can just borrow someone else's oxidizer
     # if random() < 0.05:
@@ -120,8 +121,8 @@ def get_randomized_sim() -> MotorSimulation:
     # --- Combustion Chamber ---
     m.cstar_efficiency = min(1, gauss(0.85, 0.04))
     # These are pretty set in stone, but there might be some variation
-    m.combustion_chamber.precombustion_chamber.length *= gauss(1, 0.01)
-    m.combustion_chamber.postcombustion_chamber.length *= gauss(1, 0.01)
+    m.combustion_chamber.precombustion_chamber.length *= gauss(1, 0.02)
+    m.combustion_chamber.postcombustion_chamber.length *= gauss(1, 0.02)
     # I really do not know what we are going to end up at, but I am assuming we can get it accurate, so this does not have much variation from what I think it currently is
     m.combustion_chamber.fuel_grain.geometry.length *= gauss(1, 0.005)
 
@@ -129,17 +130,18 @@ def get_randomized_sim() -> MotorSimulation:
     f: ABSGrain = m.fuel_grain
     # Different varieties have different values
     f.density *= gauss(1, 0.05)
-    # f.port_radius *= gauss(1, 0.002)
     f.initial_mass = f.fuel_mass
-    # f.initial_radius = f.port_radius
+
     f.regression_rate_function = get_random_adjusted_ABS_regression_function()
     
+    # TODO: Create a function that interpolates the geometry between the swirled shape and a regular cylinder.
     f.geometry.area_function = multiply_areas(f.geometry.area_function, gauss(0.95, 0.03), gauss(1, 0.005), gauss(1, 0.001))
 
     # --- Nozzle ---
     # This one is not really a randomization because that would require running CEA again every time, and I can't really be bothered to wait that long
     # This one is still included because it will change the mass flow rates and the pressures
     m.nozzle.throat_radius *= gauss(1, 0.001)
+    m.nozzle.efficiency *= min(gauss(0.99, 0.005), 1)
 
     # TODO: randomize the nozzle performance multiplier
     

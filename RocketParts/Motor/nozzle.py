@@ -268,67 +268,6 @@ def find_nozzle_length(converging_angle, entrance_diameter, throat_diameter, div
 
     return entrance_distance + exit_distance * conical_proportion
 
-@diametered(radius_name="bolt_radius", diameter_name="bolt_diameter")
-class RetentionRing(MassObject):
-    def __init__(self, **kwargs):
-        self.bolt_count = 6
-        self.bolt_radius = 0.00635 / 2
-        self.target_safety_factor = 1.5
-        self.bolt_shear_strength = 900_000_000 * 0.6 # Pa
-        self.retention_ring_shear_strength = 900_000_000 * 0.6 # Pa
-        self.retention_ring_compressive_strength = 250e6 # Pa
-        # Width of the retention ring
-        self.bolt_length_into_ring = 0.0127 * 3/4 # m; totally made up
-        # The shortest length between the top of the retention ring and the middle of the top bolt
-        self.bolt_minor_thickness = 0.0254
-
-        # Force variables that should change frequently through a simulation
-        # # https://workflowy.com/s/nozzle-retention/R3QmGFlhHrfeqdaw
-        # shear load = abs(inner weight + base drag + internal pressure force - thrust - external weight - external drag)
-        self.internal_load = 50_000 # N; all of the forces pushing down on the inside of the nozzle
-        self.external_load = 600 # N; all of the forces pushing down on the outside of the shell
-
-        self.overwrite_defaults(**kwargs)
-    
-    @property
-    def bolt_area(self):
-        return np.pi * self.bolt_radius ** 2
-
-    @property
-    def total_bolt_area(self):
-        return self.bolt_count * self.bolt_area
-    
-    @property
-    def bolt_shear_safety_factor(self):
-        experienced_pressure = self.internal_load / self.total_bolt_area
-
-        return self.bolt_shear_strength / experienced_pressure
-    
-    @property
-    def tear_out_safety_factor(self):
-        # It has to tear out on both sides of the bolt, and on the end
-        individual_tear_out_area = self.bolt_length_into_ring * self.bolt_minor_thickness * 2
-        individual_tear_out_area += self.bolt_diameter * self.bolt_minor_thickness
-        experienced_pressure = self.internal_load / (individual_tear_out_area * self.bolt_count)
-
-        return self.retention_ring_shear_strength / experienced_pressure
-    
-    @property
-    def bearing_safety_factor(self):
-        # It has to tear out on both sides of the bolt, and on the end
-        individual_bearing_area = self.bolt_length_into_ring * self.bolt_diameter
-        experienced_pressure = self.internal_load / (individual_bearing_area * self.bolt_count)
-
-        return self.retention_ring_compressive_strength / experienced_pressure
-
-    def check_safety_factor(self):
-        print(f"Shear: {self.bolt_shear_safety_factor}")
-        print(f"Tear Out: {self.tear_out_safety_factor}")
-        print(f"Bearing: {self.bearing_safety_factor}")
-
-# Tear out/bearing for the outside coupler piece will eventually be an issue with drag attempting to accelerate the outer shell more than accelerates the entire rocket 
-
-
 # endregion
 
 class Nozzle(PresetObject):
@@ -350,6 +289,7 @@ class Nozzle(PresetObject):
         # Both are  overriden by a CEA lookup in the actual motor simulation
         self.isentropic_exponent = 1.3
         self.exit_pressure = 100000 # Pascals. Assumes the nozzle is optimized for sea level
+        self.efficiency = 1
 
         self.overexpanded = False
 
@@ -401,7 +341,7 @@ class Nozzle(PresetObject):
         second_coefficient = (2 / isentropic_more) ** (isentropic_more / isentropic_less)
         third_coefficient = 1 - (self.exit_pressure / chamber_pressure) ** (isentropic_less / self.isentropic_exponent)
 
-        momentum_component = (first_coefficient * second_coefficient * third_coefficient) ** (1 / 2)
+        momentum_component = self.efficiency * (first_coefficient * second_coefficient * third_coefficient) ** (1 / 2)
 
         pressure_difference_component = (self.exit_pressure - atmospheric_pressure) / chamber_pressure * self.area_ratio
 
@@ -446,18 +386,5 @@ if __name__ == "__main__":
 
     # plt.plot(inputs, outputs)
     # plt.show()
-
-    # Total weight is based on the wet mass. It will actually be less. For a more complex calculation, it would have to be frame-by-frame # TODO: write code that does this in the Analysis folder
-    # nozzle base drag is based on CD for base=0.25 out of CD total = 0.85, which is about 30%, then I multiplied it by the 2000 N at max drag
-    # The pressure is pi*(0.1651/2)^2 * 2500000
-    # Tensile strength of steel alloy screw is 900000000 Pa (according to McMasterCarr), but I will use 60% for shear strength. 900_000_000 * 0.6
-    # Tensile strength of aluminum is much worse than steel
-    # I am going to look at a few diameters, but I think we are in the range of 3/8 inch
-    # Highly sensitive to bolt diameter: 8 mm gives 30, 10 mm gives 20, 12 mm gives 14
-    # Tanner said 620528156 Pa (90000 psi) was what he had been using for his bolts
-    # print(find_required_retention_bolts(120 * 9.81, 600, 53520, 620528156, 0.00635, safety_factor=1))
-    # only giving two for some reason
-    retention = RetentionRing()
-    retention.check_safety_factor()
 
     pass
