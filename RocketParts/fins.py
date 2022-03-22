@@ -73,7 +73,21 @@ class Fins(MassObject):
 
 
 # Convert all of these from inches to meters
+def layered_closure(layer_thickness, core_density, layer_density, layers):
+
+    def layered_mass(fins: Fins):
+        core_volume = fins.thickness * fins.area
+        layer_volume = layer_thickness * layers * fins.area
+
+        return fins.count * (core_volume * core_density + 2 * layer_volume * layer_density)
+    
+    return layered_mass
+
+
 def tip_to_tip_closure(layer_thickness, core_density, layer_density, layers):
+    # TODO: add in the mass of layers around the body of the rocket
+
+    base = layered_closure()
 
     def tip_to_tip_mass(fins: Fins):
         core_volume = fins.thickness * fins.area
@@ -94,5 +108,6 @@ basic_CF_layup = tip_to_tip_closure(layer_thickness=0.5e-3, core_density=58, lay
 
 if __name__ == "__main__":
     fins = Fins()
+    fins.mass_function = basic_CF_layup
 
     print("Fins have a mass of", fins.mass, "kg")
