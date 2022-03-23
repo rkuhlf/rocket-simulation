@@ -1,10 +1,7 @@
 # NOZZLE CLASS AND DESIGN
 # Script for the nozzle object and the equations that will let us CAD it
-# This may be too many responsibilities for one file
 
 import numpy as np
-
-
 
 from presetObject import PresetObject
 from Helpers.general import get_radius
@@ -76,14 +73,16 @@ class Nozzle(PresetObject):
         self.area_ratio = 4
         self.throat_temperature = 800 # Kelvin
 
-        # Both are  overriden by a CEA lookup in the actual motor simulation
+        # Isentropic exponent is overriden by a CEA lookup in the actual motor simulation
         self.isentropic_exponent = 1.3
+        # Exit pressure is overriden by a CEA lookup in the actual motor simulation
         self.exit_pressure = 100000 # Pascals. Assumes the nozzle is optimized for sea level
         self.efficiency = 1
 
         self.overexpanded = False
 
         super().overwrite_defaults(**kwargs)
+
 
     @property
     def throat_diameter(self):
@@ -113,7 +112,7 @@ class Nozzle(PresetObject):
 
             Notice that pressure can be in any units so long as they are all the same
         """
-        # FIXME: occasionally this gives a very negative value
+        # FIXME: occasionally this gives a very negative value. Not sure if this ever got fixed
 
 
         if chamber_pressure / atmospheric_pressure < 2:
@@ -136,9 +135,6 @@ class Nozzle(PresetObject):
         pressure_difference_component = (self.exit_pressure - atmospheric_pressure) / chamber_pressure * self.area_ratio
 
         return momentum_component + pressure_difference_component
-
-
-
 
 
 if __name__ == "__main__":

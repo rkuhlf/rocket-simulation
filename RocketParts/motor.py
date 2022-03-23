@@ -289,7 +289,7 @@ class CustomMotor(Motor):
         self.initial_mass = self.propellant_mass
 
     @property
-    def nozzle(self):
+    def nozzle(self) -> Nozzle:
         return self._nozzle
 
     @nozzle.setter

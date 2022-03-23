@@ -34,21 +34,24 @@ class MonteCarloMotor(MonteCarlo):
             "Used Specific Impulse": sim.used_specific_impulse,
             "Burn Time": sim.burn_time,
             "Average Thrust": sim.average_thrust,
+            "Average OF": m.average_OF,
+            "Average Regression": m.average_regression_rate,
+            "Length Regressed": m.fuel_grain.geometry.length_regressed,
             # Inputs also listed here so it is easier to determine which have the most influence
             "Combustion Efficiency": m.cstar_efficiency,
             "Launch Temperature": m.ox_tank.initial_temperature,
-            "Average OF": m.average_OF,
-            "Average Regression": m.average_regression_rate,
-            # "Discharge Coefficient": m.injector.discharge_coefficient,
-            "Length Regressed": m.fuel_grain.geometry.length_regressed,
         })
 
         data = sim.logger.get_dataframe()
 
-        # "thrust", "combustion_chamber.pressure", "ox_tank.pressure", "combustion_chamber.temperature", "ox_tank.temperature", "combustion_chamber.fuel_grain.port_diameter", "OF", "combustion_chamber.cstar", "specific_impulse", "fuel_flow", "ox_flow", "mass_flow", "mass_flow_out", "combustion_chamber.ideal_gas_constant", "propellant_mass", "propellant_CG"
-        data = data[["thrust", "OF", "ox_tank.pressure", "ox_tank.temperature", "combustion_chamber.temperature", "propellant_mass", "propellant_CG", "combustion_chamber.fuel_grain.geometry.length_regressed"]].copy()
+        try:
+            # "thrust", "combustion_chamber.pressure", "ox_tank.pressure", "combustion_chamber.temperature", "ox_tank.temperature", "combustion_chamber.fuel_grain.port_diameter", "OF", "combustion_chamber.cstar", "specific_impulse", "fuel_flow", "ox_flow", "mass_flow", "mass_flow_out", "combustion_chamber.ideal_gas_constant", "propellant_mass", "propellant_CG"
+            data = data[["thrust", "OF", "ox_tank.pressure", "ox_tank.temperature", "combustion_chamber.temperature", "propellant_mass", "propellant_CG", "combustion_chamber.fuel_grain.geometry.length_regressed", "nozzle.exit_pressure"]].copy()
 
-        self.important_data.append(data)
+            self.important_data.append(data)
+        except KeyError:
+            print("The data requested by the motor monte carlo was not saved by the motor. Try modifying the MotorLogger")
+            raise
 
     def handle_failed_sim(self, sim, e):
         if e is ValueError:
@@ -128,7 +131,7 @@ def display_analysis(motorSim: MonteCarloMotor):
 
 # FIXME: debug the NaN values that occasionally come up
 if __name__ == "__main__":
-    m = run_analysis(100, folder="Analysis/MotorMonteCarloAccurateLoadDistribution")
+    m = run_analysis(3, folder="Analysis/MotorMonteCarloAccurateLoadDistribution")
 
     display_analysis(m)
 
