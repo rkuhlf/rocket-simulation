@@ -3,9 +3,8 @@
 # Since all of the drag data on the rocket is determined by a CD lookup, it is not necessary to include a fin object, but I want one anyways just for some fin flutter stuff
 # Note that all of the masses on the fins are determined by a density per area
 
-# TODO: finish implementing this class
 
-
+import numpy as np
 
 from Helpers.general import constant
 from RocketParts.massObject import MassObject
@@ -27,7 +26,6 @@ def basic_fin_density_closure(density=2700):
 class Fins(MassObject):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # TODO: convert everything to inches
         # CR	=	fin root chord
         self.root = 0.381
         # CT	=	fin tip chord
@@ -84,16 +82,15 @@ def layered_closure(layer_thickness, core_density, layer_density, layers):
     return layered_mass
 
 
-def tip_to_tip_closure(layer_thickness, core_density, layer_density, layers):
+def tip_to_tip_closure(layer_thickness, core_density, layer_density, layers, outer_diameter):
     # TODO: add in the mass of layers around the body of the rocket
 
-    base = layered_closure()
+    base = layered_closure(layer_thickness, core_density, layer_density, layers)
 
     def tip_to_tip_mass(fins: Fins):
-        core_volume = fins.thickness * fins.area
-        layer_volume = layer_thickness * layers * fins.area
+        outer_volume = outer_diameter * np.pi * fins.root * layer_thickness * layers
 
-        return fins.count * (core_volume * core_density + 2 * layer_volume * layer_density)
+        return base(fins) + layer_density * outer_volume
     
     return tip_to_tip_mass
 
@@ -101,13 +98,16 @@ def tip_to_tip_closure(layer_thickness, core_density, layer_density, layers):
 # 5 mm thickness
 # 58 kg/m^3 for styrofoam core
 # 1750–2000 kg/m^3 for carbon fiber
-basic_CF_layup = tip_to_tip_closure(layer_thickness=0.5e-3, core_density=58, layer_density=1900, layers=4)
+# 7 in for OD
+basic_CF_layup = tip_to_tip_closure(layer_thickness=0.6e-3, core_density=58, layer_density=1900, layers=4, outer_diameter=0.17907)
 
 
+# Extremely sensitive to the thickness of the layers
 
 
 if __name__ == "__main__":
     fins = Fins()
+    fins.mass_function = layered_closure(layer_thickness=0.6e-3, core_density=58, layer_density=1900, layers=4)
     fins.mass_function = basic_CF_layup
 
     print("Fins have a mass of", fins.mass, "kg")
