@@ -131,7 +131,7 @@ def convert_csv_folder_to_rse(csv_folder_path, output_folder_path):
 if __name__ == "__main__":
     # create_linearly_interpolated_CG("Data/Input/massCGLookup.csv", "Data/Input/ThrustCurves/currentGoddard.csv", "Data/Input/finleyThrust.rse")
 
-    convert_full_csv_to_rse("Data/Output/motorOutput.csv", "Data/Input/newMotor.rse", length=3851)
+    convert_full_csv_to_rse("Data/Input/1.csv", "Data/Input/newMotor.rse", length=3886)
     # convert_csv_folder_to_rse("Analysis/MotorMonteCarlo2-Temporary", "Data/Input/ThrustCurves/RSEMotors-Temporary")
 
     pass

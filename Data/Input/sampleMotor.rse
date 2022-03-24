@@ -1,3 +1,4 @@
+<?xml version="1.0" ?>
 <engine-database>
   <engine-list>
     <engine Type="hybrid" mfg="Goddard" code="KuhlmanThrustCustomCG"
