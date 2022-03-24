@@ -30,11 +30,10 @@ def get_sim() -> MotorSimulation:
     # Usually we use 293.15
     # The ID is 6.785 in
     # This length should give us enough room for liquid to expand until we reach
-    ox = OxTank(temperature=293.15, length=2.67, diameter=0.172339, ox_mass=45, front=0)
+    ox = OxTank(temperature=293.15, length=2.69, diameter=0.172339, ox_mass=45, front=0)
 
-    geo = StarSwirl(length=0.78, outer_diameter=0.17145)
-    # Start of ox tank is 63 inches. Middle of fuel grain is 191 inches. That should be 3.25 meters away
-    grain = ABSGrain(verbose=True, center_of_gravity=3.2512, geometry=geo)
+    geo = StarSwirl(length=0.788, outer_diameter=0.17145)
+    grain = ABSGrain(verbose=True, center_of_gravity=3.34, geometry=geo)
     adjusted_regression_functions = generate_regression_functions()
     grain.regression_rate_function = adjusted_regression_functions[-2]
 
@@ -88,7 +87,7 @@ def get_random_adjusted_ABS_regression_function():
     return choice(adjusted_regression_functions)
 
 
-    
+
 
 def get_randomized_sim() -> MotorSimulation:
     """Used for monte carlo simulations. This is just me adding in standard deviations for all of the design parameters for this motor. I tried to be as realistic as possible, but I just randomized the regression laws, and I just made up multiplicative factors for some things."""

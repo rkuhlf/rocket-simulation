@@ -312,7 +312,7 @@ class CustomMotor(Motor):
         ox_mass = self.ox_tank.ox_mass
         fuel_mass = self.fuel_grain.fuel_mass
 
-        return (self.ox_tank.get_oxidizer_center_of_mass() * ox_mass + self.fuel_grain.total_CG * fuel_mass) / (ox_mass + fuel_mass)
+        return (self.ox_tank.oxidizer_center_of_mass * ox_mass + self.fuel_grain.total_CG * fuel_mass) / (ox_mass + fuel_mass)
 
     @property
     def ox_flow(self):

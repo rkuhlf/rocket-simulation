@@ -226,7 +226,7 @@ class MotorLogger(FeedbackLogger):
         super().__init__(motor)
 
         # TODO: it would be nice to have the average molar mass of the products displayed
-        self.to_record = ["thrust", "combustion_chamber.pressure", "ox_tank.pressure", "combustion_chamber.temperature", "ox_tank.temperature", "combustion_chamber.fuel_grain.geometry.effective_radius", "OF", "combustion_chamber.cstar", "specific_impulse", "fuel_flow", "ox_flow", "mass_flow", "mass_flow_out", "combustion_chamber.ideal_gas_constant", "propellant_CG", "propellant_mass", "combustion_chamber.fuel_grain.regression_rate", "combustion_chamber.fuel_grain.flux", "combustion_chamber.fuel_grain.geometry.port_area", "combustion_chamber.fuel_grain.geometry.burn_area", "combustion_chamber.fuel_grain.geometry.length_regressed", "nozzle.exit_pressure"]
+        self.to_record = ["thrust", "combustion_chamber.pressure", "ox_tank.pressure", "combustion_chamber.temperature", "ox_tank.temperature", "combustion_chamber.fuel_grain.geometry.effective_radius", "OF", "combustion_chamber.cstar", "specific_impulse", "fuel_flow", "ox_flow", "mass_flow", "mass_flow_out", "combustion_chamber.ideal_gas_constant", "propellant_CG", "propellant_mass", "combustion_chamber.fuel_grain.regression_rate", "combustion_chamber.fuel_grain.flux", "combustion_chamber.fuel_grain.geometry.port_area", "combustion_chamber.fuel_grain.geometry.burn_area", "combustion_chamber.fuel_grain.geometry.length_regressed", "nozzle.exit_pressure", "ox_tank.ox_mass", "ox_tank.oxidizer_center_of_mass", "fuel_grain.fuel_mass", "fuel_grain.total_CG"]
 
         self.debug_every = 2 # seconds
 

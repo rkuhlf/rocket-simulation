@@ -229,7 +229,8 @@ class OxTank(MassObject):
     def get_liquid_mass(self):
         return self.get_liquid_volume() * get_liquid_nitrous_density(self.temperature)
 
-    def get_oxidizer_center_of_mass(self):
+    @property
+    def oxidizer_center_of_mass(self):
         # All centers of mass are with reference to the top of the ox tank
         # The current calculations do not account for hemispherical end caps
         gas_center_of_mass = self.length * self.ullage / 2

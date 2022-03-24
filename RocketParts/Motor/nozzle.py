@@ -1,6 +1,8 @@
 # NOZZLE CLASS AND DESIGN
 # Script for the nozzle object and the equations that will let us CAD it
 
+# TODO: Rewrite in the style of fuel grain and such. There should be some methods that use CEA only, some that are completely manual, etc.
+
 import numpy as np
 
 from presetObject import PresetObject
