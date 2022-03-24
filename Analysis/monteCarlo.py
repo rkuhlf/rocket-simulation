@@ -57,12 +57,12 @@ class MonteCarlo:
             except AttributeError as e:
                 print(f"Presumably because you are using somebody else's simulation class (like OR), this error was thrown {e}. It is being ignored.")
 
-            # try:
-            # Use pass-by-reference
-            self.run_simulation(sim)
-            self.save_simulation(sim)
-            # except Exception as e:
-            #     self.handle_failed_sim(sim, e)
+            try:
+                # Use pass-by-reference
+                self.run_simulation(sim)
+                self.save_simulation(sim)
+            except Exception as e:
+                self.handle_failed_sim(sim, e)
 
             current_time = time()
             time_elapsed = current_time - start_time
