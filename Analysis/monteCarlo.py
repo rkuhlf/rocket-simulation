@@ -2,6 +2,7 @@
 
 import os
 from pathlib import Path
+from time import time
 from typing import Dict
 
 from numpy.lib.function_base import append
@@ -45,6 +46,7 @@ class MonteCarlo:
         self.important_data: list[pd.DataFrame] = []
 
     def simulate_randomized(self, count=20):
+        start_time = time()
         for i in range(count):
             print(f"Simulating {i+1} out of {count}")
 
@@ -61,6 +63,11 @@ class MonteCarlo:
             self.save_simulation(sim)
             # except Exception as e:
             #     self.handle_failed_sim(sim, e)
+
+            current_time = time()
+            time_elapsed = current_time - start_time
+            predicted_time = time_elapsed / (i + 1) * (count - (i + 1))
+            print(f"Predicted time to completion: {predicted_time/60:.1f} minutes")
 
         self.finish_simulating()
 

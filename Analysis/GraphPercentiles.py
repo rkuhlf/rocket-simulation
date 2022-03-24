@@ -1,7 +1,8 @@
+# TODO: Move this and several other things from analysis to visualization
+
 from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
-from torch import alpha_dropout
 
 
 folder = "Analysis/LowerDragFlightMonteCarlo-Temporary"

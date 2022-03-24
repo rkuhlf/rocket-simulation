@@ -10,6 +10,8 @@ import numpy as np
 
 # TODO: Expand on and implement more unit tests
 
+# TODO: Write tests for all of the major files to make sure everything runs before I commit anything
+
 
 class TestGeneralHelpers(unittest.TestCase):
     def test_interpolate(self):
