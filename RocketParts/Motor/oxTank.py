@@ -363,6 +363,7 @@ if __name__ == '__main__':
     # print(find_ullage(ox_mass, volume, 298, constant_temperature=True))
 
     print(find_required_volume(45, ullage=0.1))
+    print(cylindrical_length(find_required_volume(45, ullage=0.1), 0.0861695))
 
     print(find_required_length(45, 0.1723136, ullage=0.1))
 

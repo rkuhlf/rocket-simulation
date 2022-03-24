@@ -30,10 +30,12 @@ def get_sim() -> MotorSimulation:
     # Usually we use 293.15
     # The ID is 6.785 in
     # This length should give us enough room for liquid to expand until we reach
-    ox = OxTank(temperature=293.15, length=2.69, diameter=0.172339, ox_mass=45, front=0)
+    # This length should be the length of a cylinder that gives you thhe desired total volume
+    # Maybe add a little bit to this when I do the actual CG calculation
+    ox = OxTank(temperature=293.15, length=2.67, diameter=0.172339, ox_mass=45, front=0)
 
     geo = StarSwirl(length=0.788, outer_diameter=0.17145)
-    grain = ABSGrain(verbose=True, center_of_gravity=3.34, geometry=geo)
+    grain = ABSGrain(verbose=True, center_of_gravity=3.19, geometry=geo)
     adjusted_regression_functions = generate_regression_functions()
     grain.regression_rate_function = adjusted_regression_functions[-2]
 

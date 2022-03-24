@@ -11,6 +11,8 @@ critical_temperature = 309.57 # Kelvin; about 36 C = 96.8 F
 
 # TODO: change everything to get instead of find
 
+
+# ! important TODO: this is thhrowing an uncaught error in the motor monte carlo
 def confirm_range(temperature):
     # Errors if temperature is outside the acceptable range
     if temperature > critical_temperature:
