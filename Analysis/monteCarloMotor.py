@@ -131,7 +131,7 @@ def display_analysis(motorSim: MonteCarloMotor):
 
 # FIXME: debug the NaN values that occasionally come up
 if __name__ == "__main__":
-    m = run_analysis(3, folder="Analysis/MotorMonteCarloAccurateLoadDistribution")
+    m = run_analysis(100, folder="Analysis/MotorMonteCarloUpdatedDimensions")
 
     display_analysis(m)
 
