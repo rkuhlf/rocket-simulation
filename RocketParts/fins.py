@@ -107,7 +107,8 @@ basic_CF_layup = tip_to_tip_closure(layer_thickness=0.6e-3, core_density=58, lay
 
 if __name__ == "__main__":
     fins = Fins()
-    fins.mass_function = layered_closure(layer_thickness=0.6e-3, core_density=58, layer_density=1900, layers=4)
-    fins.mass_function = basic_CF_layup
+    fins.mass_function = layered_closure(layer_thickness=0.6e-3, core_density=58, layer_density=2300, layers=4)
+    fins.mass_function = tip_to_tip_closure(layer_thickness=0.000254, core_density=58, layer_density=2300, layers=4, outer_diameter=0.17907)
+    # fins.mass_function = basic_CF_layup
 
     print("Fins have a mass of", fins.mass, "kg")

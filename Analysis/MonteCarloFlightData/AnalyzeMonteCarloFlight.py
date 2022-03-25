@@ -33,6 +33,15 @@ def display_max_mach_distribution(df):
 
     plt.show()
 
+def display_max_velocity(df):
+    plt.hist(df["Max Velocity"], hist_box_count(len(df)), histtype='bar')
+
+    plt.title("Range of Max Velocities")
+    plt.xlabel("Max Velocity (m/s)")
+    plt.ylabel("Frequency")
+
+    plt.show()
+
 def display_AOA_velocities(df):
     plt.scatter(df["Mean Wind Speed"], df["Max Velocity"])
 
@@ -48,6 +57,15 @@ def display_apogee_distribution(df):
     plt.title("Apogee Distribution")
     plt.xlabel("Lateral Velocity (m/s)")
     plt.ylabel("Apogee (m)")
+
+    plt.show()
+
+def display_landing(df):
+    plt.scatter(df["Landing Distance"], df["Landing Velocity"])
+
+    plt.title("Landing Analysis")
+    plt.ylabel("Landing Velocity (m/s)")
+    plt.xlabel("Landing Distance (m)")
 
     plt.show()
 
@@ -78,7 +96,13 @@ def best_motor_analysis(df):
 
 
 def display_altitude_lines(sims):
+    plt.title("Altitude Curves")
+    plt.xlabel("Time (s)")
+    plt.ylabel("Altitude (m)")
     plot_all_sims(sims)
+
+    fifty_thousand_feet = 15240
+    plt.plot([0, 500], [fifty_thousand_feet, fifty_thousand_feet], linewidth=2, color="black")
     
     plt.show()
 

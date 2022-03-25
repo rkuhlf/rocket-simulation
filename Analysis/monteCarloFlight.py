@@ -1,5 +1,6 @@
 
 from matplotlib import pyplot as plt
+from Analysis.MonteCarloFlightData.AnalyzeMonteCarloFlight import display_altitude_lines, display_apogee_distribution, display_deployment_distribution, display_landing, display_max_mach_distribution, display_max_velocity, display_total_impulse_effect
 from Analysis.monteCarlo import MonteCarlo
 from Helpers.data import hist_box_count
 from Simulations.DesignedRocket import get_randomized_sim
@@ -46,80 +47,39 @@ class MonteCarloFlight(MonteCarlo):
 
     
 
-    def plot_overview(self):
+    def display_overview(self):
         df = self.characteristic_figures_dataframe
 
-        plt.scatter(df["Lateral Velocity"], df["Apogee"])
-
-        plt.title("Monte Carlo with Motors")
-        plt.xlabel("Lateral Velocity (m/s)")
-        plt.ylabel("Apogee (m)")
-
-        plt.show()
+        display_apogee_distribution(df)
     
-    def plot_landing(self):
+    def display_landing(self):
         df = self.characteristic_figures_dataframe
 
-        plt.scatter(df["Landing Distance"], df["Landing Velocity"])
-
-        plt.title("Landing Analysis")
-        plt.ylabel("Landing Velocity (m/s)")
-        plt.xlabel("Landing Distance (m)")
-
-        plt.show()
+        display_landing(df)
     
-    def plot_impulse_correlation(self):
+    def display_impulse_correlation(self):
         df = self.characteristic_figures_dataframe
 
-        plt.scatter(df["Total Impulse"], df["Apogee"])
-
-        plt.title("Total Impulse Importance")
-        plt.xlabel("Total Impulse (Ns)")
-        plt.ylabel("Apogee (m)")
-
-        plt.show()
+        display_total_impulse_effect(df)
     
-    def plot_max_velocity(self):
+    def display_max_velocity(self):
         df = self.characteristic_figures_dataframe
 
-        plt.hist(df[["Max Velocity"]], hist_box_count(len(df)), histtype='bar')
-
-        plt.title("Range of Max Velocities")
-        plt.xlabel("Max Velocity (m/s)")
-        plt.ylabel("Frequency")
-
-        plt.show()
-            
-    def lateral_velocity(self):
-        df = self.characteristic_figures_dataframe
-
-        plt.hist(df[["Lateral Velocity"]].transpose(), hist_box_count(len(df.index)), density=True, histtype='bar')
-
-        plt.title("Range of Lateral Velocities")
-        plt.xlabel("Lateral Velocity (m/s)")
-        plt.ylabel("Frequency")
-
-        plt.show()
-    
-    def plot_max_mach(self):
-        df = self.characteristic_figures_dataframe
-
-        plt.hist(df[["Max Mach"]], hist_box_count(len(df)), histtype='bar')
-
-        plt.title("Range of Max Mach Numbers")
-        plt.xlabel("Max Mach ()")
-        plt.ylabel("Frequency")
-
-        plt.show()
-
-    def plot_altitude_curves(self):
-        for df in self.important_data:
-            plt.plot(df["time"], df["altitude"])
+        display_max_velocity(df)
         
-        plt.title("Flights")
-        plt.xlabel("Time (s)")
-        plt.ylabel("Alitude (m AGL)")
+            
+    def display_lateral_velocity(self):
+        df = self.characteristic_figures_dataframe
 
-        plt.show()
+        display_deployment_distribution(df)
+    
+    def display_max_mach(self):
+        df = self.characteristic_figures_dataframe
+
+        display_max_mach_distribution(df)
+
+    def display_altitude_curves(self):
+
+        display_altitude_lines(self.important_data)
 
     
