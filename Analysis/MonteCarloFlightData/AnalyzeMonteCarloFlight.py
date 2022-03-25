@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 
 from Helpers.data import hist_box_count, plot_all_sims, read_sims
 
+# TODO: Fix the naming conventions for all of these files. Everything should be Analyze<simulation class>
+
 def failed_rockets(df, apogee_cutoff=2500):
     return df[df["Apogee"] < apogee_cutoff]
 
@@ -12,8 +14,6 @@ def burn_time(df):
     burning = df[df["thrust"] > 1]
 
     return max(burning["time"])
-
-# TODO: if I could just decouple the visualization from the simulation of the monte carlo class, I would not have to rewrite all of this stuff
 
 def display_deployment_distribution(df):
     plt.hist(df["Lateral Velocity"], hist_box_count(len(df.index)), histtype='bar')
