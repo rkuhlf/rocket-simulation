@@ -12,6 +12,7 @@ from RocketParts.massObject import MassObject
 
 
 from presetObject import PresetObject
+# Import some helpers and some general closures
 from Helpers.general import create_multiplication_modifier, cylindrical_volume, interpolate, constant
 from Helpers.decorators import diametered
 

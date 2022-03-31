@@ -61,7 +61,9 @@ class Simulation(PresetObject):
         self._logger = l
 
         self.override_subobjects()
-
+    
+    def initialize_simulation():
+        pass
 
     def simulate_step(self):
         if self.logger is not None:
@@ -257,6 +259,8 @@ class MotorSimulation(Simulation):
 
         return MotorSimulation(environment=new_environment, motor=new_motor, logger=new_logger)
 
+    def initialize_simulation(self):
+        self.motor.initialize_simulation()
 
     def simulate_step(self):
         thrust = self.motor.calculate_thrust()

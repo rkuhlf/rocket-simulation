@@ -240,6 +240,8 @@ class CustomMotor(Motor):
         self.combustion_chamber.ideal_gas_constant = 8.314 / (average_molar_mass / 1000)
         # Eventually, I should probably add an output for the nozzle throat temperature over time. We want to be certain that our graphite won't be damaged by the extreme heat
 
+    def initialize_simulation(self):
+        self.ox_tank.start_drain()
     
     def calculate_thrust(self, altitude=0):
         self.ox_tank.update_drain(self.ox_flow * self.environment.time_increment)
@@ -271,7 +273,7 @@ class CustomMotor(Motor):
 
     # region Setters
     @property
-    def ox_tank(self):
+    def ox_tank(self) -> OxTank:
         return self._ox_tank
 
     @ox_tank.setter
