@@ -105,7 +105,7 @@ class MonteCarloMotor(MonteCarlo):
 def run_analysis(count=100, folder="Analysis/MotorMonteCarlo-Temporary"):
 
 
-    m = MonteCarloMotor(get_randomized_percent_fill_closure(0.5))
+    m = MonteCarloMotor(get_randomized_percent_fill_closure(0.75))
     m.simulate_randomized(count)
 
     m.print_characteristic_figures()
@@ -135,7 +135,7 @@ def display_analysis(motorSim: MonteCarloMotor):
 
 # FIXME: debug the NaN values that occasionally come up
 if __name__ == "__main__":
-    m = run_analysis(100, folder="Analysis/MotorMonteCarloUpdatedDimensions2")
+    m = run_analysis(100, folder="Analysis/MotorMonteCarloSeventyFive")
 
     display_analysis(m)
 

@@ -148,6 +148,17 @@ def get_randomized_sim() -> MotorSimulation:
     
     return sim
 
+def get_randomized_percent_fill(percent_fill=0.5):
+    sim = get_randomized_sim()
+    sim.motor.ox_tank.ox_mass *= percent_fill
+    
+    return sim
+
+def get_randomized_percent_fill_closure(percent_fill=0.5):
+    def inner():
+        return get_randomized_percent_fill(percent_fill=percent_fill)
+    
+    return inner
 
 
 if __name__ == "__main__":

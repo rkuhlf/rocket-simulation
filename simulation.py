@@ -62,7 +62,7 @@ class Simulation(PresetObject):
 
         self.override_subobjects()
     
-    def initialize_simulation():
+    def initialize_simulation(self):
         pass
 
     def simulate_step(self):
