@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 
 from Helpers.data import hist_box_count, plot_all_sims, read_sims
@@ -126,6 +127,24 @@ def display_end_temperature_distribution(sims):
 
     plt.show()
 
+def display_starting_fuel_mass_distribution(sims):
+    fuel_mass = []
+
+    for sim in sims:
+        try:
+            fuel_mass.append((sim.iloc[0]["fuel_grain.fuel_mass"]))
+        except Exception:
+            print("Skipping because of error; probable non-simulation included in folder")
+    
+    plt.hist(fuel_mass, bins=13)
+    plt.xlabel("Fuel Mass (kg)")
+    plt.ylabel("Frequency")
+    plt.title("Distribution of Launch Masses")
+
+    print(np.average(fuel_mass))
+
+    plt.show()
+
 def display_final_mass_distribution(sims):
     propellant_mass = []
 
@@ -135,6 +154,9 @@ def display_final_mass_distribution(sims):
             propellant_mass.append((sim.iloc[-1]["propellant_mass"]) + 54)
         except Exception:
             print("Skipping because of error; probable non-simulation included in folder")
+    
+
+    print(np.average(propellant_mass))
     
     plt.hist(propellant_mass, bins=13)
     plt.xlabel("Final Mass (kg)")
@@ -203,15 +225,16 @@ def display_general(characteristic_figures, sims):
 
 
 if __name__ == "__main__":
-    folder = "Analysis/MotorMonteCarloLowerCombustion-Temporary"
+    folder = "Analysis/MotorMonteCarloUpdatedDimensions2"
     sims = read_sims(folder)
     characteristic_figures = pd.read_csv(f"{folder}/output.csv")
 
+    display_starting_fuel_mass_distribution(sims)
     # display_end_temperature_distribution(sims)
     # display_final_mass_distribution(sims)
     # make_matplotlib_big()
     # display_general(characteristic_figures, sims)
-    display_efficiency(characteristic_figures)
+    # display_efficiency(characteristic_figures)
     # display_curves(sims)
     # display_regression(characteristic_figures, sims)
 
@@ -222,7 +245,7 @@ if __name__ == "__main__":
 
 
     df = pd.read_csv("./Analysis/MotorMonteCarloAccurateLoadDistribution/1.csv")
-    print(df.keys())
-    display_CG_components(df)
+    # print(df.keys())
+    # display_CG_components(df)
 
     pass
