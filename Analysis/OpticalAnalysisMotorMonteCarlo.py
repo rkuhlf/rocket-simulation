@@ -145,18 +145,18 @@ def display_starting_fuel_mass_distribution(sims):
 
     plt.show()
 
-def display_final_mass_distribution(sims):
+def display_final_mass_distribution(sims, dry_weight=0):
     propellant_mass = []
 
     for sim in sims:
         try:
-            # 54 kg is the dry mass of the rocket
-            propellant_mass.append((sim.iloc[-1]["propellant_mass"]) + 54)
+            propellant_mass.append((sim.iloc[-1]["propellant_mass"]) + dry_weight)
         except Exception:
             print("Skipping because of error; probable non-simulation included in folder")
     
 
     print(np.average(propellant_mass))
+    print(np.std(propellant_mass))
     
     plt.hist(propellant_mass, bins=13)
     plt.xlabel("Final Mass (kg)")
@@ -229,9 +229,9 @@ if __name__ == "__main__":
     sims = read_sims(folder)
     characteristic_figures = pd.read_csv(f"{folder}/output.csv")
 
-    display_starting_fuel_mass_distribution(sims)
+    # display_starting_fuel_mass_distribution(sims)
     # display_end_temperature_distribution(sims)
-    # display_final_mass_distribution(sims)
+    display_final_mass_distribution(sims)
     # make_matplotlib_big()
     # display_general(characteristic_figures, sims)
     # display_efficiency(characteristic_figures)
