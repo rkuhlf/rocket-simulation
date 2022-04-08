@@ -179,8 +179,64 @@ def display_optical_analysis(target):
             print(f"{func} threw an error, probably because your logger is not recording the data")
 
 
+def display_altitude(df, ceiling=None):
+    if ceiling is not None:
+        plt.plot((0, max(df["time"])), (ceiling, ceiling), label="Ceiling")
+    
+    plt.plot(df["time"], df["altitude"] * 3.281, label="Flight")
 
+    plt.title("Altitude over Time")
+    plt.xlabel("Time (s)")
+    plt.ylabel("Altitude (ft)")
+
+    plt.legend()
+    plt.show()
+
+def display_speed(df):
+    fig, ax = plt.subplots()
+
+    ax.plot(df["time"], df["velocity"] * 3.281, label="Velocity", color="blue")
+    ax.set_ylabel("Velocity (ft/s)", color="blue")
+
+    ax2 = ax.twinx()
+    ax2.plot(df["time"], df["mach"], label="Mach Number", color="red")
+    ax2.set_ylabel("Mach", color="red")
+
+    ax.set_xlabel("Time (s)")
+
+    plt.title("Velocity over Time")
+    plt.show()
+
+def display_acceleration(df):    
+    plt.plot(df["time"], df["acceleration"] * 3.281)
+
+    plt.title("Acceleration over Time")
+    plt.xlabel("Time (s)")
+    plt.ylabel("Acceleration (ft/s^2)")
+
+    plt.show()
+
+def display_forces(df):
+    # No weight because I did not log it
+    plt.plot(df["time"], df["drag"] * 0.225, label="Drag")
+    plt.plot(df["time"], df["thrust"] * 0.225, label="Thrust")
+
+    plt.title("Forces over Time")
+    plt.xlabel("Time (s)")
+    plt.ylabel("Force (lbs)")
+
+    plt.legend()
+    plt.show()
 
 
 if __name__ == "__main__":
-    display_optical_analysis("Data/Output/output5DOFWind.csv")
+    # display_optical_analysis("Data/Output/output5DOFWind.csv")
+
+    data = pd.read_csv("Analysis/MonteCarloPreDatcom/MonteCarloFlightSimulations/5.csv")
+
+    # display_altitude(data, ceiling=50000)
+    # display_speed(data)
+    # display_acceleration(data)
+    display_forces(data)
+
+    pass

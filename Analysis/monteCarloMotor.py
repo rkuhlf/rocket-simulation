@@ -7,19 +7,21 @@ from Analysis.OpticalAnalysisMotorMonteCarlo import display_CG_movement, display
 from Helpers.data import hist_box_count
 from RocketParts.motor import CustomMotor
 from monteCarlo import MonteCarlo
-from Simulations.DesignedMotor2022 import get_randomized_sim
+from Simulations.DesignedMotor2022 import get_randomized_sim, get_randomized_percent_fill_closure
 from simulation import MotorSimulation
 
 
 # TODO: create some sensitivity analysis functions that find correlations in the characteristic figures.
 class MonteCarloMotor(MonteCarlo):
-    def __init__(self, sims: "List[MotorSimulation]"=[]):
+    def __init__(self, new_sim_function, sims: "List[MotorSimulation]"=[]):
         super().__init__(sims=sims)
+
+        self.new_sim_function = new_sim_function
 
         self.supercritical_nitrous_count = 0
 
     def initialize_simulation(self):
-        sim = get_randomized_sim()
+        sim = self.new_sim_function()
         sim.grain.verbose = False
         return sim
 
@@ -101,7 +103,9 @@ class MonteCarloMotor(MonteCarlo):
     #endregion
 
 def run_analysis(count=100, folder="Analysis/MotorMonteCarlo-Temporary"):
-    m = MonteCarloMotor()
+
+
+    m = MonteCarloMotor(get_randomized_percent_fill_closure(0.75))
     m.simulate_randomized(count)
 
     m.print_characteristic_figures()
@@ -131,7 +135,7 @@ def display_analysis(motorSim: MonteCarloMotor):
 
 # FIXME: debug the NaN values that occasionally come up
 if __name__ == "__main__":
-    m = run_analysis(100, folder="Analysis/MotorMonteCarloUpdatedDimensions2")
+    m = run_analysis(100, folder="Analysis/MotorMonteCarloSeventyFive")
 
     display_analysis(m)
 

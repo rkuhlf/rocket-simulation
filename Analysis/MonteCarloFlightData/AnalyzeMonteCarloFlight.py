@@ -151,15 +151,15 @@ def display_stabilities(sims, caliber=0.1778):
 
 
 if __name__ == "__main__":
-    df = pd.read_csv("./Analysis/ShortenedRocketFlight4/MonteCarloFlightData/output.csv")
+    # df = pd.read_csv("./Analysis/ShortenedRocketFlight4/MonteCarloFlightData/output.csv")
 
-    df = failed_rockets(df)
-    # display_drift_distribution(df)
-    # display_total_impulse_effect(df)
-    display_AOA_velocities(df)
+    # df = failed_rockets(df)
+    # # display_drift_distribution(df)
+    # # display_total_impulse_effect(df)
+    # display_AOA_velocities(df)
 
     for i in range(100):
-        df = pd.read_csv(f"./Analysis/LighterRocketFlight/MonteCarloFlightSimulations/{i + 1}.csv")
+        df = pd.read_csv(f"./Analysis/MonteCarloPreDatcom/MonteCarloFlightSimulations/{i + 1}.csv")
 
         display_flight_stability(df)
 

@@ -129,8 +129,10 @@ def get_randomized_sim() -> MotorSimulation:
 
     # --- Fuel Grain ---
     f: ABSGrain = m.fuel_grain
-    # Different varieties have different values
-    f.density *= gauss(1, 0.05)
+
+    # I think that we were getting 95% of 975 kg/m^3 iirc
+    density_guess = 975 * 0.95
+    f.density = gauss(density_guess, density_guess * 0.01)
     f.initial_mass = f.fuel_mass
 
     f.regression_rate_function = get_random_adjusted_ABS_regression_function()
@@ -148,6 +150,17 @@ def get_randomized_sim() -> MotorSimulation:
     
     return sim
 
+def get_randomized_percent_fill(percent_fill=0.5):
+    sim = get_randomized_sim()
+    sim.motor.ox_tank.ox_mass *= percent_fill
+    
+    return sim
+
+def get_randomized_percent_fill_closure(percent_fill=0.5):
+    def inner():
+        return get_randomized_percent_fill(percent_fill=percent_fill)
+    
+    return inner
 
 
 if __name__ == "__main__":
