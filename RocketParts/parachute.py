@@ -3,12 +3,24 @@
 # This is really simple right now; it doesn't even have any snatch forces or rope stuff
 
 from numpy import pi
+from Data.Input.models import get_density
 
 
-from Helpers.general import interpolate
+from Helpers.general import constant, interpolate
 from RocketParts.massObject import MassObject
 from Helpers.decorators import diametered
 
+
+#region Opening Force Functions
+def pflanz_method(parachute: "Parachute", expected_velocity: float, air_density: float):
+    # Not currently including the velocity reduction
+    Cx = parachute.opening_load_factor
+    force_reduction_factor = 0.6
+
+    dynamic_pressure = 1/2 * air_density * expected_velocity ** 2
+
+    return Cx * force_reduction_factor * dynamic_pressure * parachute.drag_area
+#endregion
 
 @diametered
 class Parachute(MassObject):
@@ -27,6 +39,8 @@ class Parachute(MassObject):
         # Should probably have a drag object class to deal with the parachute and the rocket
         self.CD = 0.97
 
+        self.opening_load_factor_function = constant(1.7)
+
 
         self.overwrite_defaults(**kwargs)
 
@@ -34,6 +48,24 @@ class Parachute(MassObject):
     def area(self):
         return pi * self.radius ** 2
 
+    @property
+    def drag_area(self):
+        return self.area * self.CD
+
+    def get_inflation_time(self, velocity, density):
+        # FIXME: actually calculate
+        return 0.25
+    
+    def get_force_reduction_load_factor(self, ballistic_parameter):
+        return 
+    
+    def get_ballistic_parameter(self, mass, air_density, velocity):
+        """Often abbreviated with A"""
+        return 2 * mass / (self.drag_area * self.get_inflation_time(velocity, air_density) * air_density * velocity)
+
+    @property
+    def opening_load_factor(self):
+        return self.opening_load_factor_function(self)
 
     # TODO: add some kind of deployment variance here
     def should_deploy(self, rocket):
@@ -67,3 +99,9 @@ class ApogeeParachute(Parachute):
 
 
 
+if __name__ == "__main__":
+    p = Parachute()
+    force = pflanz_method(p, 50, get_density(10))
+
+
+    print("%.2f" % force)

@@ -1,5 +1,5 @@
 # ENVIRONMENT CLASS
-# Define an object to store the atmospheric conditions at any position in the world based on th 1976 Standard Atmosphere
+# Define an object to store the atmospheric conditions at any position in the world based on the 1976 Standard Atmosphere
 # It models the wind (hopefully it will eventually include gusts, but right now it's a DIY thing that's wrong)
 # Also models air density, pressure, and temperature.
 
@@ -14,6 +14,7 @@ from Helpers.data import interpolated_lookup
 from Data.Input.wind import Wind
 
 
+# TODO: rewrite this object to use the same data methods and closure things as the other models
 class Environment(PresetObject):
     """
         Define how the environment works for a simulation (both the motor and the rocket).
@@ -112,7 +113,6 @@ class Environment(PresetObject):
     def get_speed_of_sound(self, altitude):
         """Look up the speed of sound by the altitude (in kilometers)"""
         return get_speed_of_sound(altitude)
-
 
     def get_air_density_from_model(self, altitude):
         """Look up a the air density in kg/m^3 by the altitude in km using a fitted polynomial model"""

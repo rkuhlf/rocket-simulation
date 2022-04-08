@@ -20,7 +20,8 @@ CL = data['CL']
 CP = data['CP']
 
 
-def get_density(altitude):
+def get_density(altitude: float):
+    ":param: float altitude in kilometers"
     return np.polyval([0.00287959, -0.1096957, 1.21608074], altitude)
 
 
