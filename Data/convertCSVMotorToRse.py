@@ -36,10 +36,13 @@ def initialize_motor_xml(min_mass, max_mass, name="customThrustCurve", length=39
 
     return root, data
 
-def save_root_xml(root, path):
+def save_root_xml(root, path: str):
     xml_str = root.toprettyxml(indent ="\t")
 
-    with open(path, "w") as f:
+    if not os.path.exists(os.path.dirname(path)):
+        os.mkdir(os.path.dirname(path))
+
+    with open(path, "w+") as f:
         f.write(xml_str)
 
 def create_row_xml(root, row, mass, cg):
@@ -131,8 +134,9 @@ def convert_csv_folder_to_rse(csv_folder_path, output_folder_path):
 if __name__ == "__main__":
     # create_linearly_interpolated_CG("Data/Input/massCGLookup.csv", "Data/Input/ThrustCurves/currentGoddard.csv", "Data/Input/finleyThrust.rse")
 
-    convert_full_csv_to_rse("Data/Input/1 copy.csv", "Data/Input/newMotor.rse", length=3810)
-    # convert_csv_folder_to_rse("Analysis/MotorMonteCarlo2-Temporary", "Data/Input/ThrustCurves/RSEMotors-Temporary")
+    # convert_full_csv_to_rse("Data/Input/1 copy.csv", "Data/Input/newMotor.rse", length=3810)
+    convert_csv_folder_to_rse("Analysis/MotorMonteCarloFiftyPercent", "Data/Input/ThrustCurves/RSEMotorsFiftyPercent-Temporary")
+    convert_csv_folder_to_rse("Analysis/MotorMonteCarloSeventyFive", "Data/Input/ThrustCurves/RSEMotorsSeventyFivePercent-Temporary")
 
     pass
 
