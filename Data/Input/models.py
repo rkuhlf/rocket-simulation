@@ -26,6 +26,7 @@ def get_density(altitude: float):
 
 
 def get_speed_of_sound(altitude):
+    """Altitude in kilometers"""
     # For some reason it flattens out here
     if (altitude > 11):
         altitude = 11

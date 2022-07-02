@@ -2,7 +2,6 @@
 # Simulate the properties of the fuel grain
 # Mostly covers regression calculations
 
-from email.mime import base
 from random import choice
 from typing import Callable
 import numpy as np
@@ -241,6 +240,7 @@ class Grain(MassObject):
         self.friction_coefficient_function = whitmore_friction_coefficient
         self.oxidizer_dynamic_viscosity_function = constant_nitrous_viscosity
         self.enthalpy_difference_function = no_internal_transfer_enthalpy_difference
+        self.motor = None
 
         super().overwrite_defaults(**kwargs)
 

@@ -165,13 +165,18 @@ def nested_dictionary_lookup_array(dictionary, key_array):
 # FIXME: rename from safe
 # FIXME: Create a caching system for this that saves the previous key that worked
 def interpolated_lookup(dataframe, key, value, lookup_key, safe=False):
+    """Lookup key is the value you want returned"""
     before_keys = dataframe[dataframe[key] <= value]
     if safe and len(before_keys) == 0:
         # There is nothing to look up in the table that is lower than that value
         return dataframe[dataframe[key] == dataframe[key].min()][lookup_key].values[0]
 
 
-    before_key = before_keys.iloc[-1]
+    try:
+        before_key = before_keys.iloc[-1]
+    except IndexError as e:
+        print("Try turning safe mode on")
+        raise
 
 
     after_keys = dataframe[dataframe[key] >= value]
@@ -179,7 +184,11 @@ def interpolated_lookup(dataframe, key, value, lookup_key, safe=False):
         # There is nothing to look up in the table that is bigger than that value
         return dataframe[dataframe[key] == dataframe[key].max()][lookup_key].values[0]
 
-    after_key = after_keys.iloc[0]
+    try:
+        after_key = after_keys.iloc[0]
+    except IndexError as e:
+        print("Try turning safe mode on")
+        raise
 
     return interpolate(value, before_key[key], after_key[key], before_key[lookup_key], after_key[lookup_key])
 

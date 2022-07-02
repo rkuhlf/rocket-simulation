@@ -149,6 +149,7 @@ def multiply_areas(original_func: Callable, burn_area_multiplier=1, port_area_mu
 @diametered("port_radius", "port_diameter")
 class Annular(GrainGeometry):
     def __init__(self, **kwargs) -> None:
+        """Accepts a port_radius or port_diameter, as well as the outer_diameter"""
         super().__init__(**kwargs)
 
         self._port_radius = 0.05 # m

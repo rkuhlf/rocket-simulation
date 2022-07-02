@@ -9,7 +9,7 @@ import numpy as np
 from RocketParts.Motor.oxTank import OxTank
 
 # 
-def run_simulation(ox=OxTank(ox_mass=52.43, length=3.2, radius=0.17145 / 2, temperature=293.15)):
+def run_simulation(ox: OxTank=OxTank(ox_mass=52.43, length=3.2, radius=0.17145 / 2, temperature=293.15)):
 # Higher than 36 Celsius is super critical. Please don't do that
     masses = []
     mass_vap = []
@@ -22,11 +22,11 @@ def run_simulation(ox=OxTank(ox_mass=52.43, length=3.2, radius=0.17145 / 2, temp
         mass_vap.append(ox.get_mass_flow_vap(1))
         masses.append(ox.ox_mass)
         ullages.append(ox.ullage)
-        centers.append(ox.get_center_of_mass() / ox.length)
+        centers.append(ox.oxidizer_center_of_mass / ox.length)
         temperatures.append(ox.temperature)
         pressures.append(ox.pressure)
         ox.update_drain(1)
-
+    print(centers)
     return masses, mass_vap, ullages, centers, temperatures, pressures
 
 
@@ -84,6 +84,17 @@ def display_CG_shift(masses, mass_vap, ullages, centers, temperatures, pressures
 
 
 if __name__ == "__main__":
-    outputs = run_simulation()
+    # outputs = run_simulation()
 
-    display_CG_shift(*outputs)
+    # display_CG_shift(*outputs)
+
+    # Calculated 109 in for ox length (a little fudged)
+    # This diameter should give us the correct total volume
+    # ox = OxTank(temperature=293.15, length=2.69, diameter=0.1716, ox_mass=45, front=0)
+    ox = OxTank(temperature=293.15, length=2.69, diameter=0.1716, ox_mass=45*0.5, front=0)
+
+    print(ox.oxidizer_center_of_mass)
+    # 1.45 m * 45 + 46.3 * 3.28 + 11.9 * 4.82 
+    # 45 + 46.3 + 11.9
+
+    pass

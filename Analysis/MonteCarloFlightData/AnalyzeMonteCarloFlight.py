@@ -2,8 +2,10 @@ import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from Data.Input.models import get_density
 
 from Helpers.data import hist_box_count, plot_all_sims, read_sims
+from RocketParts.parachute import Parachute, pflanz_method
 
 # TODO: Fix the naming conventions for all of these files. Everything should be Analyze<simulation class>
 
@@ -87,7 +89,6 @@ def display_total_impulse_effect(df):
 
     plt.show()
 
-
 def best_apogee_analysis(df):
     print(df[df["Apogee"] > 20000][["Apogee", "Lateral Velocity", "Total Impulse", "Mean Wind Speed", "Wind Speed Deviation"]])
 
@@ -150,18 +151,32 @@ def display_stabilities(sims, caliber=0.1778):
     plt.show()
 
 
+def display_max_load_distribution(df):
+    p = Parachute()
+
+    df["Opening Force"] = 0.2248089431 * pflanz_method(p, df["Lateral Velocity"], get_density(df["Apogee"]/1000))
+    
+    plt.hist(df["Opening Force"], bins=13)
+
+    plt.title("Deployment Forces Distribution")
+    plt.xlabel("Opening Force (lbs)")
+    plt.ylabel("Frequency")
+
+    plt.show()
+    
+
 if __name__ == "__main__":
-    # df = pd.read_csv("./Analysis/ShortenedRocketFlight4/MonteCarloFlightData/output.csv")
+    df = pd.read_csv("Analysis/MonteCarloPreDatcom/MonteCarloFlightData/output.csv")
 
     # df = failed_rockets(df)
     # # display_drift_distribution(df)
     # # display_total_impulse_effect(df)
     # display_AOA_velocities(df)
 
-    for i in range(100):
-        df = pd.read_csv(f"./Analysis/MonteCarloPreDatcom/MonteCarloFlightSimulations/{i + 1}.csv")
+    # for i in range(100):
+    #     df = pd.read_csv(f"./Analysis/MonteCarloPreDatcom/MonteCarloFlightSimulations/{i + 1}.csv")
 
-        display_flight_stability(df)
+    #     display_flight_stability(df)
 
     # sims = read_sims("./Analysis/Lighter/MonteCarloFlightSimulations")
     # display_stabilities(sims)
@@ -169,5 +184,7 @@ if __name__ == "__main__":
     # df = pd.read_csv("./Analysis/LighterRocketFlight/MonteCarloFlightData/output.csv")
 
     # display_deployment_distribution(df)
+
+    # display_max_load_distribution(df)
 
     pass

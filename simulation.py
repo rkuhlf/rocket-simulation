@@ -305,10 +305,6 @@ class MotorSimulation(Simulation):
     def grain(self) -> Grain:
         return self.motor.combustion_chamber.fuel_grain
 
-    @property
-    def nozzle(self):
-        return self.nozzle
-
     #endregion
 
     #region Helpers to evaluate the burn

@@ -137,8 +137,26 @@ def calculate_maximum_liquid_expansion(temperature=293.15, max_temperature=None)
 
 
 
+
+import matplotlib.pyplot as plt
+
+def graph_pressure_by_temperature():
+    temperatures = np.linspace(273.15 - 90, 273.15 + 36, num=50)
+    pressures = [get_nitrous_vapor_pressure(t) for t in temperatures]
+    
+    temperatures = [(t - 273.15) * 9/5 + 32 for t in temperatures]
+    pressures = [p * 14.5038 for p in pressures]
+    
+    plt.plot(temperatures, pressures)
+    plt.xlabel("Temperature (F)")
+    plt.ylabel("Pressure (psi)")
+    plt.show()
+
+
+
 if __name__ == "__main__":
-    print(get_liquid_dynamic_viscosity(-30 + 273.15))
+    graph_pressure_by_temperature()
+    # print(get_liquid_dynamic_viscosity(-30 + 273.15))
     
     
     
@@ -157,6 +175,7 @@ if __name__ == "__main__":
 
     # for i in range(len(temperatures)):
     #     print(temperatures[i], compressibilities[i])
+
     
     
     pass

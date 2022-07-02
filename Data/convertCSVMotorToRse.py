@@ -118,7 +118,7 @@ def convert_full_csv_to_rse(csv_path, output_path, use_every=30, **kwargs):
 
     save_root_xml(root, output_path)
 
-def convert_csv_folder_to_rse(csv_folder_path, output_folder_path):
+def convert_csv_folder_to_rse(csv_folder_path, output_folder_path, name_prefix="MonteCarloMotor", **kwargs):
     
     # iterate over files in
     # that directory
@@ -126,7 +126,7 @@ def convert_csv_folder_to_rse(csv_folder_path, output_folder_path):
         print(i)
         if filename.is_file():
             try:
-                convert_full_csv_to_rse(filename.path, output_folder_path + f"/{i}.rse", name=f"MonteCarloMotor{i}")
+                convert_full_csv_to_rse(filename.path, output_folder_path + f"/{i}.rse", name=f"{name_prefix}{i}", **kwargs)
             except Exception as e:
                 print("Skipping because exception")
                 print(e)
@@ -135,8 +135,8 @@ if __name__ == "__main__":
     # create_linearly_interpolated_CG("Data/Input/massCGLookup.csv", "Data/Input/ThrustCurves/currentGoddard.csv", "Data/Input/finleyThrust.rse")
 
     # convert_full_csv_to_rse("Data/Input/1 copy.csv", "Data/Input/newMotor.rse", length=3810)
-    convert_csv_folder_to_rse("Analysis/MotorMonteCarloFiftyPercent", "Data/Input/ThrustCurves/RSEMotorsFiftyPercent-Temporary")
-    convert_csv_folder_to_rse("Analysis/MotorMonteCarloSeventyFive", "Data/Input/ThrustCurves/RSEMotorsSeventyFivePercent-Temporary")
+    convert_csv_folder_to_rse("Analysis/MotorMonteCarloFiftyPercent", "Data/Input/ThrustCurves/RSEMotorsFiftyPercent-Temporary", name_prefix="50percent")
+    convert_csv_folder_to_rse("Analysis/MotorMonteCarloSeventyFive", "Data/Input/ThrustCurves/RSEMotorsSeventyFivePercent-Temporary", name_prefix="75percent")
 
     pass
 
