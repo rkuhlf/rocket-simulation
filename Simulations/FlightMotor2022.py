@@ -81,23 +81,20 @@ def get_sim() -> MotorSimulation:
     return sim
 
 
-AREA = 0.0262677157 # m^2
-telemetrum_data = pd.read_csv("Data/Output/TelemetrumData.csv")
-CD_data = pd.read_csv("Data/Input/Aerodynamics/FinalGuessAtWSMR.CSV")
-motor_output = pd.read_csv("Data/Output/motorOutput.csv")
-approximate_burn_time = 30
-approximate_parachute_time = 50
-
 # Ignoring everything that happens after parachute because I am not super concerned with tumbling simulations
-telemetrum_data = telemetrum_data[telemetrum_data["Time (s)"] < approximate_parachute_time]
-
-
-def get_mass(row):
+def get_mass(row, motor_output):
     prop_mass = interpolated_lookup(motor_output, "time", row["Time (s)"], "propellant_mass", safe=True)
 
     return 48 + prop_mass
 
-def compare_to_flight():
+def get_predictions(burn_time=30, parachute_time=50, save_path="./TelemetrumDataCalculations.csv"):
+    AREA = 0.0262677157 # m^2
+    telemetrum_data = pd.read_csv("Data/Output/TelemetrumData.csv")
+    CD_data = pd.read_csv("Data/Input/Aerodynamics/FinalGuessAtWSMR.CSV")
+    motor_output = pd.read_csv("Data/Output/motorOutput.csv")
+
+    telemetrum_data = telemetrum_data[telemetrum_data["Time (s)"] < parachute_time]
+
     predictions = pd.DataFrame()
     predictions["Time (s)"] = telemetrum_data["Time (s)"]
 
@@ -107,7 +104,7 @@ def compare_to_flight():
     thrusts = []
     predicted_drags = []
     for index, row in telemetrum_data.iterrows():
-        mass = get_mass(row)
+        mass = get_mass(row, motor_output)
         net_force = row["acceleration"] * mass
 
         weight = mass * 9.81
@@ -120,7 +117,7 @@ def compare_to_flight():
         CD = interpolated_lookup(CD_data, "Mach", speed / speed_of_sound, "CD", safe=True)
         
         predicted_drags.append(-1/2 * density * speed ** 2 * AREA * CD)
-        if row["Time (s)"] < approximate_burn_time:
+        if row["Time (s)"] < burn_time:
             drag = 1/2 * density * speed ** 2 * AREA * CD
         else:
             drag = abs(net_force) - abs(weight)
@@ -135,17 +132,30 @@ def compare_to_flight():
     telemetrum_data["Thrust"] = telemetrum_data["Net Force"] - telemetrum_data["Weight"] - telemetrum_data["Drag"]
     predictions["Drag"] = predicted_drags
 
+    telemetrum_data.to_csv(save_path)
+
+    return predictions, telemetrum_data    
+
+def compare_to_flight():
+    predictions, telemetrum_data15 = get_predictions(burn_time=15)
+    predictions, telemetrum_data30 = get_predictions(burn_time=30)
+    motor_output = pd.read_csv("Data/Output/motorOutput.csv")
 
     # plt.plot(telemetrum_data["Time (s)"], telemetrum_data["Net Force"])
     # plt.plot(telemetrum_data["Time (s)"], telemetrum_data["Weight"])
-    plt.plot(telemetrum_data["Time (s)"], telemetrum_data["Thrust"], label="Actual Thrust")
-    # plt.plot(motor_output["time"], motor_output["thrust"], label="Predicted Thrust")
+    plt.plot(telemetrum_data15["Time (s)"], telemetrum_data15["Thrust"], label="Actual Thrust (15 sec)", zorder=50)
+    plt.plot(telemetrum_data30["Time (s)"], telemetrum_data30["Thrust"], label="Actual Thrust (30 sec)", zorder=1)
+    plt.plot(motor_output["time"], motor_output["thrust"], label="Predicted Thrust", zorder=100)
 
-    plt.plot(telemetrum_data["Time (s)"], telemetrum_data["Net Force"], label="Net Force")
-    plt.plot(telemetrum_data["Time (s)"], telemetrum_data["Drag"], label="Drag")
-    plt.plot(telemetrum_data["Time (s)"], telemetrum_data["Weight"], label="Weight")
+    # plt.plot(telemetrum_data["Time (s)"], telemetrum_data["Net Force"], label="Net Force")
+    # plt.plot(telemetrum_data["Time (s)"], telemetrum_data["Drag"], label="Drag")
+    # plt.plot(telemetrum_data["Time (s)"], telemetrum_data["Weight"], label="Weight")
 
-    plt.plot(predictions["Time (s)"], predictions["Drag"], label="Predicted Drag")
+    # plt.plot(predictions["Time (s)"], predictions["Drag"], label="Predicted Drag")
+
+    plt.xlabel("Time (s)")
+    plt.ylabel("Force (N)")
+    plt.title("Flight Comparison")
     plt.legend()
     plt.show()
 
