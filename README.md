@@ -6,11 +6,11 @@ However, there are many different problems that the design process entails. Ther
 
 ## User Guide
 
-If you would like to use the code to simulate your rocket, there are a few things you have to input. After you have cloned the repository, you should open up the *SimulateRocket* file. This file is the main entrypoint that I usually use to start run a basic flight simulation, but you could easily use similar code in a different file to have the same effect.
+If you would like to use the code to simulate your rocket, there are several things that must be input input. After the repository is closed, you should open up the *SimulateRocket* file. This file is the main entrypoint for running a basic flight simulation, although you could easily use similar code in a different file to have the same effect.
 
-To run either a rocket or a motor simulation, you need to have an environment object. That will tell your simulation what the time increment is and what the atmospheric conditions are, including wind. The rocket also needs a motor, so you can either pass in a custom motor (simulating all the combustion stuff) or you can just use a default one where the thrust follows a pre-defined curve. Parachutes are also passed in separately.
+To run either a rocket or a motor simulation, you need to have an `Environment` object. It will tells any simulation the `time_increment` and the atmospheric conditionss, including wind. The rocket also needs a motor, so you can either pass in an instance of `CustomMotor` (simulating all the combustion by hand) or you can specify a pre-defined thrust curve in the `Motor` class. Parachutes are also passed in as a separate list of `Parachute` objects.
 
-Once your rocket is ready to go, I have built a couple of helper classes that loop through all of the frames, `Simulation` and to store the data as well as printing any important events `Logger`. Once you have initialized those, with all of the necessary objects passed in, you are good to go. Here is a sample:
+Once your rocket is ready to go, there are several helper classes that loop through the frames of the flight: `Simulation` to iteratively sum forces and update the physics, and `Logger` to store the data and print events. Once all of the classes have been initialized and all references set, call `.run()` on the `Simulation` object. Here is a sample:
 
 ```python
 from environment import Environment
