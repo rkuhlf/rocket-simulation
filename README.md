@@ -1,6 +1,8 @@
 # Horizon 1: Python Simulations and Analysis
 
-This repository is basically a collection of all of the code I have written for Brazoswood's 2021-2022 Goddard program. Each year, we build a relatively large hybrid rocket from the ground up, launching it at White Sands, New Mexico after the school year. The program has improved steadily, with 5/5 successful flights, reaching 35,000" in 2021 and 43,000" in 2022.
+This repository is a collection of all of the code I wrote for Brazoswood's 2021-2022 Goddard program. Each year, we build a hybrid rocket from the ground up, launching it at the WSMR missile range after the school year. The program has improved steadily, with 5/5 successful flights, reaching 35,000" in 2021 and 43,000" in 2022.
+
+However, there are many different problems that the design process entails. There are scripts in the repository for design optimization, simulation, and post-flight analysis. Though it is possible, the code was not written with the intention of being used as a library, rather as a reference for future years - if a future year faces a problem with using Python in the design process, they can find Goddard 2022's solution here.
 
 ## User Guide
 
