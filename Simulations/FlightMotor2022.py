@@ -1,4 +1,3 @@
-import matplotlib
 from matplotlib import pyplot as plt
 import pandas as pd
 from Data.Input.models import get_density, get_speed_of_sound

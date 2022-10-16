@@ -49,11 +49,11 @@ if __name__ == "__main__":
     # total_impulse = 129492
     # scale_saved_curve("./Data/Input/ThrustCurves/thrustCurveSmaller.csv", burn_time, total_impulse / burn_time, "./Data/Input/thrustCurveSmaller.csv")
 
-    # df = pd.read_csv("./TelemetrumDataCalculations30sec.csv")
-    # times = df["Time (s)"]
-    # thrusts = df["Thrust"]
+    df = pd.read_csv("./Data/MeasuredOutput/TelemetrumDataCalculations30sec.csv")
+    times = df["Time (s)"]
+    thrusts = df["Thrust"]
 
-    # total_impulse = riemann_sum(times, thrusts)
+    total_impulse = riemann_sum(times, thrusts)
 
     # print(total_impulse)
 
