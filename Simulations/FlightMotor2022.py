@@ -1,3 +1,5 @@
+# Create the motor object that represents our best guess at what happened when we launched Horizon 1 at WSMR 2022.
+
 from typing import Callable
 
 from RocketParts.Motor.grainGeometry import StarSwirl
