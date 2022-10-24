@@ -1,25 +1,20 @@
-from matplotlib import pyplot as plt
-import pandas as pd
-from Data.Input.models import get_density, get_speed_of_sound
-from Helpers.data import interpolated_lookup
-from Helpers.general import modify_function_multiplication
-from RocketParts.Motor.grainGeometry import StarSwirl, multiply_areas
+from typing import Callable
 
+from RocketParts.Motor.grainGeometry import StarSwirl
 from simulation import MotorSimulation
 from logger import MotorLogger
 from RocketParts.motor import CustomMotor
 from RocketParts.Motor.oxTank import OxTank
 from RocketParts.Motor.injector import Injector, mass_flow_fitted_HTPV
 from RocketParts.Motor.combustionChamber import CombustionChamber
-from RocketParts.Motor.grain import ABSGrain, Grain, star_swirl_modifiers, power_ABS_nitrous_functions, regression_rate_ABS_nitrous_constant
-from RocketParts.Motor.pressureSwirlInjector import PSW_modifiers
+from RocketParts.Motor.grain import ABSGrain, Grain
 from RocketParts.Motor.nozzle import Nozzle
 from environment import Environment
 
 from Visualization.MotorOpticalAnalysis import display_optical_analysis
 
 
-def custom_regression_function(grain: Grain):
+def custom_regression_function(grain: Grain) -> Callable:
     time = grain.motor.environment.time
 
     base_power_regression = 2.623e-5 * grain.flux ** 0.664
@@ -34,7 +29,7 @@ def custom_regression_function(grain: Grain):
 
     return base_power_regression
 
-def custom_ox_flow_function(injector: Injector):
+def custom_ox_flow_function(injector: Injector) -> Callable:
     time = injector.simulation.environment.time
 
     base = mass_flow_fitted_HTPV(injector)
@@ -49,9 +44,7 @@ def custom_ox_flow_function(injector: Injector):
 
 
 def get_sim() -> MotorSimulation:
-    """Attempt to recreate the inputs and functions that actually occurred when our rocket launched. 
-    
-    Returns a MotorSimulation.
+    """Attempt to recreate the inputs and functions that actually occurred when Horizon 1 launched in 2022.
     """
     # ox mass is based on the 80 lbs that they recorded
     # Temperature is 67.5 F converted to Kelvin
@@ -86,5 +79,11 @@ def get_sim() -> MotorSimulation:
 
 
 if __name__ == "__main__":
-    pass
+    sim = get_sim()
+    sim.logger.target = "flightMotor2022-Temporary.csv"
+
+    sim.run_simulation()
+    
+
+    display_optical_analysis(sim.logger.full_path)
 

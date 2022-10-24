@@ -129,7 +129,7 @@ def riemann_sum(x, y):
     return total
 
 
-def nested_dictionary_lookup(dictionary, key):
+def nested_dictionary_lookup(dictionary: dict, key: string):
     if len(key) == 0:
         raise Exception("Empty key passed in")
 
@@ -140,7 +140,7 @@ def nested_dictionary_lookup(dictionary, key):
 
 def nested_dictionary_lookup_array(dictionary: dict, key_array: list):
     """Helper for regular nested lookup, uses array of keys"""
-    
+
     if len(key_array) == 0:
         raise Exception("Empty key array passed in")
 
