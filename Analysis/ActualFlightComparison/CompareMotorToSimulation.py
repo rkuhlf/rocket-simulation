@@ -14,7 +14,7 @@ def get_mass(time: float, motor_output: pd.DataFrame, dry_mass: float):
 
     return dry_mass + prop_mass
 
-def calculate_forces_from_telemetrum(telemetrum_data, motor_output, CD_data, burn_time=30, parachute_time=50, save_path="./Data/MeasuredOutput/TelemetrumDataCalculations.csv", frontal_area=0.0262677157, dry_mass=48):
+def calculate_forces_from_telemetrum(telemetrum_data: pd.DataFrame, motor_output: pd.DataFrame, CD_data: pd.DataFrame, burn_time: float, parachute_time: float, frontal_area: float, dry_mass: float, save_path="./Data/MeasuredOutput/TelemetrumDataCalculations.csv"):
     """
     Based on the data output by a Telemetrum, calculate the weight, drag, and thrust over time experienced by the rocket.
     """
@@ -63,8 +63,10 @@ def calculate_forces_from_telemetrum(telemetrum_data, motor_output, CD_data, bur
 
     return predictions, telemetrum_data    
 
-def compare_motor_to_actual():
-    """Graphs the data output by the Telemetrum compared to the motor simulation that I tried to make match the flight conditions."""
+
+
+def compare_simulated_motor_to_2022_flight():
+    """Graphs the data output by the Telemetrum compared to the motor simulation that I tried to make match Horizon 1's actual flight in 2022."""
 
     motor_simulation = get_sim()
     motor_simulation.logger.target = "motorOutput2022FlightConditions.csv"
@@ -74,8 +76,13 @@ def compare_motor_to_actual():
     telemetrum_data = pd.read_csv("Data/MeasuredOutput/TelemetrumData.csv")
     CD_data = pd.read_csv("Data/Input/Aerodynamics/FinalGuessAtWSMR.CSV")
 
-    predictions, telemetrum_data15 = calculate_forces_from_telemetrum(telemetrum_data, motor_output, CD_data, burn_time=15)
-    predictions, telemetrum_data30 = calculate_forces_from_telemetrum(telemetrum_data, motor_output, CD_data, burn_time=30)
+    horizon_1_data = {
+        "parachute_time": 50,
+        "frontal_area": 0.0262677157,
+        "dry_mass": 48
+    }
+    predictions, telemetrum_data15 = calculate_forces_from_telemetrum(telemetrum_data, motor_output, CD_data, burn_time=15, **horizon_1_data)
+    predictions, telemetrum_data30 = calculate_forces_from_telemetrum(telemetrum_data, motor_output, CD_data, burn_time=30, **horizon_1_data)
 
     
 
@@ -99,6 +106,6 @@ def compare_motor_to_actual():
 
 
 if __name__ == "__main__":
-    compare_motor_to_actual()
+    compare_simulated_motor_to_2022_flight()
 
     pass
