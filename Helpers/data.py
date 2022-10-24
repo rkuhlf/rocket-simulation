@@ -138,8 +138,9 @@ def nested_dictionary_lookup(dictionary, key):
     return nested_dictionary_lookup_array(dictionary, key_array)
 
 
-def nested_dictionary_lookup_array(dictionary, key_array):
+def nested_dictionary_lookup_array(dictionary: dict, key_array: list):
     """Helper for regular nested lookup, uses array of keys"""
+    
     if len(key_array) == 0:
         raise Exception("Empty key array passed in")
 
@@ -164,12 +165,12 @@ def nested_dictionary_lookup_array(dictionary, key_array):
 
 # FIXME: rename from safe
 # FIXME: Create a caching system for this that saves the previous key that worked
-def interpolated_lookup(dataframe, key, value, lookup_key, safe=False):
-    """Lookup key is the value you want returned"""
+def interpolated_lookup(dataframe: pd.DataFrame, key: string, value: float, return_key: string, safe=False):
+    """return_key is the value you want returned"""
     before_keys = dataframe[dataframe[key] <= value]
     if safe and len(before_keys) == 0:
         # There is nothing to look up in the table that is lower than that value
-        return dataframe[dataframe[key] == dataframe[key].min()][lookup_key].values[0]
+        return dataframe[dataframe[key] == dataframe[key].min()][return_key].values[0]
 
 
     try:
@@ -181,8 +182,14 @@ def interpolated_lookup(dataframe, key, value, lookup_key, safe=False):
 
     after_keys = dataframe[dataframe[key] >= value]
     if safe and len(after_keys) == 0:
+        last_possible_input = dataframe[key].max() 
+        if not hasattr(interpolated_lookup, "already_warned"):
+            print(f"WARNING: Bounding lookup value from dataframe {dataframe} to prevent {value} overflowing {last_possible_input}.")
+
+            interpolated_lookup.already_warned = True
+        
         # There is nothing to look up in the table that is bigger than that value
-        return dataframe[dataframe[key] == dataframe[key].max()][lookup_key].values[0]
+        return dataframe[dataframe[key] == last_possible_input][return_key].values[0]
 
     try:
         after_key = after_keys.iloc[0]
@@ -190,7 +197,7 @@ def interpolated_lookup(dataframe, key, value, lookup_key, safe=False):
         print("Try turning safe mode on")
         raise
 
-    return interpolate(value, before_key[key], after_key[key], before_key[lookup_key], after_key[lookup_key])
+    return interpolate(value, before_key[key], after_key[key], before_key[return_key], after_key[return_key])
 
 
 def interpolated_lookup_2D(dataframe, key1, key2, value1, value2, lookup_key, safe=False):
