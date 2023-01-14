@@ -89,8 +89,6 @@ def define_ABS_nitrous(percent_sulfur_contamination=0, percent_nitrogen_contamin
     return CEA_Obj(oxName="ContaminatedNitrous", fuelName="ABS")
 
 
-
-
 def get_cal_per_mole(calories_per_gram, molar_mass):
     "Accepts a specific enthalpy in calories per gram along with a molar mass and converts it into calories per mole"
     # Propep DAF file is in cal/gram

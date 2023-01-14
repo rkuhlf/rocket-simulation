@@ -21,8 +21,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-from Data.Input.CEA.CEAPropellants import define_HTPB_nitrous
-from Data.Input.CEA.AnalyzeOFAtPressure import find_efficiencies, display_OF_graph
+from data.input.cea.PropellantDefinitions import define_HTPB_nitrous
+from data.input.cea.AnalyzePropellant import display_effect_of_pressure, find_efficiencies, display_OF_graph
 
 htpb_nitrous = None
 
@@ -95,30 +95,11 @@ def display_effect_of_carbon_black():
     fig.legend()
     plt.show()
 
-def display_effect_of_pressure(pressures=np.linspace(100, 1000, 10), best_possible=False):
-    global htpb_nitrous
-
-    if best_possible:
-        htpb_nitrous = define_HTPB_nitrous(percent_carbon_black=0, percent_contamination=0, percent_curative=0)
-    else:
-        htpb_nitrous = define_HTPB_nitrous()
-
-    fig, ax1 = plt.subplots()
-
-    for pressure in pressures:
-        _, impulses, OFs = find_efficiencies(chamber_pressure=pressure)
-        
-        ax1.plot(OFs, impulses, label=f"{pressure}")
-
-    ax1.set(title="Effect of Pressure on Efficiency")
-
-    fig.legend()
-    plt.show()
 
 
 if __name__ == "__main__":
     htpb_nitrous = define_HTPB_nitrous(percent_sulfur_contamination=5)
-    save_full_output()
+    # save_full_output()
     # display_effect_of_contamination()
     # display_effect_of_curative()
     # display_effect_of_carbon_black()
@@ -126,7 +107,7 @@ if __name__ == "__main__":
     # k = define_HTPB_nitrous()
     # display_OF_graph(k)
 
-    # display_effect_of_pressure(pressures=np.linspace(100, 10000, 50), best_possible=True)
+    display_effect_of_pressure(htpb_nitrous, pressures=np.linspace(100, 10000, 10), best_possible=True)
     pass
 
 

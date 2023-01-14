@@ -3,6 +3,9 @@ import numpy as np
 
 
 def find_efficiencies(cea_object, chamber_pressure=360, area_ratio=4, OFs=np.linspace(2, 18, 200)):
+    """
+    chamber_pressure: number representing the psi of the chamber.
+    """
     cstars = []
     specific_impulses = []
 
@@ -37,4 +40,23 @@ def display_OF_graph(cea_object, chamber_pressure=360, area_ratio=4):
 
     fig.legend()
 
+    plt.show()
+
+def display_effect_of_pressure(cea_object, pressures=np.linspace(100, 1000, 10), legend=False):
+    """
+    Accepts a pressures array, in psi, representing the pressure inside of the combustion chamber.
+    """
+
+    for pressure, color in zip(pressures, np.linspace(0.8, 0.3, len(pressures))):
+        _, impulses, OFs = find_efficiencies(cea_object, chamber_pressure=pressure)
+        
+        plt.plot(OFs, impulses, label=f"{pressure}", c=f"{color}")
+
+    plt.title("Effect of Pressure on Efficiency")
+    plt.xlabel("O/F ()")
+    plt.ylabel("Specific Impulse (s)")
+
+    if legend:
+        plt.legend()
+    
     plt.show()
