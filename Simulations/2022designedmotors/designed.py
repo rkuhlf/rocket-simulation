@@ -1,8 +1,5 @@
 # Uses ABS-Nitrous
-# Designed for a 120 kg wet mass rocket with 7.75 inch ID (I forgot to include paraffin thickness for the fuel grain) 
-# Can get up to 125_000 Ns for a really long grain, only 92_000 Ns for a 1m grain. Or, if the regression equation is different, I can get 143000 for a really long grain
-# Ox mass, combustion efficiency, and regression equation should be the main things
-
+# Based strongly on designedmotor_abs, but this is adjusted to be slightly better?
 
 from random import choice, gauss, random
 from Helpers.general import modify_function_multiplication

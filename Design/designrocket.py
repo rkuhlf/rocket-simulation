@@ -3,14 +3,14 @@
 # We are using HTPB and Nitrous
 # We have a seven and a half inch ID and an 8 inch OD for the entire rocket
 # Based off of some runs of the OptimizeBurnTime.py file for a similar size rocket, we want to aim for a liquid burn time of about 22 seconds
-# I am going for a dry mass of 60 kg based off of a preliminary DiameterStudy
+# I am going for a dry mass of 60 kg based off of a preliminary DiameterStudy.
+# Other parametric analyses could be useful for design.
 
 
 import numpy as np
 
 
 from Helpers.design import get_propellant_mass, get_ox_mass, get_fuel_mass
-# from Helpers.general import get_radius
 
 from RocketParts.Motor.nitrousProperties import get_liquid_nitrous_density, get_gaseous_nitrous_density, get_nitrous_vapor_pressure
 

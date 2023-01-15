@@ -1,10 +1,13 @@
+# Compare the actual output of the motor, as extracted from the logger data, to the flight that was predicted.
+# Useful in order to match the inputs, assuming that the simulation was correct.
+
 
 from matplotlib import pyplot as plt
 import pandas as pd
-from Data.Input.models import get_density, get_speed_of_sound
+from data.input.models import get_density, get_speed_of_sound
 
-from Helpers.data import interpolated_lookup
-from Simulations.FlightMotor2022 import get_sim
+from helpers.data import interpolated_lookup
+from simulations.FlightMotor2022 import get_sim
 
 
 def get_mass(time: float, motor_output: pd.DataFrame, dry_mass: float):
@@ -36,7 +39,7 @@ def calculate_forces_from_telemetrum(telemetrum_data: pd.DataFrame, motor_output
 
         weight = mass * 9.81
         
-        # If the motor is burning, we have to guess what the drag should be
+        # If the motor is burning, we have to guess what the drag should be.
         density = get_density(row["altitude"] / 1000)
         speed = row["speed"]
         speed_of_sound = get_speed_of_sound(row["altitude"] / 1000)

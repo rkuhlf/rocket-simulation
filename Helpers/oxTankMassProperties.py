@@ -1,7 +1,6 @@
-# Generate a table with the ox tank mass over time
+# Generate a table with the ox tank mass over time.
+# Useful for analyzing how the drain goes, but does not hook into any simulations of rockets.
 import numpy as np
-
-
 
 
 from RocketParts.Motor.oxTank import OxTank
