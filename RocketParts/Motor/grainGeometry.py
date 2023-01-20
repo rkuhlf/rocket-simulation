@@ -6,8 +6,8 @@ from typing import Callable
 import numpy as np
 
 import pandas as pd
-from Helpers.decorators import diametered
-from Helpers.data import interpolated_lookup, interpolated_lookup_2D
+from helpers.decorators import diametered
+from helpers.data import interpolated_lookup, interpolated_lookup_2D
 from presetObject import PresetObject
 
 # For now, I am assuming that all grains have a constant OD

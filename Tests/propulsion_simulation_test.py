@@ -10,7 +10,7 @@ import numpy as np
 from random import random
 
 
-from Helpers.data import riemann_sum
+from helpers.data import riemann_sum
 # import SimulateMotor
 import Simulations.DesignedMotorHTPB as SimulateMotor
 

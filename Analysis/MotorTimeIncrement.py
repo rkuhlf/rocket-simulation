@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-from Data.Input.ThrustProfile import scale_saved_curve
+from data.input.ThrustProfile import scale_saved_curve
 from Simulations.DesignedMotorHTPB import get_sim
 
 

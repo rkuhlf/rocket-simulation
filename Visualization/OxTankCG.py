@@ -6,7 +6,7 @@ import numpy as np
 
 
 
-from RocketParts.Motor.oxTank import OxTank
+from rocketparts.motor.oxtank import OxTank
 
 # 
 def run_simulation(ox: OxTank=OxTank(ox_mass=52.43, length=3.2, radius=0.17145 / 2, temperature=293.15)):

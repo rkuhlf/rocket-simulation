@@ -5,12 +5,12 @@
 from random import gauss
 import numpy as np
 import matplotlib.pyplot as plt
-from RocketParts.massObject import MassObject
+from rocketparts.massObject import MassObject
 
 from presetObject import PresetObject
-from Helpers.general import cylindrical_volume, cylindrical_length
-from RocketParts.Motor.nitrousProperties import *
-from Helpers.decorators import diametered
+from helpers.general import cylindrical_volume, cylindrical_length
+from rocketparts.motor.nitrousProperties import *
+from helpers.decorators import diametered
 
 
 #region DESIGN EQUATIONS

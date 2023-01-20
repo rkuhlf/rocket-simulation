@@ -4,9 +4,9 @@
 
 import numpy as np
 
-from Helpers.general import constant, create_multiplication_modifier
-from RocketParts.Motor.injector import Injector
-from RocketParts.Motor.oxTank import OxTank
+from helpers.general import constant, create_multiplication_modifier
+from rocketparts.motor.injector import Injector
+from rocketparts.motor.oxtank import OxTank
 
 
 # TODO: make graphs of all of these over different pressures, debug the reason for numbers being different

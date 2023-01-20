@@ -2,15 +2,15 @@
 
 from typing import Callable
 
-from RocketParts.Motor.grainGeometry import StarSwirl
+from rocketparts.motor.grainGeometry import StarSwirl
 from simulation import MotorSimulation
 from logger import MotorLogger
-from RocketParts.motor import CustomMotor
-from RocketParts.Motor.oxTank import OxTank
-from RocketParts.Motor.injector import Injector, mass_flow_fitted_HTPV
-from RocketParts.Motor.combustionChamber import CombustionChamber
-from RocketParts.Motor.grain import ABSGrain, Grain
-from RocketParts.Motor.nozzle import Nozzle
+from rocketparts.motor import CustomMotor
+from rocketparts.motor.oxtank import OxTank
+from rocketparts.motor.injector import Injector, mass_flow_fitted_HTPV
+from rocketparts.motor.combustionchamber import CombustionChamber
+from rocketparts.motor.grain import ABSGrain, Grain
+from rocketparts.motor.nozzle import Nozzle
 from environment import Environment
 
 from Visualization.MotorOpticalAnalysis import display_optical_analysis

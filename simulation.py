@@ -2,12 +2,12 @@
 # This is the file for the basic connections between a rocket, a logger, and an environment
 # It doesn't really do much math, but there are a few basic utilities that help in other places
 
-from RocketParts.Motor.grain import Grain
-from RocketParts.motor import Motor
+from rocketparts.motor.grain import Grain
+from rocketparts.motor import Motor
 from presetObject import PresetObject
 
 from rocket import Rocket
-from Helpers.general import magnitude
+from helpers.general import magnitude
 from logger import Logger, RocketLogger
 from environment import Environment
 
@@ -181,7 +181,7 @@ class RocketSimulation(Simulation):
         return not self.rocket.landed
 
 
-    #region Helpers to evaluate the flight
+    #region helpers to evaluate the flight
 
     @property
     def dist_from_start(self) -> float:
@@ -307,7 +307,7 @@ class MotorSimulation(Simulation):
 
     #endregion
 
-    #region Helpers to evaluate the burn
+    #region helpers to evaluate the burn
 
     @property
     def total_impulse(self):

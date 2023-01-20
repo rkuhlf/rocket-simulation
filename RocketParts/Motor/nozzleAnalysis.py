@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from Helpers.general import get_radius
+from helpers.general import get_radius
 
-from RocketParts.Motor.nozzle import Nozzle
+from rocketparts.motor.nozzle import Nozzle
 
 
 #region Mathematical calculationss

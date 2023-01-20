@@ -3,9 +3,9 @@
 
 
 
-from RocketParts.massObject import MassObject
-from Helpers.decorators import diametered
-from Helpers.general import cylindrical_volume
+from rocketparts.massObject import MassObject
+from helpers.decorators import diametered
+from helpers.general import cylindrical_volume
 
 
 @diametered

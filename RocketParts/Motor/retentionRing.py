@@ -2,8 +2,8 @@ import numpy as np
 from builtins import print as builtin_print
 
 
-from Helpers.decorators import diametered
-from RocketParts.massObject import MassObject
+from helpers.decorators import diametered
+from rocketparts.massObject import MassObject
 
 
 

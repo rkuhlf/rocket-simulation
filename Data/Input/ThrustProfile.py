@@ -6,7 +6,7 @@
 import pandas as pd
 
 
-from Helpers.data import riemann_sum
+from helpers.data import riemann_sum
 
 def scale_saved_curve(path, desired_burn_time, desired_average_thrust, target_path=None):
     if target_path is None:

@@ -5,8 +5,8 @@ from matplotlib import pyplot as plt
 
 import orhelper
 from orhelper import FlightDataType, FlightEvent
-from Analysis.OpenRocketAnalysis.openRocketHelpers import apogee
-from openRocketHelpers import getSimulationByName, most_updated_sim, new_or_instance
+from Analysis.OpenRocketAnalysis.openRockethelpers import apogee
+from openRockethelpers import getSimulationByName, most_updated_sim, new_or_instance
 
 with new_or_instance() as instance:
     orh = orhelper.Helper(instance)

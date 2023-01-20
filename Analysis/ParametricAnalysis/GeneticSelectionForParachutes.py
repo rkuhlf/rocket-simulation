@@ -1,8 +1,8 @@
 from environment import Environment
 from simulation import Simulation
 from rocket import Rocket
-from RocketParts.motor import Motor
-from RocketParts.parachute import ApogeeParachute, Parachute
+from rocketparts.motor import Motor
+from rocketparts.parachute import ApogeeParachute, Parachute
 import numpy as np
 from random import random, normalvariate
 from copy import deepcopy

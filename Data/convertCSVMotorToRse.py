@@ -5,8 +5,8 @@
 import os
 import pandas as pd
 
-from Helpers.general import interpolate
-from Helpers.data import interpolated_lookup, riemann_sum
+from helpers.general import interpolate
+from helpers.data import interpolated_lookup, riemann_sum
 from xml.dom import minidom
 
 

@@ -10,7 +10,7 @@ from orhelper import FlightDataType
 # from net.sf.openrocket import document # type: ignore
 
 
-from Helpers.data import load_environment_variable
+from helpers.data import load_environment_variable
 
 
 OR_JAR_PATH = load_environment_variable('OR_JAR_PATH')

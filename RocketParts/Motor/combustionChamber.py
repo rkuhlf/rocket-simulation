@@ -8,10 +8,10 @@ import numpy as np
 
 
 from presetObject import PresetObject
-from RocketParts.Motor.grain import Grain
-from Helpers.data import DataType
-from Helpers.general import cylindrical_volume
-from RocketParts.Motor.mixingChambers import PrecombustionChamber, PostcombustionChamber
+from rocketparts.motor.grain import Grain
+from helpers.data import DataType
+from helpers.general import cylindrical_volume
+from rocketparts.motor.mixingChambers import PrecombustionChamber, PostcombustionChamber
 
 
 class CombustionChamber(PresetObject):

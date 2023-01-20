@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 
 
-from Helpers.general import numpy_from_string
+from helpers.general import numpy_from_string
 
 
 

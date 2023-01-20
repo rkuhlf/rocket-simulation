@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 
 
-from Helpers.general import angles_from_vector_3d
+from helpers.general import angles_from_vector_3d
 from Simulations.DesignedRocket import get_sim
 
 

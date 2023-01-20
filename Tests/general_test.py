@@ -4,7 +4,7 @@
 
 import unittest
 
-from Helpers.general import *
+from helpers.general import *
 import numpy as np
 
 
@@ -13,7 +13,7 @@ import numpy as np
 # TODO: Write tests for all of the major files to make sure everything runs before I commit anything
 
 
-class TestGeneralHelpers(unittest.TestCase):
+class TestGeneralhelpers(unittest.TestCase):
     def test_interpolate(self):
         self.assertEqual(interpolate(-1, -2, 0, 0, 100), 50)
 

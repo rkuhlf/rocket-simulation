@@ -6,12 +6,12 @@ from time import time
 from typing import Dict
 
 from numpy.lib.function_base import append
-from RocketParts.motor import Motor
+from rocketparts.motor import Motor
 from simulation import Simulation
 import pandas as pd
 import numpy as np
 
-from Helpers.data import force_save
+from helpers.data import force_save
 
 
 def create_motors_from_directory(path, max_count=-1):

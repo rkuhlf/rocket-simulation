@@ -12,7 +12,7 @@ The rocket model system makes fairly consistent use of object oriented design th
 
 Unfortunately, every decision has its downsides, and a class-based system generates lots of different files and sometimes wastes time. For example, it is difficult to efficiently fit a model for drag, then copy that model over to the models section, then copy a call to that model over to the environment. However, I couldn't really figure out a better way to do it.
 
-Helpers is supposed to have general 'helper' functions, which aren't specific to rockets or to aerodynamics, but accept arguments and return a solution. The functions should have descriptive names so that you don't have to go into the folder to figure out what they do.
+helpers is supposed to have general 'helper' functions, which aren't specific to rockets or to aerodynamics, but accept arguments and return a solution. The functions should have descriptive names so that you don't have to go into the folder to figure out what they do.
 
 There are some folders that I mostly just kept so that all of the stuff would be in one place. Tests is just to make sure some of the tricky calculations are working correctly, but it isn't really finished. Visualization is to help figure out what is wrong with the rocket, but also to make sure that things are working correctly.
 

@@ -1,5 +1,5 @@
 # DATA CLASSES AND ENUMS
-# Depending on what type of data input we are using, we will want to have an enum entry that is easily serializable to indicate to the object what to do
+# Depending on what type of data input we are using, we will want to have an enum entry that is easily serializable to indicate to the object what to do.
 
 import os
 from pathlib import Path
@@ -12,7 +12,7 @@ import string
 
 import pandas as pd
 
-from Helpers.general import interpolate
+from helpers.general import interpolate
 
 #region CONSTANTS
 inputs_path = "./Data/Input/"

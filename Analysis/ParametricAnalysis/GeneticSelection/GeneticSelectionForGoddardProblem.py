@@ -19,7 +19,7 @@ from environment import Environment
 from simulation import RocketSimulationToApogee
 # from rocket import Rocket
 from Simulations.DesignedRocket import get_rocket
-from RocketParts.motor import Motor
+from rocketparts.motor import Motor
 
 
 #region Global Variables

@@ -153,4 +153,4 @@ The code for the nozzle assumes completely isentropic flow that is always choked
 
 There are many terms to represent the ratio of specific heats for a fluid (notably gamma, γ, isentropic coefficient, isentropic exponent, k, κ, and probably some others), I have chosen to use isentropic_exponent consistently, for no particular reason.
 
-All temperatures are in Kelvin, I try to keep to the metric system (going so far as to use base Pascals), and I use radiuses in meters.
+All temperatures are in Kelvin, I try to keep to the metric system (going so far as to use base Pascals for pressure), and I use radiuses in meters.

@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 
 
-from Data.Input.models import get_splined_coefficient_of_drag
+from data.input.models import get_splined_coefficient_of_drag
 
 
 data = pd.read_csv("Data/Input/aerodynamicQualities.csv")

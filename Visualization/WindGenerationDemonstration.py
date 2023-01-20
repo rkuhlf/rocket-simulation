@@ -11,9 +11,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-from Helpers.general import magnitude
-from Data.Input.wind import Wind
-from Data.Input.Wind.whiteSandsModels import speed_at_altitude
+from helpers.general import magnitude
+from data.input.wind import Wind
+from data.input.Wind.whiteSandsModels import speed_at_altitude
 
 
 def show_normal_perlin_disparity():

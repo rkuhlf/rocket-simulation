@@ -2,8 +2,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-from Helpers.data import hist_box_count, plot_all_sims, read_sims
-from Helpers.visualization import make_matplotlib_big
+from helpers.data import hist_box_count, plot_all_sims, read_sims
+from helpers.visualization import make_matplotlib_big
 
 
 

@@ -8,17 +8,17 @@
 import numpy as np
 from math import isnan
 
-from Helpers.general import interpolate, project, combine
-from Helpers.general import angles_from_vector_3d, vector_from_angle, angle_between, magnitude
-from RocketParts.massObject import MassObject
-from Helpers.data import DataType
-from Data.Input.models import get_splined_coefficient_of_drag, get_coefficient_of_lift
+from helpers.general import interpolate, project, combine
+from helpers.general import angles_from_vector_3d, vector_from_angle, angle_between, magnitude
+from rocketparts.massObject import MassObject
+from helpers.data import DataType
+from data.input.models import get_splined_coefficient_of_drag, get_coefficient_of_lift
 
 # Import some stuff for defaults
-from RocketParts.motor import Motor
+from rocketparts.motor import Motor
 from logger import RocketLogger
 from environment import Environment
-from Helpers.decorators import diametered
+from helpers.decorators import diametered
 
 @diametered
 class Rocket(MassObject):

@@ -1,15 +1,15 @@
 # EFFECT OF DELTA TIME
 # Determine when further decreasing the time increment makes no change
 
-from Helpers.general import angles_from_vector_3d
+from helpers.general import angles_from_vector_3d
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy import array
 from simulation import RocketSimulation
 from logger import RocketLogger
-from RocketParts.parachute import ApogeeParachute
+from rocketparts.parachute import ApogeeParachute
 from rocket import Rocket
-from RocketParts.motor import Motor
+from rocketparts.motor import Motor
 from environment import Environment
 
 

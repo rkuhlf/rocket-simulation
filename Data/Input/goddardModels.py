@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from math import isnan
 
 
-from Helpers.data import interpolated_lookup, interpolated_lookup_2D
+from helpers.data import interpolated_lookup, interpolated_lookup_2D
 
 
 # This code should run regardless of how you import this file

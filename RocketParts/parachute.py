@@ -3,12 +3,12 @@
 # This is really simple right now; it doesn't even have any snatch forces or rope stuff
 
 from numpy import pi
-from Data.Input.models import get_density
+from data.input.models import get_density
 
 
-from Helpers.general import constant, interpolate
-from RocketParts.massObject import MassObject
-from Helpers.decorators import diametered
+from helpers.general import constant, interpolate
+from rocketparts.massObject import MassObject
+from helpers.decorators import diametered
 
 
 #region Opening Force Functions

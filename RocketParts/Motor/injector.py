@@ -6,11 +6,11 @@
 
 from typing import Callable
 import numpy as np
-from Helpers.data import DataType
-from Helpers.general import constant
+from helpers.data import DataType
+from helpers.general import constant
 
-from RocketParts.massObject import MassObject
-from RocketParts.Motor.nitrousProperties import get_nitrous_vapor_pressure, get_liquid_nitrous_density, find_specific_enthalpy_of_gaseous_nitrous, find_specific_enthalpy_of_liquid_nitrous, get_liquid_dynamic_viscosity
+from rocketparts.massObject import MassObject
+from rocketparts.motor.nitrousProperties import get_nitrous_vapor_pressure, get_liquid_nitrous_density, find_specific_enthalpy_of_gaseous_nitrous, find_specific_enthalpy_of_liquid_nitrous, get_liquid_dynamic_viscosity
 
 
 #region DESIGN/WEIGHT FUNCTIONS

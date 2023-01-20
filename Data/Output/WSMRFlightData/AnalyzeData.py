@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 from numpy import arctan
 import pandas as pd
 
-from Data.Input.models import get_speed_of_sound
+from data.input.models import get_speed_of_sound
 
 
 DATA_PATH = "./Data/Output/WSMRFlightData"

@@ -3,17 +3,17 @@ from random import choice
 
 import orhelper
 from Analysis.OpenRocketAnalysis.CustomMotor import OverrideThrustLookup
-from Analysis.OpenRocketAnalysis.openRocketHelpers import apogee
+from Analysis.OpenRocketAnalysis.openRockethelpers import apogee
 from Analysis.OpenRocketAnalysis.overrideAerodynamicsListener import OverrideAerodynamicsDataFrame
 from Analysis.monteCarlo import MonteCarlo
 from Analysis.monteCarloFlight import MonteCarloFlight
-from Helpers.data import interpolated_lookup
+from helpers.data import interpolated_lookup
 from net.sf.openrocket.simulation import FlightDataType, SimulationStatus # type: ignore
 from net.sf.openrocket.simulation.listeners import SimulationListener # type: ignore
-from openRocketHelpers import get_randomized_sim
+from openRockethelpers import get_randomized_sim
 from orhelper import Helper
 from net.sf.openrocket import document # type: ignore
-from RocketParts.motor import Motor
+from rocketparts.motor import Motor
 import pandas as pd
 from net.sf.openrocket.simulation.exception import MotorIgnitionException # type: ignore
 

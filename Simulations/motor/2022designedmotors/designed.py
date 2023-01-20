@@ -2,18 +2,18 @@
 # Based strongly on designedmotor_abs, but this is adjusted to be slightly better?
 
 from random import choice, gauss, random
-from Helpers.general import modify_function_multiplication
-from RocketParts.Motor.grainGeometry import StarSwirl, multiply_areas
+from helpers.general import modify_function_multiplication
+from rocketparts.motor.grainGeometry import StarSwirl, multiply_areas
 
 from simulation import MotorSimulation
 from logger import MotorLogger
-from RocketParts.motor import CustomMotor
-from RocketParts.Motor.oxTank import OxTank, random_WSMR_temperature
-from RocketParts.Motor.injector import Injector, mass_flow_fitted_HTPV
-from RocketParts.Motor.combustionChamber import CombustionChamber
-from RocketParts.Motor.grain import ABSGrain, star_swirl_modifiers, power_ABS_nitrous_functions
-from RocketParts.Motor.pressureSwirlInjector import PSW_modifiers
-from RocketParts.Motor.nozzle import Nozzle
+from rocketparts.motor import CustomMotor
+from rocketparts.motor.oxtank import OxTank, random_WSMR_temperature
+from rocketparts.motor.injector import Injector, mass_flow_fitted_HTPV
+from rocketparts.motor.combustionchamber import CombustionChamber
+from rocketparts.motor.grain import ABSGrain, star_swirl_modifiers, power_ABS_nitrous_functions
+from rocketparts.motor.pressureSwirlInjector import PSW_modifiers
+from rocketparts.motor.nozzle import Nozzle
 from environment import Environment
 
 from Visualization.MotorOpticalAnalysis import display_optical_analysis

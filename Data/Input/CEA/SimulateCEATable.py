@@ -10,8 +10,8 @@ from rocketcea.cea_obj import CEA_Obj
 
 
 
-from Helpers.data import inputs_path
-from Data.Input.CEA.CEAPropellants import define_ABS_nitrous, define_HTPB_nitrous
+from helpers.data import inputs_path
+from data.input.CEA.CEAPropellants import define_ABS_nitrous, define_HTPB_nitrous
 
 
 # by default, it has the HTPB and N2O at 76-ish F. This is probably fine for the HTPB, we will see what effect it has to change it

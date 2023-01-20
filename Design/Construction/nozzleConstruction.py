@@ -1,4 +1,4 @@
-from Helpers.general import linear_intersection, interpolate_point, transpose_tuple
+from helpers.general import linear_intersection, interpolate_point, transpose_tuple
 import matplotlib.pyplot as plt
 import numpy as np
 

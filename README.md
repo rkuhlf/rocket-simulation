@@ -14,9 +14,9 @@ Once your rocket is ready to go, there are several helper classes that loop thro
 
 ```python
 from environment import Environment
-from RocketParts.motor import Motor
+from rocketparts.motor import Motor
 from rocket import Rocket
-from RocketParts.parachute import ApogeeParachute, Parachute
+from rocketparts.parachute import ApogeeParachute, Parachute
 from logger import RocketLogger 
 from simulation import RocketSimulation
 

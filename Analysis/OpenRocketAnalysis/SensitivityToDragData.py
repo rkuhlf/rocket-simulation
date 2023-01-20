@@ -4,11 +4,11 @@ from matplotlib import pyplot as plt
 from Analysis.OpenRocketAnalysis.CustomMotor import OverrideThrustLookup
 import javaInitialization
 
-from Analysis.OpenRocketAnalysis.openRocketHelpers import apogee
+from Analysis.OpenRocketAnalysis.openRockethelpers import apogee
 from Analysis.OpenRocketAnalysis.overrideAerodynamicsListener import OverrideAerodynamicsConstant, OverrideAerodynamicsDataFrame
 
 import orhelper
-from openRocketHelpers import getSimulationNames, most_updated_sim, new_or_instance
+from openRockethelpers import getSimulationNames, most_updated_sim, new_or_instance
 from net.sf.openrocket.aerodynamics import FlightConditions # type: ignore
 
 

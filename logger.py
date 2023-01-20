@@ -9,8 +9,8 @@ import pandas as pd
 from copy import deepcopy, copy
 
 from presetObject import PresetObject
-from Helpers.data import nested_dictionary_lookup, force_save
-from Helpers.general import magnitude
+from helpers.data import nested_dictionary_lookup, force_save
+from helpers.general import magnitude
 
 # TODO: I need to refactor the to_record feature to allow a different name for the columns
 # I can probably just use a separate array

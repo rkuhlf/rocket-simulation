@@ -2,9 +2,9 @@
 # It includes an example of how to set up and run a rocket simulation.
 
 from environment import Environment
-from RocketParts.motor import Motor
+from rocketparts.motor import Motor
 from rocket import Rocket
-from RocketParts.parachute import ApogeeParachute, Parachute
+from rocketparts.parachute import ApogeeParachute, Parachute
 from logger import RocketLogger
 from simulation import RocketSimulation
 from Visualization.FlightOpticalAnalysis import display_optical_analysis

@@ -1,12 +1,12 @@
-from RocketParts.motor import Motor
+from rocketparts.motor import Motor
 import javaInitialization
 
 import orhelper
 from orhelper import AbstractSimulationListener
-from Analysis.OpenRocketAnalysis.openRocketHelpers import apogee
+from Analysis.OpenRocketAnalysis.openRockethelpers import apogee
 
-from openRocketHelpers import getSimulationByName, most_updated_sim, new_or_instance
-from Helpers.data import interpolated_lookup
+from openRockethelpers import getSimulationByName, most_updated_sim, new_or_instance
+from helpers.data import interpolated_lookup
 
 from net.sf.openrocket.simulation import SimulationStatus # type: ignore
 # from net.sf.openrocket.masscalc import RigidBody

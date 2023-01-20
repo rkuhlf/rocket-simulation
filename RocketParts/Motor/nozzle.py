@@ -6,7 +6,7 @@
 import numpy as np
 
 from presetObject import PresetObject
-from Helpers.general import get_radius
+from helpers.general import get_radius
 
 
 

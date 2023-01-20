@@ -5,13 +5,13 @@
 
 import pandas as pd
 
-from Helpers.data import inputs_path
-from Helpers.general import interpolate, get_next
+from helpers.data import inputs_path
+from helpers.general import interpolate, get_next
 from presetObject import PresetObject
-from Data.Input.models import get_density, get_speed_of_sound
-from Data.Input.Wind.whiteSandsModels import speed_at_altitude
-from Helpers.data import interpolated_lookup
-from Data.Input.wind import Wind
+from data.input.models import get_density, get_speed_of_sound
+from data.input.wind.whiteSandsModels import speed_at_altitude
+from helpers.data import interpolated_lookup
+from data.input.wind import Wind
 
 
 # TODO: rewrite this object to use the same data methods and closure things as the other models

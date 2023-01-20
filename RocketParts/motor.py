@@ -7,15 +7,15 @@ from typing import Type
 import numpy as np
 import pandas as pd
 
-from RocketParts.massObject import MassObject
-from Helpers.data import interpolated_lookup, interpolated_lookup_2D, riemann_sum
+from rocketparts.massObject import MassObject
+from helpers.data import interpolated_lookup, interpolated_lookup_2D, riemann_sum
 from environment import Environment
 
 # Imports for defaults
-from RocketParts.Motor.oxTank import OxTank
-from RocketParts.Motor.injector import Injector
-from RocketParts.Motor.combustionChamber import CombustionChamber
-from RocketParts.Motor.nozzle import Nozzle
+from rocketparts.motor.oxtank import OxTank
+from rocketparts.motor.injector import Injector
+from rocketparts.motor.combustionchamber import CombustionChamber
+from rocketparts.motor.nozzle import Nozzle
 from logger import MotorLogger
 
 

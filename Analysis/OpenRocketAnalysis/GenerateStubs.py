@@ -4,7 +4,7 @@
 import jpype
 import stubgenj
 
-from Helpers.data import load_environment_variable
+from helpers.data import load_environment_variable
 
 jvm_path = load_environment_variable("JVM_PATH")
 jar_path = load_environment_variable("OR_JAR_PATH")

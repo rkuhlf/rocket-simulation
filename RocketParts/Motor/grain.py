@@ -6,14 +6,14 @@ from random import choice
 from typing import Callable
 import numpy as np
 import pandas as pd
-from RocketParts.Motor.grainGeometry import Annular
-from RocketParts.massObject import MassObject
+from rocketparts.motor.grainGeometry import Annular
+from rocketparts.massObject import MassObject
 
 
 from presetObject import PresetObject
 # Import some helpers and some general closures
-from Helpers.general import create_multiplication_modifier, cylindrical_volume, interpolate, constant
-from Helpers.decorators import diametered
+from helpers.general import create_multiplication_modifier, cylindrical_volume, interpolate, constant
+from helpers.decorators import diametered
 
 #region REGRESSION-RATE EQUATIONS
 # This is just a list of pre-programmed regression-rate equations that I have come across

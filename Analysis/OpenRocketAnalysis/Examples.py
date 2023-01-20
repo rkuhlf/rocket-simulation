@@ -9,7 +9,7 @@ if __name__ == "__main__":
     import javaInitialization
     import orhelper
     from orhelper import FlightDataType, FlightEvent
-    from openRocketHelpers import getSimulationNames, most_updated_sim, new_or_instance
+    from openRockethelpers import getSimulationNames, most_updated_sim, new_or_instance
 
     with new_or_instance() as instance:
         

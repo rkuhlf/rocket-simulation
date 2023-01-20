@@ -97,7 +97,7 @@ if __name__ == "__main__":
     # display_OF_graph(abs_nitrous, chamber_pressure=chamber_pressure, area_ratio=5.09)
     # print(abs_nitrous.get_eps_at_PcOvPe(chamber_pressure, 6.18, chamber_pressure/environmental_pressure))
 
-    display_effect_of_pressure(abs_nitrous, pressures=np.linspace(200, 600, 5))
+    display_effect_of_pressure(abs_nitrous, pressures=np.linspace(200, 600, 5), legend=True)
 
     # abs_nitrous = define_ABS_nitrous()
     # save_full_output()

@@ -6,8 +6,8 @@
 
 import numpy as np
 
-from Helpers.general import constant
-from RocketParts.massObject import MassObject
+from helpers.general import constant
+from rocketparts.massObject import MassObject
 
 
 def trapezoidal_area(fins: "Fins"):

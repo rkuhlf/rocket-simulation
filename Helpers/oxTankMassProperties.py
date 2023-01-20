@@ -3,10 +3,10 @@
 import numpy as np
 
 
-from RocketParts.Motor.oxTank import OxTank
-from RocketParts.Motor.nitrousProperties import get_gaseous_nitrous_density, get_nitrous_vapor_pressure, get_liquid_nitrous_density
+from rocketparts.motor.oxtank import OxTank
+from rocketparts.motor.nitrousproperties import get_gaseous_nitrous_density, get_nitrous_vapor_pressure, get_liquid_nitrous_density
 
-from RocketParts.Motor.injector import Injector
+from rocketparts.motor.injector import Injector
 import matplotlib.pyplot as plt
 
 temperature = 273.15 + 22

@@ -7,7 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-from Data.Input.models import *
+from data.input.models import *
 
 
 def display_density():

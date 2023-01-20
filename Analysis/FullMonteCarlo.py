@@ -1,9 +1,9 @@
 import os
 import matplotlib.pyplot as plt
 from Analysis.monteCarloFlightPickMotor import MonteCarloFlightPickMotor
-from RocketParts.motor import Motor
+from rocketparts.motor import Motor
 
-from Helpers.data import create_motors_from_directory
+from helpers.data import create_motors_from_directory
     
 
 if __name__ == "__main__":

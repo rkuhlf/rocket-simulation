@@ -10,7 +10,7 @@ from random import random
 
 
 import SimulateRocket
-from Helpers.general import angle_between
+from helpers.general import angle_between
 
 
 class TestSimulateRocket(unittest.TestCase):        

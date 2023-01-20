@@ -4,7 +4,7 @@
 import unittest
 
 
-from RocketParts.massObject import MassObject
+from rocketparts.massObject import MassObject
 
 class TestMassObject(unittest.TestCase):
 

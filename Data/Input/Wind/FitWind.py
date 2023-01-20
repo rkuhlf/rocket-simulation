@@ -8,7 +8,7 @@ import numpy as np
 from scipy.optimize import curve_fit
 
 
-from Helpers.visualization import make_matplotlib_big
+from helpers.visualization import make_matplotlib_big
 
 
 # Data from 1992 to 2011

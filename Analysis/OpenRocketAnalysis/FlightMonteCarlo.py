@@ -3,12 +3,12 @@
 # I think I should be more careful with this. All of the units have to be base metric for this to work
 
 import pandas as pd
-from Helpers.data import read_sims
+from helpers.data import read_sims
 import javaInitialization
 from Analysis.OpenRocketAnalysis.monteCarloFlightOR import MonteCarloFlightOR, MonteCarloFlightRandomMotorOR
 from Analysis.monteCarlo import create_motors_from_directory
 
-from Analysis.OpenRocketAnalysis.openRocketHelpers import apogee, most_updated_sim, new_or_instance
+from Analysis.OpenRocketAnalysis.openRockethelpers import apogee, most_updated_sim, new_or_instance
 from Analysis.MonteCarloFlightData.AnalyzeMonteCarloFlight import display_altitude_lines, display_apogee_distribution, display_landing, display_max_mach_distribution, display_max_velocity, display_total_impulse_effect
 
 def run_simulation():

@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from Helpers.data import interpolated_lookup
+from helpers.data import interpolated_lookup
 
 
 
