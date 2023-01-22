@@ -2,10 +2,10 @@ import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from data.input.models import get_density
+from src.data.input.models import get_density
 
-from helpers.data import hist_box_count, plot_all_sims, read_sims
-from rocketparts.parachute import Parachute, pflanz_method
+from lib.data import hist_box_count, plot_all_sims, read_sims
+from src.rocketparts.parachute import Parachute, pflanz_method
 
 # TODO: Fix the naming conventions for all of these files. Everything should be Analyze<simulation class>
 

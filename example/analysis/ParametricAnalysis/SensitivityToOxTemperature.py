@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 
 from Simulations.DesignedMotorHTPB import get_sim
-from helpers.data import fahrenheit_from_kelvin
+from lib.data import fahrenheit_from_kelvin
 
 
 # Iterating from the limits of theoretically reasonable temperatures in Kelvin

@@ -3,12 +3,12 @@
 # This is really simple right now; it doesn't even have any snatch forces or rope stuff
 
 from numpy import pi
-from data.input.models import get_density
+from src.data.input.models import get_density
 
 
-from helpers.general import constant, interpolate
-from rocketparts.massObject import MassObject
-from helpers.decorators import diametered
+from lib.general import constant, interpolate
+from src.rocketparts.massObject import MassObject
+from lib.decorators import diametered
 
 
 #region Opening Force Functions
@@ -73,13 +73,15 @@ class Parachute(MassObject):
 
     def deploy(self, rocket):
         self.deployed = True
-        self.time_of_deployment = rocket.environment.time
+        self.time_of_deployment = rocket.simulation.time
+        # TODO: refactor so thatt you can say rocket.parachute.deployed
+        # I want to make all of these functions so that they do not require rocket to be passed.
         rocket.parachute_deployed = True
 
     def get_drag(self, rocket):
         # TODO: use a more accurate interpolation for opening
         if self.deployed:
-            interpolated_area = interpolate(rocket.environment.time, self.time_of_deployment, self.time_of_deployment + self.required_deployment_time, 0, self.area)
+            interpolated_area = interpolate(rocket.simulation.time, self.time_of_deployment, self.time_of_deployment + self.required_deployment_time, 0, self.area)
             interpolated_area = min(interpolated_area, self.area)
 
             return rocket.dynamic_pressure * self.CD * interpolated_area

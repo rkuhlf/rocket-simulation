@@ -10,14 +10,14 @@
 import numpy as np
 
 
-from helpers.design import get_propellant_mass, get_ox_mass, get_fuel_mass
+from lib.design import get_propellant_mass, get_ox_mass, get_fuel_mass
 
-from rocketparts.motor.nitrousproperties import get_liquid_nitrous_density, get_gaseous_nitrous_density, get_nitrous_vapor_pressure
+from src.rocketparts.motorparts.nitrousproperties import get_liquid_nitrous_density, get_gaseous_nitrous_density, get_nitrous_vapor_pressure
 
-from rocketparts.motor.grain import determine_optimal_starting_diameter, marxman_doran_HTPB_nitrous, find_required_length as find_required_length_fuel
-from rocketparts.motor.oxtank import find_required_length as find_required_length_oxidizer
-from rocketparts.motor.injector import determine_required_thickness, determine_orifice_count_MR, find_mass_flow_MR, get_cross_sectional_area
-from rocketparts.motor.nozzle import find_nozzle_length, find_equilibrium_throat_area, find_equilibrium_throat_diameter, determine_expansion_ratio
+from src.rocketparts.motorparts.grain import determine_optimal_starting_diameter, marxman_doran_HTPB_nitrous, find_required_length as find_required_length_fuel
+from src.rocketparts.motorparts.oxtank import find_required_length as find_required_length_oxidizer
+from src.rocketparts.motorparts.injector import determine_required_thickness, determine_orifice_count_MR, find_mass_flow_MR, get_cross_sectional_area
+from src.rocketparts.motorparts.nozzle import find_nozzle_length, find_equilibrium_throat_area, find_equilibrium_throat_diameter, determine_expansion_ratio
 
 
 #region PRESETS

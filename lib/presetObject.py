@@ -4,8 +4,9 @@
 
 import copy
 import pickle
+from abc import ABCMeta
 
-class PresetObject:
+class PresetObject(metaclass=ABCMeta):
     def __init__(self, **kwargs):
         self.overwrite_defaults(**kwargs)
 

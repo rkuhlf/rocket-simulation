@@ -5,8 +5,8 @@
 import os
 import pandas as pd
 
-from helpers.general import interpolate
-from helpers.data import interpolated_lookup, riemann_sum
+from lib.general import interpolate
+from lib.data import interpolated_lookup, riemann_sum
 from xml.dom import minidom
 
 
@@ -85,7 +85,7 @@ def create_linearly_interpolated_CG(CG_data_file, thrust_data_file, output_path,
         # Convert to mm
         cg = 1000 * interpolated_lookup(mass_CG_lookup, "mass", mass, "CG", safe=True)
 
-        data.appendChild(create_row_xml(root, row, mass, cg))
+        src.data.appendChild(create_row_xml(root, row, mass, cg))
 
         prev_thrust = row["thrust"]
         prev_time = row["time"]
@@ -114,7 +114,7 @@ def convert_full_csv_to_rse(csv_path, output_path, use_every=30, **kwargs):
         mass = row["propellant_mass"]
         cg = row["propellant_CG"]
 
-        data.appendChild(create_row_xml(root, row, mass, cg))
+        src.data.appendChild(create_row_xml(root, row, mass, cg))
 
     save_root_xml(root, output_path)
 

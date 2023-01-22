@@ -2,7 +2,7 @@ import numpy as np
 import unittest
 
 
-from rocketparts.motor.grain import *
+from src.rocketparts.motorparts.grain import *
 
 
 class TestingChamber(unittest.TestCase):

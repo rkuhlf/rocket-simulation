@@ -13,12 +13,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-from rocketparts.motor.nitrousProperties import calculate_maximum_liquid_expansion
-from rocketparts.motor.grain import determine_optimal_starting_diameter, marxman_doran_HTPB_nitrous, find_required_length as find_required_length_fuel
-from rocketparts.motor.oxtank import find_required_length as find_required_length_oxidizer
-from rocketparts.motor.nozzle import find_nozzle_length, find_equilibrium_throat_area
-from rocketparts.motor.injector import determine_required_thickness
-from helpers.general import get_radius, normalized
+from src.rocketparts.motorparts.nitrousProperties import calculate_maximum_liquid_expansion
+from src.rocketparts.motorparts.grain import determine_optimal_starting_diameter, marxman_doran_HTPB_nitrous, find_required_length as find_required_length_fuel
+from src.rocketparts.motorparts.oxtank import find_required_length as find_required_length_oxidizer
+from src.rocketparts.motorparts.nozzle import find_nozzle_length, find_equilibrium_throat_area
+from src.rocketparts.motorparts.injector import determine_required_thickness
+from lib.general import get_radius, normalized
 
 
 # I am designing around 70 kg of Nitrous and an HTPB single-port

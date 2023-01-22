@@ -2,21 +2,20 @@
 # Started off as just a place to store the code to get a thrust curve up and running for a rocket class
 # Now there is a custom motor that can simulate a hybrid's combustion process
 
-
-from typing import Type
 import numpy as np
 import pandas as pd
 
-from rocketparts.massObject import MassObject
-from helpers.data import interpolated_lookup, interpolated_lookup_2D, riemann_sum
-from environment import Environment
+from src.rocketparts.massObject import MassObject
+from lib.data import interpolated_lookup, interpolated_lookup_2D, riemann_sum
+from src.environment import Environment
+from src.constants import thrust_curve_path
 
 # Imports for defaults
-from rocketparts.motor.oxtank import OxTank
-from rocketparts.motor.injector import Injector
-from rocketparts.motor.combustionchamber import CombustionChamber
-from rocketparts.motor.nozzle import Nozzle
-from lib.logger import MotorLogger
+from src.rocketparts.motorparts.oxtank import OxTank
+from src.rocketparts.motorparts.injector import Injector
+from src.rocketparts.motorparts.combustionchamber import CombustionChamber
+from src.rocketparts.motorparts.nozzle import Nozzle
+from src.simulation.motor.logger import MotorLogger
 
 
 
@@ -34,7 +33,7 @@ class Motor(MassObject):
         self.center_of_gravity = 2 # m
         self.mass = 105 # kg
         self.propellant_mass = 105 # kg
-        self.thrust_curve = "Data/Input/ThrustCurves/currentGoddard.csv"
+        self.thrust_curve = f"{thrust_curve_path}/currentGoddard.csv"
 
         self.thrust_multiplier = 1
         self.time_multiplier = 1
@@ -83,13 +82,13 @@ class Motor(MassObject):
 
 
         # The longer we want the burn time, the more we want to shrink the lookup time
-        lookup_time = self.environment.time / self.time_multiplier
+        lookup_time = self.simulation.time / self.time_multiplier
 
         
         try:
             self.thrust = self.thrust_multiplier * interpolated_lookup(self.thrust_data, "time", lookup_time, "thrust")
 
-            new_mass = self.total_mass - self.thrust_to_mass(self.thrust, self.environment.time_increment)
+            new_mass = self.total_mass - self.thrust_to_mass(self.thrust, self.simulation.time_increment)
             self.set_mass_constant(new_mass)
 
             self.thrust += self.get_nozzle_force_difference(altitude)
@@ -180,9 +179,9 @@ class CustomMotor(Motor):
 
         self.overwrite_defaults(**kwargs)
 
-        self.pressurization_time_increment = self.pressurization_time_increment or self.environment.time_increment
-        self.post_pressurization_time_increment = self.post_pressurization_time_increment or self.environment.time_increment
-        self.environment.time_increment = self.pressurization_time_increment
+        self.pressurization_time_increment = self.pressurization_time_increment or self.simulation.time_increment
+        self.post_pressurization_time_increment = self.post_pressurization_time_increment or self.simulation.time_increment
+        self.simulation.time_increment = self.pressurization_time_increment
 
         self.nozzle_area = self._nozzle.exit_area
 
@@ -244,8 +243,8 @@ class CustomMotor(Motor):
         self.ox_tank.start_drain()
     
     def calculate_thrust(self, altitude=0):
-        self.ox_tank.update_drain(self.ox_flow * self.environment.time_increment)
-        self.combustion_chamber.update_combustion(self.ox_flow, self.nozzle, self.environment.time_increment)
+        self.ox_tank.update_drain(self.ox_flow * self.simulation.time_increment)
+        self.combustion_chamber.update_combustion(self.ox_flow, self.nozzle, self.simulation.time_increment)
 
         if self.fuel_flow == 0:
             self.OF = 1e10
@@ -263,10 +262,10 @@ class CustomMotor(Motor):
         # TODO: I want to reimplement this so that the nozzle is giving mass flow and exit velocity values. I think both ways should work, but that way will be easier to compare, and I am not sure that my nozzle coefficient calculation is correct
         self.thrust = nozzle_coefficient * self.nozzle.throat_area * self.combustion_chamber.pressure * self.thrust_multiplier
 
-        self.total_impulse += self.thrust * self.environment.time_increment
+        self.total_impulse += self.thrust * self.simulation.time_increment
 
         if not self.combustion_chamber.pressurizing:
-            self.environment.time_increment = self.post_pressurization_time_increment
+            self.simulation.time_increment = self.post_pressurization_time_increment
 
         return self.thrust
 
@@ -376,7 +375,7 @@ class CustomMotor(Motor):
 
     def end(self):
         self.finished_simulating = True
-        self.burn_time = self.environment.time
+        self.burn_time = self.simulation.time
 
     # endregion
 

@@ -19,7 +19,7 @@ from src.environment import Environment
 from lib.simulation import RocketSimulationToApogee
 # from rocket import Rocket
 from Simulations.DesignedRocket import get_rocket
-from rocketparts.motor import Motor
+from src.rocketparts.motor import Motor
 
 
 #region Global Variables
@@ -44,7 +44,7 @@ def create_random_motor(target_total_impulse, point_count, mean_burn_time=20, st
     data[0] = [0, 0]
     data[-1] = [1, 0]
     data = pd.DataFrame(data, columns=["time", "thrust"])
-    data = data.sort_values(by=['time'], ignore_index=True)
+    data = src.data.sort_values(by=['time'], ignore_index=True)
     
 
     # Instantiate the motor from the dataframe
@@ -123,7 +123,7 @@ def mutate(motor: Motor):
     data = deepcopy(motor.thrust_data)
     current_burn_time = motor.get_burn_time()
 
-    for index, row in data.iterrows():
+    for index, row in src.data.iterrows():
         # You cannot just do a basic multiplication because it will get stuck at zero
         row["thrust"] = normalvariate(row["thrust"] , 0.05)
         row["thrust"] = max(0, row["thrust"])
@@ -134,13 +134,13 @@ def mutate(motor: Motor):
         if row["time"] > 1:
             row["time"] = 2 - row["time"]
 
-    data = data.sort_values(by=['time'], ignore_index=True) 
+    data = src.data.sort_values(by=['time'], ignore_index=True) 
 
-    first = data.iloc[0]
+    first = src.data.iloc[0]
     first["time"] = 0
     first["thrust"] = 0
 
-    last = data.iloc[-1]
+    last = src.data.iloc[-1]
     last["time"] = 1
     last["thrust"] = 0
     

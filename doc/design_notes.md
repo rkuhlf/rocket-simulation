@@ -37,8 +37,15 @@ I think there is a half-finished attempt to implement something like that saving
 
 
 ## Separation of Concerns
-lib is for code that could be used outside of this project without any alteration (i.e. it has nothing to do with rockets or motors or environments). All of the CEA code is included in the source, as is all of the data. The analysis of a lot of that stuff is included in the example.
+lib is for code that could be used outside of this project without any alteration (i.e. it has nothing to do with rockets or motors or environments, or it has nothing to do with my implementation of them). All of the CEA code is included in the source, as is all of the src.data. The analysis of a lot of that stuff is included in the example.
+
+In theory, the display of the data should be entirely decoupled from the simulation itself, so all of the matplotlib code should be in example.
 
 <!-- TODO: try to remove all of the redundancy in file naming with folder names. -->
+<!-- TODO: move all of the hard coded path prefixes out of the class call functions. They make it hard to get a custom input. -->
+<!-- Every main class should have access to the simulation, which will give access to whatever sub-things are needed. -->
 
 <!-- I have tried to put file paths that will usually need to be customized into a .env file. These will probably be different every time you clone the repository. -->
+
+
+<!-- Separate the OR stuff into a completely different library. -->

@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-from rocketparts.motor.grain import bath_correction_for_helical_regression
+from src.rocketparts.motorparts.grain import bath_correction_for_helical_regression
 
 
 

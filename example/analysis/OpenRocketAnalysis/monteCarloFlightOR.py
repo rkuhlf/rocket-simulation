@@ -7,13 +7,13 @@ from Analysis.OpenRocketAnalysis.openRockethelpers import apogee
 from Analysis.OpenRocketAnalysis.overrideAerodynamicsListener import OverrideAerodynamicsDataFrame
 from Analysis.monteCarlo import MonteCarlo
 from Analysis.monteCarloFlight import MonteCarloFlight
-from helpers.data import interpolated_lookup
+from lib.data import interpolated_lookup
 from net.sf.openrocket.simulation import FlightDataType, SimulationStatus # type: ignore
 from net.sf.openrocket.simulation.listeners import SimulationListener # type: ignore
 from openRockethelpers import get_randomized_sim
 from orhelper import Helper
 from net.sf.openrocket import document # type: ignore
-from rocketparts.motor import Motor
+from src.rocketparts.motor import Motor
 import pandas as pd
 from net.sf.openrocket.simulation.exception import MotorIgnitionException # type: ignore
 
@@ -81,7 +81,7 @@ class MonteCarloFlightOR(MonteCarloFlight):
             data["RASAero CP"] = CPs
 
         data = pd.DataFrame(data)
-        data.set_index("time")
+        src.data.set_index("time")
 
         self.important_data.append(data)
     

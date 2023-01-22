@@ -28,7 +28,7 @@ fullpath = os.path.join(directory, filename)
 
 data = pd.read_csv(fullpath)
 
-for index, row in data.iterrows():
+for index, row in src.data.iterrows():
     # adjusting the multiplier should give some control over frame rate
     scene.frame_set(index * 1)
 

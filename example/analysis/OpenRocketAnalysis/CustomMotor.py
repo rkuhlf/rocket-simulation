@@ -1,4 +1,4 @@
-from rocketparts.motor import Motor
+from src.rocketparts.motor import Motor
 import javaInitialization
 
 import orhelper
@@ -6,7 +6,7 @@ from orhelper import AbstractSimulationListener
 from Analysis.OpenRocketAnalysis.openRockethelpers import apogee
 
 from openRockethelpers import getSimulationByName, most_updated_sim, new_or_instance
-from helpers.data import interpolated_lookup
+from lib.data import interpolated_lookup
 
 from net.sf.openrocket.simulation import SimulationStatus # type: ignore
 # from net.sf.openrocket.masscalc import RigidBody
@@ -19,7 +19,7 @@ class OverrideThrustLookup(AbstractSimulationListener):
         
     
     def postSimpleThrustCalculation(self, simulationStatus: SimulationStatus, thrust: float) -> float:
-        self.motor.environment.time = simulationStatus.getSimulationTime()
+        self.motor.simulation.time = simulationStatus.getSimulationTime()
         # ! TODO: The CG is very important too. I need that data from the motor sim
         # Pass the altitude in here
         try:

@@ -9,8 +9,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-from data.input.ThrustProfile import scale_saved_curve
-from Simulations.DesignedMotorHTPB import get_sim
+from src.data.manipulation.ThrustProfile import scale_saved_curve
+from example.simulations.motors2022.htpb import get_sim
 
 
 
@@ -20,7 +20,7 @@ total_impulses = []
 for inc in possible_increments:
     sim = get_sim()
 
-    sim.environment.time_increment = inc
+    sim.time_increment = inc
     # sim.logger = None
 
     sim.run_simulation()

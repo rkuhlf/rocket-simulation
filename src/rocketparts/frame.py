@@ -5,8 +5,8 @@
 import numpy as np
 
 
-from rocketparts.massObject import MassObject
-from helpers.decorators import diametered
+from src.rocketparts.massObject import MassObject
+from lib.decorators import diametered
 
 @diametered
 class Frame(MassObject):

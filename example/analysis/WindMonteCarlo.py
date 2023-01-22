@@ -62,7 +62,7 @@ def save_monte_carlo(apogees, distances, lateral_velocities, path="Data/Output/w
             'Lateral Velocities': lateral_velocities
         })
 
-    data.to_csv(path)
+    src.data.to_csv(path)
 
 
 def load_monte_carlo():

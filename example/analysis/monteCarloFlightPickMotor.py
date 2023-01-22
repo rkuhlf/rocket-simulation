@@ -3,7 +3,7 @@
 from Analysis.monteCarloFlight import MonteCarloFlight
 from random import choice
 
-from rocketparts.motor import Motor
+from src.rocketparts.motor import Motor
 
 class MonteCarloFlightPickMotor(MonteCarloFlight):
     def __init__(self, motors: 'list[Motor]', sims=[]):

@@ -4,7 +4,7 @@
 
 
 
-from helpers.data import DataType
+from lib.data import dataType
 from lib.presetObject import PresetObject
 
 
@@ -35,9 +35,9 @@ class MassObject(PresetObject):
 
         self.mass_objects = []
 
-        self.mass_data_type = DataType.DEFAULT
-        self.CG_data_type = DataType.DEFAULT
-        self.moment_data_type = DataType.DEFAULT
+        self.mass_data_type = dataType.DEFAULT
+        self.CG_data_type = dataType.DEFAULT
+        self.moment_data_type = dataType.DEFAULT
 
         super().overwrite_defaults(**kwargs)
 
@@ -47,7 +47,7 @@ class MassObject(PresetObject):
         return self.get_total_mass()       
 
     def get_total_mass(self, exclude_objects=[]):
-        if self.mass_data_type is DataType.DEFAULT:
+        if self.mass_data_type is dataType.DEFAULT:
             if self in exclude_objects:
                 return 0
             
@@ -62,21 +62,22 @@ class MassObject(PresetObject):
             
             return total
         
-        if self.mass_data_type == DataType.CONSTANT:
+        # Get rid of all of this function nonsense to create more closures.
+        if self.mass_data_type == dataType.CONSTANT:
             return self.mass
 
-        if self.mass_data_type == DataType.FUNCTION_TIME:
-            return self.mass_given_time(self.simulation.environment.time)
+        if self.mass_data_type == dataType.FUNCTION_TIME:
+            return self.mass_given_time(self.simulation.time)
 
     def mass_given_time(self, time):
         raise NotImplementedError("If you are going to use a custom function for the mass over the time, you have to specify it by using 'set_mass_as_function_of_time'")
 
     def set_mass_as_function_of_time(self, function):
-        self.mass_data_type = DataType.FUNCTION_TIME
+        self.mass_data_type = dataType.FUNCTION_TIME
         self.mass_given_time = function
 
     def set_mass_constant(self, value):
-        self.mass_data_type = DataType.CONSTANT
+        self.mass_data_type = dataType.CONSTANT
         self.mass = value
 
     def change_mass(self, amount, proportional=True, exclude_objects=[]):
@@ -107,7 +108,7 @@ class MassObject(PresetObject):
     # region Total Center of Gravity
     @property
     def total_CG(self, local=False):
-        if self.CG_data_type == DataType.DEFAULT:
+        if self.CG_data_type == dataType.DEFAULT:
             current_CG = self.center_of_gravity
             current_CG_mass_weight = self.mass
 
@@ -125,21 +126,21 @@ class MassObject(PresetObject):
 
             return current_CG
 
-        if self.CG_data_type == DataType.CONSTANT:
+        if self.CG_data_type == dataType.CONSTANT:
             return self.center_of_gravity
         
-        if self.CG_data_type == DataType.FUNCTION_TIME:
-            return self.CG_given_time(self.simulation.environment.time)
+        if self.CG_data_type == dataType.FUNCTION_TIME:
+            return self.CG_given_time(self.simulation.time)
 
     def CG_given_time(self, time):
         raise NotImplementedError("If you are going to use a custom function for the CG over the time, you have to specify it by using 'set_CG_as_function_of_time'")
 
     def set_CG_as_function_of_time(self, function):
-        self.CG_data_type = DataType.FUNCTION_TIME
+        self.CG_data_type = dataType.FUNCTION_TIME
         self.CG_given_time = function
 
     def set_CG_constant(self, value):
-        self.CG_data_type = DataType.CONSTANT
+        self.CG_data_type = dataType.CONSTANT
         self.center_of_gravity = value
 
     # endregion
@@ -148,7 +149,7 @@ class MassObject(PresetObject):
     # region Total Moment of Inertia
     @property
     def total_moment_of_inertia(self):
-        if self.moment_data_type == DataType.DEFAULT:
+        if self.moment_data_type == dataType.DEFAULT:
             # Right now, there are no individual moments of inertia anyways, but I will keep the convention
             total_moment = 0
             total_CG = self.total_CG
@@ -162,22 +163,22 @@ class MassObject(PresetObject):
             return total_moment
 
     
-        if self.moment_data_type == DataType.CONSTANT:
+        if self.moment_data_type == dataType.CONSTANT:
             # Notice that it is not set by default, so it will throw an error if you don't override it
             return self.moment_of_inertia
         
-        if self.moment_data_type == DataType.FUNCTION_TIME:
-            return self.moment_given_time(self.simulation.environment.time)
+        if self.moment_data_type == dataType.FUNCTION_TIME:
+            return self.moment_given_time(self.simulation.time)
 
     def moment_given_time(self, time):
         raise NotImplementedError("If you are going to use a custom function for the moment of inertia over the time, you have to specify it by using 'set_moment_as_function_of_time'")
 
     def set_moment_as_function_of_time(self, function):
-        self.moment_data_type = DataType.FUNCTION_TIME
+        self.moment_data_type = dataType.FUNCTION_TIME
         self.moment_given_time = function
 
     def set_moment_constant(self, value):
-        self.moment_data_type = DataType.CONSTANT
+        self.moment_data_type = dataType.CONSTANT
         self.moment_of_inertia = value
 
     # endregion

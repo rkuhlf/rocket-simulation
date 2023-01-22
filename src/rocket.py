@@ -8,17 +8,19 @@
 import numpy as np
 from math import isnan
 
-from helpers.general import interpolate, project, combine
-from helpers.general import angles_from_vector_3d, vector_from_angle, angle_between, magnitude
-from rocketparts.massObject import MassObject
-from helpers.data import DataType
-from data.input.models import get_splined_coefficient_of_drag, get_coefficient_of_lift
+from lib.general import interpolate, project, combine
+from lib.general import angles_from_vector_3d, vector_from_angle, angle_between, magnitude
+from src.rocketparts.massObject import MassObject
+from lib.data import dataType
+from src.data.input.models import get_splined_coefficient_of_drag, get_coefficient_of_lift
 
 # Import some stuff for defaults
-from rocketparts.motor import Motor
-from lib.logger import RocketLogger
+from src.rocketparts.motor import Motor
+from src.simulation.rocket.logger import RocketLogger
 from src.environment import Environment
-from helpers.decorators import diametered
+from lib.decorators import diametered
+from lib.vector import Vector
+from lib.rotation import Rotation
 
 @diametered
 class Rocket(MassObject):
@@ -38,31 +40,32 @@ class Rocket(MassObject):
 
     # Torque is in radians per second-squared * kg
     def __init__(self, **kwargs):
+        """
+        This should receive a simulation eventually.
+        """
         super().__init__()
         # X, Y, Z values, where Z is upwards
-        self.position = np.array([0, 0, 0], dtype="float64")
-        self.velocity = np.array([0, 0, 0], dtype="float64")
-        self.acceleration = np.array([0, 0, 0], dtype="float64")
+        self.position = Vector(0, 0, 0)
+        self.velocity = Vector(0, 0, 0)
+        self.acceleration = Vector(0, 0, 0)
 
-        self.rotation = np.array(
-            [np.pi / 2, 0],
-            dtype="float64")
-        self.angular_velocity = np.array([0, 0], dtype="float64")
-        self.angular_acceleration = np.array([0, 0], dtype="float64")
+        self.rotation = Rotation(np.pi / 2, 0)
+        self.angular_velocity = Rotation(0, 0)
+        self.angular_acceleration = Rotation(0, 0)
 
         # This is just the mass of the frame, the motor and propellant will be added in a second
         self.mass = 0  # kg
         # Excluding the motor and other sub mass objects
         self.center_of_gravity = 4  # m
         # Constant by default, override with set_CP_function
-        self.CP_data_type = DataType.CONSTANT
+        self.CP_data_type = dataType.CONSTANT
         self.CP = 5
 
-        self.CD_data_type = DataType.CONSTANT
+        self.CD_data_type = dataType.CONSTANT
         self.CD = 0.7
 
         # This will throw an error because it must be overriden if we are applying angular effects
-        self.CL_data_type = DataType.CONSTANT
+        self.CL_data_type = dataType.CONSTANT
         self.CL = 0
 
 
@@ -109,11 +112,11 @@ class Rocket(MassObject):
         self.update_previous()
 
 
-        self.force = np.array([0., 0., 0.])
-        self.torque = np.array([0., 0.])
+        self.force = Vector(0, 0, 0)
+        self.torque = Rotation(0, 0)
 
         # region Evaluators
-        self.relative_velocity = np.array([0., 0., 0.])
+        self.relative_velocity = Vector(0, 0, 0)
         self.apogee = None
         self.max_mach = 0
         self.max_velocity = 0
@@ -141,7 +144,7 @@ class Rocket(MassObject):
         self.update_maxes()
 
         # I am going to pretend that we have some kind of safety mechanism to make sure they don't deploy while we are under thrust
-        if self.environment.time > self.motor.get_burn_time():
+        if self.simulation.time > self.motor.get_burn_time():
             for parachute in self.parachutes:
                 if parachute.should_deploy(self):
                     parachute.deploy(self)
@@ -151,11 +154,9 @@ class Rocket(MassObject):
         if isnan(self.position[2]):
             raise Exception("Everything fell apart. NaN value in altitude")
 
-        self.log_data("Net Force", self.force)
-
         self.update_previous()
-        self.force = np.array([0., 0., 0.])
-        self.torque = np.array([0., 0.])
+        self.force = Vector(0, 0, 0)
+        self.torque = Rotation(0, 0)
 
     # region PROPERTIES
     @property
@@ -175,7 +176,7 @@ class Rocket(MassObject):
     def environment(self, e):
         self._environment = e
         self.override_subobjects()
-    
+
     @property
     def reference_area(self):
         return np.pi * self.radius ** 2
@@ -200,12 +201,7 @@ class Rocket(MassObject):
 
     @property
     def thrusting(self):
-        return self.motor.calculate_thrust(self.environment.time) > 0
-
-
-    def log_data(self, name, data):
-        if self.logger is not None:
-            self.logger.add_items({name: data})
+        return self.motor.calculate_thrust(self.simulation.time) > 0
 
     @property
     def theta_around(self):
@@ -214,6 +210,22 @@ class Rocket(MassObject):
     @property
     def theta_down(self):
         return self.rotation[1]
+
+    @property
+    def omega_around(self):
+        return self.angular_velocity[0]
+
+    @property
+    def omega_down(self):
+        return self.angular_velocity[1]
+
+    @property
+    def alpha_around(self):
+        return self.angular_acceleration[0]
+
+    @property
+    def alpha_down(self):
+        return self.angular_acceleration[1]
 
     @property
     def mach(self):
@@ -248,12 +260,11 @@ class Rocket(MassObject):
         if self.descending and self.apogee == None and self.has_lifted:
             print(
                 "Setting Apogee to", self.p_position[2],
-                "at t=", self.environment.time)
+                "at t=", self.simulation.time)
             self.apogee = self.p_position[2]
             self.apogee_lateral_velocity = magnitude(self.relative_velocity)
 
 
-        self.log_data("Mach", self.mach)
         self.max_mach = max(self.max_mach, self.mach)
         self.max_velocity = max(self.max_velocity, magnitude(self.velocity))
         self.max_net_force = max(self.max_net_force, magnitude(self.force))
@@ -263,12 +274,12 @@ class Rocket(MassObject):
     # region UPDATING KINEMATICS
     def apply_velocity(self):
         combined_velocity = combine(self.p_velocity, self.velocity)
-        self.position += combined_velocity * self.environment.time_increment
+        self.position += combined_velocity * self.simulation.time_increment
 
     def apply_acceleration(self):
         combined_acceleration = combine(
             self.p_acceleration, self.get_acceleration())
-        self.velocity += combined_acceleration * self.environment.time_increment
+        self.velocity += combined_acceleration * self.simulation.time_increment
 
     def get_acceleration(self):
         # We only set the self variable here so that it can be logged
@@ -279,7 +290,7 @@ class Rocket(MassObject):
     def apply_angular_velocity(self):
         combined_angular_velocity = combine(
             self.p_angular_velocity, self.angular_velocity)
-        self.rotation += combined_angular_velocity * self.environment.time_increment
+        self.rotation += combined_angular_velocity * self.simulation.time_increment
 
         # Flip all of the rotation
         # Change the theta_down so that it is never negative (should always be between 0 and pi)
@@ -294,7 +305,6 @@ class Rocket(MassObject):
             # Notice that flipping the rotational acceleration is important, even if it has already been applied this frame. Next frame, when we average it, it will basically be zero, showing the flip
             self.angular_acceleration[1] *= -1
             self.angular_velocity[1] *= -1
-            self.log_data("flipped", 1)
         elif (self.rotation[1] < 0):
             # Should just turn this into a function, want to make sure it's identical
             self.rotation[0] += np.pi
@@ -305,14 +315,11 @@ class Rocket(MassObject):
 
             self.angular_acceleration[1] *= -1
             self.angular_velocity[1] *= -1
-            self.log_data("flipped", 1)
-        else:
-            self.log_data("flipped", 0)
 
     def apply_angular_acceleration(self):
         combined_angular_acceleration = combine(
             self.p_angular_acceleration, self.get_angular_acceleration())
-        self.angular_velocity += combined_angular_acceleration * self.environment.time_increment
+        self.angular_velocity += combined_angular_acceleration * self.simulation.time_increment
 
 
     def get_angular_acceleration(self):
@@ -324,12 +331,16 @@ class Rocket(MassObject):
     def update_previous(self):
         """Update the variables that hold last frame's rocket features"""
         # I am just going to start applying a normal force here because this is super annoying. Hopefully nobody is trying to do one second rocket flights.
-        if self.environment.time < 1 and self.position[2] < 0:
-            self.position = np.array([0, 0, 0], dtype="float64")
-            self.velocity = np.array([0, 0, 0], dtype="float64")
-            self.acceleration = np.array([0, 0, 0], dtype="float64")
+        # TODO: find something else to check to see if the flight has begun. Maybe a left the pad variable.
+        # Check whether the z-value is less than the ground level.
+        if self.simulation and self.simulation.time < 1 and self.position[2] < 0:
+            self.position = Vector(0, 0, 0)
+            self.velocity = Vector(0, 0, 0)
+            self.acceleration = Vector(0, 0, 0)
 
-        self.log_data("Target Heading", angles_from_vector_3d(self.velocity))
+        # Silent will return zero if it is not yet heading anywhere.
+        heading = angles_from_vector_3d(self.velocity, silent=True)
+        self.target_heading = Rotation(heading[0], heading[1])
 
         self.p_position = np.copy(self.position)  # p stands for previous
         self.p_velocity = np.copy(self.velocity)
@@ -353,9 +364,6 @@ class Rocket(MassObject):
 
         if distance_from_nose is None:
             distance_from_nose = self.total_CG
-
-        if debug:
-            self.log_data(name, value * direction)
 
         self.force += value * direction
 
@@ -422,6 +430,9 @@ class Rocket(MassObject):
 
 
     def apply_air_resistance(self):
+        self.drag = np.zeros(3)
+        self.lift = np.zeros(3)
+
         # Translational drag
         if not np.isclose(self.dynamic_pressure, 0):
             drag_magnitude, drag_direction, lift_magnitude, lift_direction = self.get_translational_drag()
@@ -429,19 +440,18 @@ class Rocket(MassObject):
 
             if self.parachute_deployed:
                 # We need to add in the drag of all of the parachutes, and we need to start applying force at CG. Also, lift doesn't matter anymore
-                total_drag = drag_magnitude
                 for parachute in self.parachutes:
-                    total_drag += parachute.get_drag(self)
+                    drag_magnitude += parachute.get_drag(self)
 
-                self.apply_force(total_drag, drag_direction,
-                                 debug=True, name="Drag")
+                self.apply_force(drag_magnitude, drag_direction)
             else:
-                self.apply_force(drag_magnitude, drag_direction,
-                                 self.CP, debug=True, name="Drag")
+                self.apply_force(drag_magnitude, drag_direction)
 
                 if self.apply_angular_forces:
-                    self.apply_force(lift_magnitude, lift_direction,
-                                     self.CP, debug=True, name="Lift")
+                    self.apply_force(lift_magnitude, lift_direction)
+
+            self.drag = drag_magnitude * drag_direction
+            self.lift = lift_magnitude * lift_direction
 
 
         # FIXME: Not currently applying angular air resistance
@@ -456,18 +466,17 @@ class Rocket(MassObject):
         drag = self.dynamic_pressure * self.reference_area * self.CD
         lift = self.dynamic_pressure * self.reference_area * self.CL
 
-        air_velocity = np.array([0., 0., 0.])
+        air_velocity = Vector(0, 0, 0)
         if self.apply_angular_forces:
             air_velocity = self.environment.get_air_speed(self.altitude)
 
         self.relative_velocity = self.velocity - air_velocity
 
         if magnitude(self.relative_velocity) == 0:
-            return 0, np.array([0., 0., 1.]), 0, np.array([0., 0., 1.])
+            # Direction doesn't matter, since mag is zero.
+            return 0, Vector(0, 0, 1), 0, Vector(0, 0, -1)
 
-        self.log_data('air speed', self.environment.get_air_speed(
-            self.altitude))
-        self.log_data('relative velocity', self.relative_velocity)
+        self.air_speed = self.environment.get_air_speed(self.altitude)
 
         # Drag force is applied in the same direction as freestream velocity
         drag_direction = - self.relative_velocity / \
@@ -495,7 +504,7 @@ class Rocket(MassObject):
 
         if np.all(np.isclose(lift_direction, 0)):
             lift = 0
-            lift_direction = np.array([0, 0, -1])
+            lift_direction = Vector(0, 0, -1)
         else:
             lift_direction /= magnitude(lift_direction)
 
@@ -514,13 +523,13 @@ class Rocket(MassObject):
 
         moment_around = multiplier * self.angular_velocity[0] ** 2
         moment_around = min(
-            self.angular_velocity[0] / self.environment.time_increment,
+            self.angular_velocity[0] / self.simulation.time_increment,
             moment_around)
         moment_around *= -np.sign(self.angular_velocity[0])
 
         moment_down = multiplier * self.angular_velocity[1] ** 2
         moment_down = min(
-            self.angular_velocity[1] / self.environment.time_increment,
+            self.angular_velocity[1] / self.simulation.time_increment,
             moment_down)
         moment_down *= -np.sign(self.angular_velocity[1])
 
@@ -530,13 +539,10 @@ class Rocket(MassObject):
 
     def apply_thrust(self):
         # Calculate indicates there are side effects, namely, the mass decreases
-        thrust = self.motor.calculate_thrust(self.altitude)
-
-        self.log_data("Thrust", thrust)
-        self.log_data("Mass", self.total_mass)
+        self.thrust = self.motor.calculate_thrust(self.altitude)
 
         # thrust is in direction of the rotation. The larger the angle is, the more to the right the rocket is
-        self.apply_force(thrust, vector_from_angle(self.rotation))
+        self.apply_force(self.thrust, vector_from_angle(self.rotation))
 
 
     def apply_gravity(self):
@@ -544,7 +550,7 @@ class Rocket(MassObject):
             self.total_mass, self.altitude)
 
         self.apply_force(
-            gravity, np.array([0, 0, -1]),
+            gravity, Vector(0, 0, -1),
             debug=True, name="Gravity")
 
     # endregion
@@ -570,21 +576,17 @@ class Rocket(MassObject):
             self.angle_of_attack = angle_between(
                 relative_velocity, vector_from_angle(self.rotation))
 
-        self.log_data("AOA", self.angle_of_attack)
-
 
     def get_coefficient_of_drag(self, mach, alpha):
         return self.CD
 
     def calculate_coefficient_of_drag(self):
-        if self.CD_data_type is DataType.CONSTANT:
+        if self.CD_data_type is dataType.CONSTANT:
             pass
 
-        if self.CD_data_type is DataType.FUNCTION_MACH_ALPHA:
+        if self.CD_data_type is dataType.FUNCTION_MACH_ALPHA:
             self.CD = self.get_coefficient_of_drag(
                 self.mach, self.angle_of_attack)
-
-        self.log_data("CD", self.CD)
 
 
     def get_coefficient_of_lift(self, mach, alpha):
@@ -595,25 +597,22 @@ class Rocket(MassObject):
             "There is no default coefficient of lift lookup, you must provide one yourself")
 
     def calculate_coefficient_of_lift(self):
-        if self.CL_data_type is DataType.CONSTANT:
+        if self.CL_data_type is dataType.CONSTANT:
             pass
 
-        if self.CL_data_type is DataType.FUNCTION_MACH_ALPHA:
+        if self.CL_data_type is dataType.FUNCTION_MACH_ALPHA:
             self.CL = self.get_coefficient_of_lift(
                 self.mach, self.angle_of_attack)
-
-        self.log_data("CL", self.CL)
-
 
     def get_center_of_pressure(self, mach, alpha):
         # This is the default, it should probably be overriden by set_CP_function
         return self.CP
 
     def calculate_center_of_pressure(self):
-        if self.CP_data_type is DataType.CONSTANT:
+        if self.CP_data_type is dataType.CONSTANT:
             pass
 
-        if self.CP_data_type is DataType.FUNCTION_MACH_ALPHA:
+        if self.CP_data_type is dataType.FUNCTION_MACH_ALPHA:
             self.CP = self.get_center_of_pressure(
                 self.mach, self.angle_of_attack)
 
@@ -622,10 +621,8 @@ class Rocket(MassObject):
         # Note that this is only used for dynamic stability calculations, nothing during the simulations
         self.dist_press_grav = self.CP - self.total_CG
 
-        self.log_data("Stability [Calibers]",
-                      self.dist_press_grav / (self.diameter))
-        self.log_data("Stability [Lengths]",
-                      self.dist_press_grav / (self.length))
+        self.stability_cals = self.dist_press_grav / self.diameter
+        self.stability_lengths = self.dist_press_grav / self.length
 
     def calculate_cached(self):
         self.calculate_dynamic_pressure()
@@ -638,32 +635,34 @@ class Rocket(MassObject):
     # endregion
 
 
-    # region DATA INPUTS
+    # region data INPUTS
     def set_CP_constant(self, value):
-        self.CP_data_type = DataType.CONSTANT
+        self.CP_data_type = dataType.CONSTANT
         self.CP = value
 
     def set_CP_function(self, func):
-        self.CP_data_type = DataType.FUNCTION_MACH_ALPHA
+        self.CP_data_type = dataType.FUNCTION_MACH_ALPHA
         self.get_center_of_pressure = func
 
     def set_CD_constant(self, value):
-        self.CD_data_type = DataType.CONSTANT
+        self.CD_data_type = dataType.CONSTANT
         self.CD = value
 
     def set_CD_function(self, func):
-        self.CD_data_type = DataType.FUNCTION_MACH_ALPHA
+        self.CD_data_type = dataType.FUNCTION_MACH_ALPHA
         self.get_coefficient_of_drag = func
 
     def set_CL_constant(self, value):
-        self.CL_data_type = DataType.CONSTANT
+        self.CL_data_type = dataType.CONSTANT
         self.CL = value
 
     def set_CL_function(self, func):
-        self.CL_data_type = DataType.FUNCTION_MACH_ALPHA
+        self.CL_data_type = dataType.FUNCTION_MACH_ALPHA
         self.get_coefficient_of_lift = func
 
     # endregion
+
+
 
 
 
@@ -717,17 +716,17 @@ class Rocket(MassObject):
 
     #     if more_than_cancels(
     #             current_rotational_momentum[0],
-    #             around_drag * self.environment.time_increment):
+    #             around_drag * self.simulation.time_increment):
     #         # This actually has an effect a significant portion of the time
     #         around_drag = current_rotational_momentum[0] / \
-    #             self.environment.time_increment
+    #             self.simulation.time_increment
 
     #     if more_than_cancels(
     #             current_rotational_momentum[1],
-    #             down_drag * self.environment.time_increment):
+    #             down_drag * self.simulation.time_increment):
     #         # This actually has an effect a significant portion of the time
     #         down_drag = current_rotational_momentum[1] / \
-    #             self.environment.time_increment
+    #             self.simulation.time_increment
 
 
     #     # This is making almost zero difference

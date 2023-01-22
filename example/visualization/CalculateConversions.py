@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 import re # FIXME: leave a comment that says what this is
 
-from helpers.general import numpy_from_string
+from lib.general import numpy_from_string
 
 # For each one, check if there is already a 'conversions.csv' in outputs
 # Then add the conversions based on that data

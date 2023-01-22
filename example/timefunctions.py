@@ -6,12 +6,12 @@
 
 from timeit import timeit
 import importlib
-from helpers.timing import Timer
+from lib.timing import Timer
 import pandas as pd
 from random import random
 from src.environment import Environment
 from src.rocket import Rocket
-from rocketparts.motor import Motor
+from src.rocketparts.motor import Motor
 
 
 # One Trial: 5.7
@@ -73,7 +73,7 @@ def test_gravity():
     iters = 10000
     with Timer():
         for i in range(iters):
-            helpers.variables.position[1] = random() * 3000
+            lib.variables.position[1] = random() * 3000
             # Add the import for this back
             get_gravitational_attraction()
 

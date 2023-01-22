@@ -4,7 +4,7 @@
 
 import unittest
 
-from helpers.general import *
+from lib.general import *
 import numpy as np
 
 

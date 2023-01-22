@@ -3,8 +3,8 @@
 
 
 
-from data.input.CEA.CEAPropellants import define_ABS_nitrous
-from rocketparts.motor.nozzle import determine_expansion_ratio as determine_eps_constant_gamma
+from src.data.input.CEA.CEAPropellants import define_ABS_nitrous
+from src.rocketparts.motorparts.nozzle import determine_expansion_ratio as determine_eps_constant_gamma
 
 
 combustion_chamber_pressure = 362 # psia

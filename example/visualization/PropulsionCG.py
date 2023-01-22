@@ -5,8 +5,8 @@
 
 
 from Visualization.OxTankCG import run_simulation
-from rocketparts.massObject import MassObject
-from helpers.general import interpolate
+from src.rocketparts.massObject import MassObject
+from lib.general import interpolate
 
 
 

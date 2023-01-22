@@ -40,11 +40,11 @@ Most matematical models will be quicker to calculate tan a lookup, so it is some
 #### Numpy Polynomial vs lmfit
 TL;DR: lmfit is better. Though most of the other code is written using numpy for calculations, the polynomial class is very poorly supported. There are basically two versions, and looking through the documentation for either one is a nightmare. It is also hard to save the model.
 
-lmfit is built entirely for this kind of thing - fitting a user-inputted function to input-output data. Eventually, everything should be generated using lmfit.
+lmfit is built entirely for this kind of thing - fitting a user-inputted function to input-output src.data. Eventually, everything should be generated using lmfit.
 
 
 ## Inaccuracies in Inputs
-Most rocket simulation software only allows you to input one possible value for each input. However, aerodynamics is a particularly inaccurate science, with difficulties determining coefficients of force to even one significant figure. Therefore, I thought it would be useful to allow inputs that covered a range of data. To do so, I think it makes the most since to have custom override functions for each class.
+Most rocket simulation software only allows you to input one possible value for each input. However, aerodynamics is a particularly inaccurate science, with difficulties determining coefficients of force to even one significant figure. Therefore, I thought it would be useful to allow inputs that covered a range of src.data. To do so, I think it makes the most since to have custom override functions for each class.
 
 Simply allow the user to input an array of two items, worst-case first followed by best-case. The program would then run two simulations and output the range of possible outcomes. 
 
@@ -53,7 +53,7 @@ An even more advanced version of this software could accept an array of objects 
 ## Nomenclature
 I call the rotational moment torque, but it isn't really torque. Torque as units Newton-meters, but I am using a force with radians per second^2 kilograms - The main difference is that I don't have the extra meters in it. Actually I'm not sure there's a difference.
 
-I tried to capitalize python files that are intended to be run. For the most part, files that begin with a lowercase are just helpers.
+I tried to capitalize python files that are intended to be run. For the most part, files that begin with a lowercase are just lib.
 
 
 ## Rotation

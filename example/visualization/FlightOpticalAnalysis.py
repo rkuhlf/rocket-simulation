@@ -6,16 +6,18 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+from lib.logger import feature_time
+from src.simulation.rocket.logger_features import *
 
 def display_forces(data):
     fig, ax = plt.subplots()
-    ax.plot(data['time'], data['Net Force3'], label="Vertical Net Force")
+    ax.plot(data[feature_time.get_label()], data[feature_z_force.get_label()], label="Vertical Net Force")
 
     # This not exactly all in the same direction, but close enough
-    resistive_forces = data['Thrust'] - data['Net Force3']
-    ax.plot(data['time'], resistive_forces, label="Resistive Forces")
+    resistive_forces = data[feature_thrust.get_label()] - data[feature_z_force.get_label()]
+    ax.plot(data[feature_time.get_label()], resistive_forces, label="Resistive Forces")
     
-    ax.plot(data['time'], data['Thrust'], label="Thrust")
+    ax.plot(data[feature_time.get_label()], data[feature_thrust.get_label()], label="Thrust")
 
     ax.set_title("Forces over Time")
     ax.set_xlabel("Time [s]")
@@ -30,14 +32,18 @@ def display_lift_drag(data):
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(ncols=2, nrows=2)
 
     ax1.set_title("Lift Magnitude")
-    lift = (data["Lift1"] ** 2 + data["Lift2"] ** 2 + data["Lift3"] ** 2) ** (1/2)
-    ax1.plot(data["time"], lift)
+    lift = (data[feature_x_lift.get_label()] ** 2 + \
+            data[feature_y_lift.get_label()] ** 2 + \
+            data[feature_z_lift.get_label()] ** 2) ** (1/2)
+    ax1.plot(data[feature_time.get_label()], lift)
     ax1.set_xlabel("Time [s]")
     ax1.set_ylabel("Stability [Calibers]")
 
     ax2.set_title("Drag Magnitude")
-    lift = (data["Drag1"] ** 2 + data["Drag2"] ** 2 + data["Drag3"] ** 2) ** (1/2)
-    ax2.plot(data["time"], lift)
+    lift = (data[feature_x_drag.get_label()] ** 2 + \
+            data[feature_y_drag.get_label()] ** 2 + \
+            data[feature_z_drag.get_label()] ** 2) ** (1/2)
+    ax2.plot(data[feature_time.get_label()], lift)
     ax2.set_xlabel("Time [s]")
     ax2.set_ylabel("Force (N)")
 
@@ -59,12 +65,12 @@ def display_stability(data):
 
 
     ax1.set_title("Conventional Stability")
-    ax1.plot(data["time"], data["Stability [Calibers]"])
+    ax1.plot(data[feature_time.get_label()], data[feature_stability_cals.get_label()])
     ax1.set_xlabel("Time [s]")
     ax1.set_ylabel("Stability [Calibers]")
 
     ax2.set_title("Modern Stability")
-    ax2.plot(data["time"], data["Stability [Lengths]"])
+    ax2.plot(data[feature_time.get_label()], data[feature_stability_lengths.get_label()])
     ax2.set_xlabel("Time [s]")
     ax2.set_ylabel("Stability [Lengths]")
 
@@ -72,14 +78,14 @@ def display_stability(data):
     print("An improved understanding of stability suggests that you should be using the stability distance divided by the total length as your rule of thumb. I have seen recommendations of 10-20%.")
     
     ax3.set_title("Rotation")
-    ax3.plot(data["time"], data["rotation2"])
+    ax3.plot(data[feature_time.get_label()], data[feature_theta_down.get_label()])
     ax3.set_xlabel("Time [s]")
     ax3.set_ylabel("Rotation Down [rad]")
 
     print("The rocket's rotation should be a relatively smooth curve (some small oscillations are fine) until it reaches apogee. Then, if you have no simulated parachutes, you will see all kinds of oscillations. Depending on how stable you are, the rotation might converge towards the end when the air gets denser.")
 
     ax4.set_title("Angle of Attack")
-    ax4.plot(data["time"], data["AOA"])
+    ax4.plot(data[feature_time.get_label()], data[feature_AOA.get_label()])
     ax4.set_xlabel("Time [s]")
     ax4.set_ylabel("AOA [rad]")
     print("The angle of attack should show a similar story to the rotation.")
@@ -93,10 +99,10 @@ def display_aerodynamics(data):
 
     fig, (ax_top, ax_bottom) = plt.subplots(2, 1)
 
-    ax_top.plot(data["time"], data["AOA"])
+    ax_top.plot(data[feature_time.get_label()], data[feature_AOA.get_label()])
     ax_top.set(title="Angle of Attack Over Time", xlabel="Time [s]", ylabel="AOA [rad]")
-    ax_bottom.plot(data["time"], data["CL"], label="CL")
-    ax_bottom.plot(data["time"], data["CD"], label="CD")
+    ax_bottom.plot(data[feature_time.get_label()], data[feature_CL.get_label()], label="CL")
+    ax_bottom.plot(data[feature_time.get_label()], data[feature_CD.get_label()], label="CD")
     ax_bottom.set(title="CD and CL over Time", xlabel="Time [s]", ylabel="Coefficient")
     ax_bottom.legend(loc="upper right")
 
@@ -115,16 +121,16 @@ def display_diverging(data):
 
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
     
-    ax1.plot(data["time"], data["AOA"])
+    ax1.plot(data[feature_time.get_label()], data[feature_AOA.get_label()])
     ax1.set(title="Angle of Attack Over Time", xlabel="Time [s]", ylabel="AOA [rad]")
-    ax2.plot(data["time"], data["angular_acceleration2"])
+    ax2.plot(data[feature_time.get_label()], data[feature_alpha_down.get_label()])
     ax2.set(title="Angular Acceleration Over Time", xlabel="Time [s]", ylabel="Acceleration [rad/s^2]")
 
-    restoration_ratios = data["angular_acceleration2"] / data["AOA"]
-    ax3.plot(data["time"], restoration_ratios)
+    restoration_ratios = data[feature_alpha_down.get_label()] / data[feature_AOA.get_label()]
+    ax3.plot(data[feature_time.get_label()], restoration_ratios)
     ax3.set(title="Restoration Ratio Over Time", xlabel="Time [s]", ylabel="Restoration")
     ax4.set(title="Restoration Ratio Over Time", xlabel="Time [s]", ylabel="Restoration")
-    ax4.plot(data["time"], abs(restoration_ratios))
+    ax4.plot(data[feature_time.get_label()], abs(restoration_ratios))
     
     fig.tight_layout()
 
@@ -135,25 +141,25 @@ def display_diverging(data):
 def display_overall_flight(data):
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
 
-    ax1.plot(data["time"], data["position3"], label="Height [AGL]")
-    ax1.plot(data["time"], data["velocity3"], label="Velocity")
-    ax1.plot(data["time"], data["acceleration3"], label="Acceleration")
+    ax1.plot(data[feature_time.get_label()], data[feature_z_position.get_label()], label="Height [AGL]")
+    ax1.plot(data[feature_time.get_label()], data[feature_z_velocity.get_label()], label="Velocity")
+    ax1.plot(data[feature_time.get_label()], data[feature_z_acceleration.get_label()], label="Acceleration")
     ax1.set(title="Flight over Time", xlabel="Time [s]", ylabel="Positional Information [m/s^n]")
     ax1.legend(loc="upper right")
     
-    ax2.plot(data["position1"], data["position3"], label="vs x-axis")
-    ax2.plot(data["position2"], data["position3"], label="vs y-axis")
+    ax2.plot(data[feature_x_position.get_label()], data[feature_z_position.get_label()], label="vs x-axis")
+    ax2.plot(data[feature_y_position.get_label()], data[feature_z_position.get_label()], label="vs y-axis")
     ax2.set(title="Flight Path", xlabel="Distance [m]", ylabel="Height [m]")
     ax2.legend(loc="upper right")
 
-    ax3.plot(data["time"], data["rotation2"], label="Pitch")
-    ax3.plot(data["time"], data["angular_velocity2"], label="Velocity")
-    ax3.plot(data["time"], data["angular_acceleration2"], label="Acceleration")
+    ax3.plot(data[feature_time.get_label()], data[feature_theta_down.get_label()], label="Pitch")
+    ax3.plot(data[feature_time.get_label()], data[feature_omega_down.get_label()], label="Velocity")
+    ax3.plot(data[feature_time.get_label()], data[feature_alpha_down.get_label()], label="Acceleration")
     ax3.set(title="Rotation over Time", xlabel="Time [s]", ylabel="Rotational Information [rad/s^n]")
     ax3.legend(loc="lower right")
 
-    ax4.plot(data["time"], data["rotation2"], label="Pitch")
-    ax4.plot(data["time"], data["Target Heading2"], label="Target")
+    ax4.plot(data[feature_time.get_label()], data[feature_theta_down.get_label()], label="Pitch")
+    ax4.plot(data[feature_time.get_label()], data[feature_heading_around.get_label()], label="Target")
     ax4.set(title="Rotation Seeking", xlabel="Time [s]", ylabel="Rotation [rad]")
     ax4.legend(loc="lower right")
 
@@ -170,20 +176,21 @@ def display_optical_analysis(target):
 
     data = pd.read_csv(target)
 
-    funcs = [display_forces, display_stability, display_aerodynamics, display_diverging, display_lift_drag, display_overall_flight]
+    funcs: list[callable] = [display_forces, display_stability, display_aerodynamics, display_diverging, display_lift_drag, display_overall_flight]
 
     for func in funcs:
         try:
             func(data)
-        except:
-            print(f"{func} threw an error, probably because your logger is not recording the data")
+        except Exception as e:
+            print(f"{func.__name__} threw an error, probably because your logger is not recording the data")
+            print(e)
 
 
 def display_altitude(df, ceiling=None):
     if ceiling is not None:
-        plt.plot((0, max(df["time"])), (ceiling, ceiling), label="Ceiling")
+        plt.plot((0, max(df[feature_time.get_label()])), (ceiling, ceiling), label="Ceiling")
     
-    plt.plot(df["time"], df["altitude"] * 3.281, label="Flight")
+    plt.plot(df[feature_time.get_label()], df["altitude"] * 3.281, label="Flight")
 
     plt.title("Altitude over Time")
     plt.xlabel("Time (s)")
@@ -195,11 +202,11 @@ def display_altitude(df, ceiling=None):
 def display_speed(df):
     fig, ax = plt.subplots()
 
-    ax.plot(df["time"], df["velocity"] * 3.281, label="Velocity", color="blue")
+    ax.plot(df[feature_time.get_label()], df["velocity"] * 3.281, label="Velocity", color="blue")
     ax.set_ylabel("Velocity (ft/s)", color="blue")
 
     ax2 = ax.twinx()
-    ax2.plot(df["time"], df["mach"], label="Mach Number", color="red")
+    ax2.plot(df[feature_time.get_label()], df["mach"], label="Mach Number", color="red")
     ax2.set_ylabel("Mach", color="red")
 
     ax.set_xlabel("Time (s)")
@@ -208,7 +215,7 @@ def display_speed(df):
     plt.show()
 
 def display_acceleration(df):    
-    plt.plot(df["time"], df["acceleration"] * 3.281)
+    plt.plot(df[feature_time.get_label()], df["acceleration"] * 3.281)
 
     plt.title("Acceleration over Time")
     plt.xlabel("Time (s)")
@@ -218,8 +225,8 @@ def display_acceleration(df):
 
 def display_forces(df):
     # No weight because I did not log it
-    plt.plot(df["time"], df["drag"] * 0.225, label="Drag")
-    plt.plot(df["time"], df["thrust"] * 0.225, label="Thrust")
+    plt.plot(df[feature_time.get_label()], df["drag"] * 0.225, label="Drag")
+    plt.plot(df[feature_time.get_label()], df["thrust"] * 0.225, label="Thrust")
 
     plt.title("Forces over Time")
     plt.xlabel("Time (s)")

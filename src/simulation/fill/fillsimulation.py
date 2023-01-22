@@ -1,9 +1,9 @@
 
 
 
-from rocketparts.motor.oxtank import OxTank
+from src.rocketparts.motorparts.oxtank import OxTank
 from lib.simulation import Simulation
-from helpers.general import constant
+from lib.general import constant
 
 
 class FillSimulation(Simulation):

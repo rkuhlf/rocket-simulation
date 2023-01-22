@@ -1,4 +1,4 @@
-# TODO: move all visualization to Data
+# TODO: move all visualization to data
 
 
 from matplotlib import pyplot as plt

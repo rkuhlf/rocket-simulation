@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 
 
-from helpers.general import numpy_from_string
+from lib.general import numpy_from_string
 
 
 
@@ -21,9 +21,9 @@ def graph_conversions():
     # data["x"] = data['position'].apply(lambda x: numpy_from_string(x)[0])
     data["y"] = data['position'].apply(lambda x: numpy_from_string(x)[1])
 
-    data.plot.line(x='time', y='y')
-    data.plot.line(x='time', y='g-force')
-    data.plot.line(x='time', y='mock')
+    src.data.plot.line(x='time', y='y')
+    src.data.plot.line(x='time', y='g-force')
+    src.data.plot.line(x='time', y='mock')
 
     plt.show()
 
@@ -34,7 +34,7 @@ def graph_all():
     data = pd.read_csv("Data/Output/output.csv")
 
 
-    data.plot.line()
+    src.data.plot.line()
 
     plt.show()
 
@@ -46,7 +46,7 @@ def graph_flight_path():
     data["x"] = data['position1']
     data["y"] = data['position3']
 
-    data.plot.line(x="x", y="y")
+    src.data.plot.line(x="x", y="y")
 
     plt.show()
 
@@ -54,16 +54,16 @@ def graph_flight_path():
 def graph_vertical_acceleration():
     data = pd.read_csv("Data/Output/output.csv")
 
-    data.plot.line(x="time", y=["rotation2", "Direction of translational drag3", "area", "flipped", "mag", "coeff"])
-    # data.plot.line(x="time", y="rotation2")
+    src.data.plot.line(x="time", y=["rotation2", "Direction of translational drag3", "area", "flipped", "mag", "coeff"])
+    # src.data.plot.line(x="time", y="rotation2")
 
     plt.show()
 
 def graph_angle_of_attack():
     data = pd.read_csv("Data/Output/output.csv")
 
-    data.plot.line(x="time", y="AOA1")
-    data.plot.line(x="time", y="rotation2")
+    src.data.plot.line(x="time", y="AOA1")
+    src.data.plot.line(x="time", y="rotation2")
 
     plt.show()
 

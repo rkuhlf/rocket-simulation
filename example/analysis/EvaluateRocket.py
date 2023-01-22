@@ -1,10 +1,12 @@
-# PROVIDE A DATA-BASED EVALUATION OF A SIMULATED ROCKET
+# PROVIDE A data-BASED EVALUATION OF A SIMULATED ROCKET
 # Based on instantaneous conditions at every time frame, the script will calculate optimal coefficients/values and measure the distance away from them that we are
 # TODO: this is where I need to implement the logger that can take a csv file and return it in a standardized format
 
 
 import pandas as pd
 import numpy as np
+
+from example.constants import output_path
 
 # Easier safety factors
 
@@ -56,7 +58,7 @@ def find_total_impulse(data):
 # Drift distance
 
 if __name__ == "__main__":
-    script_path = "Data/Output/output.csv"
+    script_path = f"{output_path}/output.csv"
     data = pd.read_csv(script_path)
 
     print(f"The total impulse used in the simulation was {find_total_impulse(data)} Ns")

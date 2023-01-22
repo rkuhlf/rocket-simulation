@@ -8,12 +8,12 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from rocketparts.motor.oxtank import OxTank
-from rocketparts.motor import CustomMotor
+from src.rocketparts.motorparts.oxtank import OxTank
+from src.rocketparts.motor import CustomMotor
 
 
 from Simulations.DesignedMotorHTPB import get_sim
-from helpers.data import fahrenheit_from_kelvin
+from lib.data import fahrenheit_from_kelvin
 
 
 m: CustomMotor = get_sim().motor

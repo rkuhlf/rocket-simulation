@@ -102,7 +102,7 @@ if __name__ == "__main__":
         plt.tight_layout()
         plt.show()
     
-    from helpers.visualization import make_matplotlib_big
+    from lib.visualization import make_matplotlib_big
     make_matplotlib_big()
 
     plot_distribution("altitude", title="Distribution of Altitude", axis_label="Altitude (ft)")

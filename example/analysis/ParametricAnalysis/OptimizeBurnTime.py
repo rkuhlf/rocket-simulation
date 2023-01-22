@@ -18,7 +18,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-from data.input.ThrustProfile import scale_saved_curve
+from src.data.input.ThrustProfile import scale_saved_curve
 # from SimulateRocket import get_simulation as get_sim
 from Simulations.DesignedRocket import get_sim
 

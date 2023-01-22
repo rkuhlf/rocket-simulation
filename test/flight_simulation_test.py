@@ -10,7 +10,7 @@ from random import random
 
 
 import SimulateRocket
-from helpers.general import angle_between
+from lib.general import angle_between
 
 
 class TestSimulateRocket(unittest.TestCase):        
@@ -35,7 +35,7 @@ class TestAverages(TestSimulateRocket):
         sim = self.get_current_simulation()
         target = sim.rocket.motor.get_total_impulse()
 
-        time_increment = sim.environment.time_increment
+        time_increment = sim.simulation.time_increment
 
 
         data = self.get_current_output()
@@ -58,7 +58,7 @@ class TestDescent(TestSimulateRocket):
 
         descending = False
         previous_altitude = 0
-        for i, row in data.iterrows():
+        for i, row in src.data.iterrows():
             current_altitude = row["position3"]
 
             if descending:
@@ -75,7 +75,7 @@ class TestAscent(TestSimulateRocket):
         data = self.get_current_output()
 
         previous_altitude = 0
-        for i, row in data.iterrows():
+        for i, row in src.data.iterrows():
             current_altitude = row["position3"]
             # print(data["rotation2"])
             self.assertLess(abs(row["rotation2"]), np.pi * 7/9,  
@@ -133,7 +133,7 @@ class TestWholeFlight(TestSimulateRocket):
     def test_flipping(self):
         data = self.get_current_output()
 
-        for i, row in data.iterrows():
+        for i, row in src.data.iterrows():
             self.assertGreater(abs(row["rotation2"]), 0,  
                 "The flipping code is not working correctly. Somehow we got a negative rotation down.")
             

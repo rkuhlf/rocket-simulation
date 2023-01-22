@@ -10,7 +10,7 @@ import numpy as np
 from random import random
 
 
-from helpers.data import riemann_sum
+from lib.data import riemann_sum
 # import SimulateMotor
 import Simulations.DesignedMotorHTPB as SimulateMotor
 
@@ -37,7 +37,7 @@ class TestAverages(TestSimulateMotor):
         sim = self.get_current_simulation()
         target = sim.motor.get_total_impulse()
 
-        time_increment = sim.environment.time_increment
+        time_increment = sim.time_increment
 
 
         data = self.get_current_output()
@@ -45,7 +45,7 @@ class TestAverages(TestSimulateMotor):
         # Integrate over the thrust using a trapezoidal riemann sum (that is how it is added in the model)
         actual = 0
         previous_thrust = 0
-        for i, row in data.iterrows():
+        for i, row in src.data.iterrows():
             actual += (row["Thrust"] + previous_thrust) / 2 * time_increment
             previous_thrust = row["Thrust"]
 
@@ -70,7 +70,7 @@ class TestWholeFlight(TestSimulateMotor):
     def test_flipping(self):
         data = self.get_current_output()
 
-        for i, row in data.iterrows():
+        for i, row in src.data.iterrows():
             self.assertGreater(abs(row["rotation2"]), 0,  
                 "The flipping code is not working correctly. Somehow we got a negative rotation down.")
             

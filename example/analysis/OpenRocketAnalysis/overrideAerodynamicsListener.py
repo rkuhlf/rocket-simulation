@@ -10,7 +10,7 @@
 import pandas as pd
 import numpy as np
 from orhelper import AbstractSimulationListener
-from helpers.data import interpolated_lookup
+from lib.data import interpolated_lookup
 from net.sf.openrocket.document import Simulation # type: ignore
 
 from net.sf.openrocket.simulation import SimulationStatus # type: ignore

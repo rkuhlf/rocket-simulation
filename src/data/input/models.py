@@ -8,11 +8,13 @@ from scipy.interpolate import interp1d, interp2d, fitpack, bisplrep, bisplev
 from math import isnan
 
 
-from helpers.data import interpolated_lookup, interpolated_lookup_2D
+from lib.data import interpolated_lookup, interpolated_lookup_2D
+from src.constants import aero_path
 
 
 # This code should run regardless of how you import this file
-data = pd.read_csv('Data/Input/aerodynamicQualities.csv')
+# TODO: move this path to exist elsewhere. Also make it one of those closure things.
+data = pd.read_csv(f'{aero_path}/aerodynamicQualities.csv')
 mach = data['Mach']
 alpha = data['Alpha']
 CD = data['CD']

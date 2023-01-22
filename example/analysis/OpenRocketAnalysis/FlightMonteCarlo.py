@@ -3,7 +3,7 @@
 # I think I should be more careful with this. All of the units have to be base metric for this to work
 
 import pandas as pd
-from helpers.data import read_sims
+from lib.data import read_sims
 import javaInitialization
 from Analysis.OpenRocketAnalysis.monteCarloFlightOR import MonteCarloFlightOR, MonteCarloFlightRandomMotorOR
 from Analysis.monteCarlo import create_motors_from_directory

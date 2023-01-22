@@ -1,4 +1,4 @@
-# DATA MODELS FOR GODDARD SIMULATIONS
+# data MODELS FOR GODDARD SIMULATIONS
 # Center of pressure and drag coefficient come from other sources, I define how to look them up here
 
 # Stores the fitted polynomials that are outputted from fitPolynomial.py
@@ -9,16 +9,16 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from math import isnan
 
+from lib.data import interpolated_lookup, interpolated_lookup_2D
+from src.constants import aero_path
 
-from helpers.data import interpolated_lookup, interpolated_lookup_2D
 
-
+# TODO: get rid of this once I make models.py more customizable.
 # This code should run regardless of how you import this file
 # The idea is that it is a drop-in replacement for the RASAero data whenever you want to do it
-data = pd.read_csv('Data/Input/aerodynamicQualities.csv')
+data = pd.read_csv(f'{aero_path}/aerodynamicQualities.csv')
 mach = data['Mach']
 alpha = data['Alpha']
-# TODO: add the difference; should be the last fix (unless drag is really messed up)
 CD = data['CD Power-Off']
 CL = data['CL']
 CP = data['CP']

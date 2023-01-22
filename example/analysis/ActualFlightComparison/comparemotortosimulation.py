@@ -4,9 +4,9 @@
 
 from matplotlib import pyplot as plt
 import pandas as pd
-from data.input.models import get_density, get_speed_of_sound
+from src.data.input.models import get_density, get_speed_of_sound
 
-from helpers.data import interpolated_lookup
+from lib.data import interpolated_lookup
 from simulations.FlightMotor2022 import get_sim
 
 

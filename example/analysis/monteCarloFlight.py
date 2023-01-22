@@ -2,7 +2,7 @@
 from matplotlib import pyplot as plt
 from Analysis.MonteCarloFlightData.AnalyzeMonteCarloFlight import display_altitude_lines, display_apogee_distribution, display_deployment_distribution, display_landing, display_max_mach_distribution, display_max_velocity, display_total_impulse_effect
 from Analysis.monteCarlo import MonteCarlo
-from helpers.data import hist_box_count
+from lib.data import hist_box_count
 from Simulations.DesignedRocket import get_randomized_sim
 from lib.simulation import RocketSimulation
 

@@ -9,9 +9,9 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from rocketparts.motor.grain import constant, whitmore_regression_model
-# from rocketparts.motor.grain import HTPBGrain as Grain
-from rocketparts.motor.grain import ABSGrain as Grain
+from src.rocketparts.motorparts.grain import constant, whitmore_regression_model
+# from src.rocketparts.motorparts.grain import HTPBGrain as Grain
+from src.rocketparts.motorparts.grain import ABSGrain as Grain
 
 
 def new_grain():

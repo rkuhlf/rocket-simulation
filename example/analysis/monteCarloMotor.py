@@ -4,8 +4,8 @@ from typing import List
 import matplotlib.pyplot as plt
 from Analysis.OpticalAnalysisMotorMonteCarlo import display_CG_movement, display_OF_correlation, display_average_thrust, display_cstar_importance, display_curves, display_regression, display_efficiency, display_overview
 
-from helpers.data import hist_box_count
-from rocketparts.motor import CustomMotor
+from lib.data import hist_box_count
+from src.rocketparts.motor import CustomMotor
 from monteCarlo import MonteCarlo
 from Simulations.DesignedMotor2022 import get_randomized_sim, get_randomized_percent_fill_closure
 from lib.simulation import MotorSimulation

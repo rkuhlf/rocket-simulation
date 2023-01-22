@@ -1,4 +1,4 @@
-# DISPLAY AERODYNAMIC DATA OVER MACH
+# DISPLAY AERODYNAMIC data OVER MACH
 # Looking over mach numbers should give the same information as looking over Reynolds numbers
 # Several graphs intended to illustrate how different inputs affect the output of coefficient of drag and center of pressure
 
@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 
 
-from data.input.models import get_splined_coefficient_of_drag
+from src.data.input.models import get_splined_coefficient_of_drag
 
 
 data = pd.read_csv("Data/Input/aerodynamicQualities.csv")

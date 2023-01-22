@@ -10,8 +10,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-from helpers.visualization import make_matplotlib_medium
-from helpers.data import riemann_sum
+from lib.visualization import make_matplotlib_medium
+from lib.data import riemann_sum
 
 def display_overall(data):
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)

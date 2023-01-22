@@ -5,29 +5,29 @@
 
 import pandas as pd
 
-from helpers.data import inputs_path
-from helpers.general import interpolate, get_next
+from src.constants import atmosphere_path
+from lib.general import interpolate, get_next
 from lib.presetObject import PresetObject
-from data.input.models import get_density, get_speed_of_sound
-from data.input.wind.whiteSandsModels import speed_at_altitude
-from helpers.data import interpolated_lookup
-from data.input.wind import Wind
+from src.data.input.models import get_density, get_speed_of_sound
+from src.data.input.atmosphere.whiteSandsModels import speed_at_altitude
+from lib.data import interpolated_lookup
+from src.data.input.atmosphere.wind import Wind
 
 
 # TODO: rewrite this object to use the same data methods and closure things as the other models
 class Environment(PresetObject):
+    # TODO: make a separate model for motor simulations.
     """
-        Define how the environment works for a simulation (both the motor and the rocket).
-        The most important factor is the time_increment - check out some of the timeStudies to see the effect.
+        Define how the environment works for a rocket simulation (both the motor and the rocket).
         The base_altitude is also relatively important, as it can seriously cut down on the air density, decreasing drag
         
         The current model implements the 1976 Standard Atmosphere based on Digital Dutch's data as well as a variable gravity model of a perfectly spherical Earth.
     """
     
     def __init__(self, **kwargs):
-        self.time = 0
-        self.time_increment = 0.01  # seconds
-
+        """
+        A simulation should be passed to it eventually.
+        """
         self.earth_mass = 5.972 * 10 ** 24  # kg
         self.gravitational_constant = 6.67 * 10 ** -11  # Newtons kg^-2 m^2
         self.earth_radius = 6371071.03  # m
@@ -60,14 +60,12 @@ class Environment(PresetObject):
         self.load_atmospheric_data()
 
     def load_atmospheric_data(self):
-        self.atmospheric_data = pd.read_csv(inputs_path + self._atmospheric_path)
+        self.atmospheric_data = pd.read_csv(f"{atmosphere_path}/{self._atmospheric_path}")
         self.atmospheric_data.drop(
             columns=["Viscosity", "Temperature"])
 
     def simulate_step(self):
-        self.time += self.time_increment
-
-        # Update the wind
+        pass
 
     @property
     def gravitational_acceleration(self):
@@ -107,7 +105,7 @@ class Environment(PresetObject):
 
         # I believe that Lake Jackson average windspeed is about 2.1 m/s
         # https://globalwindatlas.info/ also has some direction data
-        return self.wind.get_air_velocity(self.time, altitude)
+        return self.wind.get_air_velocity(self.simulation.time, altitude)
 
 
     def get_speed_of_sound(self, altitude):

@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-from helpers.visualization import make_matplotlib_big
+from lib.visualization import make_matplotlib_big
 
 # TODO: This should use some kind of data structure to avoid all of the repetition
 def display_altitude(openRocket=None, rasaero=None, no_angles=None, DIY_angles=None, rockSim=None, show=True):

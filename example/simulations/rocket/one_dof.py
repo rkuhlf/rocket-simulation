@@ -2,18 +2,24 @@
 # Simply disable the wind in the environment and shoot the rocket straight up. Because the parachute provides all of the CD on the descent, it doesn't matter that the rocket never turns over
 
 import numpy as np
-
+# This will allow me to catch errors and handle them myself.
+np.seterr(all='raise')
 
 from src.environment import Environment
-from rocketparts.motor import Motor
-from rocketparts.massObject import MassObject
+from src.rocketparts.motor import Motor
+from src.rocketparts.massObject import MassObject
 from src.rocket import Rocket
-from rocketparts.parachute import ApogeeParachute
-from lib.logger import RocketLogger
-from lib.simulation import RocketSimulation
-from data.input.goddardModels import get_sine_interpolated_center_of_pressure, linear_approximated_normal_force, assumed_zero_AOA_CD
+from src.rocketparts.parachute import ApogeeParachute
+from src.simulation.rocket.logger import RocketLogger
+from src.simulation.rocket.simulation import RocketSimulation
+from src.data.input.goddardModels import get_sine_interpolated_center_of_pressure, linear_approximated_normal_force, assumed_zero_AOA_CD
+from src.constants import thrust_curve_path
+from example.constants import output_path
 
-from Visualization.FlightOpticalAnalysis import display_optical_analysis
+from example.visualization.FlightOpticalAnalysis import display_optical_analysis
+from lib.vector import Vector
+from lib.rotation import Rotation
+from src.simulation.rocket.logger_features import extended_features
 
 
 def get_mass_objects():
@@ -37,14 +43,15 @@ def get_mass_objects():
 
 
 def get_sim():
-    env = Environment(time_increment=0.05, apply_wind=False)
-    motor = Motor(front=2, center_of_gravity=2, mass=60, propellant_mass=60, thrust_curve="Data/Input/ThrustCurves/mmrThrust.csv", environment=env)
+    env = Environment(apply_wind=False)
+    motor = Motor(front=2, center_of_gravity=2, mass=60, propellant_mass=60, thrust_curve=f"{thrust_curve_path}/mmrThrust.csv", environment=env)
 
     main_parachute = ApogeeParachute(diameter=4.8768)
-    rocket = Rocket(radius=0.1016, length=5.7912, rotation=np.array([np.pi / 2, 0.0872665], dtype="float64"),
+    rocket = Rocket(radius=0.1016, length=5.7912, rotation=Rotation(np.pi / 2, 0),
         environment=env, motor=motor, parachutes=[])
     rocket.set_CP_function(get_sine_interpolated_center_of_pressure)
     rocket.set_CL_function(linear_approximated_normal_force)
+    # This makes it partially one dof
     rocket.set_CD_function(assumed_zero_AOA_CD)
     rocket.set_moment_constant(250)
 
@@ -52,9 +59,10 @@ def get_sim():
     mass_objects.extend(get_mass_objects())
     rocket.mass_objects = mass_objects
 
-    sim = RocketSimulation(apply_angular_forces=False, environment=env, rocket=rocket)
+    sim = RocketSimulation(time_increment=0.05, apply_angular_forces=False, environment=env, rocket=rocket)
     motor.simulation = sim
-
+    sim.logger.full_path = f"{output_path}/output.csv"
+    sim.logger.features = extended_features
 
     return sim
 
