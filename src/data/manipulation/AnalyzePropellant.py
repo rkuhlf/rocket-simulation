@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+# Write one to save full output.
 
 def find_efficiencies(cea_object, chamber_pressure=360, area_ratio=4, OFs=np.linspace(2, 18, 200)):
     """

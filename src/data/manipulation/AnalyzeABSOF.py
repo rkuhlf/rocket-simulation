@@ -12,15 +12,19 @@ import matplotlib.pyplot as plt
 
 from rocketcea.cea_obj import CEA_Obj
 
-from src.data.input.cea.PropellantDefinitions import define_ABS_nitrous
-from src.data.input.cea.AnalyzePropellant import display_effect_of_pressure, find_efficiencies, display_OF_graph
+from src.data.input.chemistry.PropellantDefinitions import define_ABS_nitrous
+from src.data.manipulation.AnalyzePropellant import display_effect_of_pressure, find_efficiencies, display_OF_graph
 from lib.visualization import make_matplotlib_big
 
-abs_nitrous: CEA_Obj = None
+# abs_nitrous: CEA_Obj = None
 
-
-def save_full_output(name="absNitrous.txt"):
-    output = abs_nitrous.get_full_cea_output(362.6, 6.18, 5.09)
+# TODO: rewrite these all to take a cea_object
+def save_full_output(cea_object: CEA_Obj, name="absNitrous.txt"):
+    # abs_nitrous.get_full_cea_output(362.5, )
+    # For some unfathomable reason get_full_cea_output ceases to exist only on this object.
+    # It has every single other method but this one.
+    # I have no idea why it is broken or how to fix it.
+    output = cea_object.get_full_cea_output(362.6, 6.18, 5.09)
 
     with open(f"Data/Input/CEAOutput/{name}", "w") as f:
         f.write(output)
@@ -89,6 +93,7 @@ if __name__ == "__main__":
 
     make_matplotlib_big()
     abs_nitrous = define_ABS_nitrous()
+    save_full_output(abs_nitrous)
 
     # display_effect_of_acrylonitrile()
     # display_effect_of_butadiene()
@@ -97,7 +102,7 @@ if __name__ == "__main__":
     # display_OF_graph(abs_nitrous, chamber_pressure=chamber_pressure, area_ratio=5.09)
     # print(abs_nitrous.get_eps_at_PcOvPe(chamber_pressure, 6.18, chamber_pressure/environmental_pressure))
 
-    display_effect_of_pressure(abs_nitrous, pressures=np.linspace(200, 600, 5), legend=True)
+    # display_effect_of_pressure(abs_nitrous, pressures=np.linspace(200, 600, 5), legend=True)
 
     # abs_nitrous = define_ABS_nitrous()
     # save_full_output()

@@ -24,6 +24,10 @@ units = {
 
 
 def define_nitrous_card(percent_sulfur_contamination=0, percent_nitrogen_contamination=0, temperature=298.15):
+    """
+    Adds a card for nitrous into the database used by RocketCEA.
+    """
+
     card_str = f"""
     oxid NitrousOxide  N 2.0 O 1.0  wt%={100 - percent_sulfur_contamination - percent_nitrogen_contamination}
     h,cal=19497.759 t(k)={temperature}
@@ -66,7 +70,6 @@ def define_HTPB_nitrous(percent_sulfur_contamination=0, percent_nitrogen_contami
 
 def define_ABS_nitrous(percent_sulfur_contamination=0, percent_nitrogen_contamination=0, percent_acrylonitrile=40, percent_butadiene=47, percent_styrene=13, oxidizer_temperature=298.15, fuel_temperature=298.15, overrides_units=False):
     # Notice that all of these custom cards require the enthalpy in cal/mol
-    # Sulfur Dioxide can apparently contaminate the nitrous up to 2% mass, so we should take a look at the differences
     
     define_nitrous_card(percent_sulfur_contamination, percent_nitrogen_contamination, oxidizer_temperature)
     
@@ -81,6 +84,8 @@ def define_ABS_nitrous(percent_sulfur_contamination=0, percent_nitrogen_contamin
 
     add_new_fuel('ABS', card_str)
 
+    # We are redefining propellant cards, so we need to overwrite some previous calculations.
+    # They were made on cards with the same name but different properties.
     cea_obj._CacheObjDict = {}
     
     if overrides_units:

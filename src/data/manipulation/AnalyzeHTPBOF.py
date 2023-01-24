@@ -28,7 +28,7 @@ htpb_nitrous = None
 
 
 def save_full_output(name="htpbNitrous.txt"):
-    # TODO: not 100% sure what this is doing.
+    # TODO: not 100% sure what this is doing. But it oddly seems liike get_full_cea_output doesn't exist whenever I try to call it.
     output = htpb_nitrous.get_full_cea_output(360, 7, 4)
 
     with open(f"Data/Input/CEAOutput/{name}", "w") as f:
@@ -100,7 +100,7 @@ def display_effect_of_carbon_black():
 
 if __name__ == "__main__":
     htpb_nitrous = define_HTPB_nitrous(percent_sulfur_contamination=5)
-    # save_full_output()
+    save_full_output()
     # display_effect_of_contamination()
     # display_effect_of_curative()
     # display_effect_of_carbon_black()
@@ -108,7 +108,7 @@ if __name__ == "__main__":
     # k = define_HTPB_nitrous()
     # display_OF_graph(k)
 
-    display_effect_of_pressure(htpb_nitrous, pressures=np.linspace(100, 10000, 10), best_possible=True)
+    # display_effect_of_pressure(htpb_nitrous, pressures=np.linspace(100, 10000, 10), best_possible=True)
     pass
 
 
