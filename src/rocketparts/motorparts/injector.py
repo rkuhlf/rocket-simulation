@@ -108,8 +108,8 @@ def find_mass_flow_single_phase_incompressible(liquid_density, pressure_drop: fl
     This is the not area-corrected version.
     Returns the mass flow per area
     """
-    return 2 * liquid_density * pressure_drop
-
+    return np.sqrt(2 * liquid_density * pressure_drop)
+    
 
 def mass_flow_SPI_function(discharge_coefficient: float) -> Callable:
     # Relatively simple model that assumes your flow is entirely liquid. This will work well for most liquid rockets, but very poorly for nitrous (it overestimates it; since it is actually lower density)
@@ -138,8 +138,10 @@ def mass_flow_fitted_square_root_HTPV(injector: Injector):
 
 
 # TODO: rewrite some of these to simply take an injector as a parameter
-
 def find_mass_flow_MR(pressure_drop, liquid_density, gas_density, total_area, coefficient_of_discharge=0.7, mixing_ratio=0.2552):
+    """
+    Function assumes that mixing_ratio fraction of the flow will be gaseous.
+    """
     density = mixing_ratio * gas_density + (1 - mixing_ratio) * liquid_density
 
     return total_area * coefficient_of_discharge * (2 * density * pressure_drop) ** (1/2)
