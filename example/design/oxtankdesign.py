@@ -136,5 +136,16 @@ if __name__ == '__main__':
 
     # 0.0588 m^3
     # 0.086 m is the radius (6.785 in)
-    print(cylindrical_length(0.0588, 0.0861695))
+    # print(cylindrical_length(0.0588, 0.0861695))
+
+    # Check Rowan's model.
+    # At 263.7 K with 6.9 kg in the tank, do I get 2.6 kg liquid as well?
+    print(find_ullage(
+        6.9, # kg
+        0.06806, # m^3
+        263.7,
+        constant_temperature=True
+    ))
+
+    print(get_liquid_nitrous_density(263.7) * 0.06806 * (1 - 0.9581503090925062))
     
