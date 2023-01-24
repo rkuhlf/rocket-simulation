@@ -3,7 +3,7 @@
 # Uses a separate motor class for thrust, and an array of parachutes
 # Uses RASAero for looking up various aerodynamic qualities
 
-# TODO: Fix parachute deployment - right now it does not match 3rd party
+# TODO: The rocket should not have access to the logger class at all. The logger class should observe it. I think this would have simplified my code a bit. 
 
 import numpy as np
 from math import isnan

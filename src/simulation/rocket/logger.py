@@ -9,9 +9,9 @@ class RocketLogger(FeedbackLogger):
         Logs the progress of the rocket simulation along with some print statements.
     """
 
-    def __init__(self, rocket, **kwargs):
+    def __init__(self, simulation, **kwargs):
         # You need to make sure the parent's override doesn't override the self values we have already established, so we set our defaults after this
-        super().__init__(rocket)
+        super().__init__(simulation)
 
         # Don't want to override the ones added in super()
         self.features.union(base_features)

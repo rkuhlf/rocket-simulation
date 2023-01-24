@@ -4,6 +4,7 @@
 from src.rocketparts.motorparts.oxtank import OxTank
 from lib.simulation import Simulation
 from lib.general import constant
+from src.environment import Environment
 
 
 class FillSimulation(Simulation):
@@ -19,26 +20,27 @@ class FillSimulation(Simulation):
         self.run_tank = OxTank()
         self.head_loss = constant(5e5) # 5 bar
         self.flow_rate = constant(1)
-
-        
+        self.environment = Environment()
 
         super().__init__(**kwargs)
 
     def simulate_step(self):
-        mass_change = self.flow_rate(self)
+        mass_change = self.get_flow_rate(self)
         self.fill_tank.update_drain(mass_change)
         self.run_tank.update_drain(-mass_change)
 
         return super().simulate_step()
 
+    def is_finished(self):
+        """
+        Return true if the rocket hasn't landed, false if it has.
+        Used in run_simulation
+        """
+        return self.rocket.landed
     
     @property
-    def should_continue_simulating(self):
-        """This should be overridden, otherwise it will always go to the max frames"""
-        self
-
-
-        return True
+    def flow_rate(self):
+        pass
 
     @property
     def environment(self):
