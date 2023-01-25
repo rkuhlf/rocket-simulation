@@ -15,7 +15,7 @@ class FillLogger(FeedbackLogger):
         super().__init__(simulation)
 
         # Don't want to override the ones added in super()
-        self.features.union(base_features)
+        self.features = self.features.union(base_features)
 
         self.debug_every = 20 # seconds
         self.full_path = f"{output_path}/output.csv"
@@ -43,9 +43,9 @@ class FillLogger(FeedbackLogger):
         super().display_partial_data()
 
 
-        print(f"Fill tank ({} kg, {self.fill_tank.pressure}) draining at {} kg/s")
+        print(f"Fill tank ({self.fill_tank.ox_mass} kg, {self.fill_tank.pressure}) draining at {self.simulation.p_flow_rate} kg/s")
         # They might fill at slightly different rates because the run tank is also venting.
-        print(f"Run tank ({} kg, {self.run_tank.pressure}) filling at {} kg/s")
+        print(f"Run tank ({self.run_tank.ox_mass} kg, {self.run_tank.pressure}) filling at {self.simulation.p_flow_rate} kg/s")
 
 
     def handle_frame(self):

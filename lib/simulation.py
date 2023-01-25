@@ -65,6 +65,9 @@ class Simulation(PresetObject, metaclass=ABCMeta):
 
     @property
     def logger(self):
+        if not hasattr(self, "_logger"):
+            self._logger = None
+        
         return self._logger
 
     @logger.setter

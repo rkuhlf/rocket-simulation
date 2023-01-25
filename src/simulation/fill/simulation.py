@@ -1,10 +1,9 @@
 
-
-
 from src.rocketparts.motorparts.oxtank import OxTank
 from lib.simulation import Simulation
 from lib.general import constant
 from src.environment import Environment
+from src.simulation.fill.logger import FillLogger
 
 
 class FillSimulation(Simulation):
@@ -16,18 +15,27 @@ class FillSimulation(Simulation):
         head_loss is the function that calculates the pressure loss from fill_tank to run_tank. It should return a value in bar.
         
         """
-        self.fill_tank = OxTank()
-        self.run_tank = OxTank()
+        super().__init__(**kwargs)
+
+        self.fill_tank = OxTank(ox_mass = 20)
+        self.run_tank = OxTank(ox_mass = 0)
         self.head_loss = constant(5e5) # 5 bar
         self.flow_rate = constant(1)
         self.environment = Environment()
+        self.logger = FillLogger(self)
 
-        super().__init__(**kwargs)
+        # Below this value, the tank stops draining.
+        self.flow_rate_threshold = 0.1
+
+        self.overwrite_defaults(**kwargs)
+        self.override_subobjects()
 
     def simulate_step(self):
-        mass_change = self.get_flow_rate(self)
+        mass_change = self.flow_rate(self) * self.time_increment
         self.fill_tank.update_drain(mass_change)
         self.run_tank.update_drain(-mass_change)
+
+        self.save_previous()
 
         return super().simulate_step()
 
@@ -36,11 +44,13 @@ class FillSimulation(Simulation):
         Return true if the rocket hasn't landed, false if it has.
         Used in run_simulation
         """
-        return self.rocket.landed
-    
-    @property
-    def flow_rate(self):
-        pass
+        if (self.fill_tank.ox_mass <= 0):
+            print("Stopping for ox mass")
+        
+        if self.flow_rate(self) <= self.flow_rate_threshold:
+            print("Stopping for flow rate")
+
+        return self.fill_tank.ox_mass <= 0 or self.flow_rate(self) <= self.flow_rate_threshold
 
     @property
     def environment(self):
@@ -52,6 +62,8 @@ class FillSimulation(Simulation):
 
         self.override_subobjects()
 
+    def save_previous(self):
+        self.p_flow_rate = self.flow_rate(self)
 
     def copy(self):
         new_environment = self.environment.copy()

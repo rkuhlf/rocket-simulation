@@ -39,7 +39,7 @@ class RocketSimulation(Simulation):
         self.rocket: Rocket = None
 
         self.apply_angular_forces = True
-        self.logger = RocketLogger(self.rocket)
+        self.logger = RocketLogger(self)
 
         # Now we override defaults to get rid of anything we don't want.
         self.overwrite_defaults(**kwargs)

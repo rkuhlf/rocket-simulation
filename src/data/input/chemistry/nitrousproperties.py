@@ -17,10 +17,10 @@ def confirm_range(temperature):
     # Errors if temperature is outside the acceptable range
     if temperature > critical_temperature:
         raise ValueError(
-            "The model is not accurate beyond nitrous's critical point. You may not be there yet, but it is close enough that everything gets weird")
+            f"The model is not accurate beyond nitrous's critical point ({temperature} > {critical_temperature}). You may not be there yet, but it is close enough that everything gets weird")
     if temperature < minimum_temperature:
         raise ValueError(
-            "The model is not accurate below Nitrous's boiling point. I don't know why this would happen (check that your temperature is in Kelvin?)")
+            f"The model is not accurate below Nitrous's boiling point ({temperature} < {minimum_temperature}). I don't know why this would happen (check that your temperature is in Kelvin?)")
 
 def get_liquid_dynamic_viscosity(temperature: float):
     # Returns the value in N * s / m^2

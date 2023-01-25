@@ -89,8 +89,10 @@ class Logger(PresetObject):
         for feature in self.features:
             try:
                 value = copy(nested_dictionary_lookup(self.simulation, feature.path))
-            except Exception:
+            except Exception as e:
                 value = None
+                print(f"Could not find value for {feature}")
+                print(e)
                 
             self.add_items({feature.get_label(): value})
 
