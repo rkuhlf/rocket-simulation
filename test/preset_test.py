@@ -3,7 +3,7 @@ import unittest
 
 
 from lib.simulation import Simulation
-from lib.logger import Logger
+from lib.logging.logger import Logger
 
 
 class TestingPreset(unittest.TestCase):

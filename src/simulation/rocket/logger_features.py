@@ -1,5 +1,5 @@
 from lib.units import Units
-from lib.logger import Feature, feature_time
+from lib.logging.logger import Feature, feature_time
 
 feature_z_position = Feature("z position", "rocket.position.z", Units.m)
 feature_x_position = Feature("x position", "rocket.position.x", Units.m)

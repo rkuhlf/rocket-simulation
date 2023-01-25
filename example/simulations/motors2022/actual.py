@@ -2,9 +2,9 @@
 
 from typing import Callable
 
-from src.rocketparts.motorparts.grainGeometry import StarSwirl
+from src.rocketparts.motorparts.graingeometry import StarSwirl
 from lib.simulation import MotorSimulation
-from lib.logger import MotorLogger
+from lib.logging.logger import MotorLogger
 from src.rocketparts.motor import CustomMotor
 from src.rocketparts.motorparts.oxtank import OxTank
 from src.rocketparts.motorparts.injector import Injector, mass_flow_fitted_HTPV

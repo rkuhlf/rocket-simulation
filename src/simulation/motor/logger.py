@@ -1,4 +1,4 @@
-from lib.logger import FeedbackLogger
+from lib.logging.logger import FeedbackLogger
 from src.simulation.motor.logger_features import *
 
 class MotorLogger(FeedbackLogger):

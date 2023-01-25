@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-from lib.logger import feature_time
+from lib.logging.logger import feature_time
 from src.simulation.rocket.logger_features import *
 
 def display_forces(data):

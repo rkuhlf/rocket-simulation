@@ -4,32 +4,13 @@
 
 import numpy as np
 import pandas as pd
-from dataclasses import dataclass
 
 from copy import deepcopy, copy
 
 from lib.presetObject import PresetObject
 from lib.data import nested_dictionary_lookup, force_save
 from lib.general import magnitude
-from lib.units import Units
-
-
-@dataclass(eq=True, frozen=True)
-class Feature:
-    """
-    Display names should be all lower case.
-    Paths should follow the necessary object properties to reach the attribute.
-    units should be in abbreviations, using negative exponents for fractions.
-    """
-    name: str
-    path: str
-    units: Units
-
-    def get_label(self) -> str:
-        return f"{self.name} [{self.units.value}]"
-
-
-feature_time = Feature("time", "time", Units.s)
+from lib.logging.logger_features import Feature, feature_time
 
 
 class Logger(PresetObject):
@@ -103,7 +84,7 @@ class Logger(PresetObject):
 
         try:
             # Rather than using the index (0, 1, 2, 3, 4...), I will index the rows by the time the row is recorded at
-            df.set_index('time', inplace=True)
+            df.set_index(feature_time.get_label(), inplace=True)
         except KeyError as e:
             print("Attempted to create dataframe, but there was no time index. Likely, the simulation did not make it past one frame, and no time was ever logged.")
         

@@ -1,5 +1,5 @@
 from lib.units import Units
-from lib.logger import Feature, feature_time
+from lib.logging.logger import Feature, feature_time
 
 feature_fill_tank_pressure = Feature("fill pressure", "fill_tank.pressure", Units.Pa)
 feature_run_tank_pressure = Feature("run pressure", "run_tank.pressure", Units.Pa)

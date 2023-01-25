@@ -1,4 +1,4 @@
-from lib.logger import Feature
+from lib.logging.logger import Feature
 from lib.units import Units
 
 feature_thrust = Feature("thrust", "motor.thrust", Units.N)

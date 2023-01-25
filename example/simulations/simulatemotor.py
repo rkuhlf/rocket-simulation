@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from lib.simulation import MotorSimulation
-from lib.logger import MotorLogger
+from lib.logging.logger import MotorLogger
 from src.rocketparts.motor import CustomMotor
 from src.rocketparts.motorparts.oxtank import OxTank
 from src.rocketparts.motorparts.injector import Injector, mass_flow_fitted_HTPV

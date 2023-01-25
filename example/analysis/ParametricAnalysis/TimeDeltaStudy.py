@@ -5,8 +5,7 @@ from lib.general import angles_from_vector_3d
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy import array
-from lib.simulation import RocketSimulation
-from lib.logger import RocketLogger
+from src.simulation.rocket.simulation import RocketSimulation
 from src.rocketparts.parachute import ApogeeParachute
 from src.rocket import Rocket
 from src.rocketparts.motor import Motor

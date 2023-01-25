@@ -9,7 +9,7 @@ from lib.general import constant, modify_function_multiplication
 from src.rocketparts.motorparts.grainGeometry import Annular, StarSwirl, multiply_areas
 
 from lib.simulation import MotorSimulation
-from lib.logger import MotorLogger
+from lib.logging.logger import MotorLogger
 from src.rocketparts.motor import CustomMotor
 from src.rocketparts.motorparts.oxtank import OxTank, random_WSMR_temperature
 from src.rocketparts.motorparts.grain import marxman_whitman_ABS_nitrous

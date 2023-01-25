@@ -1,6 +1,6 @@
 from src.constants import output_path
 
-from lib.logger import FeedbackLogger
+from lib.logging.logger import FeedbackLogger
 from lib.general import magnitude
 from src.simulation.rocket.logger_features import *
 

@@ -1,6 +1,6 @@
 from src.constants import output_path
 
-from lib.logger import FeedbackLogger
+from lib.logging.logger import FeedbackLogger
 from lib.general import magnitude
 from src.simulation.fill.logger_features import *
 from src.rocketparts.motorparts.oxtank import OxTank

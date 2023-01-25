@@ -2,7 +2,7 @@
 # Depending on which model of regression we use, we get either 120_000 Ns or 97_000 Ns. That is a 20% difference. Already, this is just for regression of a cylindrical tube. I have no idea how much worse it is going to get for complex geometry
 
 from lib.simulation import MotorSimulation
-from lib.logger import MotorLogger
+from lib.logging.logger import MotorLogger
 from src.rocketparts.motor import CustomMotor
 from src.rocketparts.motorparts.oxtank import OxTank
 from src.rocketparts.motorparts.injector import Injector

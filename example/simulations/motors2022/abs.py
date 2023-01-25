@@ -7,7 +7,7 @@
 from random import choice, gauss, random
 
 from lib.simulation import MotorSimulation
-from lib.logger import MotorLogger
+from lib.logging.logger import MotorLogger
 from src.rocketparts.motor import CustomMotor
 from src.rocketparts.motorparts.oxtank import OxTank, random_WSMR_temperature
 from src.rocketparts.motorparts.injector import Injector, mass_flow_fitted_HTPV

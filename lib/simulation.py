@@ -10,7 +10,7 @@ from lib.presetObject import PresetObject
 
 from src.rocket import Rocket
 from lib.general import magnitude
-from lib.logger import Logger
+from lib.logging.logger import Logger
 from lib.verbosity import Verbosity
 from src.environment import Environment
 

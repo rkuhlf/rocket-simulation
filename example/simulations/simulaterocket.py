@@ -5,7 +5,7 @@ from src.environment import Environment
 from src.rocketparts.motor import Motor
 from rocket import Rocket
 from src.rocketparts.parachute import ApogeeParachute, Parachute
-from lib.logger import RocketLogger
+from lib.logging.logger import RocketLogger
 from lib.simulation import RocketSimulation
 from Visualization.FlightOpticalAnalysis import display_optical_analysis
 
