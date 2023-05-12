@@ -2,7 +2,6 @@
 from lib.chemistry import ideal_gas_pressure, van_der_waals_pressure
 
 
-
 if __name__ == "__main__":
 
     inputs = [
