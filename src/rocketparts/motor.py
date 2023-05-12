@@ -243,7 +243,7 @@ class CustomMotor(Motor):
         self.ox_tank.start_drain()
     
     def calculate_thrust(self, altitude=0):
-        self.ox_tank.update_drain(self.ox_flow * self.simulation.time_increment)
+        self.ox_tank.update_mass(-self.ox_flow * self.simulation.time_increment)
         self.combustion_chamber.update_combustion(self.ox_flow, self.nozzle, self.simulation.time_increment)
 
         if self.fuel_flow == 0:

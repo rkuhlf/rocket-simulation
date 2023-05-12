@@ -1,4 +1,3 @@
-
 R = 8.314
 
 def ideal_gas_pressure(volume: float, moles: float, temperature: float):
@@ -18,7 +17,4 @@ def van_der_waals_pressure(volume: float, moles: float, temperature: float, a: f
     Returns pressure in Pa
     """
     return moles * R * temperature / (volume - b * moles) - a * (moles / volume) ** 2
-
-
-
 

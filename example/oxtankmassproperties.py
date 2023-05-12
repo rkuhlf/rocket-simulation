@@ -1,13 +1,9 @@
 # Generate a table with the ox tank mass over time.
 # Useful for analyzing how the drain goes, but does not hook into any simulations of rockets.
-import numpy as np
 
+import matplotlib.pyplot as plt
 
 from src.rocketparts.motorparts.oxtank import OxTank
-from src.rocketparts.motorparts.nitrousproperties import get_gaseous_nitrous_density, get_nitrous_vapor_pressure, get_liquid_nitrous_density
-
-from src.rocketparts.motorparts.injector import Injector
-import matplotlib.pyplot as plt
 
 temperature = 273.15 + 22
 
@@ -30,7 +26,8 @@ liquid_masses = []
 center_of_masses = []
 
 while tank.ox_mass > 0:
-    tank.update_drain(time_increment * 5)
+    # Should drain 5 kg per second.
+    tank.update_mass(-time_increment * 5)
 
     times.append(time)
     masses.append(tank.ox_mass)

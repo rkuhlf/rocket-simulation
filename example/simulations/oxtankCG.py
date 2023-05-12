@@ -25,7 +25,8 @@ def run_simulation(ox: OxTank=OxTank(ox_mass=52.43, length=3.2, radius=0.17145 /
         centers.append(ox.oxidizer_center_of_mass / ox.length)
         temperatures.append(ox.temperature)
         pressures.append(ox.pressure)
-        ox.update_drain(1)
+        # Drain 1 kg out of the tank.
+        ox.update_mass(-1)
     print(centers)
     return masses, mass_vap, ullages, centers, temperatures, pressures
 

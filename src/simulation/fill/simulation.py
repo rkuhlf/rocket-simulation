@@ -32,10 +32,10 @@ class FillSimulation(Simulation):
 
     def simulate_step(self):
         mass_change = self.flow_rate(self) * self.time_increment
-        self.fill_tank.update_drain(mass_change)
-        self.run_tank.update_drain(-mass_change)
+        self.fill_tank.update_mass(-mass_change)
+        self.run_tank.update_mass(mass_change, temperature=self.fill_tank.temperature)
 
-        self.save_previous()
+        self.save_cached()
 
         return super().simulate_step()
 
@@ -62,8 +62,9 @@ class FillSimulation(Simulation):
 
         self.override_subobjects()
 
-    def save_previous(self):
+    def save_cached(self):
         self.p_flow_rate = self.flow_rate(self)
+        self.p_head_loss = self.head_loss(self)
 
     def copy(self):
         new_environment = self.environment.copy()

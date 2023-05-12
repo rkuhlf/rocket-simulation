@@ -10,7 +10,7 @@ from lib.data import dataType
 from lib.general import constant
 
 from src.rocketparts.massObject import MassObject
-from src.data.input.chemistry.nitrousproperties import get_nitrous_vapor_pressure, get_liquid_nitrous_density, find_specific_enthalpy_of_gaseous_nitrous, find_specific_enthalpy_of_liquid_nitrous, get_liquid_dynamic_viscosity
+from src.data.input.chemistry.nitrousproperties import get_vapor_pressure, get_liquid_nitrous_density, get_specific_enthalpy_of_gaseous_nitrous, get_specific_enthalpy_of_liquid_nitrous, get_liquid_dynamic_viscosity
 
 
 #region DESIGN/WEIGHT FUNCTIONS
@@ -185,14 +185,14 @@ def find_mass_flow_dyer_interpolation(
 
     k = find_dyer_interpolation_factor(
         upstream_pressure,
-        get_nitrous_vapor_pressure(injector_fluid_temperature),
+        get_vapor_pressure(injector_fluid_temperature),
         downstream_pressure)
 
     liquid_density = get_liquid_nitrous_density(injector_fluid_temperature)
     # FIXME: This is wrong in so many ways I don't know how to start
-    upstream_enthalpy = find_specific_enthalpy_of_liquid_nitrous(
+    upstream_enthalpy = get_specific_enthalpy_of_liquid_nitrous(
         upstream_temperature)
-    downstream_enthalpy = find_specific_enthalpy_of_gaseous_nitrous(
+    downstream_enthalpy = get_specific_enthalpy_of_gaseous_nitrous(
         downstream_temperature)
 
     # TODO: make sure that I am multiplying by area and density in the correct places

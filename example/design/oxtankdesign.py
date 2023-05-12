@@ -86,12 +86,12 @@ def find_ullage(
     if not constant_temperature and iters_so_far < iterations:
         newly_evaporated_gas = gas_mass - already_gas_mass
         heat_absorbed = newly_evaporated_gas * \
-            find_heat_of_vaporization(temperature)
+            get_heat_of_vaporization(temperature)
 
         total_heat_capacity = get_combined_total_heat_capacity(
             gas_mass, liquid_mass,
-            find_gaseous_heat_capacity(temperature),
-            find_liquid_heat_capacity(temperature))
+            get_gaseous_heat_capacity(temperature),
+            get_liquid_heat_capacity(temperature))
         temperature_change = -heat_absorbed / total_heat_capacity
 
 

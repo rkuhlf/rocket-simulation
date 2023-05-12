@@ -1,3 +1,6 @@
+# Instead of using a table to look up the CP value, these equations are designed to calculate how much every component on a rocket contributes to the CP.
+# However, they are not used anywhere, since it was too much work to change them all.
+
 import numpy as np
 
 
