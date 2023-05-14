@@ -90,8 +90,8 @@ def find_ullage(
 
         total_heat_capacity = get_combined_total_heat_capacity(
             gas_mass, liquid_mass,
-            get_gaseous_heat_capacity(temperature),
-            get_liquid_heat_capacity(temperature))
+            get_gaseous_specific_heat(temperature),
+            get_liquid_specific_heat(temperature))
         temperature_change = -heat_absorbed / total_heat_capacity
 
 

@@ -12,14 +12,12 @@ from src.rocketparts.motorparts.oxtank import OxTank
 def run_simulation(ox: OxTank=OxTank(ox_mass=52.43, length=3.2, radius=0.17145 / 2, temperature=293.15)):
 # Higher than 36 Celsius is super critical. Please don't do that
     masses = []
-    mass_vap = []
     ullages = []
     centers = []
     temperatures = []
     pressures = []
 
     for _ in range(55):
-        mass_vap.append(ox.get_mass_flow_vap(1))
         masses.append(ox.ox_mass)
         ullages.append(ox.ullage)
         centers.append(ox.oxidizer_center_of_mass / ox.length)
@@ -28,7 +26,7 @@ def run_simulation(ox: OxTank=OxTank(ox_mass=52.43, length=3.2, radius=0.17145 /
         # Drain 1 kg out of the tank.
         ox.update_mass(-1)
     print(centers)
-    return masses, mass_vap, ullages, centers, temperatures, pressures
+    return masses, ullages, centers, temperatures, pressures
 
 
 def display_important_conditions(temperatures, pressures):
@@ -39,7 +37,7 @@ def display_important_conditions(temperatures, pressures):
     print(f"The average of the first 3/4 of pressures is {np.average(important_pressures) / 10**5} bar")
 
 
-def display_CG_shift(masses, mass_vap, ullages, centers, temperatures, pressures):
+def display_CG_shift(masses, ullages, centers, temperatures, pressures):
 
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
 
@@ -71,12 +69,6 @@ def display_CG_shift(masses, mass_vap, ullages, centers, temperatures, pressures
     ax3.set_xlabel("Ox Mass [kg]")
     ax3.set_ylabel("Pressure [Pa]")
     ax3.invert_xaxis()
-
-    ax4.plot(masses, mass_vap)
-    ax4.set_title("Rate of Vaporization over Mass Drain")
-    ax4.set_xlabel("Ox Mass [kg]")
-    ax4.set_ylabel("Vaporization Rate [kg/s]")
-    ax4.invert_xaxis()
 
     fig.tight_layout()
 
