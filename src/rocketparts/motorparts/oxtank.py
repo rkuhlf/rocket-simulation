@@ -90,7 +90,7 @@ class OxTank(MassObject):
         if self.phase == NitrousState.LIQUID_ONLY:
             self._liquid_mass = self.ox_mass
             self._gas_mass = 0
-            self._liquid_volume = self._liquid_mass / get_liquid_nitrous_density(self._temperature, override_range=True)
+            self._liquid_volume = self._liquid_mass / get_liquid_nitrous_density(self._temperature, override_low=True)
             self._gas_volume = 0
             self._ullage = 1 - (self._liquid_volume / self._volume) # the empty air is basically ullage.
         elif self.phase == NitrousState.GAS_ONLY:
@@ -102,7 +102,7 @@ class OxTank(MassObject):
         elif self.phase == NitrousState.EQUILIBRIUM:
             self._liquid_mass = get_liquid_mass(self._volume, self.ox_mass, self._temperature)
             self._gas_mass = self.ox_mass - self._liquid_mass
-            self._liquid_volume = self._liquid_mass / get_liquid_nitrous_density(self._temperature)
+            self._liquid_volume = self._liquid_mass / get_liquid_nitrous_density(self._temperature, override_low=True)
             self._gas_volume = self._volume - self._liquid_volume
             self._ullage = self._gas_volume / self._volume
         elif self.phase == NitrousState.SUPERCRITICAL:
@@ -234,16 +234,16 @@ class OxTank(MassObject):
         '''
         self.ox_mass += mass_change
 
-        # I am pretty sure that we have to use the heat capacity at this point, even though we are using a discrete approximation over a changing temperature. Hopefully the heat in the tank is still zero when we finish.
         if phase == NitrousState.SUPERCRITICAL:
-            specific_heat = 2 # kJ/kg/K for supercritical.
+            # Hopefully this is kind of right.
+            specific_enthalpy = get_specific_enthalpy_of_liquid_nitrous(critical_temperature)
         elif (phase == NitrousState.LIQUID_ONLY or
             phase == NitrousState.EQUILIBRIUM): # In equilibrium, there's a puddle at the bottom.
-            specific_heat = get_liquid_specific_heat(temperature, clamped=True)
+            specific_enthalpy = get_specific_enthalpy_of_liquid_nitrous(temperature, override_low=True)
         elif phase == NitrousState.GAS_ONLY:
-            specific_heat = get_gaseous_specific_heat(temperature)
+            specific_enthalpy = get_specific_enthalpy_of_gaseous_nitrous(temperature, override_low=True)
 
-        self.heat += mass_change * specific_heat
+        self.heat += mass_change * specific_enthalpy
 
     def drain_mass(self, drain_amount: float):
         """For a specific case of updating the mass."""
