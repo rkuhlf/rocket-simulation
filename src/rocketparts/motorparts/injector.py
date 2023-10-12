@@ -102,7 +102,6 @@ class Injector(MassObject):
 
 
 #region MASS FLOW CHARACTERISTICS
-# TODO: rewrite this so that it can be used under the closure that wraps it to be usable with the injector.
 def find_mass_flow_single_phase_incompressible(liquid_density, pressure_drop: float) -> float:
     """
     This is the not area-corrected version.

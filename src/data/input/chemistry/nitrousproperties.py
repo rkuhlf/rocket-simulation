@@ -6,6 +6,7 @@
 # For some reason I did everything in kilojoules and kilograms.
 
 from enum import Enum, auto
+import math
 import numpy as np
 
 # This is Nitrous's boiling point. Below this, the solution is no longer saturated, and you need to use a different model
@@ -18,7 +19,7 @@ class NitrousState(Enum):
     GAS_ONLY = auto()
     SUPERCRITICAL = auto()
 
-def confirm_range(temperature: float, clamped=False):
+def confirm_range(temperature: float, clamped=False, override_low=False, override_high=False):
     """
     If clamped, instead of throwing an error, it will return whichever extreme the function is still defined for. Useful only as a very rough approximation.
     """
@@ -26,13 +27,13 @@ def confirm_range(temperature: float, clamped=False):
         temperature = temperature.real
 
     # Errors if temperature is outside the acceptable range
-    if temperature > critical_temperature:
+    if temperature > critical_temperature and not override_high:
         if clamped:
             return critical_temperature - 0.1
             
         raise ValueError(
             f"The model is not accurate beyond nitrous's critical point ({temperature} > {critical_temperature}). You may not be there yet, but it is close enough that everything gets weird")
-    if temperature < minimum_temperature:
+    if temperature < minimum_temperature and not override_low:
         if clamped:
             return minimum_temperature + 0.1
 
@@ -57,7 +58,7 @@ def get_liquid_dynamic_viscosity(temperature: float, clamped=False):
 def get_vapor_pressure(temperature, clamped=False):
     """Returns the vapor pressure for a saturated solution of nitrous in bar"""
     # bar
-    temperature = confirm_range(temperature, clamped)
+    # temperature = confirm_range(temperature, clamped)
     return 72.51 * np.e ** (309.57 / temperature *
                             (-6.71893 * (1 - temperature / 309.57) + 1.35966 *
                              (1 - temperature / 309.57) ** (3 / 2) - 1.3779 *
@@ -65,16 +66,10 @@ def get_vapor_pressure(temperature, clamped=False):
                              (1 - temperature / 309.57) ** (5)))
 
 
-def get_liquid_nitrous_density(temperature, clamped=False, override_range=False):
+def get_liquid_nitrous_density(temperature, clamped=False, override_low=False):
     # kg / m**3
     # It looks reasonable even when it's purely liquid. It's basically a straight line of increasing density as it gets colder.
-    try:
-        temperature = confirm_range(temperature, clamped)
-    except ValueError as e:
-        if override_range:
-            pass
-        else:
-            raise e
+    temperature = confirm_range(temperature, clamped, override_low)
 
     return 452 * np.e ** (1.72328 * (1 - (temperature / 309.57)) ** (1 / 3) -
                           0.8395 * (1 - (temperature / 309.57)) ** (2 / 3) +
@@ -84,10 +79,10 @@ def get_liquid_nitrous_density(temperature, clamped=False, override_range=False)
 
 minimum_liquid_density = get_liquid_nitrous_density(critical_temperature)
 
-def get_gaseous_nitrous_density(temperature, clamped=False):
+def get_gaseous_nitrous_density(temperature, clamped=False, override_low=False):
     """Returns vapor density in kg / m^3"""
 
-    temperature = confirm_range(temperature, clamped)
+    temperature = confirm_range(temperature, clamped, override_low)
 
     b1 = -1.00900
     b2 = -6.28792
@@ -99,21 +94,19 @@ def get_gaseous_nitrous_density(temperature, clamped=False):
     base = 1 / Tr - 1
     exponent = b1 * base ** (1 / 3) + b2 * base ** (
         2 / 3) + b3 * base + b4 * base ** (4 / 3) + b5 * base ** (5 / 3)
-    return pc * np.e ** exponent
+    
+    try:
+        return pc * np.e ** exponent
+    except OverflowError:
+        return float("inf") 
 
 
-def get_specific_enthalpy_of_liquid_nitrous(temperature, clamped=False, override_range=False):
+def get_specific_enthalpy_of_liquid_nitrous(temperature, clamped=False, override_low=False):
     """
     Returns number of kilojoules in one kilogram of nitrous.
     This property happens to appear to be relatively accurate all the way to absolute zero, so you are allowed to override it to use the number beyond the range it was generated.
     """
-    try:
-        temperature = confirm_range(temperature, clamped)
-    except ValueError as e:
-        if override_range:
-            pass
-        else:
-            raise e
+    temperature = confirm_range(temperature, clamped, override_low)
 
     coefficients = [-200, 116.043, -917.225, 794.779, -589.587]
     total = 0
@@ -122,10 +115,9 @@ def get_specific_enthalpy_of_liquid_nitrous(temperature, clamped=False, override
 
     return total
 
-
-def get_specific_enthalpy_of_gaseous_nitrous(temperature, clamped=False):
+def get_specific_enthalpy_of_gaseous_nitrous(temperature, clamped=False, override_low=False):
     """Intended for saturated vapor"""
-    temperature = confirm_range(temperature, clamped)
+    temperature = confirm_range(temperature, clamped, override_low)
     # kJ / kg
     coefficients = [-200, 440.055, -459.701, 434.081, -485.338]
     total = 0
@@ -174,17 +166,23 @@ def get_maximum_liquid_expansion(temperature=293.15, max_temperature=None):
     # The maximum expansion - you want big over small. At a higher temperature, the density will be smaller
     return current_density / min_density
 
-def get_enthalpy(temperature, liquid_mass, gas_mass):
-    return gas_mass * get_specific_enthalpy_of_gaseous_nitrous(temperature) + liquid_mass * get_specific_enthalpy_of_liquid_nitrous(temperature)
+def get_enthalpy(temperature, liquid_mass, gas_mass, override_low=False):
+    return gas_mass * get_specific_enthalpy_of_gaseous_nitrous(temperature, override_low=override_low) + liquid_mass * get_specific_enthalpy_of_liquid_nitrous(temperature, override_low=override_low)
 
-def get_liquid_mass(volume: float, mass: float, temperature: float):
-    gas_density = get_gaseous_nitrous_density(temperature)
-    liquid_density = get_liquid_nitrous_density(temperature)
+def get_liquid_mass(volume: float, mass: float, temperature: float, override_low=False) -> float:
+    liquid_density = get_liquid_nitrous_density(temperature, override_low=override_low)
+    if liquid_density == 0:
+        return 0
+
+    gas_density = get_gaseous_nitrous_density(temperature, override_low=override_low)
+    if gas_density == 0:
+        return mass
+    
     return (volume - mass / gas_density) / (1 / liquid_density - 1 / gas_density)
 
 
 # I'm going to need another function to set the temperature and determine the heat. Can probably just start with liquid at that temperature, then double/binary search it until we get something close.
-def calculate_temperature(volume: float, mass: float, heat: float, iters=10):
+def calculate_temperature(volume: float, mass: float, heat: float, iters=10) -> tuple[float, NitrousState]:
     """
     The volume represents the volume of the receptacle.
     The mass is the equivalent mass of liquid
@@ -196,28 +194,22 @@ def calculate_temperature(volume: float, mass: float, heat: float, iters=10):
     """
     # One of the issues is that it doesn't necessarily go supercritical at critical temperature if the density is low enough. With a low enough density, it will stay a gas. That means that you have to know the specific enthalpy of the gas beyond the supercritical temperature, which I do not.
 
-    # Check the boundary points to see if it is even in vapor phase equilibrium.
-
-    # Is the amount of heat so low that the temperature is less than -90 C?
-    # We need to find whether the specific enthalpy of liquid is low enough.
-    stored_heat = get_specific_enthalpy_of_liquid_nitrous(minimum_temperature) * mass
-    if heat <= stored_heat: # There's not even enough heat to do this.
-        # We want to use specific heat, since we can just assume that's constant and then just do division, but I wanted to do enthalpy to keep the data source consistent.
-
-        min_possible = 0
-        max_possible = minimum_temperature
-
-        for _ in range(iters):
-            temperature = (min_possible + max_possible) / 2
-            stored_heat = get_specific_enthalpy_of_liquid_nitrous(temperature, override_range=True) * mass
-            if stored_heat > heat:
-                max_possible = temperature
-            else:
-                min_possible = temperature
-        
-        return temperature, NitrousState.LIQUID_ONLY
-
     # TODO: Try to figure out if it works as a gas only thing, in which case it might also go supercritical. The gas could be any temperature from boiling to infinite.
+    min_possible = 0
+    max_possible = critical_temperature
+    # Find the temperature of the gas.
+    for _ in range(iters):
+        # We try a temperature.
+        temperature = (min_possible + max_possible) / 2
+
+        # If the system generated at that temperature has more heat than we do, we know we need to try a lower temperature.
+        stored_heat = get_enthalpy(temperature, 0, mass, override_low=True)
+        if stored_heat > heat:
+            max_possible = temperature
+        else:
+            min_possible = temperature
+    
+    return (min_possible + max_possible) / 2, NitrousState.GAS_ONLY
 
     stored_heat = get_specific_enthalpy_of_gaseous_nitrous(critical_temperature) * mass
     if stored_heat <= heat: # There's more than enough heat to do this.
@@ -232,38 +224,42 @@ def calculate_temperature(volume: float, mass: float, heat: float, iters=10):
 
         return temperature, NitrousState.SUPERCRITICAL
 
-    # Now we know that it's definitely not liquid-only, and it's definitely not supercritical, so it must be in vapor-equilibrium. However, it might be in a vapor equilibrium where it is all gas, and there is no liquid. That's a little bit harder to check, so we'll just put it in the iterative code.
+    # Now we know that it's definitely not supercritical, so it must be in vapor-equilibrium. However, it might be in a vapor equilibrium where it is all gas, and there is no liquid. That's a little bit harder to check, so we'll just put it in the iterative code.
 
     # Now we just need to iterate (with binary search) temperature values until we find one that satisfies our constraints. The only requirement with binary search is that the enthalpy is increasing with temperature.
 
-    min_possible = minimum_temperature
+    min_possible = 0
     max_possible = critical_temperature
 
     for _ in range(iters):
         # We try a temperature.
         temperature = (min_possible + max_possible) / 2
 
-        
-        liquid_mass = get_liquid_mass(volume, mass, temperature)
-        # If the system generated at that temperature has a negative mass of liquid, then we know it's too hot, so we try a lower temperature.
-        # if liquid_mass < 0:
-        #     max_possible = temperature
-        #     continue
+        liquid_mass = get_liquid_mass(volume, mass, temperature, override_low=True)
+
+        # If we got a negative amount of liquid, we need to go colder.
+        if liquid_mass < -0.001 * mass:
+            max_possible = temperature
 
         # If the system generated at that temperature has more heat than we do, we know we need to try a lower temperature.
-        stored_heat = get_enthalpy(temperature, liquid_mass, mass - liquid_mass)
+        stored_heat = get_enthalpy(temperature, liquid_mass, mass - liquid_mass, override_low=True)
         if stored_heat > heat:
             max_possible = temperature
         else:
             min_possible = temperature
     
     final_temp = (min_possible + max_possible) / 2
+    liquid_mass = get_liquid_mass(volume, mass, final_temp, override_low=True)
 
-    if liquid_mass / get_liquid_nitrous_density(final_temp, override_range=True) > volume:
+    # Occasionally floating point errors make it not exactly equal.
+    if abs(liquid_mass - mass) < 0.0001 * mass:
+        return final_temp, NitrousState.LIQUID_ONLY
+
+    if liquid_mass / get_liquid_nitrous_density(final_temp, override_low=True) > volume:
         # I think this is right. When the volume of the liquid nitrous is too big, then we know that it is all liquid, and that the tank must supply enough pressure to compress it into a small enough volume. This only works because nitrous is a compressible liquid.
 
-        # It must be at least in the equilibrium zone, otherwise it's either supercritical or liquid only already.
-        min_possible = minimum_temperature
+        # It can't be supercritical.
+        min_possible = 0
         max_possible = critical_temperature
         # Find the temperature of the liquid.
         for _ in range(iters):
@@ -280,26 +276,7 @@ def calculate_temperature(volume: float, mass: float, heat: float, iters=10):
         return (min_possible + max_possible) / 2, NitrousState.LIQUID_ONLY
     if liquid_mass > mass:
         raise Exception("There is an error in the calculation. If the liquid mass is greater than the given mass, then the volume should be too.")
-    
-    # If it's this little, it's probably all gas anyways. This means that we have to redo our enthalpy, because we had calculated it as if the negative contribution from the liquid made a difference.
-    if liquid_mass <= 0:
-        print("Calcing gas")
-        # It must be at least in the equilibrium zone, otherwise it's either supercritical or liquid only already.
-        min_possible = minimum_temperature
-        max_possible = critical_temperature
-        # Find the temperature of the liquid.
-        for _ in range(iters):
-            # We try a temperature.
-            temperature = (min_possible + max_possible) / 2
-
-            # If the system generated at that temperature has more heat than we do, we know we need to try a lower temperature.
-            stored_heat = get_enthalpy(temperature, 0, mass)
-            if stored_heat > heat:
-                max_possible = temperature
-            else:
-                min_possible = temperature
         
-        return (min_possible + max_possible) / 2, NitrousState.GAS_ONLY
     
     return final_temp, NitrousState.EQUILIBRIUM
 
@@ -360,8 +337,7 @@ def calculate_heat(volume: float, mass: float, temperature: float, iters=20, tem
 
 import matplotlib.pyplot as plt
 
-def graph_property(property, xlabel, ylabel, units="F"):
-    temperatures = np.linspace(minimum_temperature, critical_temperature, num=50)
+def graph_property(property, xlabel, ylabel, units="F", temperatures=np.linspace(minimum_temperature, critical_temperature, num=50)):
     outputs = [property(t) for t in temperatures]
     
     if units == "F":
@@ -383,14 +359,23 @@ def graph_specific_heat_by_temperature():
     plt.show()
 
 def graph_enthalpy_by_temperature():
-    graph_property(lambda t: get_specific_enthalpy_of_gaseous_nitrous(t), xlabel="Temperature (K)", ylabel="Enthalpy (J/kg)", units="K")
+    inputs = np.linspace(0, 300, 80)
+    graph_property(lambda t: get_specific_enthalpy_of_liquid_nitrous(t, override_low=True), xlabel="Temperature (K)", ylabel="Enthalpy (J/kg)", units="K", temperatures=inputs)
+    graph_property(lambda t: get_specific_enthalpy_of_gaseous_nitrous(t, override_low=True), xlabel="Temperature (K)", ylabel="Enthalpy (J/kg)", units="K", temperatures=inputs)
+    plt.show()
+
+def graph_vapor_pressure_by_temperature():
+    graph_property(lambda t: get_vapor_pressure(t), xlabel="Temperature (K)", ylabel="Pressure (bar)", units="K", temperatures=np.linspace(0, 300, 50))
+    plt.show()
 
 def graph_pressure_by_temperature():
     graph_property(lambda t: get_vapor_pressure(t) * 14.5038, xlabel="Temperature (F)", ylabel="Pressure (psi)")
     plt.show()
 
 def graph_density_by_temperature():
-    graph_property(lambda t: get_liquid_nitrous_density(t), xlabel="Temperature (F)", ylabel="Density (kg/m^3)")
+    inputs = np.linspace(0, 300, 80)
+    graph_property(lambda t: get_liquid_nitrous_density(t, override_low=True), xlabel="Temperature (K)", ylabel="Density (kg/m^3)", units="K", temperatures=inputs)
+    graph_property(lambda t: get_gaseous_nitrous_density(t, override_low=True), xlabel="Temperature (K)", ylabel="Density (kg/m^3)", units="K", temperatures=inputs)
     plt.show()
 
 def graph_distributions(mass=30):
@@ -423,6 +408,7 @@ if __name__ == "__main__":
     # graph_enthalpy_by_temperature()
     # graph_pressure_by_temperature()
     # graph_specific_heat_by_temperature()
+    # graph_vapor_pressure_by_temperature()
     # print(get_liquid_dynamic_viscosity(-30 + 273.15))
     
     
