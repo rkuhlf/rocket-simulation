@@ -211,6 +211,10 @@ def calculate_temperature(volume: float, mass: float, heat: float, iters=10) -> 
 
     returns a tuple with the temperature first, then the phase.    
     """
+    # We return room temperature if there is nothing in here.
+    if mass == 0:
+        return 293, NitrousState.GAS_ONLY
+
     # Check if we have enough energy to go supercritical.
     required_heat = get_specific_enthalpy_of_nitrous_vapor(critical_temperature) * mass
     if required_heat <= heat: # There's more than enough heat to do this.
@@ -264,7 +268,8 @@ def calculate_heat(volume: float, mass: float, temperature: float, iters=20, tem
         It will include iters * temp_iters calls.
     """
     
-
+    if mass == 0:
+        return 0
 
     if temp_iters is None:
         temp_iters = iters // 2

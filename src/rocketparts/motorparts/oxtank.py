@@ -88,7 +88,6 @@ class OxTank(MassObject):
 
         self._volume = self.get_volume()
         self._temperature, self._phase = calculate_temperature(self._volume, self.ox_mass, self._heat, iters=60)
-        print(f"calculate_temperature({self._volume:.2f}, {self.ox_mass:.2f}, {self._heat:.2f})={self._temperature:.2f}")
 
         if self.phase == NitrousState.LIQUID_ONLY:
             self._liquid_mass = self.ox_mass
@@ -259,3 +258,5 @@ class OxTank(MassObject):
         """For a specific case of updating the mass."""
         self.update_mass(-drain_amount, self._temperature, self._phase)
 
+    def __repr__(self) -> str:
+        return f"OxTank(ox_mass={self.ox_mass:.1f} kg, pressure={self.pressure/100_000:.1f} bar, temperature={self.temperature:.0f} K, ullage={self.ullage*100:.0f}%, liquid_mass={self._liquid_mass:.1f})"

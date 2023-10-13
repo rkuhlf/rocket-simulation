@@ -46,10 +46,7 @@ def plot_masses(data: pd.DataFrame):
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
 
     plt.sca(ax1)
-    plot_feature(data, feature_time, feature_fill_tank_mass)
-
-    plt.sca(ax2)
-    plot_feature(data, feature_time, feature_run_tank_mass)
+    plot_feature(data, feature_time, feature_fill_tank_mass, feature_run_tank_mass)
 
     plt.sca(ax3)
     plot_feature(data, feature_time, feature_flow_rate)

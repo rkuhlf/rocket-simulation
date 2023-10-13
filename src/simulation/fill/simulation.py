@@ -58,6 +58,10 @@ class FillSimulation(Simulation):
         return False
 
     @property
+    def pressure_difference(self):
+        return (self.fill_tank.pressure - self.run_tank.pressure) - self.head_loss()
+
+    @property
     def environment(self):
         return self._environment
 
