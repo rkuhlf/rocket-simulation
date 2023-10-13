@@ -26,6 +26,7 @@ def determine_injector_mass(thickness, radius, density):
     return determine_injector_volume(thickness, radius) * density
 
 def determine_orifice_count_SPI(mass_flow_rate, pressure_drop, density, orifice_diameter, coefficient_of_discharge=0.7):
+    """Find the number of orifices required to get a given flow rate."""
     individual_orifice_area = np.pi * (orifice_diameter / 2) ** 2
 
     # m = C_d * (N * a) * sqrt(2 * rho * delta-P)
@@ -102,12 +103,20 @@ class Injector(MassObject):
 
 
 #region MASS FLOW CHARACTERISTICS
-def find_mass_flow_single_phase_incompressible(liquid_density, pressure_drop: float) -> float:
+def find_mass_flux_single_phase_incompressible(liquid_density: float, pressure_drop: float, coefficient_of_discharge: float = 1) -> float:
     """
     This is the not area-corrected version.
-    Returns the mass flow per area
+    Returns the mass flow per area. This should be multiplied by an area.
     """
-    return np.sqrt(2 * liquid_density * pressure_drop)
+    return coefficient_of_discharge * np.sqrt(2 * liquid_density * pressure_drop)
+
+def find_mass_flow_single_phase_incompressible(liquid_density: float, pressure_drop: float, area: float, coefficient_of_discharge: float) -> float:
+    """
+    This is the not area-corrected version.
+    Returns the mass flow per area. This should be multiplied by an area and a discharge coefficient.
+    """
+    return area * coefficient_of_discharge * np.sqrt(2 * liquid_density * pressure_drop)
+
     
 
 def mass_flow_SPI_function(discharge_coefficient: float) -> Callable:
@@ -197,7 +206,7 @@ def find_mass_flow_dyer_interpolation(
     # TODO: make sure that I am multiplying by area and density in the correct places
     return discharge_coefficient * area * \
         (
-            k / (k + 1) * find_mass_flow_single_phase_incompressible(
+            k / (k + 1) * find_mass_flux_single_phase_incompressible(
                 liquid_density,
                 upstream_pressure - downstream_pressure)
             + 1 / (k + 1) * find_mass_flow_homogenous_equilibrium(

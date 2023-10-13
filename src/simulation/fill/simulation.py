@@ -19,12 +19,12 @@ class FillSimulation(Simulation):
 
         self.fill_tank = OxTank(ox_mass = 20)
         self.run_tank = OxTank(ox_mass = 0)
-        self.head_loss = constant(5e5) # 5 bar
-        self.flow_rate = constant(1)
+        self.head_loss = constant(0) # constant(5e5) # 5 bar
+        self.flow_rate = constant(1) # Just a default; can be overriden.
         self.environment = Environment()
         self.logger = FillLogger(self)
 
-        # Below this value, the tank stops draining.
+        # Below this value, the fill tank stops draining.
         self.flow_rate_threshold = 0.1
 
         self.overwrite_defaults(**kwargs)
@@ -33,7 +33,8 @@ class FillSimulation(Simulation):
     def simulate_step(self):
         mass_change = self.flow_rate(self) * self.time_increment
         self.fill_tank.update_mass(-mass_change)
-        self.run_tank.update_mass(mass_change, temperature=self.fill_tank.temperature)
+        # If the fill tank is in equilibrium, this will still be liquid with the dip tube.
+        self.run_tank.update_mass(mass_change, temperature=self.fill_tank.temperature, phase=self.fill_tank.phase)
 
         self.save_cached()
 
@@ -46,11 +47,15 @@ class FillSimulation(Simulation):
         """
         if (self.fill_tank.ox_mass <= 0):
             print("Stopping for ox mass")
+
+            return True
         
         if self.flow_rate(self) <= self.flow_rate_threshold:
             print("Stopping for flow rate")
 
-        return self.fill_tank.ox_mass <= 0 or self.flow_rate(self) <= self.flow_rate_threshold
+            return True
+
+        return False
 
     @property
     def environment(self):

@@ -57,9 +57,11 @@ class OxTank(MassObject):
 
         self.environment = Environment()
 
-        temperature = kwargs.get("temperature", 293)
+        temperature = 293
         # That way it doesn't get to the override.
-        del kwargs["temperature"]
+        if temperature in kwargs:
+            temperature = kwargs["temperature"]
+            del kwargs["temperature"]
 
         super().overwrite_defaults(**kwargs)
 
@@ -85,7 +87,8 @@ class OxTank(MassObject):
         # Recalculate all cached variables.
 
         self._volume = self.get_volume()
-        self._temperature, self._phase = calculate_temperature(self._volume, self.ox_mass, self._heat)
+        self._temperature, self._phase = calculate_temperature(self._volume, self.ox_mass, self._heat, iters=60)
+        print(f"calculate_temperature({self._volume:.2f}, {self.ox_mass:.2f}, {self._heat:.2f})={self._temperature:.2f}")
 
         if self.phase == NitrousState.LIQUID_ONLY:
             self._liquid_mass = self.ox_mass
@@ -193,6 +196,7 @@ class OxTank(MassObject):
         if self.phase == NitrousState.GAS_ONLY:
             # Return the pressure predicted by the adjusted ideal gas law. (Ideal way overpredicts pressure, since it's very compressible).
             # This model is off by about 3 bar in some spots, based on the conversion from equilibrium model to this model.
+            # Note that molar_mass is already in kilograms.
             moles = self.ox_mass / self.molar_mass
             
             return van_der_waals_pressure(self._volume, moles, self.temperature, self.a, self.b)
@@ -225,13 +229,19 @@ class OxTank(MassObject):
         self.heat = calculate_heat(self._volume, self._ox_mass, temperature)
 
 
-    def update_mass(self, mass_change: float, temperature: float, phase: NitrousState):
+    def update_mass(self, mass_change: float, temperature: float = None, phase: NitrousState = None):
         '''
         mass_change is the amount going into or out of the tank (positive is into).
         temperature is the temperature of the fluid going into or out of the tank.
         
             Update the mass object by draining an amount out of it, usually determined by the injector.
         '''
+        if temperature is None:
+            temperature = self.temperature
+        
+        if phase is None:
+            phase = self.phase
+
         self.ox_mass += mass_change
 
         if phase == NitrousState.SUPERCRITICAL:
